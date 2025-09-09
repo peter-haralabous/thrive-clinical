@@ -105,7 +105,6 @@ select = [
     "INT",
     # "ARG", # Unused function argument
     "PTH",
-    "ERA",
     "PD",
     "PGH",
     "PL",

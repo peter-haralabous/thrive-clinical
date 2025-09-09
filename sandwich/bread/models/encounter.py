@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from sandwich.bread.models.abstract import TimestampedModel
+from sandwich.bread.models.organization import Organization
 from sandwich.bread.models.patient import Patient
 
 
@@ -31,9 +32,16 @@ class Encounter(TimestampedModel):
     https://www.hl7.org/fhir/R5/encounter.html
     """
 
-    # This is _not_ a client-extensible ValueSet; we'll want a second field to hold custom statuses that they define.
-    # in the Jira model, this is "Resolution", and we'll also want "Status"
-    status = models.CharField(max_length=255, choices=EncounterStatus)
+    # this is Encounter.serviceProvider in FHIR
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
 
     # this is Encounter.subject in FHIR
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
+
+    # This is _not_ a client-extensible ValueSet; we'll want a second field to hold custom statuses that they define.
+    # in the Jira model, this is "Resolution"; "Status" is below
+    status = models.CharField(max_length=255, choices=EncounterStatus)
+
+    # this is Encounter.subjectStatus in FHIR (https://www.hl7.org/fhir/R5/encounter.html#8.11.1.1)
+    # we can use a client-defined ontology for these statuses
+    patient_status = models.CharField(max_length=255, blank=True)

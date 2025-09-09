@@ -1,6 +1,7 @@
 from django.db import models
 
 from sandwich.bread.models.abstract import TimestampedModel
+from sandwich.bread.models.organization import Organization
 from sandwich.users.models import User
 
 
@@ -32,3 +33,7 @@ class Patient(TimestampedModel):
 
     # a user can have many patients. in the future we may allow multiple users to manage care of a single patient.
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+    # each patient record belongs to at most one organization
+    # TODO: pull in patient merging logic from Classic
+    organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
