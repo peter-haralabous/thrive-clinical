@@ -1,7 +1,10 @@
 {% extends "provider/base.html" %}
 
 {% block main %}
-  <h2>{{ organization.name }}</h2>
+  <h2>
+    {{ organization.name }}<a href="{% url "providers:organization_edit" organization_id=organization.id %}"
+   class="btn btn-sm">🔧</a>
+  </h2>
   <a href="{% url "providers:patient_add" organization_id=organization.id %}"
      class="btn btn-primary">Add a Patient</a>
   <a href="{% url "providers:patient_list" organization_id=organization.id %}"
