@@ -14,7 +14,7 @@
       {% for patient in patients %}
         <tr>
           <td>
-            <a href="{% url "providers:patient_edit" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
+            <a href="{% url "providers:patient" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
           </td>
           <td>{{ patient.created_at }}</td>
           <td>{{ patient.updated_at }}</td>

@@ -54,6 +54,22 @@ class PatientAdd(forms.ModelForm[Patient]):
 
 
 @login_required
+def patient_details(request: HttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
+    organization = get_object_or_404(Organization, id=organization_id)
+    patient = get_object_or_404(organization.patient_set, id=patient_id)
+    current_encounter = patient.encounter_set.first()
+    tasks = current_encounter.task_set.all() if current_encounter else []
+
+    context = {
+        "patient": patient,
+        "organization": organization,
+        "current_encounter": current_encounter,
+        "tasks": tasks,
+    }
+    return render(request, "provider/patient_details.html", context)
+
+
+@login_required
 def patient_edit(request: HttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     organization = get_object_or_404(Organization, id=organization_id)
     patient = get_object_or_404(organization.patient_set, id=patient_id)
@@ -84,7 +100,9 @@ def patient_add(request: HttpRequest, organization_id: int) -> HttpResponse:
         if form.is_valid():
             patient = form.save(organization=organization)
             messages.add_message(request, messages.SUCCESS, "Patient added successfully.")
-            return HttpResponseRedirect(reverse("providers:patient", kwargs={"patient_id": patient.id}))
+            return HttpResponseRedirect(
+                reverse("providers:patient", kwargs={"patient_id": patient.id, "organization_id": organization.id})
+            )
     else:
         form = PatientAdd()
 

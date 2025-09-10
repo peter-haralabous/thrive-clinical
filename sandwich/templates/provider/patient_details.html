@@ -1,0 +1,31 @@
+{% extends "provider/base.html" %}
+
+{% block main %}
+  <h2>Patient Details</h2>
+  <p>
+    <strong>Name:</strong> {{ patient.full_name }}
+  </p>
+  <a href="{% url "providers:patient_edit" organization_id=organization.id patient_id=patient.id %}"
+     class="btn btn-primary">Edit</a>
+  <hr />
+  <h3>Tasks</h3>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in tasks %}
+        <tr>
+          <td>{{ task.name }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td>No tasks</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="#" class="btn btn-primary">Add Task</a>
+{% endblock main %}
