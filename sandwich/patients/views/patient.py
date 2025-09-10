@@ -2,7 +2,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 from django.contrib import messages
-from django.http import HttpRequest
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -10,10 +10,12 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from sandwich.core.models import Patient
+from sandwich.core.util.http import AuthenticatedHttpRequest
+from sandwich.users.models import User
 
 
 class PatientEdit(forms.ModelForm[Patient]):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
@@ -30,12 +32,12 @@ class PatientAdd(forms.ModelForm[Patient]):
     # TODO: add check for duplicate patient
     #       "you already have a patient with this email address/PHN/name"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
 
-    def save(self, commit=True, user=None):  # noqa: FBT002
+    def save(self, commit: bool = True, user: User | None = None) -> Patient:  # noqa: FBT001,FBT002
         instance = super().save(commit=False)
         if user is not None:
             instance.user = user
@@ -51,8 +53,9 @@ class PatientAdd(forms.ModelForm[Patient]):
         }
 
 
-def patient(request: HttpRequest, pk: int) -> HttpResponse:
-    patient = get_object_or_404(Patient, id=pk)
+@login_required
+def patient(request: AuthenticatedHttpRequest, pk: int) -> HttpResponse:
+    patient = get_object_or_404(request.user.patient_set, id=pk)
     if request.method == "POST":
         form = PatientEdit(request.POST, instance=patient)
         if form.is_valid():
@@ -66,7 +69,8 @@ def patient(request: HttpRequest, pk: int) -> HttpResponse:
     return render(request, "patient/patient_edit.html", context)
 
 
-def patient_add(request: HttpRequest) -> HttpResponse:
+@login_required
+def patient_add(request: AuthenticatedHttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = PatientAdd(request.POST)
         if form.is_valid():

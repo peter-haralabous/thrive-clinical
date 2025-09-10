@@ -15,7 +15,7 @@ from sandwich.core.models import Patient
 
 
 class PatientEdit(forms.ModelForm[Patient]):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
@@ -32,12 +32,12 @@ class PatientAdd(forms.ModelForm[Patient]):
     # TODO: add check for duplicate patient
     #       "you already have a patient with this email address/PHN/name"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
 
-    def save(self, commit=True, organization: Organization | None = None):  # noqa: FBT002
+    def save(self, commit: bool = True, organization: Organization | None = None) -> Patient:  # noqa: FBT001,FBT002
         instance = super().save(commit=False)
         if organization is not None:
             instance.organization = organization
@@ -54,19 +54,9 @@ class PatientAdd(forms.ModelForm[Patient]):
 
 
 @login_required
-def patient_edit(request: HttpRequest, patient_id: int, organization_id: int | None = None) -> HttpResponse:
-    patient = get_object_or_404(Patient, id=patient_id)
-
-    # make sure that the organization id in the route matches the organization id of the patient
-    # a tricksy user might have edited the URL manually
-    assert patient.organization_id is not None, "Patient has no organization"
-    if patient.organization_id != organization_id:
-        return HttpResponseRedirect(
-            reverse(
-                "providers:organization_patient",
-                kwargs={"patient_id": patient.id, "organization_id": patient.organization_id},
-            )
-        )
+def patient_edit(request: HttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
+    organization = get_object_or_404(Organization, id=organization_id)
+    patient = get_object_or_404(organization.patient_set, id=patient_id)
 
     if request.method == "POST":
         form = PatientEdit(request.POST, instance=patient)
@@ -75,14 +65,14 @@ def patient_edit(request: HttpRequest, patient_id: int, organization_id: int | N
             messages.add_message(request, messages.SUCCESS, "Patient updated successfully.")
             return HttpResponseRedirect(
                 reverse(
-                    "providers:organization_patient",
-                    kwargs={"patient_id": patient.id, "organization_id": patient.organization_id},
+                    "providers:patient_edit",
+                    kwargs={"patient_id": patient.id, "organization_id": organization.id},
                 )
             )
     else:
         form = PatientEdit(instance=patient)
 
-    context = {"form": form, "organization": patient.organization}
+    context = {"form": form, "organization": organization}
     return render(request, "provider/patient_edit.html", context)
 
 

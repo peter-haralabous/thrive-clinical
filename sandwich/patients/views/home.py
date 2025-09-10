@@ -1,17 +1,14 @@
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.shortcuts import render
 
-from sandwich.core.models import Patient
-from sandwich.users.models import User
+from sandwich.core.util.http import AuthenticatedHttpRequest
 
 
 @login_required
-def home(request: HttpRequest) -> HttpResponse:
-    assert isinstance(request.user, User)
-    patient = Patient.objects.filter(user=request.user).first()
+def home(request: AuthenticatedHttpRequest) -> HttpResponse:
+    patient = request.user.patient_set.first()
     if patient:
         return redirect("patients:patient", pk=patient.id)
 

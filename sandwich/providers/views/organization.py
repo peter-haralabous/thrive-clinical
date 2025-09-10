@@ -14,7 +14,7 @@ from sandwich.core.models import Organization
 
 
 class OrganizationEdit(forms.ModelForm[Organization]):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
@@ -25,7 +25,7 @@ class OrganizationEdit(forms.ModelForm[Organization]):
 
 
 class OrganizationAdd(forms.ModelForm[Organization]):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
