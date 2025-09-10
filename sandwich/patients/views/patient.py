@@ -55,7 +55,7 @@ def patient(request: HttpRequest, pk: int) -> HttpResponse:
         form = PatientEdit(instance=patient)
 
     context = {"form": form}
-    return render(request, "provider/patient_edit.html", context)
+    return render(request, "patient/patient_edit.html", context)
 
 
 def patient_add(request: HttpRequest) -> HttpResponse:
@@ -64,9 +64,9 @@ def patient_add(request: HttpRequest) -> HttpResponse:
         if form.is_valid():
             patient = form.save()
             messages.add_message(request, messages.SUCCESS, "Patient added successfully.")
-            return HttpResponseRedirect(reverse("patient", kwargs={"pk": patient.id}))
+            return HttpResponseRedirect(reverse("patients:patient", kwargs={"pk": patient.id}))
     else:
         form = PatientAdd()
 
     context = {"form": form}
-    return render(request, "provider/patient_add.html", context)
+    return render(request, "patient/patient_add.html", context)

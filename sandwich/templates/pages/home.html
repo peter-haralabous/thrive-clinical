@@ -1,1 +1,10 @@
 {% extends "base.html" %}
+
+{% block main %}
+  <h1>HealthConnect</h1>
+  <p>
+    Your comprehensive healthcare management platform connecting patients and providers for better health outcomes and streamlined care coordination.
+  </p>
+  <a href="{% url "patients:home" %}">Continue as Patient</a>
+  <a href="{% url "providers:home" %}">Continue as Provider</a>
+{% endblock main %}

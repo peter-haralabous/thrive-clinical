@@ -20,6 +20,8 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
     path("", include("sandwich.bread.urls")),
+    path("patients/", include("sandwich.patients.urls", namespace="patients")),
+    path("providers/", include("sandwich.providers.urls", namespace="providers")),
     # Media files
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]
