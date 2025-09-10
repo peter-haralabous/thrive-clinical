@@ -35,6 +35,14 @@ class PatientAdd(forms.ModelForm[Patient]):
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
 
+    def save(self, commit=True, user=None):  # noqa: FBT002
+        instance = super().save(commit=False)
+        if user is not None:
+            instance.user = user
+        if commit:
+            instance.save()
+        return instance
+
     class Meta:
         model = Patient
         fields = ("first_name", "last_name", "email", "phn", "date_of_birth")
@@ -62,7 +70,7 @@ def patient_add(request: HttpRequest) -> HttpResponse:
     if request.method == "POST":
         form = PatientAdd(request.POST)
         if form.is_valid():
-            patient = form.save()
+            patient = form.save(user=request.user)
             messages.add_message(request, messages.SUCCESS, "Patient added successfully.")
             return HttpResponseRedirect(reverse("patients:patient", kwargs={"pk": patient.id}))
     else:
