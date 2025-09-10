@@ -14,10 +14,14 @@
       {% for organization in organizations %}
         <tr>
           <td>
-            <a href="{% url "providers:patient_list" organization_id=organization.id %}">{{ organization.name }}</a>
+            <a href="{% url "providers:organization" organization_id=organization.id %}">{{ organization.name }}</a>
           </td>
           <td>{{ organization.created_at }}</td>
           <td>{{ organization.updated_at }}</td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="3">No organizations found.</td>
         </tr>
       {% endfor %}
     </tbody>

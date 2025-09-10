@@ -82,7 +82,7 @@ def patient_edit(request: HttpRequest, patient_id: int, organization_id: int | N
     else:
         form = PatientEdit(instance=patient)
 
-    context = {"form": form}
+    context = {"form": form, "organization": patient.organization}
     return render(request, "provider/patient_edit.html", context)
 
 
@@ -98,12 +98,14 @@ def patient_add(request: HttpRequest, organization_id: int) -> HttpResponse:
     else:
         form = PatientAdd()
 
-    context = {"form": form}
+    context = {"form": form, "organization": organization}
     return render(request, "provider/patient_add.html", context)
 
 
 @login_required
-def organization_patient_list(request: HttpRequest, organization_id: int) -> HttpResponse:
+def patient_list(request: HttpRequest, organization_id: int) -> HttpResponse:
     organization = get_object_or_404(Organization, id=organization_id)
     patients = list(Patient.objects.filter(organization=organization))
-    return render(request, "provider/patient_list.html", {"patients": patients, "organization": organization})
+
+    context = {"patients": patients, "organization": organization}
+    return render(request, "provider/patient_list.html", context)

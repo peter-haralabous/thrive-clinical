@@ -19,6 +19,10 @@
           <td>{{ patient.created_at }}</td>
           <td>{{ patient.updated_at }}</td>
         </tr>
+      {% empty %}
+        <tr>
+          <td colspan="3">No patients found.</td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>
