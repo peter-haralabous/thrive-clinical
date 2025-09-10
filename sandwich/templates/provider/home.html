@@ -1,14 +1,26 @@
 {% extends "base.html" %}
 
 {% block main %}
-  <table>
-    {% for organization in organizations %}
+  <h2>Organizations</h2>
+  <table class="table table-bordered">
+    <thead>
       <tr>
-        <td>
-          <a href="{% url "providers:patient_list" organization_id=organization.id %}">{{ organization.name }}</a>
-        </td>
+        <th>Name</th>
+        <th>Created</th>
+        <th>Updated</th>
       </tr>
-    {% endfor %}
+    </thead>
+    <tbody>
+      {% for organization in organizations %}
+        <tr>
+          <td>
+            <a href="{% url "providers:patient_list" organization_id=organization.id %}">{{ organization.name }}</a>
+          </td>
+          <td>{{ organization.created_at }}</td>
+          <td>{{ organization.updated_at }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
   </table>
-  <a href="{% url "providers:organization_add" %}">Add an Organization</a>
+  <a href="{% url "providers:organization_add" %}" class="btn btn-primary">Add an Organization</a>
 {% endblock main %}
