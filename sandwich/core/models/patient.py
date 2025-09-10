@@ -37,3 +37,7 @@ class Patient(TimestampedModel):
     # each patient record belongs to at most one organization
     # TODO: pull in patient merging logic from Classic
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
+
+    @property
+    def full_name(self) -> str:
+        return f"{self.first_name} {self.last_name}"

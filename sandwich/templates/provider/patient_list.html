@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block main %}
+  <table>
+    {% for patient in patients %}
+      <tr>
+        <td>
+          <a href="{% url "providers:organization_patient" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
+        </td>
+      </tr>
+    {% endfor %}
+  </table>
+  <a href="{% url "providers:patient_add" organization_id=organization.id %}">Add a Patient</a>
+{% endblock main %}
