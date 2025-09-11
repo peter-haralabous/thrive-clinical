@@ -11,6 +11,7 @@ from .views.patient import patient_cancel_task
 from .views.patient import patient_details
 from .views.patient import patient_edit
 from .views.patient import patient_list
+from .views.patient import patient_resend_invite
 
 app_name = "providers"
 urlpatterns = [
@@ -25,6 +26,11 @@ urlpatterns = [
         "organization/<int:organization_id>/patient/<int:patient_id>/add_task",
         patient_add_task,
         name="patient_add_task",
+    ),
+    path(
+        "organization/<int:organization_id>/patient/<int:patient_id>/resend_invite",
+        patient_resend_invite,
+        name="patient_resend_invite",
     ),
     path(
         "organization/<int:organization_id>/patient/<int:patient_id>/task/<int:task_id>/cancel",

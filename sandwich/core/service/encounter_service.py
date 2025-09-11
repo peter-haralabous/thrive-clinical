@@ -1,10 +1,9 @@
-from datetime import UTC
-from datetime import datetime
+from django.utils import timezone
 
 from sandwich.core.models import Patient
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
-from sandwich.core.service.task import cancel_task
+from sandwich.core.service.task_service import cancel_task
 
 
 # NOTE-NG: It might feel like this belongs as a method on the Encounter model, but
@@ -15,7 +14,7 @@ def complete_encounter(encounter: Encounter) -> None:
     assert encounter.active, "Cannot complete an inactive encounter."
 
     encounter.status = EncounterStatus.COMPLETED
-    encounter.ended_at = datetime.now(UTC)
+    encounter.ended_at = timezone.now()
     encounter.save()
 
     for task in encounter.task_set.all():

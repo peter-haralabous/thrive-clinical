@@ -17,9 +17,12 @@ from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import TaskStatus
-from sandwich.core.service.encounter import complete_encounter
-from sandwich.core.service.encounter import get_current_encounter
-from sandwich.core.service.task import cancel_task
+from sandwich.core.service.encounter_service import complete_encounter
+from sandwich.core.service.encounter_service import get_current_encounter
+from sandwich.core.service.invitation_service import get_pending_invitation
+from sandwich.core.service.invitation_service import resend_patient_invitation_email
+from sandwich.core.service.task_service import cancel_task
+from sandwich.core.service.task_service import send_task_added_email
 
 
 class PatientEdit(forms.ModelForm[Patient]):
@@ -68,6 +71,7 @@ def patient_details(request: HttpRequest, organization_id: int, patient_id: int)
     current_encounter = get_current_encounter(patient)
     tasks = current_encounter.task_set.all() if current_encounter else []
     past_encounters = patient.encounter_set.exclude(status=EncounterStatus.IN_PROGRESS)
+    pending_invitation = get_pending_invitation(patient)
 
     context = {
         "patient": patient,
@@ -75,6 +79,7 @@ def patient_details(request: HttpRequest, organization_id: int, patient_id: int)
         "current_encounter": current_encounter,
         "past_encounters": past_encounters,
         "tasks": tasks,
+        "pending_invitation": pending_invitation,
     }
     return render(request, "provider/patient_details.html", context)
 
@@ -91,7 +96,7 @@ def patient_edit(request: HttpRequest, organization_id: int, patient_id: int) ->
             messages.add_message(request, messages.SUCCESS, "Patient updated successfully.")
             return HttpResponseRedirect(
                 reverse(
-                    "providers:patient_edit",
+                    "providers:patient",
                     kwargs={"patient_id": patient.id, "organization_id": organization.id},
                 )
             )
@@ -157,7 +162,8 @@ def patient_add_task(request: HttpRequest, organization_id: int, patient_id: int
         current_encounter = Encounter.objects.create(
             patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
         )
-    Task.objects.create(encounter=current_encounter, patient=patient, status=TaskStatus.REQUESTED)
+    task = Task.objects.create(encounter=current_encounter, patient=patient, status=TaskStatus.REQUESTED)
+    send_task_added_email(task)
 
     messages.add_message(request, messages.SUCCESS, "Task added successfully.")
     return HttpResponseRedirect(
@@ -175,6 +181,21 @@ def patient_cancel_task(request: HttpRequest, organization_id: int, patient_id: 
     cancel_task(task)
 
     messages.add_message(request, messages.SUCCESS, "Task cancelled successfully.")
+    return HttpResponseRedirect(
+        reverse("providers:patient", kwargs={"organization_id": organization.id, "patient_id": patient.id})
+    )
+
+
+@login_required
+@require_POST
+def patient_resend_invite(request: HttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
+    organization = get_object_or_404(Organization, id=organization_id)
+    patient = get_object_or_404(organization.patient_set, id=patient_id)
+
+    assert patient.user is None, "Patient already has a user"
+    resend_patient_invitation_email(patient)
+
+    messages.add_message(request, messages.SUCCESS, "Invitation resent successfully.")
     return HttpResponseRedirect(
         reverse("providers:patient", kwargs={"organization_id": organization.id, "patient_id": patient.id})
     )

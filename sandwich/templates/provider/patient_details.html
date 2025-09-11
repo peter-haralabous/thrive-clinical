@@ -8,8 +8,21 @@
   <p>
     <strong>Email:</strong> {{ patient.email|default:"—" }}
   </p>
+  {% if pending_invitation %}
+    <p>
+      <strong>Invitation:</strong> {{ pending_invitation.get_status_display }}, last sent at {{ pending_invitation.last_invited_at }}
+    </p>
+  {% endif %}
   <a href="{% url "providers:patient_edit" organization_id=organization.id patient_id=patient.id %}"
      class="btn btn-primary">Edit</a>
+  {% if pending_invitation %}
+    <form action="{% url "providers:patient_resend_invite" organization_id=organization.id patient_id=patient.id %}"
+          class="d-inline"
+          method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-primary">Resend Invitation</button>
+    </form>
+  {% endif %}
   {% if current_encounter %}
     <form action="{% url "providers:patient_archive" organization_id=organization.id patient_id=patient.id %}"
           class="d-inline"
