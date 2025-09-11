@@ -1,6 +1,3 @@
-from datetime import UTC
-from datetime import datetime
-
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
@@ -20,6 +17,9 @@ from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import TaskStatus
+from sandwich.core.service.encounter import complete_encounter
+from sandwich.core.service.encounter import get_current_encounter
+from sandwich.core.service.task import cancel_task
 
 
 class PatientEdit(forms.ModelForm[Patient]):
@@ -61,15 +61,11 @@ class PatientAdd(forms.ModelForm[Patient]):
         }
 
 
-def _current_encounter(patient: Patient) -> Encounter | None:
-    return patient.encounter_set.filter(status=EncounterStatus.IN_PROGRESS).first()
-
-
 @login_required
 def patient_details(request: HttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     organization = get_object_or_404(Organization, id=organization_id)
     patient = get_object_or_404(organization.patient_set, id=patient_id)
-    current_encounter = _current_encounter(patient)
+    current_encounter = get_current_encounter(patient)
     tasks = current_encounter.task_set.all() if current_encounter else []
     past_encounters = patient.encounter_set.exclude(status=EncounterStatus.IN_PROGRESS)
 
@@ -139,21 +135,12 @@ def patient_list(request: HttpRequest, organization_id: int) -> HttpResponse:
 def patient_archive(request: HttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     organization = get_object_or_404(Organization, id=organization_id)
     patient = get_object_or_404(organization.patient_set, id=patient_id)
-    current_encounter = _current_encounter(patient)
+    current_encounter = get_current_encounter(patient)
 
     # in the future we might want to capture _why_ the patient was archived
     # i.e. should status be COMPLETED / CANCELLED / ...
     assert current_encounter is not None, "No current encounter found for patient"
-    current_encounter.status = EncounterStatus.COMPLETED
-    current_encounter.ended_at = datetime.now(UTC)
-    current_encounter.save()
-
-    # cancel all outstanding tasks
-    for task in current_encounter.task_set.all():
-        if task.active:
-            task.status = TaskStatus.CANCELLED
-            task.ended_at = datetime.now(UTC)
-            task.save()
+    complete_encounter(current_encounter)
 
     messages.add_message(request, messages.SUCCESS, "Patient archived successfully.")
     return HttpResponseRedirect(reverse("providers:patient_list", kwargs={"organization_id": organization.id}))
@@ -165,7 +152,7 @@ def patient_add_task(request: HttpRequest, organization_id: int, patient_id: int
     organization = get_object_or_404(Organization, id=organization_id)
     patient = get_object_or_404(organization.patient_set, id=patient_id)
 
-    current_encounter = _current_encounter(patient)
+    current_encounter = get_current_encounter(patient)
     if not current_encounter:
         current_encounter = Encounter.objects.create(
             patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
@@ -185,10 +172,7 @@ def patient_cancel_task(request: HttpRequest, organization_id: int, patient_id: 
     patient = get_object_or_404(organization.patient_set, id=patient_id)
     task = get_object_or_404(patient.task_set, id=task_id)
 
-    assert task.active, "Task is not active"
-    task.status = TaskStatus.CANCELLED
-    task.ended_at = datetime.now(UTC)
-    task.save()
+    cancel_task(task)
 
     messages.add_message(request, messages.SUCCESS, "Task cancelled successfully.")
     return HttpResponseRedirect(

@@ -50,7 +50,7 @@ class Task(TimestampedModel):
 
     status = models.CharField(max_length=255, choices=TaskStatus)
 
-    # this is Task.executionPeriod.end om FHIR
+    # this is Task.executionPeriod.end in FHIR
     ended_at = models.DateTimeField(blank=True, null=True)
 
     @property
