@@ -3,6 +3,8 @@ from crispy_forms.layout import Submit
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -127,12 +129,39 @@ def patient_add(request: AuthenticatedHttpRequest, organization_id: int) -> Http
     return render(request, "provider/patient_add.html", context)
 
 
+def _validate_sort(sort: str | None, valid_sorts: list[str]) -> str | None:
+    if sort is None:
+        return None
+    field = sort[1:] if sort.startswith("-") else sort
+    if field not in valid_sorts:
+        return None
+    return sort
+
+
 @login_required
 def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
-    patients = list(Patient.objects.filter(organization=organization))
 
-    context = {"patients": patients, "organization": organization}
+    search = request.GET.get("search", "").strip()
+    sort = _validate_sort(request.GET.get("sort"), ["first_name", "last_name", "date_of_birth"])
+    page = request.GET.get("page", 1)
+
+    patients = Patient.objects.filter(organization=organization)
+    if search:
+        patients = patients.filter(
+            Q(first_name__icontains=search)
+            | Q(last_name__icontains=search)
+            | Q(phn__icontains=search)
+            | Q(email__icontains=search)
+        )
+
+    if sort:
+        patients = patients.order_by(sort)
+
+    paginator = Paginator(patients, 25)
+    patients_page = paginator.get_page(page)
+
+    context = {"patients": patients_page, "organization": organization, "search": search, "sort": sort, "page": page}
     return render(request, "provider/patient_list.html", context)
 
 

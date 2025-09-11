@@ -2,10 +2,21 @@
 
 {% block main %}
   <h2>Patients</h2>
+  <form>
+    <div class="input-group mb-2">
+      <input name="search"
+             type="text"
+             class="form-control"
+             placeholder="Search"
+             value="{{ search }}" />
+      <button type="submit" class="btn btn-outline-secondary">Search</button>
+    </div>
+  </form>
   <table class="table table-bordered">
     <thead>
       <tr>
         <th>Name</th>
+        <th>Email</th>
         <th>Created</th>
         <th>Updated</th>
       </tr>
@@ -16,16 +27,54 @@
           <td>
             <a href="{% url "providers:patient" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
           </td>
+          <td>{{ patient.email|default:"—" }}</td>
           <td>{{ patient.created_at }}</td>
           <td>{{ patient.updated_at }}</td>
         </tr>
       {% empty %}
         <tr>
-          <td colspan="3" class="text-center">No patients found.</td>
+          <td colspan="4" class="text-center">No patients found.</td>
         </tr>
       {% endfor %}
     </tbody>
   </table>
+  <!-- Pagination controls -->
+  {% if patients.has_other_pages %}
+    <nav aria-label="Patient pagination">
+      <ul class="pagination">
+        {% if patients.has_previous %}
+          <li class="page-item">
+            <a class="page-link"
+               href="?page={{ patients.previous_page_number }}"
+               aria-label="Previous">
+              <span aria-hidden="true">&laquo; Previous</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link" aria-label="Previous">
+              <span aria-hidden="true">&laquo; Previous</span>
+            </span>
+          </li>
+        {% endif %}
+        {% if patients.has_next %}
+          <li class="page-item">
+            <a class="page-link"
+               href="?page={{ patients.next_page_number }}"
+               aria-label="Next">
+              <span aria-hidden="true">Next &raquo;</span>
+            </a>
+          </li>
+        {% else %}
+          <li class="page-item disabled">
+            <span class="page-link" aria-label="Next">
+              <span aria-hidden="true">Next &raquo;</span>
+            </span>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
   <a href="{% url "providers:patient_add" organization_id=organization.id %}"
      class="btn btn-primary">Add a Patient</a>
 {% endblock main %}
