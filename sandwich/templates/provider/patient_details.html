@@ -21,14 +21,18 @@
     <thead>
       <tr>
         <th>Name</th>
+        <th>Started</th>
+        <th>Ended</th>
         <th>Status</th>
-        <th></th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for task in tasks %}
         <tr>
           <td>{{ task.name }}</td>
+          <td>{{ task.created_at }}</td>
+          <td>{{ task.ended_at|default:"—" }}</td>
           <td>{{ task.get_status_display }}</td>
           <td>
             {% if task.active %}
@@ -36,14 +40,16 @@
                     class="d-inline"
                     method="post">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
               </form>
+            {% else %}
+              <button type="button" class="btn btn-outline-secondary btn-sm disabled">Re-request</button>
             {% endif %}
           </td>
         </tr>
       {% empty %}
-        <tr colspan="3">
-          <td>No tasks</td>
+        <tr>
+          <td colspan="5" class="text-center">No tasks found.</td>
         </tr>
       {% endfor %}
     </tbody>
@@ -54,4 +60,31 @@
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Add Task</button>
   </form>
+  {% if past_encounters %}
+    <hr />
+    <h3>Past Encounters</h3>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Started</th>
+          <th>Ended</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {# TODO: link to details about past encounters #}
+        {% for encounter in past_encounters %}
+          <tr>
+            <td>{{ encounter.created_at }}</td>
+            <td>{{ encounter.ended_at|default:"—" }}</td>
+            <td>{{ encounter.get_status_display }}</td>
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="3" class="text-center">No past encounters.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
 {% endblock main %}

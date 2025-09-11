@@ -27,7 +27,7 @@ class TaskStatus(models.TextChoices):
     ENTERED_IN_ERROR = "entered-in-error", _("Entered in Error")
 
 
-def is_terminal(status: TaskStatus) -> bool:
+def terminal_task_status(status: TaskStatus) -> bool:
     return status in [TaskStatus.CANCELLED, TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.ENTERED_IN_ERROR]
 
 
@@ -50,6 +50,9 @@ class Task(TimestampedModel):
 
     status = models.CharField(max_length=255, choices=TaskStatus)
 
+    # this is Task.executionPeriod.end om FHIR
+    ended_at = models.DateTimeField(blank=True, null=True)
+
     @property
     def name(self) -> str:
         return f"Task {self.id}"
@@ -57,4 +60,4 @@ class Task(TimestampedModel):
     @property
     def active(self) -> bool:
         # FIXME-NG: self.status is a str, not a TaskStatus
-        return not is_terminal(self.status)  # type: ignore[arg-type]
+        return not terminal_task_status(self.status)  # type: ignore[arg-type]

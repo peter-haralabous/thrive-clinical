@@ -24,6 +24,16 @@ class EncounterStatus(models.TextChoices):
     UNKNOWN = "unknown", _("Unknown")
 
 
+def terminal_encounter_status(status: EncounterStatus) -> bool:
+    return status in [
+        EncounterStatus.CANCELLED,
+        EncounterStatus.COMPLETED,
+        EncounterStatus.DISCHARGED,
+        EncounterStatus.DISCONTINUED,
+        EncounterStatus.ENTERED_IN_ERROR,
+    ]
+
+
 class Encounter(TimestampedModel):
     """
     An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or
@@ -45,3 +55,15 @@ class Encounter(TimestampedModel):
     # this is Encounter.subjectStatus in FHIR (https://www.hl7.org/fhir/R5/encounter.html#8.11.1.1)
     # we can use a client-defined ontology for these statuses
     patient_status = models.CharField(max_length=255, blank=True)
+
+    # this is Encounter.actualPeriod.end om FHIR
+    ended_at = models.DateTimeField(blank=True, null=True)
+
+    @property
+    def name(self):
+        return f"Encounter {self.id}"
+
+    @property
+    def active(self) -> bool:
+        # FIXME-NG: self.status is a str, not a EncounterStatus
+        return not terminal_encounter_status(self.status)  # type: ignore[arg-type]
