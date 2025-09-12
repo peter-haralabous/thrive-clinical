@@ -3,16 +3,16 @@
 {% block main %}
   <h2>Patients</h2>
   <form>
-    <div class="input-group mb-2">
+    <div class="mb-2">
       <input name="search"
              type="text"
-             class="form-control"
+             class="input"
              placeholder="Search"
              value="{{ search }}" />
-      <button type="submit" class="btn btn-outline-secondary">Search</button>
+      <button type="submit" class="btn">Search</button>
     </div>
   </form>
-  <table class="table table-bordered">
+  <table class="table">
     <thead>
       <tr>
         <th>Name</th>
@@ -25,7 +25,8 @@
       {% for patient in patients %}
         <tr>
           <td>
-            <a href="{% url "providers:patient" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
+            <a class="link"
+               href="{% url "providers:patient" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
           </td>
           <td>{{ patient.email|default:"—" }}</td>
           <td>{{ patient.created_at }}</td>

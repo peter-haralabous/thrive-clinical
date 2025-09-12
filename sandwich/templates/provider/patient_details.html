@@ -17,7 +17,7 @@
      class="btn btn-primary">Edit</a>
   {% if pending_invitation %}
     <form action="{% url "providers:patient_resend_invite" organization_id=organization.id patient_id=patient.id %}"
-          class="d-inline"
+          class="inline"
           method="post">
       {% csrf_token %}
       <button type="submit" class="btn btn-outline-primary">Resend Invitation</button>
@@ -25,7 +25,7 @@
   {% endif %}
   {% if current_encounter %}
     <form action="{% url "providers:patient_archive" organization_id=organization.id patient_id=patient.id %}"
-          class="d-inline"
+          class="inline"
           method="post">
       {% csrf_token %}
       <button type="submit" class="btn btn-danger">Archive</button>
@@ -33,7 +33,7 @@
   {% endif %}
   <hr />
   <h3>Tasks</h3>
-  <table class="table table-bordered">
+  <table class="table">
     <thead>
       <tr>
         <th>Name</th>
@@ -53,7 +53,7 @@
           <td>
             {% if task.active %}
               <form action="{% url "providers:patient_cancel_task" organization_id=organization.id patient_id=patient.id task_id=task.id %}"
-                    class="d-inline"
+                    class="inline"
                     method="post">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-danger btn-sm">Cancel</button>
@@ -71,7 +71,7 @@
     </tbody>
   </table>
   <form action="{% url "providers:patient_add_task" organization_id=organization.id patient_id=patient.id %}"
-        class="d-inline"
+        class="inline"
         method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary">Add Task</button>

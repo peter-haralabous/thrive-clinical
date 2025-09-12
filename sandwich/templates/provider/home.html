@@ -2,7 +2,7 @@
 
 {% block main %}
   <h2>Organizations</h2>
-  <table class="table table-bordered">
+  <table class="table">
     <thead>
       <tr>
         <th>Name</th>
@@ -14,7 +14,8 @@
       {% for organization in organizations %}
         <tr>
           <td>
-            <a href="{% url "providers:organization" organization_id=organization.id %}">{{ organization.name }}</a>
+            <a class="link"
+               href="{% url "providers:organization" organization_id=organization.id %}">{{ organization.name }}</a>
           </td>
           <td>{{ organization.created_at }}</td>
           <td>{{ organization.updated_at }}</td>
