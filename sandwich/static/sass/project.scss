@@ -1,7 +1,9 @@
 @import 'tailwindcss';
 
 @plugin "@tailwindcss/typography";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: corporate --default;
+}
 
 /* load classes used by crispy-tailwind */
 @source "../../../.venv/lib/python3.12/site-packages/crispy_tailwind";
@@ -12,10 +14,14 @@
 /* bring back some default styling */
 @layer base {
   h1 {
-    font-size: var(--text-2xl);
+    @apply text-2xl;
   }
 
   h2 {
-    font-size: var(--text-xl);
+    @apply text-xl;
+  }
+
+  h3 {
+    @apply text-lg;
   }
 }
