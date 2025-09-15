@@ -38,7 +38,7 @@ def accept_invite(request: HttpRequest, token: str) -> HttpResponse:
             # TODO: if the user already has patients, they may want to merge one of them with the invited one
             accept_patient_invitation(invitation, request.user)
             return HttpResponseRedirect(
-                reverse("patients:patient_detail", kwargs={"patient_id": invitation.patient.id})
+                reverse("patients:patient_details", kwargs={"patient_id": invitation.patient.id})
             )
     else:
         form = InvitationAcceptForm()
