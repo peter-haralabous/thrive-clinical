@@ -187,6 +187,8 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
         "page": page,
         "has_active_encounter_filter": has_active_encounter_filter,
     }
+    if request.headers.get("HX-Request"):
+        return render(request, "provider/partials/patient_list_table.html", context)
     return render(request, "provider/patient_list.html", context)
 
 

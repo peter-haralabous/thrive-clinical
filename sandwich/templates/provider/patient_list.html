@@ -1,14 +1,15 @@
 {% extends "provider/base.html" %}
 
-{% load sortable %}
-
 {% block main %}
   <div class="flex justify-between mb-4">
     <h2>Patients</h2>
     <a href="{% url "providers:patient_add" organization_id=organization.id %}"
        class="btn btn-primary">Add a Patient</a>
   </div>
-  <form>
+  <form hx-get="{% url "providers:patient_list" organization_id=organization.id %}"
+        hx-target="#patient_table_container"
+        hx-push-url="true"
+        hx-trigger="keyup changed delay:300ms from:input[name='search'], change from:select[name='has_active_encounter']">
     <div class="mb-2">
       <input name="search"
              type="text"
@@ -28,61 +29,5 @@
          class="btn btn-secondary">Clear</a>
     </div>
   </form>
-  <table class="table">
-    <thead>
-      <tr>
-        <th>{% sortable_column "Name" "first_name" %}</th>
-        <th>{% sortable_column "Email" "email" %}</th>
-        <th>{% sortable_column "Status" "has_active_encounter" %}</th>
-        <th>{% sortable_column "Created" "created_at" %}</th>
-        <th>{% sortable_column "Updated" "updated_at" %}</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for patient in patients %}
-        <tr>
-          <td>
-            <a class="link"
-               href="{% url "providers:patient" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
-          </td>
-          <td>{{ patient.email|default:"—" }}</td>
-          <td>{{ patient.has_active_encounter|yesno:"Active,Archived" }}</td>
-          <td>{{ patient.created_at }}</td>
-          <td>{{ patient.updated_at }}</td>
-        </tr>
-      {% empty %}
-        <tr>
-          <td colspan="5" class="text-center">No patients found.</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-  <!-- Pagination controls -->
-  <nav aria-label="Patient pagination">
-    <div class="join">
-      {% if patients.has_previous %}
-        <a class="join-item btn"
-           href="?page={{ patients.previous_page_number }}"
-           aria-label="Previous">
-          <span aria-hidden="true">&laquo; Previous</span>
-        </a>
-      {% else %}
-        <button class="join-item btn" disabled aria-label="Previous">
-          <span aria-hidden="true">&laquo; Previous</span>
-        </button>
-      {% endif %}
-      <span class="join-item btn">Page {{ patients.number }} of {{ patients.paginator.num_pages }}</span>
-      {% if patients.has_next %}
-        <a class="join-item btn"
-           href="?page={{ patients.next_page_number }}"
-           aria-label="Next">
-          <span aria-hidden="true">Next &raquo;</span>
-        </a>
-      {% else %}
-        <button class="join-item btn" disabled aria-label="Next">
-          <span aria-hidden="true">Next &raquo;</span>
-        </button>
-      {% endif %}
-    </div>
-  </nav>
+  <div id="patient_table_container">{% include "provider/partials/patient_list_table.html" %}</div>
 {% endblock main %}

@@ -3242,6 +3242,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"htmx.org@npm:^2.0.7":
+  version: 2.0.7
+  resolution: "htmx.org@npm:2.0.7"
+  checksum: 10c0/3b97e78cd28619574f34ab58d92aae201219cc02826292c535711c17768b7d9f05a4107192ea575651bc60d95a32afa084520d416696b4402beb95dfa715ac16
+  languageName: node
+  linkType: hard
+
 "http-cache-semantics@npm:^4.1.1":
   version: 4.2.0
   resolution: "http-cache-semantics@npm:4.2.0"
@@ -4849,6 +4856,7 @@ __metadata:
     concurrently: "npm:^9.0.0"
     css-loader: "npm:^7.1.2"
     daisyui: "npm:^5.1.10"
+    htmx.org: "npm:^2.0.7"
     mini-css-extract-plugin: "npm:^2.4.5"
     node-sass-tilde-importer: "npm:^1.0.2"
     postcss: "npm:^8.3.11"
