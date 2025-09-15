@@ -1,5 +1,7 @@
 {% extends "provider/base.html" %}
 
+{% load sortable %}
+
 {% block main %}
   <h2>Patients</h2>
   <form>
@@ -16,17 +18,18 @@
         <option value="false"
                 {% if has_active_encounter_filter == "false" %}selected{% endif %}>Archived</option>
       </select>
+      <input type="hidden" name="sort" value="{{ sort }}" />
       <button type="submit" class="btn">Search</button>
     </div>
   </form>
   <table class="table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Status</th>
-        <th>Created</th>
-        <th>Updated</th>
+        <th>{% sortable_column "Name" "first_name" %}</th>
+        <th>{% sortable_column "Email" "email" %}</th>
+        <th>{% sortable_column "Status" "has_active_encounter" %}</th>
+        <th>{% sortable_column "Created" "created_at" %}</th>
+        <th>{% sortable_column "Updated" "updated_at" %}</th>
       </tr>
     </thead>
     <tbody>

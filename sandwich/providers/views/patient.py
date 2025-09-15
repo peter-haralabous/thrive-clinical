@@ -145,8 +145,12 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
 
     search = request.GET.get("search", "").strip()
-    sort = _validate_sort(
-        request.GET.get("sort"), ["first_name", "last_name", "date_of_birth", "has_active_encounter"]
+    sort = (
+        _validate_sort(
+            request.GET.get("sort"),
+            ["first_name", "last_name", "email", "date_of_birth", "has_active_encounter", "created_at", "updated_at"],
+        )
+        or "-updated_at"
     )
     page = request.GET.get("page", 1)
     has_active_encounter_filter = request.GET.get("has_active_encounter", "").lower()
