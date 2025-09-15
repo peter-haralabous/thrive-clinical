@@ -3,7 +3,11 @@
 {% load sortable %}
 
 {% block main %}
-  <h2>Patients</h2>
+  <div class="flex justify-between mb-4">
+    <h2>Patients</h2>
+    <a href="{% url "providers:patient_add" organization_id=organization.id %}"
+       class="btn btn-primary">Add a Patient</a>
+  </div>
   <form>
     <div class="mb-2">
       <input name="search"
@@ -52,42 +56,31 @@
     </tbody>
   </table>
   <!-- Pagination controls -->
-  {% if patients.has_other_pages %}
-    <nav aria-label="Patient pagination">
-      <ul class="pagination">
-        {% if patients.has_previous %}
-          <li class="page-item">
-            <a class="page-link"
-               href="?page={{ patients.previous_page_number }}"
-               aria-label="Previous">
-              <span aria-hidden="true">&laquo; Previous</span>
-            </a>
-          </li>
-        {% else %}
-          <li class="page-item disabled">
-            <span class="page-link" aria-label="Previous">
-              <span aria-hidden="true">&laquo; Previous</span>
-            </span>
-          </li>
-        {% endif %}
-        {% if patients.has_next %}
-          <li class="page-item">
-            <a class="page-link"
-               href="?page={{ patients.next_page_number }}"
-               aria-label="Next">
-              <span aria-hidden="true">Next &raquo;</span>
-            </a>
-          </li>
-        {% else %}
-          <li class="page-item disabled">
-            <span class="page-link" aria-label="Next">
-              <span aria-hidden="true">Next &raquo;</span>
-            </span>
-          </li>
-        {% endif %}
-      </ul>
-    </nav>
-  {% endif %}
-  <a href="{% url "providers:patient_add" organization_id=organization.id %}"
-     class="btn btn-primary">Add a Patient</a>
+  <nav aria-label="Patient pagination">
+    <div class="join">
+      {% if patients.has_previous %}
+        <a class="join-item btn"
+           href="?page={{ patients.previous_page_number }}"
+           aria-label="Previous">
+          <span aria-hidden="true">&laquo; Previous</span>
+        </a>
+      {% else %}
+        <button class="join-item btn" disabled aria-label="Previous">
+          <span aria-hidden="true">&laquo; Previous</span>
+        </button>
+      {% endif %}
+      <span class="join-item btn">Page {{ patients.number }} of {{ patients.paginator.num_pages }}</span>
+      {% if patients.has_next %}
+        <a class="join-item btn"
+           href="?page={{ patients.next_page_number }}"
+           aria-label="Next">
+          <span aria-hidden="true">Next &raquo;</span>
+        </a>
+      {% else %}
+        <button class="join-item btn" disabled aria-label="Next">
+          <span aria-hidden="true">Next &raquo;</span>
+        </button>
+      {% endif %}
+    </div>
+  </nav>
 {% endblock main %}
