@@ -1,6 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
-from uuid import uuid4
+from secrets import token_urlsafe
 
 from django.db import models
 from django.utils import timezone
@@ -29,7 +29,7 @@ class Invitation(TimestampedModel):
         default=InvitationStatus.PENDING,
     )
     # The token isn't visible to the sender, only to the receiver
-    token = models.UUIDField(default=uuid4, editable=False, unique=True)
+    token = models.CharField(default=token_urlsafe, editable=False, unique=True)
 
     expires_at = models.DateTimeField(default=default_expiry, null=True)
     accepted_at = models.DateTimeField(null=True)
