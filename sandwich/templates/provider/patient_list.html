@@ -9,6 +9,13 @@
              class="input"
              placeholder="Search"
              value="{{ search }}" />
+      <select name="has_active_encounter" class="input">
+        <option value="">All Statuses</option>
+        <option value="true"
+                {% if has_active_encounter_filter == "true" %}selected{% endif %}>Active</option>
+        <option value="false"
+                {% if has_active_encounter_filter == "false" %}selected{% endif %}>Archived</option>
+      </select>
       <button type="submit" class="btn">Search</button>
     </div>
   </form>
@@ -17,6 +24,7 @@
       <tr>
         <th>Name</th>
         <th>Email</th>
+        <th>Status</th>
         <th>Created</th>
         <th>Updated</th>
       </tr>
@@ -29,12 +37,13 @@
                href="{% url "providers:patient" patient_id=patient.id organization_id=organization.id %}">{{ patient.full_name }}</a>
           </td>
           <td>{{ patient.email|default:"—" }}</td>
+          <td>{{ patient.has_active_encounter|yesno:"Active,Archived" }}</td>
           <td>{{ patient.created_at }}</td>
           <td>{{ patient.updated_at }}</td>
         </tr>
       {% empty %}
         <tr>
-          <td colspan="4" class="text-center">No patients found.</td>
+          <td colspan="5" class="text-center">No patients found.</td>
         </tr>
       {% endfor %}
     </tbody>

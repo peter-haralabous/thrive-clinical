@@ -4,6 +4,8 @@ from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db.models import Exists
+from django.db.models import OuterRef
 from django.db.models import Q
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
@@ -143,10 +145,22 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
 
     search = request.GET.get("search", "").strip()
-    sort = _validate_sort(request.GET.get("sort"), ["first_name", "last_name", "date_of_birth"])
+    sort = _validate_sort(
+        request.GET.get("sort"), ["first_name", "last_name", "date_of_birth", "has_active_encounter"]
+    )
     page = request.GET.get("page", 1)
+    has_active_encounter_filter = request.GET.get("has_active_encounter", "").lower()
 
     patients = Patient.objects.filter(organization=organization)
+    patients = patients.annotate(
+        has_active_encounter=Exists(
+            Encounter.objects.filter(patient=OuterRef("pk"), status=EncounterStatus.IN_PROGRESS)
+        )
+    )
+
+    if has_active_encounter_filter in ("true", "false"):
+        patients = patients.filter(has_active_encounter=(has_active_encounter_filter == "true"))
+
     if search:
         patients = patients.filter(
             Q(first_name__icontains=search)
@@ -161,7 +175,14 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
     paginator = Paginator(patients, 25)
     patients_page = paginator.get_page(page)
 
-    context = {"patients": patients_page, "organization": organization, "search": search, "sort": sort, "page": page}
+    context = {
+        "patients": patients_page,
+        "organization": organization,
+        "search": search,
+        "sort": sort,
+        "page": page,
+        "has_active_encounter_filter": has_active_encounter_filter,
+    }
     return render(request, "provider/patient_list.html", context)
 
 
