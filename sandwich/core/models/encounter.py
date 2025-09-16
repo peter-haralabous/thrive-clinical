@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_enum import EnumField
 
 from sandwich.core.models.abstract import TimestampedModel
 from sandwich.core.models.organization import Organization
@@ -50,7 +51,7 @@ class Encounter(TimestampedModel):
 
     # This is _not_ a client-extensible ValueSet; we'll want a second field to hold custom statuses that they define.
     # in the Jira model, this is "Resolution"; "Status" is below
-    status = models.CharField(max_length=255, choices=EncounterStatus)
+    status: models.Field[EncounterStatus, EncounterStatus] = EnumField(EncounterStatus)
 
     # this is Encounter.subjectStatus in FHIR (https://www.hl7.org/fhir/R5/encounter.html#8.11.1.1)
     # we can use a client-defined ontology for these statuses
@@ -65,5 +66,4 @@ class Encounter(TimestampedModel):
 
     @property
     def active(self) -> bool:
-        # FIXME-NG: self.status is a str, not a EncounterStatus
-        return not terminal_encounter_status(self.status)  # type: ignore[arg-type]
+        return not terminal_encounter_status(self.status)

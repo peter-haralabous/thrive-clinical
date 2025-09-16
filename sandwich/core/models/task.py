@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_enum import EnumField
 
 from sandwich.core.models import Encounter
 from sandwich.core.models.abstract import TimestampedModel
@@ -49,7 +50,7 @@ class Task(TimestampedModel):
 
     encounter = models.ForeignKey(Encounter, on_delete=models.CASCADE)
 
-    status = models.CharField(max_length=255, choices=TaskStatus)
+    status: models.Field[TaskStatus, TaskStatus] = EnumField(TaskStatus)
 
     # this is Task.executionPeriod.end in FHIR
     ended_at = models.DateTimeField(blank=True, null=True)
@@ -60,8 +61,7 @@ class Task(TimestampedModel):
 
     @property
     def active(self) -> bool:
-        # FIXME-NG: self.status is a str, not a TaskStatus
-        return not terminal_task_status(self.status)  # type: ignore[arg-type]
+        return not terminal_task_status(self.status)
 
     @property
     def formio_submission(self) -> FormioSubmission | None:

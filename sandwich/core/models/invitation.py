@@ -4,6 +4,7 @@ from secrets import token_urlsafe
 
 from django.db import models
 from django.utils import timezone
+from django_enum import EnumField
 
 from sandwich.core.models.abstract import TimestampedModel
 
@@ -24,8 +25,8 @@ def default_expiry() -> datetime:
 
 
 class Invitation(TimestampedModel):
-    status = models.CharField(
-        choices=InvitationStatus,
+    status: models.Field[InvitationStatus, InvitationStatus] = EnumField(
+        InvitationStatus,
         default=InvitationStatus.PENDING,
     )
     # The token isn't visible to the sender, only to the receiver

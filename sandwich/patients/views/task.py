@@ -1,12 +1,9 @@
-from typing import cast
-
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 
-from sandwich.core.models.task import TaskStatus
 from sandwich.core.models.task import terminal_task_status
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
@@ -18,7 +15,7 @@ def task(request: AuthenticatedHttpRequest, patient_id: int, task_id: int) -> Ht
 
     # NOTE-NG: we're using the task ID here as the form name
     # patients don't have permission to load arbitrary forms
-    read_only = terminal_task_status(cast("TaskStatus", task.status))
+    read_only = terminal_task_status(task.status)
     # no, I don't want to catch RelatedObjectDoesNotExist if there's no submission yet
     if task.formio_submission:
         form_url = request.build_absolute_uri(
