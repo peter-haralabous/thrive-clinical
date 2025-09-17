@@ -16,4 +16,5 @@ def home(request: AuthenticatedHttpRequest) -> HttpResponse:
 @login_required
 def organization_home(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
-    return render(request, "provider/organization_home.html", {"organization": organization})
+    context = {"organization": organization}
+    return render(request, "provider/organization_home.html", context)

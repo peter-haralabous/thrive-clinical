@@ -25,6 +25,7 @@ from sandwich.core.service.encounter_service import get_current_encounter
 from sandwich.core.service.invitation_service import get_pending_invitation
 from sandwich.core.service.invitation_service import resend_patient_invitation_email
 from sandwich.core.service.organization_service import get_provider_organizations
+from sandwich.core.service.patient_service import maybe_patient_name
 from sandwich.core.service.task_service import cancel_task
 from sandwich.core.service.task_service import send_task_added_email
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -167,6 +168,10 @@ def patient_add(request: AuthenticatedHttpRequest, organization_id: int) -> Http
             )
     else:
         form = PatientAdd()
+        maybe_name = maybe_patient_name(request.GET.get("maybe_name", ""))
+        if maybe_name:
+            form.fields["first_name"].initial = maybe_name[0]
+            form.fields["last_name"].initial = maybe_name[1]
 
     context = {"form": form, "organization": organization}
     return render(request, "provider/patient_add.html", context)

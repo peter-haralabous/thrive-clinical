@@ -9,3 +9,6 @@
     {% endif %}
   </li>
 {% endblock nav_items %}
+{% block modal %}
+  <command-palette search-url="{% url 'providers:search' organization_id=organization.id %}" />
+{% endblock modal %}

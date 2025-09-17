@@ -12,6 +12,7 @@ from .views.patient import patient_details
 from .views.patient import patient_edit
 from .views.patient import patient_list
 from .views.patient import patient_resend_invite
+from .views.search import search
 
 app_name = "providers"
 urlpatterns = [
@@ -41,4 +42,5 @@ urlpatterns = [
     path("organization/<int:organization_id>/patient/add", patient_add, name="patient_add"),
     path("organization/<int:organization_id>", organization_home, name="organization"),
     path("organization/<int:organization_id>/edit", organization_edit, name="organization_edit"),
+    path("organization/<int:organization_id>/search", search, name="search"),
 ]
