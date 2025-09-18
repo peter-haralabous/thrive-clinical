@@ -57,7 +57,7 @@ class Encounter(TimestampedModel):
     # we can use a client-defined ontology for these statuses
     patient_status = models.CharField(max_length=255, blank=True)
 
-    # this is Encounter.actualPeriod.end om FHIR
+    # this is Encounter.actualPeriod.end in FHIR
     ended_at = models.DateTimeField(blank=True, null=True)
 
     @property
