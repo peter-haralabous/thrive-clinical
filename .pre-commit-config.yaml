@@ -65,9 +65,9 @@ repos:
         pass_filenames: false
       - id: tsc
         name: 'tsc'
-        entry: yarn tsc
+        entry: sh -c 'yarn && yarn tsc'
         language: system
-        types_or: [javascript, jsx, ts, tsx]
+        types_or: [ts, tsx]
         pass_filenames: false
 
 # sets up .pre-commit-ci.yaml to ensure pre-commit dependencies stay up to date
