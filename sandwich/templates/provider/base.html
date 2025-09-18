@@ -14,3 +14,7 @@
     <command-palette search-url="{% url 'providers:search' organization_id=organization.id %}" />
   {% endif %}
 {% endblock modal %}
+{% block title %}
+  {% if organization %}{{ organization.name }} &middot;{% endif %}
+  HealthConnect
+{% endblock title %}
