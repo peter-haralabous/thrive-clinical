@@ -22,9 +22,17 @@ mailpit:
 dev: init migrate mailpit
 	yarn run dev
 
+.PHONY: test-unit
+test-unit: init migrate
+	uv run pytest -x
+
+.PHONY: test-e2e
+test-e2e: init migrate
+	# https://pytest-xdist.readthedocs.io/en/stable/distribution.html
+	uv run pytest -m e2e -n logical -x
+
 .PHONY: test
-test: init migrate
-	uv run pytest
+test: test-unit test-e2e
 
 .PHONY: lint
 lint: init
