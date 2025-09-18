@@ -1,0 +1,12 @@
+# serializer version: 1
+# name: test_resend_patient_invitation_email
+  '''
+  
+  Hi John,
+  Test Organization has assigned you a task to complete.
+  
+  Click to get started: http://localhost:3000/patients/invite/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/accept
+  
+  
+  '''
+# ---

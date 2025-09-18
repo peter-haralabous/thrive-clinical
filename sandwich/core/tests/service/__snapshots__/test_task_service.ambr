@@ -1,0 +1,12 @@
+# serializer version: 1
+# name: test_send_task_added_email
+  '''
+  
+  Hi John,
+  Test Organization has assigned you a new task to complete.
+  
+  Click to get started: http://localhost:3000/patients/invite/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/accept
+  
+  
+  '''
+# ---

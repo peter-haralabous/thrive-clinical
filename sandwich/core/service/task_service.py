@@ -1,3 +1,4 @@
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
@@ -33,14 +34,9 @@ def send_task_added_email(task: Task) -> None:
         # they've already signed up; just send them to their tasks page
         task_url = APP_URL + reverse("patients:patient_details", kwargs={"patient_id": task.patient.id})
     else:
-        # otherwise we need to send them an invite link
+        # otherwise we need to send them an invitation link
         invitation = find_or_create_patient_invitation(task.patient)
         task_url = APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
 
-    # TODO: generate both html and text versions of the email, add legal footer
-    body = f"""Hi {task.patient.first_name},
-{task.encounter.organization.name} has assigned you a new task to complete.
-
-Click to get started: {task_url}
-    """
+    body = render_to_string("email/task_added_body.txt", {"task": task, "task_url": task_url})
     send_email(to, subject, body)

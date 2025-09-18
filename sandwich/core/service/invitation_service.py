@@ -1,3 +1,4 @@
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
@@ -30,15 +31,11 @@ def resend_patient_invitation_email(patient: Patient) -> None:
 
     # this is a bit messy, because we didn't track why the invitation was originally sent
     invitation = find_or_create_patient_invitation(patient)
+    task_url = APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
 
     to = invitation.patient.email
     subject = "Reminder: you have tasks assigned!"
-    task_url = APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
-    body = f"""Hi {invitation.patient.first_name},
-{patient.organization.name} has assigned you a tasks to complete.
-
-Click to get started: {task_url}
-"""
+    body = render_to_string("email/invitation_body.txt", {"invitation": invitation, "task_url": task_url})
     send_email(to, subject, body)
 
 

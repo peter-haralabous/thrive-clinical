@@ -1,0 +1,6 @@
+{% autoescape off %}
+Hi {{ invitation.patient.first_name }},
+{{ invitation.patient.organization.name }} has assigned you a task to complete.
+
+Click to get started: {{ task_url }}
+{% endautoescape %}
