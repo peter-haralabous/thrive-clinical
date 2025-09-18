@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 def escape_fts5(query: str) -> str:
     # TODO: we could do a lot better here
     def quote(s: str) -> str:
-        return f'"{s.replace('"', '""')}"'
+        return f'"{s.replace('"', '""')}"*'
 
     return " AND ".join(quote(t.strip()) for t in query.split())
 

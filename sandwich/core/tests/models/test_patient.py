@@ -8,11 +8,11 @@ from sandwich.core.models.patient import escape_fts5
 @pytest.mark.parametrize(
     ("query", "expected"),
     [
-        ("hello", '"hello"'),
-        ("hello world", '"hello" AND "world"'),
-        ("  hello  world  ", '"hello" AND "world"'),
+        ("hello", '"hello"*'),
+        ("hello world", '"hello"* AND "world"*'),
+        ("  hello  world  ", '"hello"* AND "world"*'),
         # ("\"hello world\"", "\"hello world\""),  -- this would need a real parser
-        ('"quot', '"""quot"'),
+        ('"quot', '"""quot"*'),
     ],
 )
 def test_escape_fts5(query, expected) -> None:
@@ -32,9 +32,14 @@ def test_patient_search() -> None:
     def search(query: str) -> list[Patient]:
         return list(Patient.objects.filter(organization=o).search(query))  # type: ignore[attr-defined]
 
+    assert search("joh") == [p]
     assert search("john") == [p]
     assert search("doe") == [p]
+    assert search("doe j") == [p]
+    assert search("john d") == [p]
     assert search("john doe") == [p]
+
+    # don't match patients in another organization
     assert search("jane") == []
     assert search("jane doe") == []
 
