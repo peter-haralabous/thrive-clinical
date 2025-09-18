@@ -2,8 +2,8 @@ def maybe_patient_name(q: str) -> list[str] | None:
     """
     try to turn unstructured text into a patient name
 
-    >>> maybe_patient_name("")
-    None
+    >>> maybe_patient_name("") is None
+    True
     >>> maybe_patient_name("SMITT, CARL")
     ["Carl", "Smitt"]
     >>> maybe_patient_name("SMITT, CARL JOSEPH")
