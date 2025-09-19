@@ -65,13 +65,12 @@ jobs:
       - name: Install python dependencies
         run: uv sync --locked
 
-      # Appears to be the resolution to  https://github.com/actions/setup-node/issues/480
-      # when the packageManager is specified, and we're not using yarn classic.
-      - run: npm install -g corepack@0.34.0
+      # Yarn is specified as our packageManager in package.json.
       - run: corepack enable
 
       - name: Set up node
-        uses: actions/setup-node@v5.0.0 # v5 now has automatic caching: https://github.com/actions/setup-node/releases/v5.0.0
+        # v5 now has automatic caching: https://github.com/actions/setup-node/releases/v5.0.0
+        uses: actions/setup-node@v5.0.0
         with:
           node-version-file: 'package.json'
 
