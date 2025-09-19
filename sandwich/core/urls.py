@@ -1,3 +1,8 @@
-from django.urls import URLPattern
+from django.urls import path
 
-urlpatterns: list[URLPattern] = []
+from sandwich.core.views import healthcheck
+
+app_name = "core"
+urlpatterns = [
+    path("healthcheck/", healthcheck.healthcheck, name="healthcheck"),
+]
