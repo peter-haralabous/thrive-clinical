@@ -10,7 +10,16 @@ node_modules: package.json yarn.lock
 	yarn install
 	@touch $@
 
-build-js: package.json yarn.lock
+.playwright-browsers: pyproject.toml
+	uv run playwright install --with-deps chromium
+	@touch $@
+
+.PHONY: collectstatic
+collectstatic: .venv build-js
+	uv run manage.py collectstatic --noinput
+
+.PHONY: build-js
+build-js: node_modules
 	yarn run build
 
 .PHONY: migrate
@@ -26,26 +35,15 @@ dev: init migrate mailpit
 	yarn run dev
 
 .PHONY: test-unit
-test-unit: init
+test-unit: .venv
 	uv run pytest -m "not e2e" -x
 
-.playwright-browsers: pyproject.toml
-	uv run playwright install --with-deps chromium
-	@touch $@
-
-.PHONY: collectstatic
-collectstatic:
-	uv run manage.py collectstatic --noinput
-
-.PHONY: test-e2e-browser
-test-e2e-browser: .playwright-browsers
-
 .PHONY: test-e2e
-test-e2e: init node_modules build-js test-e2e-browser collectstatic
+test-e2e: .playwright-browsers collectstatic
 	# https://pytest-xdist.readthedocs.io/en/stable/distribution.html
 	uv run pytest -m e2e -n logical -x
 
-.PHONY: test-branch
+.PHONY: test
 test: test-unit test-e2e
 
 .PHONY: lint
