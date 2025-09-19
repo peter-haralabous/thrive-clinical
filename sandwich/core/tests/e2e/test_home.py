@@ -4,13 +4,13 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.e2e
-def test_home_page_buttons(live_server_with_assets, page: Page):
+def test_home_page_buttons(live_server, page: Page):
     """
     Test that the home page displays the Continue as Patient and Continue as Provider buttons
     with proper styling and JavaScript functionality.
     """
     # Navigate to the home page
-    page.goto(f"{live_server_with_assets.url}{reverse('home')}")
+    page.goto(f"{live_server.url}{reverse('home')}")
 
     # Wait for the page to load completely
     page.wait_for_load_state("networkidle")

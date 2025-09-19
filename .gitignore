@@ -1,6 +1,9 @@
 # Pycharm
 .idea
 
+# This file is touched in ./Makefile to tell if browsers have been installed
+.playwright-browsers
+
 ### Python template
 # Byte-compiled / optimized / DLL files
 __pycache__/
