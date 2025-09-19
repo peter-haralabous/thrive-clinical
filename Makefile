@@ -46,6 +46,12 @@ test-e2e: .playwright-browsers collectstatic
 .PHONY: test
 test: test-unit test-e2e
 
+.PHONY: coverage
+coverage:
+	uv run coverage run -m pytest
+	uv run coverage html
+	open htmlcov/index.html
+
 .PHONY: lint
 lint: init
 	uv run pre-commit run -a

@@ -22,35 +22,49 @@ Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getti
 
 ### Setting Up Your Users
 
-- To create a **normal user account**, just go to Sign Up and fill out the form. Once you submit it, you'll see a "Verify Your E-mail Address" page. Go to [mailpit](http://localhost:8025) to see the emailed message. Follow the verification link and the user will be ready to go.
+- To create a **normal user account**, just go to Sign Up and fill out the form. Once you submit it, you'll see a
+  "Verify Your E-mail Address" page. Go to [mailpit](http://localhost:8025) to see the emailed message. Follow the verification link and
+  the user will be ready to go.
 
 - To create a **superuser account**, use this command:
 
       uv run python manage.py createsuperuser
 
-For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar), so that you can see how the site behaves for both kinds of users.
+For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar),
+so that you can see how the site behaves for both kinds of users.
 
-### Type checks
+## Essential Commands
 
-Running type checks with mypy:
+**`make dev`** - Start development environment
+Sets up everything you need and launches the dev server with hot reload.
 
-    uv run mypy .
+**`make test`** - Run all tests
+Executes both unit tests and end-to-end tests to verify your code works.
 
-### Running tests
+**`make test-unit`** - Run unit tests only
+Quick feedback loop for testing your Python code changes.
 
-    uv run pytest
+**`make test-e2e`** - Run end-to-end tests
+Full browser testing to ensure the complete application works correctly.
 
-#### Test coverage
+## Setup & Maintenance
 
-To run the tests, check your test coverage, and generate an HTML coverage report:
+**`make init`** - Initialize project
+Sets up Python virtual environment, installs dependencies, and configures git hooks.
 
-    uv run coverage run -m pytest
-    uv run coverage html
-    open htmlcov/index.html
+**`make lint`** - Check code quality
+Runs formatting and linting tools to keep your code clean and consistent.
 
-### Live reloading and Sass CSS compilation
+**`make coverage`** - Generate test coverage report
+Shows which parts of your code are tested and opens the report in your browser.
 
-Moved to [Live reloading and SASS compilation](https://cookiecutter-django.readthedocs.io/en/latest/2-local-development/developing-locally.html#using-webpack-or-gulp).
+## Utilities
+
+**`make migrate`** - Apply database migrations
+Updates your database schema with any pending changes.
+
+**`make collectstatic`** - Prepare static files
+Gathers CSS, JS, and other static assets for deployment.
 
 ### Testing Docker builds
 

@@ -3,8 +3,7 @@
 minversion = "6.0"
 addopts = "--ds=config.settings.test --reuse-db --import-mode=importlib"
 python_files = [
-    "tests.py",
-    "test_*.py",
+    "*_test.py",
 ]
 markers = [
   "e2e: marks tests as end-to-end tests that use playwright"
@@ -13,7 +12,17 @@ markers = [
 # ==== Coverage ====
 [tool.coverage.run]
 include = ["sandwich/**"]
-omit = ["*/migrations/*", "*/tests/*"]
+omit = [
+  "*/migrations/*",
+  "*/tests/*",
+  ".venv/*",            # Exclude the virtual environment
+  "*/__init__.py",      # Exclude all __init__.py files
+  "*_test.py",          # Exclude all test files
+  "conftest.py",        # Exclude pytest configuration
+  "manage.py",          # Exclude the manage.py script
+  "config/*",           # Exclude the project settings/config directory
+  "*/migrations/*",     # Exclude all database migration files
+]
 plugins = ["django_coverage_plugin"]
 
 # ==== mypy ====

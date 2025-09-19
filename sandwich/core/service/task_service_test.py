@@ -1,8 +1,8 @@
 import pytest
 
 from sandwich.core.models import Task
+from sandwich.core.service.invitation_service_test import mask_uuids
 from sandwich.core.service.task_service import send_task_added_email
-from sandwich.core.tests.service.test_invitation_service import mask_uuids
 
 
 @pytest.mark.django_db
