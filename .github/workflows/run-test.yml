@@ -1,0 +1,43 @@
+name: run-test.yml
+
+on:
+  workflow_call:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code repository
+        uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: 'true'
+
+      - name: Set up python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: '.python-version'
+
+      - name: Install python dependencies
+        run: uv sync --locked
+
+      # Yarn is specified as our packageManager in package.json.
+      - run: corepack enable
+
+      - name: Set up node
+        # v5 now has automatic caching: https://github.com/actions/setup-node/releases/v5.0.0
+        uses: actions/setup-node@v5.0.0
+        with:
+          node-version-file: 'package.json'
+
+      - name: Install node dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Check db migrations
+        run: uv run python manage.py makemigrations --check
+
+      - name: Run the tests
+        run: make test

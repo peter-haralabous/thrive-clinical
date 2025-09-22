@@ -1,0 +1,35 @@
+name: run-deploy.yml
+
+on:
+  workflow_call:
+    inputs:
+      app:
+        description: 'name of the service to be deployed'
+        required: false
+        type: string
+        default: sandwich
+      environment:
+        description: 'name of the deployment environment (integration, etc)'
+        required: true
+        type: string
+      image_tag:
+        description: 'docker image tag to deploy'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v5.0.0
+      - uses: aws-actions/configure-aws-credentials@v5.0.0
+        with:
+          # Defined in tf: https://github.com/thrivehealth/terraform/blob/78c420999bcfeda27ba80e2bbd64978c804e894f/stacks/deploy/github.tf#L47
+          role-to-assume: arn:aws:iam::153784117502:role/deploy-github-action
+          aws-region: ca-central-1
+      - env:
+          APP: sandwich
+          ENVIRONMENT: integration
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: ./scripts/deploy.sh ${{ inputs.app }}
