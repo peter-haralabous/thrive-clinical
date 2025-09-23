@@ -12,9 +12,9 @@ app_name = "patients"
 urlpatterns = [
     path("", home, name="home"),
     path("patient/add", patient_add, name="patient_add"),
-    path("patient/<int:patient_id>", patient_details, name="patient_details"),
-    path("patient/<int:patient_id>/edit", patient_edit, name="patient_edit"),
+    path("patient/<uuid:patient_id>", patient_details, name="patient_details"),
+    path("patient/<uuid:patient_id>/edit", patient_edit, name="patient_edit"),
     path("invite/<str:token>/accept", accept_invite, name="accept_invite"),
-    path("patient/<int:patient_id>/task/<int:task_id>", task, name="task"),
+    path("patient/<uuid:patient_id>/task/<uuid:task_id>", task, name="task"),
     path("api/", api.urls, name="api"),
 ]

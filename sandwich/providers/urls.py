@@ -18,29 +18,31 @@ app_name = "providers"
 urlpatterns = [
     path("", home, name="home"),
     path("organization/add", organization_add, name="organization_add"),
-    path("organization/<int:organization_id>/patient/<int:patient_id>", patient_details, name="patient"),
-    path("organization/<int:organization_id>/patient/<int:patient_id>/edit", patient_edit, name="patient_edit"),
+    path("organization/<uuid:organization_id>/patient/<uuid:patient_id>", patient_details, name="patient"),
+    path("organization/<uuid:organization_id>/patient/<uuid:patient_id>/edit", patient_edit, name="patient_edit"),
     path(
-        "organization/<int:organization_id>/patient/<int:patient_id>/archive", patient_archive, name="patient_archive"
+        "organization/<uuid:organization_id>/patient/<uuid:patient_id>/archive",
+        patient_archive,
+        name="patient_archive",
     ),
     path(
-        "organization/<int:organization_id>/patient/<int:patient_id>/add_task",
+        "organization/<uuid:organization_id>/patient/<uuid:patient_id>/add_task",
         patient_add_task,
         name="patient_add_task",
     ),
     path(
-        "organization/<int:organization_id>/patient/<int:patient_id>/resend_invite",
+        "organization/<uuid:organization_id>/patient/<uuid:patient_id>/resend_invite",
         patient_resend_invite,
         name="patient_resend_invite",
     ),
     path(
-        "organization/<int:organization_id>/patient/<int:patient_id>/task/<int:task_id>/cancel",
+        "organization/<uuid:organization_id>/patient/<uuid:patient_id>/task/<uuid:task_id>/cancel",
         patient_cancel_task,
         name="patient_cancel_task",
     ),
-    path("organization/<int:organization_id>/patients", patient_list, name="patient_list"),
-    path("organization/<int:organization_id>/patient/add", patient_add, name="patient_add"),
-    path("organization/<int:organization_id>", organization_home, name="organization"),
-    path("organization/<int:organization_id>/edit", organization_edit, name="organization_edit"),
-    path("organization/<int:organization_id>/search", search, name="search"),
+    path("organization/<uuid:organization_id>/patients", patient_list, name="patient_list"),
+    path("organization/<uuid:organization_id>/patient/add", patient_add, name="patient_add"),
+    path("organization/<uuid:organization_id>", organization_home, name="organization"),
+    path("organization/<uuid:organization_id>/edit", organization_edit, name="organization_edit"),
+    path("organization/<uuid:organization_id>/search", search, name="search"),
 ]
