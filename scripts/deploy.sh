@@ -36,16 +36,24 @@ done
 for SERVICE in "${SERVICES[@]}"; do
   while true; do
     DEPLOYMENTS=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" --query 'services[].deployments[].[rolloutState,createdAt]' --output text)
-    N_DEPLOYMENTS=$(echo "$DEPLOYMENTS" | wc -l | tr -d ' ')
     echo "$DEPLOYMENTS"
 
-    if [[ "$N_DEPLOYMENTS" -gt 1 ]]; then
+    set +e
+    FAILED=$(echo "$DEPLOYMENTS" | grep -c "FAILED")
+    IN_PROGRESS=$(echo "$DEPLOYMENTS" | grep -c "IN_PROGRESS")
+    set -e
+
+    # if any deployments are in progress, wait
+    if [[ $IN_PROGRESS -gt 0 ]]; then
       if [[ "$SECONDS" -gt "$DEPLOY_TIMEOUT" ]]; then
         echo "timed out after $SECONDS seconds"
         exit 1
       fi
       echo "will check again in 10s..."
       sleep 10
+    elif [[ $FAILED -gt 0 ]]; then
+      echo "deployment failed"
+      exit 1
     else
       break
     fi
