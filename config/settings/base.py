@@ -259,18 +259,20 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s",
-        },
+        "json": {"()": "config.logging.CustomDataDogJSONFormatter"},
     },
     "handlers": {
-        "console": {
+        "json_stdout": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "verbose",
+            "formatter": "json",
         },
     },
-    "root": {"level": "INFO", "handlers": ["console"]},
+    "root": {
+        "level": "INFO",
+        "handlers": ["json_stdout"],
+    },
+    "loggers": {},
 }
 
 REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")

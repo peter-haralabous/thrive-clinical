@@ -381,6 +381,20 @@ wheels = [
 ]
 
 [[package]]
+name = "django-datadog-logger"
+version = "0.7.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "djangorestframework" },
+    { name = "json-log-formatter" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/7f/ec/d36154ea51a4a7ad9bcff4a02ccb5f1db47e1ef52d52c870f2c0dfdfa787/django_datadog_logger-0.7.3.tar.gz", hash = "sha256:4361bb068a4b188fa14135398f9b747728464a291757e6adf8c95c9215dcd602", size = 19894, upload-time = "2024-11-21T13:36:11.482Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/54/10/57e7b9f6cc605a7046206e52aadf8e44776f7ac312640a548683fbd91258/django_datadog_logger-0.7.3-py2.py3-none-any.whl", hash = "sha256:87838cd868f407e050831c536413de6b2ece31433b28c952c0fd90be1d66486a", size = 14004, upload-time = "2024-11-21T13:36:10.183Z" },
+]
+
+[[package]]
 name = "django-debug-toolbar"
 version = "6.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -535,6 +549,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/64/e3/7c824814222d8411e5b2a72f4650e0181893bafa8324c33a5f77dd41db42/django_webpack_loader-3.2.1.tar.gz", hash = "sha256:d4bfaca9a640f087e7feeeb2ca6afd3d0a644bce3925b3d430448989c1673774", size = 17855, upload-time = "2025-06-16T12:33:24.353Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/79/dc/216df230d008495613b6fa3fe6f5f38c99c8516e81acda8cbe73a3c0f14c/django_webpack_loader-3.2.1-py2.py3-none-any.whl", hash = "sha256:b7e505bcdf7af8f75433f13d54010e0a95c61a8b80890a700a598602656e09bf", size = 20806, upload-time = "2025-06-16T12:33:22.672Z" },
+]
+
+[[package]]
+name = "djangorestframework"
+version = "3.16.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8a/95/5376fe618646fde6899b3cdc85fd959716bb67542e273a76a80d9f326f27/djangorestframework-3.16.1.tar.gz", hash = "sha256:166809528b1aced0a17dc66c24492af18049f2c9420dbd0be29422029cfc3ff7", size = 1089735, upload-time = "2025-08-06T17:50:53.251Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b0/ce/bf8b9d3f415be4ac5588545b5fcdbbb841977db1c1d923f7568eeabe1689/djangorestframework-3.16.1-py3-none-any.whl", hash = "sha256:33a59f47fb9c85ede792cbf88bde71893bcda0667bc573f784649521f1102cec", size = 1080442, upload-time = "2025-08-06T17:50:50.667Z" },
 ]
 
 [[package]]
@@ -812,6 +838,12 @@ sdist = { url = "https://files.pythonhosted.org/packages/ea/98/d6cadf4d5a1c03b21
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2d/14/1c65fccf8413d5f5c6e8425f84675169654395098000d8bddc4e9d3390e1/jsbeautifier-1.15.4-py3-none-any.whl", hash = "sha256:72f65de312a3f10900d7685557f84cb61a9733c50dcc27271a39f5b0051bf528", size = 94707, upload-time = "2025-02-27T17:53:46.152Z" },
 ]
+
+[[package]]
+name = "json-log-formatter"
+version = "1.1.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/e8/ef/324f4a28ed0152a32b80685b26316b604218e4ac77487ea82719c3c28bc6/json_log_formatter-1.1.1.tar.gz", hash = "sha256:0815e3b4469e5c79cf3f6dc8a0613ba6601f4a7464f85ba03655cfa6e3e17d10", size = 5896, upload-time = "2025-02-27T22:56:15.643Z" }
 
 [[package]]
 name = "json5"
@@ -1379,6 +1411,7 @@ dependencies = [
     { name = "django-allauth", extra = ["mfa"] },
     { name = "django-anymail", extra = ["amazon-ses"] },
     { name = "django-crispy-forms" },
+    { name = "django-datadog-logger" },
     { name = "django-enum" },
     { name = "django-environ" },
     { name = "django-model-utils" },
@@ -1428,6 +1461,7 @@ requires-dist = [
     { name = "django-allauth", extras = ["mfa"], specifier = "==65.11.1" },
     { name = "django-anymail", extras = ["amazon-ses"], specifier = "==13.1" },
     { name = "django-crispy-forms", specifier = "==2.4" },
+    { name = "django-datadog-logger", specifier = ">=0.7.3" },
     { name = "django-enum", specifier = ">=2.2.3" },
     { name = "django-environ", specifier = "==0.12.0" },
     { name = "django-model-utils", specifier = "==5.0.0" },
