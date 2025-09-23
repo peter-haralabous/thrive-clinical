@@ -30,8 +30,12 @@ migrate:
 mailpit:
 	docker compose up -d mailpit
 
+.PHONY: postgres
+postgres:
+	docker compose up -d postgres
+
 .PHONY: dev
-dev: init collectstatic migrate mailpit
+dev: init collectstatic migrate mailpit postgres
 	yarn run dev
 
 .PHONY: test-unit

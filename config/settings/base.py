@@ -53,16 +53,8 @@ DATABASES = {
     "default": {
         **env.db(
             "DATABASE_URL",
-            default="sqlite:///data/sandwich.db",
-        ),
-        "OPTIONS": {
-            "transaction_mode": "IMMEDIATE",
-            "timeout": 5,  # seconds
-            "init_command": """
-                PRAGMA journal_mode=WAL;
-                PRAGMA synchronous=NORMAL;
-            """,
-        },
+            default="postgres://sandwich:sandwich@localhost:5432/sandwich",
+        )
     }
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True

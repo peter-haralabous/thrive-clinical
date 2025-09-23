@@ -198,6 +198,7 @@ dependencies = [
     "gunicorn==23.0.0",
     "hiredis==3.2.1",
     "pillow==11.3.0",
+    "psycopg2>=2.9.10",
     "pytest-xdist[psutil]>=3.8.0",
     "python-slugify==8.0.4",
     "redis==6.4.0",
