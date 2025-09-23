@@ -31,7 +31,7 @@ mailpit:
 	docker compose up -d mailpit
 
 .PHONY: dev
-dev: init migrate mailpit
+dev: init collectstatic migrate mailpit
 	yarn run dev
 
 .PHONY: test-unit
