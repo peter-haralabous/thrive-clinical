@@ -1,7 +1,7 @@
 from django.contrib.auth.models import Group
 from django.db import models
 
-from sandwich.core.models.abstract import TimestampedModel
+from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.organization import Organization
 
 
@@ -19,7 +19,7 @@ class RoleName:
     PATIENT = "patient"
 
 
-class Role(TimestampedModel):
+class Role(BaseModel):
     """
     The `Role` model serves as a bridge between django's `Group` and our `Organization` model.
 

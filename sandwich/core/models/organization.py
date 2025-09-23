@@ -2,7 +2,7 @@ import pydantic
 from django.db import models
 from django_pydantic_field import SchemaField
 
-from sandwich.core.models.abstract import TimestampedModel
+from sandwich.core.models.abstract import BaseModel
 
 
 class PatientStatus(pydantic.BaseModel):
@@ -10,7 +10,7 @@ class PatientStatus(pydantic.BaseModel):
     label: str
 
 
-class Organization(TimestampedModel):
+class Organization(BaseModel):
     """
     ... companies, institutions, corporations, departments, community groups, ...
 

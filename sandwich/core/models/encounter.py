@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_enum import EnumField
 
-from sandwich.core.models.abstract import TimestampedModel
+from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
 
@@ -35,7 +35,7 @@ def terminal_encounter_status(status: EncounterStatus) -> bool:
     ]
 
 
-class Encounter(TimestampedModel):
+class Encounter(BaseModel):
     """
     An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or
     assessing the health status of a patient.

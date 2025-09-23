@@ -4,7 +4,7 @@ from typing import Self
 from django.db import models
 from django.db.models.expressions import RawSQL
 
-from sandwich.core.models.abstract import TimestampedModel
+from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.organization import Organization
 from sandwich.users.models import User
 
@@ -46,7 +46,7 @@ class PatientManager(models.Manager["Patient"]):
         return self.get_queryset().search(query)
 
 
-class Patient(TimestampedModel):
+class Patient(BaseModel):
     """
     Administrative information about an individual receiving care
 

@@ -2,10 +2,10 @@ from typing import Literal
 
 from django.db import models
 
-from sandwich.core.models.abstract import TimestampedModel
+from sandwich.core.models.abstract import BaseModel
 
 
-class FormioSubmission(TimestampedModel):
+class FormioSubmission(BaseModel):
     task = models.OneToOneField("Task", on_delete=models.CASCADE, related_name="_formio_submission")
 
     data = models.JSONField(default=dict)

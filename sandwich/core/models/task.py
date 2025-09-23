@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_enum import EnumField
 
-from sandwich.core.models.abstract import TimestampedModel
+from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.formio_submission import FormioSubmission
 from sandwich.core.models.patient import Patient
@@ -34,7 +34,7 @@ def terminal_task_status(status: TaskStatus) -> bool:
 
 
 # NOTE-NG: this is just a placeholder for now. We'll want to expand this model significantly in the future.
-class Task(TimestampedModel):
+class Task(BaseModel):
     """
     A task to be performed.
 

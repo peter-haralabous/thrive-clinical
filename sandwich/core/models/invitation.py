@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import timezone
 from django_enum import EnumField
 
-from sandwich.core.models.abstract import TimestampedModel
+from sandwich.core.models.abstract import BaseModel
 
 
 class InvitationStatus(models.TextChoices):
@@ -24,7 +24,7 @@ def default_expiry() -> datetime:
     return timezone.now() + timedelta(days=INVITE_EXPIRY_DAYS)
 
 
-class Invitation(TimestampedModel):
+class Invitation(BaseModel):
     status: models.Field[InvitationStatus, InvitationStatus] = EnumField(
         InvitationStatus,
         default=InvitationStatus.PENDING,
