@@ -4,6 +4,31 @@ import uuid
 from django.db import migrations, models
 
 
+def clear_existing_data(apps, schema_editor):
+    """Clear existing data before changing primary keys to UUIDs"""
+    Encounter = apps.get_model('core', 'Encounter')
+    FormioSubmission = apps.get_model('core', 'FormioSubmission')
+    Invitation = apps.get_model('core', 'Invitation')
+    Organization = apps.get_model('core', 'Organization')
+    Patient = apps.get_model('core', 'Patient')
+    Role = apps.get_model('core', 'Role')
+    Task = apps.get_model('core', 'Task')
+    
+    # Delete all existing data
+    Encounter.objects.all().delete()
+    FormioSubmission.objects.all().delete()
+    Invitation.objects.all().delete()
+    Patient.objects.all().delete() 
+    Organization.objects.all().delete()
+    Role.objects.all().delete()
+    Task.objects.all().delete()
+
+
+def reverse_clear_data(apps, schema_editor):
+    """No-op for reverse migration"""
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -11,6 +36,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(clear_existing_data, reverse_clear_data),
         migrations.AlterField(
             model_name='encounter',
             name='id',
