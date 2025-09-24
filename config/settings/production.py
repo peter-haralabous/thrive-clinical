@@ -155,9 +155,5 @@ MIDDLEWARE = [
 ddtrace.patch(logging=True)
 ddtrace.config.requests["split_by_domain"] = True
 
-# pass `extra={}` through to datadog
-DJANGO_DATADOG_LOGGER_EXTRA_INCLUDE = r"^(django_datadog_logger|celery|sandwich)(|\..+)$"
-
-
 # Your stuff...
 # ------------------------------------------------------------------------------

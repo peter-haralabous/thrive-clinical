@@ -65,7 +65,6 @@ LOGGING["loggers"]["sandwich"] = {  # type: ignore[index]
     "propagate": False,
 }
 
-
 # django-extensions
 # ------------------------------------------------------------------------------
 # https://django-extensions.readthedocs.io/en/latest/installation_instructions.html#configuration
