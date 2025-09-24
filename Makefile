@@ -39,7 +39,7 @@ dev: init collectstatic migrate mailpit postgres
 	yarn run dev
 
 .PHONY: test-unit
-test-unit: .venv
+test-unit: .venv postgres
 	uv run pytest -m "not e2e" -x
 
 .PHONY: test-e2e
