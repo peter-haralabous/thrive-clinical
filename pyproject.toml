@@ -158,7 +158,7 @@ dev = [
     "ipdb==0.13.13",
     "mypy==1.18.2",
     "pre-commit==4.3.0",
-    "playwright==1.48.0",
+    "playwright==1.55.0",
     "pytest==8.4.2",
     "pytest-django==4.11.1",
     "pytest-sugar==1.1.1",
