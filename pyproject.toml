@@ -153,7 +153,7 @@ dev = [
     "django-coverage-plugin==3.1.1",
     "django-debug-toolbar==6.0.0",
     "django-extensions==4.1",
-    "django-stubs[compatible-mypy]==5.2.2",
+    "django-stubs[compatible-mypy]==5.2.5",
     "djlint==1.36.4",
     "factory-boy==3.3.2",
     "ipdb==0.13.13",
