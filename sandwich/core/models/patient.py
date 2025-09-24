@@ -1,8 +1,13 @@
 import logging
+import re
 from typing import Self
 
+from django.contrib.postgres.indexes import GinIndex
+from django.contrib.postgres.search import SearchQuery
+from django.contrib.postgres.search import SearchRank
+from django.contrib.postgres.search import SearchVectorField
 from django.db import models
-from django.db.models.expressions import RawSQL
+from django.db.models import F
 
 from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.organization import Organization
@@ -11,29 +16,40 @@ from sandwich.users.models import User
 logger = logging.getLogger(__name__)
 
 
-def escape_fts5(query: str) -> str:
-    # TODO: we could do a lot better here
-    def quote(s: str) -> str:
-        return f'"{s.replace('"', '""')}"*'
-
-    return " AND ".join(quote(t.strip()) for t in query.split())
-
-
 class PatientQuerySet(models.QuerySet):
     def search(self, query: str) -> Self:
-        """
-        Performs a full-text search and filters the current QuerySet.
-        """
         if not query:
             return self
 
-        query = escape_fts5(query)
+        # Sanitize the query to remove problematic characters
+        # Remove or replace characters that cause tsquery syntax errors
+        sanitized_query = re.sub(r"[^\w\s]", " ", query)
 
-        # important note: the subquery isn't executed eagerly; it'll be evaluated later
-        # when the whole QuerySet is fetched.
-        subquery = "SELECT patient_uuid FROM core_patient_fts WHERE core_patient_fts MATCH %s"
+        # Split into terms and filter out empty ones
+        terms = [term.strip() for term in sanitized_query.split() if term.strip()]
+        if not terms:
+            return self
 
-        return self.filter(pk__in=RawSQL(subquery, [query]))  # noqa: S611
+        # For partial matching, add :* suffix for prefix search
+        prefix_terms = [f"{term}:*" for term in terms]
+
+        try:
+            search_query = SearchQuery(" & ".join(prefix_terms), search_type="raw", config="english")
+            return (
+                self.filter(search_vector=search_query)
+                .annotate(rank=SearchRank(F("search_vector"), search_query))
+                .order_by("-rank")
+            )
+        except Exception as e:  # noqa: BLE001
+            # If the raw query fails, fall back to a simple search
+            logger.warning("FTS query failed", extra={"query": query, "error": e})
+            # Use websearch_to_tsquery as fallback - it's more forgiving
+            try:
+                search_query = SearchQuery(query, search_type="websearch", config="english")
+                return self.filter(search_vector=search_query)
+            except Exception:  # noqa: BLE001
+                # If all else fails, return empty queryset
+                return self.none()
 
 
 class PatientManager(models.Manager["Patient"]):
@@ -78,8 +94,14 @@ class Patient(BaseModel):
     # each patient record belongs to at most one organization
     # TODO: pull in patient merging logic from Classic
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
+    search_vector = SearchVectorField(null=True, blank=True)
 
     objects = PatientManager()
+
+    class Meta(BaseModel.Meta):
+        indexes = [
+            GinIndex(fields=["search_vector"]),
+        ]
 
     @property
     def full_name(self) -> str:
