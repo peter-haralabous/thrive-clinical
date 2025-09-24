@@ -156,12 +156,7 @@ ddtrace.patch(logging=True)
 ddtrace.config.requests["split_by_domain"] = True
 
 # pass `extra={}` through to datadog
-DJANGO_DATADOG_LOGGER_EXTRA_INCLUDE = (
-    r"^(django_datadog_logger|celery|common|core|forms|integrations|organizations|project|users)(|\..+)$"
-)
-
-# Set Auditlog Correlation ID = datadog trace_id
-AUDITLOG_CID_GETTER = "project.correlation.get_datadog_trace_id"
+DJANGO_DATADOG_LOGGER_EXTRA_INCLUDE = r"^(django_datadog_logger|celery|sandwich)(|\..+)$"
 
 
 # Your stuff...
