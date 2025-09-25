@@ -55,3 +55,16 @@ coverage:
 .PHONY: lint
 lint: init
 	uv run pre-commit run -a
+
+.PHONY: smoke-test-development
+smoke-test-development:
+	uv run --script ./scripts/smoke_test.py \
+		http://localhost:3000/ \
+		"latest"
+
+
+.PHONY: smoke-test-integration
+smoke-test-integration:
+	uv run --script ./scripts/smoke_test.py \
+		https://hc.wethrive.ninja/ \
+		"${GITHUB_SHA:-GITHUB_SHA_NOT_SET}"

@@ -24,10 +24,16 @@ jobs:
   test:
     uses: ./.github/workflows/run-test.yml
 
-  deploy:
+  deploy-integration:
     needs: ['test', 'build']
     uses: ./.github/workflows/run-deploy.yml
     with:
       environment: integration
       # Note: must match image_tag set in build step
       image_tag: latest
+
+  smoketest-integration:
+    needs: deploy-integration
+    uses: ./.github/workflows/run-smoke-test.yml
+    with:
+      environment: integration
