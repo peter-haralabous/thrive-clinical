@@ -89,6 +89,7 @@ THIRD_PARTY_APPS = [
     "allauth.mfa",
     "allauth.socialaccount",
     "webpack_loader",
+    "procrastinate.contrib.django",
 ]
 
 LOCAL_APPS = [
