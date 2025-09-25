@@ -33,15 +33,24 @@ repos:
     hooks:
       - id: django-upgrade
 
-  # Run the Ruff linter.
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.12.12
+  # Run the Ruff linter (using the locally installed version)
+  # copied from https://github.com/astral-sh/ruff-pre-commit/blob/main/.pre-commit-hooks.yaml
+  - repo: local
     hooks:
       # Linter
       - id: ruff-check
-        args: [--fix, --exit-non-zero-on-fix]
+        name: ruff check
+        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
+        language: system
+        types_or: [python, pyi, jupyter]
+        require_serial: true
       # Formatter
       - id: ruff-format
+        name: ruff format
+        entry: uv run ruff format --force-exclude
+        language: system
+        types_or: [python, pyi, jupyter]
+        require_serial: true
 
   - repo: https://github.com/Riverside-Healthcare/djLint
     rev: v1.36.4
