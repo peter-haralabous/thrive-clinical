@@ -23,7 +23,7 @@ build-js: node_modules
 	yarn run build
 
 .PHONY: migrate
-migrate:
+migrate: postgres
 	uv run manage.py migrate
 
 .PHONY: mailpit
