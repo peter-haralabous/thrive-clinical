@@ -66,7 +66,6 @@ smoke-test-development:
 		http://localhost:3000/ \
 		"latest"
 
-
 .PHONY: smoke-test-integration
 smoke-test-integration:
 	uv run --script ./scripts/smoke_test.py \

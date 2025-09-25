@@ -68,15 +68,6 @@ Gathers CSS, JS, and other static assets for deployment.
 
 ### Testing Docker builds
 
-```shell
-docker build -t sandwich .
-docker run \
-  -e DJANGO_SETTINGS_MODULE=config.settings.production \
-  -e DJANGO_SECRET_KEY=secret \
-  -e DJANGO_AWS_STORAGE_BUCKET_NAME=bucket-name \
-  -e "DJANGO_ALLOWED_HOSTS=*" \
-  -e DJANGO_SECURE_SSL_REDIRECT=false \
-  -v ./data:/app/data \
-  -p 3000:3000 \
-  --rm sandwich
+```
+docker compose up --build sandwich
 ```

@@ -13,6 +13,7 @@ services:
       MP_DATABASE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
+
   postgres:
     image: postgres:17.6
     container_name: postgres
@@ -30,6 +31,24 @@ services:
       timeout: 3s
       interval: 3s
       retries: 30
+
+  # this configuration is for local validation of the Docker build step
+  # it's not going to be fully functional without connection to AWS resources
+  sandwich:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sandwich
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      DJANGO_SECRET_KEY: secret
+      DJANGO_AWS_STORAGE_BUCKET_NAME: bucket-name
+      DJANGO_ALLOWED_HOSTS: '*'
+      DJANGO_SECURE_SSL_REDIRECT: false
+      DATABASE_URL: postgres://sandwich:sandwich@postgres:5432/sandwich
 
 volumes:
   db:
