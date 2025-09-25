@@ -2,11 +2,19 @@
 
 {% load i18n %}
 
-{% block bodyclass %}
-  bg-light
-{% endblock bodyclass %}
 {% block css %}
   {{ block.super }}
+  <style>
+    .entrance_card {
+      & a {
+        text-decoration: underline;
+      }
+
+      & p {
+        margin: 0.8rem 0;
+      }
+    }
+  </style>
 {% endblock css %}
 {% block title %}
   {% block head_title %}
@@ -14,8 +22,8 @@
   {% endblock head_title %}
 {% endblock title %}
 {% block body %}
-  <div class="d-flex justify-content-center h-100 py-4">
-    <div class="col-md-4 py-4 my-4 px-4">
+  <div class="flex justify-center py-4">
+    <div class="entrance_card max-w-md py-4 my-4 px-4 bg-base-100 rounded-lg shadow">
       {% include "partials/messages.html" %}
       {% block content %}
       {% endblock content %}
