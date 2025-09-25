@@ -52,8 +52,13 @@ def main(base_url: str, sha: str):
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(filename)s:%(lineno)d:%(funcName)s: %(message)s")
 
+    def non_blank(value: str) -> str:
+        if not value:
+            raise argparse.ArgumentTypeError
+        return value
+
     parser = argparse.ArgumentParser(description="Run smoke tests against a website URL.")
-    parser.add_argument("url", help="The base URL of the website to test.")
-    parser.add_argument("sha", help="The hash of the commit deployed")
+    parser.add_argument("url", type=non_blank, help="The base URL of the website to test.")
+    parser.add_argument("sha", type=non_blank, help="The hash of the commit deployed")
     args = parser.parse_args()
     main(base_url=args.url, sha=args.sha)

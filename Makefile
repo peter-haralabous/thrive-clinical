@@ -71,4 +71,4 @@ smoke-test-development:
 smoke-test-integration:
 	uv run --script ./scripts/smoke_test.py \
 		https://hc.wethrive.ninja/ \
-		"${GITHUB_SHA:-GITHUB_SHA_NOT_SET}"
+		"${GITHUB_SHA}"
