@@ -44,4 +44,4 @@ jobs:
     with:
       environment: production
       # Note: must match image_tag set in build step
-      image_tag: latest
+      image_tag: integration
