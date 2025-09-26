@@ -36,7 +36,7 @@ postgres:
 
 .PHONY: dev
 dev: init collectstatic migrate mailpit postgres
-	DJANGO_READ_DOT_ENV_FILE=True yarn run dev
+	yarn run dev
 
 .PHONY: test-unit
 test-unit: .venv postgres
