@@ -1,7 +1,17 @@
 import '../sass/project.scss';
 import './components/command-palette';
+import { initializeDatadog } from './lib/datadog';
 
 /* Project specific Javascript goes here. */
+
+const ENVIRONMENT = JSON.parse(
+  document.getElementById('environment')?.textContent || '',
+);
+const APP_VERSION = JSON.parse(
+  document.getElementById('app_version')?.textContent || '',
+);
+
+initializeDatadog(ENVIRONMENT, APP_VERSION);
 
 try {
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;

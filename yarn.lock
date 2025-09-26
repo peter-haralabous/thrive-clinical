@@ -1186,6 +1186,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@datadog/browser-core@npm:6.21.1":
+  version: 6.21.1
+  resolution: "@datadog/browser-core@npm:6.21.1"
+  checksum: 10c0/d3d258ce6cf4c1fd8d1ce93cbdc633df5793de8a9c2232abc394b0f1b38842555f116dacd481059f2d5f2f595d3147986f519392d9a9b5afa7d91d590a099ee0
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum-core@npm:6.21.1":
+  version: 6.21.1
+  resolution: "@datadog/browser-rum-core@npm:6.21.1"
+  dependencies:
+    "@datadog/browser-core": "npm:6.21.1"
+  checksum: 10c0/5d5dd2b395ef553019679297031fe09b2ed7fe1d6f3e9aa597b32680094ca1dc0d6827602e54e6e07cfd4603fbd3a78e6ade12141358b1dc3a984e1beb6fec94
+  languageName: node
+  linkType: hard
+
+"@datadog/browser-rum@npm:^6.21.1":
+  version: 6.21.1
+  resolution: "@datadog/browser-rum@npm:6.21.1"
+  dependencies:
+    "@datadog/browser-core": "npm:6.21.1"
+    "@datadog/browser-rum-core": "npm:6.21.1"
+  peerDependencies:
+    "@datadog/browser-logs": 6.21.1
+  peerDependenciesMeta:
+    "@datadog/browser-logs":
+      optional: true
+  checksum: 10c0/11654d17aa275ace3283337fe7f6d9d507a7c21d422ff473632128c55e5da266fac1ba27286735b4dd07db2489ddecefa6b8fcafff8553a6e53dfa0a3a7c5367
+  languageName: node
+  linkType: hard
+
 "@discoveryjs/json-ext@npm:^0.6.1":
   version: 0.6.3
   resolution: "@discoveryjs/json-ext@npm:0.6.3"
@@ -5145,6 +5176,7 @@ __metadata:
     "@babel/plugin-proposal-decorators": "npm:^7.28.0"
     "@babel/preset-env": "npm:^7.16.5"
     "@babel/preset-typescript": "npm:^7.27.1"
+    "@datadog/browser-rum": "npm:^6.21.1"
     "@popperjs/core": "npm:^2.10.2"
     "@tailwindcss/postcss": "npm:^4.1.13"
     "@tailwindcss/typography": "npm:^0.5.16"
