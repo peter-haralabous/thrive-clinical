@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # deploy a new docker image to a service in ECS and wait for the deployment to finish
-# usage: `ENVIRONMENT=integration IMAGE_TAG=latest ./deploy.sh bread`
+# usage: `ENVIRONMENT=integration IMAGE_TAG=latest ./deploy.sh sandwich`
 
 APP=${1?"app name required"}
 ENVIRONMENT=${ENVIRONMENT?"must be defined"}
@@ -14,10 +14,10 @@ SERVICE="$ENVIRONMENT-sandwich-$APP"
 
 SERVICES=("$SERVICE")
 
-# TODO: the sandwich service might deploy both frontends and backends out of the same image
-#if [[ "$APP" == "sandwich" ]]; then
-#  SERVICES+=("$SERVICE-worker")
-#fi
+# Add worker service for sandwich
+if [[ "$APP" == "sandwich" ]]; then
+  SERVICES+=("$SERVICE-worker")
+fi
 
 # 1: re-tag the docker image app:latest to app:integration
 MANIFEST=$(aws ecr batch-get-image --repository-name "$APP" --image-ids imageTag="$IMAGE_TAG" --output text --query 'images[].imageManifest')
