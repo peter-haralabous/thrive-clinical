@@ -19,7 +19,7 @@ if READ_DOT_ENV_FILE:
 
 # GENERAL
 # ------------------------------------------------------------------------------
-ENVIRONMENT = env("ENVIRONMENT_NAME", default=None)
+ENVIRONMENT = env.str("ENVIRONMENT_NAME", default="not set")
 APP_VERSION = env.str("APP_VERSION", default="latest")
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = env.bool("DJANGO_DEBUG", False)
