@@ -16,6 +16,17 @@
     <meta name="description" content="bread + htmx" />
     <meta name="author" content="Thrive Health" />
     <link rel="icon" href="{% static 'images/favicons/favicon.ico' %}" />
+    <!-- Open Graph metadata for rich previews -->
+    <meta property="og:title"
+          content="Thrive Health: Unified, AI-Powered Health Platform" />
+    <meta property="og:description"
+          content="Discover Thrive Health’s next-generation platform: AI-powered tools and a unified personal health record for individuals, families, and healthcare professionals. Take control of your health journey—see how easy connected care can be." />
+    <meta property="og:image"
+          content="{% block og_image %}{% static 'images/logo_primary_blue.png' %}{% endblock og_image %}" />
+    <meta property="og:url"
+          content="{{ request.build_absolute_uri|default:'' }}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Thrive Health" />
     {% block css %}
       <!-- Your stuff: Third-party CSS libraries go here -->
       <!-- This file stores project-specific CSS -->
