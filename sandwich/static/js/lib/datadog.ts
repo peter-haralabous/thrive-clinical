@@ -21,6 +21,11 @@ export function initializeDatadog(environment: string, app_version: string) {
         // see https://docs.datadoghq.com/getting_started/site/
         site: 'datadoghq.eu',
         service: 'sandwich',
+        allowedTracingUrls: [
+            /^https:\/\/[^\/]+\.thrive\.health/,
+            /^https:\/\/[^\/]+\.wethrive\.ninja/,
+            /^https:\/\/[^\/]+\.thrivehealth\.dev/,
+        ],
         env: environment,
         // Specify a version number to identify the deployed version of your application in Datadog
         version: app_version,
