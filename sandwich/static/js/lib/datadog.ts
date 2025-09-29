@@ -26,12 +26,17 @@ export function initializeDatadog(environment: string, app_version: string) {
             /^https:\/\/[^\/]+\.wethrive\.ninja/,
             /^https:\/\/[^\/]+\.thrivehealth\.dev/,
         ],
+        traceSampleRate: 100,
+        traceContextInjection: 'all',
         env: environment,
         // Specify a version number to identify the deployed version of your application in Datadog
         version: app_version,
         sessionSampleRate: 100,
         sessionReplaySampleRate: 20,
         trackBfcacheViews: true,
-        defaultPrivacyLevel: 'mask-user-input',
+        defaultPrivacyLevel: 'mask-unless-allowlisted',
+        trackResources: true,
+        trackLongTasks: true,
+        trackUserInteractions: true,
     });
 }
