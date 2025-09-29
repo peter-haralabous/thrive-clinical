@@ -1186,34 +1186,34 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@datadog/browser-core@npm:6.21.1":
-  version: 6.21.1
-  resolution: "@datadog/browser-core@npm:6.21.1"
-  checksum: 10c0/d3d258ce6cf4c1fd8d1ce93cbdc633df5793de8a9c2232abc394b0f1b38842555f116dacd481059f2d5f2f595d3147986f519392d9a9b5afa7d91d590a099ee0
+"@datadog/browser-core@npm:6.21.2":
+  version: 6.21.2
+  resolution: "@datadog/browser-core@npm:6.21.2"
+  checksum: 10c0/445526628e3ea8c5b4d82dea6d0c46d4447c0f275e71631a3a80b82b10889befb4c3124ba74ae3d2f322f98ee201ae7a549d6d8fa3ee4c4f2992bd250042963c
   languageName: node
   linkType: hard
 
-"@datadog/browser-rum-core@npm:6.21.1":
-  version: 6.21.1
-  resolution: "@datadog/browser-rum-core@npm:6.21.1"
+"@datadog/browser-rum-core@npm:6.21.2":
+  version: 6.21.2
+  resolution: "@datadog/browser-rum-core@npm:6.21.2"
   dependencies:
-    "@datadog/browser-core": "npm:6.21.1"
-  checksum: 10c0/5d5dd2b395ef553019679297031fe09b2ed7fe1d6f3e9aa597b32680094ca1dc0d6827602e54e6e07cfd4603fbd3a78e6ade12141358b1dc3a984e1beb6fec94
+    "@datadog/browser-core": "npm:6.21.2"
+  checksum: 10c0/ef3dfef01765de49569615bb405071b6cb494ad8897206238e60e2c0f25fe2050cee8a8f0c79d9825566a2239389c3f2db41a76491aa849be54fa51796c44a77
   languageName: node
   linkType: hard
 
 "@datadog/browser-rum@npm:^6.21.1":
-  version: 6.21.1
-  resolution: "@datadog/browser-rum@npm:6.21.1"
+  version: 6.21.2
+  resolution: "@datadog/browser-rum@npm:6.21.2"
   dependencies:
-    "@datadog/browser-core": "npm:6.21.1"
-    "@datadog/browser-rum-core": "npm:6.21.1"
+    "@datadog/browser-core": "npm:6.21.2"
+    "@datadog/browser-rum-core": "npm:6.21.2"
   peerDependencies:
-    "@datadog/browser-logs": 6.21.1
+    "@datadog/browser-logs": 6.21.2
   peerDependenciesMeta:
     "@datadog/browser-logs":
       optional: true
-  checksum: 10c0/11654d17aa275ace3283337fe7f6d9d507a7c21d422ff473632128c55e5da266fac1ba27286735b4dd07db2489ddecefa6b8fcafff8553a6e53dfa0a3a7c5367
+  checksum: 10c0/b6228e4d48394938eb11bea130a26d559d8ec28f89c30b76f7e919155a21e03ca9aec23573a8944d7ff311d430510bdde92ed5c93da08ce8da6d4e0629afce09
   languageName: node
   linkType: hard
 
