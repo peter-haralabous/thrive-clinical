@@ -44,3 +44,9 @@ jobs:
     with:
       environment: production
       image_tag: integration
+
+  smoketest-production:
+    needs: deploy-production
+    uses: ./.github/workflows/run-smoke-test.yml
+    with:
+      environment: production

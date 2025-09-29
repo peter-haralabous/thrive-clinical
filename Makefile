@@ -71,3 +71,9 @@ smoke-test-integration:
 	uv run --script ./scripts/smoke_test.py \
 		https://hc.wethrive.ninja/ \
 		"${GITHUB_SHA}"
+
+.PHONY: smoke-test-production
+smoke-test-production:
+	uv run --script ./scripts/smoke_test.py \
+		https://hc.thrive.health/ \
+		"${GITHUB_SHA}"
