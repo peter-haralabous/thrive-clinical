@@ -16,4 +16,4 @@ def _media_storage(settings, tmpdir) -> None:
 
 @pytest.fixture
 def user(db) -> User:
-    return UserFactory()
+    return UserFactory()  # type:ignore[return-value]
