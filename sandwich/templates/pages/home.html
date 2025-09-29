@@ -1,15 +1,27 @@
 {% extends "base.html" %}
 
 {% block main %}
-  <div class="flex flex-col items-center justify-center">
+  <div class="min-h-screen flex flex-col items-center justify-center -mt-16">
     <div class="max-w-xl w-full p-8 bg-white rounded-lg shadow-lg">
-      <h1 class="text-4xl font-bold text-primary mb-4">HealthConnect</h1>
+      <h1 class="text-4xl font-bold text-primary mb-4 text-center">HealthConnect</h1>
       <p class="text-lg text-gray-600 mb-8">
         Your comprehensive healthcare management platform connecting patients and providers for better health outcomes and streamlined care coordination.
       </p>
-      <div class="flex flex-col gap-4">
-        <a href="{% url 'patients:home' %}" class="btn btn-primary w-full">Continue as Patient</a>
-        <a href="{% url 'providers:home' %}" class="btn btn-secondary w-full">Continue as Provider</a>
+      <div class="flex gap-4">
+        <a href="{% url 'patients:home' %}"
+           class="btn btn-primary flex-1 flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          Continue as Patient
+        </a>
+        <a href="{% url 'providers:home' %}"
+           class="btn btn-secondary flex-1 flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Continue as Provider
+        </a>
       </div>
     </div>
   </div>
