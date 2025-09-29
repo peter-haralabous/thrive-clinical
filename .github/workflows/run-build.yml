@@ -50,6 +50,8 @@ jobs:
           docker buildx build .
           --builder ${{ steps.buildx.outputs.name }}
           --build-arg APP_VERSION=${{ github.sha }}
+          --build-arg DD_GIT_REPOSITORY_URL=${{ github.repositoryUrl }}
+          --build-arg DD_GIT_COMMIT_SHA=${{ github.sha }}
           --tag $REGISTRY/$REPOSITORY:$IMAGE_TAG
           --cache-from type=registry,ref=$REGISTRY/$REPOSITORY:cache
           --cache-to mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=$REGISTRY/$REPOSITORY:cache
