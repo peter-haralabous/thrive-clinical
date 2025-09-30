@@ -49,51 +49,10 @@
   </head>
   <body class="{% block bodyclass %}{% endblock bodyclass %}">
     {% block body %}
-      <div class="mb-4">
-        <nav class="navbar bg-base-100 shadow">
-          <div class="flex-1">
-            <a class="btn btn-ghost normal-case text-xl" href="{% url 'home' %}">HealthConnect</a>
-          </div>
-          <div class="flex gap-2 items-center">
-            {% block nav_items %}
-            {% endblock nav_items %}
-            {% if request.user.is_authenticated %}
-              <div class="dropdown dropdown-end">
-                <div tabindex="0"
-                     role="button"
-                     class="btn btn-ghost btn-circle border-none avatar avatar-placeholder">
-                  <div class="bg-neutral text-neutral-content w-10 rounded-full">
-                    <span class="text-sm">{{ request.user.initials }}</span>
-                  </div>
-                </div>
-                <ul tabindex="0"
-                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                  <li>
-                    <a href="{% url 'users:detail' request.user.pk %}">{% translate "My Profile" %}</a>
-                  </li>
-                  <li>
-                    <a href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-                  </li>
-                </ul>
-              </div>
-            {% else %}
-              {% if ACCOUNT_ALLOW_REGISTRATION %}
-                <a id="sign-up-link"
-                   class="btn btn-ghost"
-                   href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
-              {% endif %}
-              <a id="log-in-link"
-                 class="btn btn-ghost"
-                 href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-            {% endif %}
-          </div>
-        </nav>
-      </div>
       <div class="container mx-auto">
         {% include "partials/messages.html" %}
         {% block main %}
           {% block content %}
-            <p>Use this document as a way to quick start any new project.</p>
           {% endblock content %}
         {% endblock main %}
       </div>

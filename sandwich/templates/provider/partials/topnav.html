@@ -1,0 +1,19 @@
+{% extends 'partials/topnav.html' %}
+
+{% load static i18n %}
+
+{% block topnav_items_start %}
+  {# TODO: just show the opened command palette inline, instead of this fakery #}
+  <input class="input"
+         type="text"
+         id="fake-search"
+         placeholder="Type a command or search..." />
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('fake-search').addEventListener('focus', (event) => {
+        document.querySelector('command-palette').isOpen = true;
+        event.target.blur();
+      });
+    })
+  </script>
+{% endblock topnav_items_start %}

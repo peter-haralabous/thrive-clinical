@@ -1,21 +1,10 @@
 {% extends "provider/base.html" %}
 
-{% block main %}
+{% block content %}
   <div class="flex justify-between">
-    <h2>{{ organization.name }}</h2>
+    <h2>Patients</h2>
     <a href="{% url "providers:patient_add" organization_id=organization.id %}"
        class="btn btn-primary">Add a Patient</a>
-  </div>
-  <div class="tabs tabs-border w-full">
-    <a class="tab"
-       href="{% url 'providers:organization' organization_id=organization.id %}">Home</a>
-    <a class="tab tab-active"
-       href="{% url "providers:patient_list" organization_id=organization.id %}">Patients</a>
-    <a class="tab"
-       href="{% url "providers:encounter_list" organization_id=organization.id %}">Encounters</a>
-    <div class="flex-grow-1"></div>
-    <a class="tab"
-       href="{% url "providers:organization_edit" organization_id=organization.id %}">Settings</a>
   </div>
   <form hx-get="{% url "providers:patient_list" organization_id=organization.id %}"
         hx-target="#patient_table_container"
@@ -42,4 +31,4 @@
     </div>
   </form>
   <div id="patient_table_container">{% include "provider/partials/patient_list_table.html" %}</div>
-{% endblock main %}
+{% endblock content %}

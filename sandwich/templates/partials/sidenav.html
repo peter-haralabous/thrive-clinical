@@ -1,0 +1,11 @@
+<aside class="bg-base-100 border-r border-base-300 flex flex-col w-64 h-full">
+  <div class="h-16 border-b border-base-300 flex items-center justify-center relative">
+    {% block sidenav-title %}
+      <a class="btn btn-ghost normal-case text-xl" href="{% url 'home' %}">HealthConnect</a>
+    {% endblock sidenav-title %}
+  </div>
+  <ul class="menu p-2 flex-grow space-y-2 w-full">
+    {% block sidenav-items %}
+    {% endblock sidenav-items %}
+  </ul>
+</aside>

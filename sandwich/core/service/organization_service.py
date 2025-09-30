@@ -52,3 +52,20 @@ def create_default_roles(organization: Organization) -> None:
         "Default roles created successfully",
         extra={"organization_id": organization.id, "roles_created": created_roles},
     )
+
+
+def assign_organization_role(organization: Organization, role_name: str, user: User) -> None:
+    """
+    Assign user to a role in the organization.
+    param role_name: str literal of RoleName, e.g. RoleName.OWNER
+    """
+    logger.debug(
+        "Assigning role for organization",
+        extra={
+            "organization_id": organization.id,
+            "role_name": role_name,
+            "user_id": user.id,
+        },
+    )
+    # FIXME: why does mypy think that `role_set` isn't an Organization field?
+    organization.role_set.get(name=role_name).group.user_set.add(user)  # type: ignore[attr-defined]

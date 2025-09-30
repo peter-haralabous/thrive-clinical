@@ -16,6 +16,7 @@ from django_pydantic_field.forms import SchemaField
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.organization import PatientStatus
 from sandwich.core.models.role import RoleName
+from sandwich.core.service.organization_service import assign_organization_role
 from sandwich.core.service.organization_service import create_default_roles
 from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -82,7 +83,10 @@ def organization_edit(request: AuthenticatedHttpRequest, organization_id: int) -
         )
         form = OrganizationEdit(instance=organization)
 
-    context = {"form": form}
+    context = {
+        "form": form,
+        "organization": organization,
+    }
     return render(request, "provider/organization_edit.html", context)
 
 
@@ -100,8 +104,7 @@ def organization_add(request: AuthenticatedHttpRequest) -> HttpResponse:
                 extra={"user_id": request.user.id, "organization_id": organization.id},
             )
             create_default_roles(organization)
-            # FIXME: why does mypy think that `role_set` isn't an Organization field?
-            organization.role_set.get(name=RoleName.OWNER).group.user_set.add(request.user)  # type: ignore[attr-defined]
+            assign_organization_role(organization, RoleName.OWNER, request.user)
             logger.debug(
                 "User assigned as organization owner",
                 extra={"user_id": request.user.id, "organization_id": organization.id},

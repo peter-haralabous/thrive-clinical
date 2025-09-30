@@ -1,11 +1,8 @@
 {% extends "provider/base.html" %}
 
-{% block sidenav %}
-  {% include 'partials/provider_sidenav.html' %}
-{% endblock sidenav %}
 {% load crispy_forms_tags %}
 
 {% block content %}
-  <h2>Edit Organization</h2>
+  <h2>Organization Settings</h2>
   {% crispy form %}
 {% endblock content %}
