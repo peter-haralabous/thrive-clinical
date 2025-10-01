@@ -48,15 +48,9 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # DATABASES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        **env.db(
-            "DATABASE_URL",
-            default="postgres://sandwich:sandwich@localhost:5432/sandwich",
-        )
-    }
-}
+# To configure the Procrastinate app, need the db connection string.
+DATABASE_URL = env.str("DATABASE_URL", default="postgres://sandwich:sandwich@localhost:5432/sandwich")
+DATABASES = {"default": {**env.db_url_config(DATABASE_URL)}}
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
@@ -312,5 +306,11 @@ WEBPACK_LOADER = {
         "IGNORE": [r".+\.hot-update.js", r".+\.map"],
     },
 }
+# Procrastinate (Task queue)
+# ------------------------------------------------------------------------------
+# https://procrastinate.readthedocs.io/en/stable/howto/django/settings.html#customize-the-app-integration-through-settings
+# Dotted paths to additional modules containing tasks.
+PROCRASTINATE_IMPORT_PATHS = ["sandwich.core.service.procrastinate_service"]
+
 # Your stuff...
 # ------------------------------------------------------------------------------
