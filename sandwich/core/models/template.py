@@ -16,4 +16,4 @@ class Template(BaseModel):  # type: ignore[django-manager-missing] # see docs/ty
         ordering = ("created_at",)
 
     def __str__(self) -> str:
-        return self.slug
+        return f"{self.slug}:{self.organization_id}"
