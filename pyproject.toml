@@ -199,5 +199,7 @@ dependencies = [
     "pytest-xdist[psutil]>=3.8.0",
     "python-slugify==8.0.4",
     "redis==6.4.0",
+    "tablib==3.8.0",
+    "tablib[cli]==3.8.0",
     "whitenoise==6.11.0",
 ]
