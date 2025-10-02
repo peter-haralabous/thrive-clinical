@@ -176,7 +176,7 @@ dependencies = [
     "argon2-cffi==25.1.0",
     "crispy-tailwind>=1.0.3",
     "ddtrace>=3.14.3",
-    "django==5.2.6",
+    "django==5.2.7",
     "django-allauth[mfa]==65.11.2",
     "django-anymail[amazon-ses]==13.1",
     "django-crispy-forms==2.4",
