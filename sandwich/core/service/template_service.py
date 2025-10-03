@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from inspect import isclass
 from typing import Any
 from typing import TypeGuard
@@ -53,15 +54,18 @@ class TemplateLoader(Loader):
         self.organization: Organization | None = organization
         self.language: str | None = language
 
-    def get_template_sources(self, template_name: str) -> list[Origin]:
+    def get_template_sources(self, template_name: str) -> Generator[Origin, Any, None]:
         """
+        An iterator that yields possible matching template paths for a
+        template name.
 
         https://docs.djangoproject.com/en/stable/ref/templates/api/#template-origin
         """
         templates = Template.objects.filter(
             Q(organization=self.organization) | Q(organization__isnull=True), slug=template_name
         ).order_by("organization_id")  # Prefer organization-specific templates to global ones
-        return [TemplateOrigin(template=template, language=self.language) for template in templates]
+        for template in templates:
+            yield TemplateOrigin(template=template, language=self.language)
 
     @staticmethod
     def get_contents(origin: TemplateOrigin) -> str:
