@@ -60,8 +60,9 @@ DEBUG_TOOLBAR_CONFIG = {
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
 INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 
+# show debug logs by default for internal code
 LOGGING["loggers"]["sandwich"] = {  # type: ignore[index]
-    "handlers": ["json_stdout"],
+    "handlers": ["console"],
     "level": "DEBUG",
     "propagate": False,
 }

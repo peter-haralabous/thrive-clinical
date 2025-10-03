@@ -255,7 +255,7 @@ LOGGING = {
         "json": {"()": "config.logging.CustomDataDogJSONFormatter"},
     },
     "handlers": {
-        "json_stdout": {
+        "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "json",
@@ -269,9 +269,14 @@ LOGGING = {
     },
     "root": {
         "level": "INFO",
-        "handlers": ["json_stdout"],
+        "handlers": ["console"],
     },
     "loggers": {
+        "django": {
+            # by default this is ["console", "mail_admins"]; we don't want either.
+            # just let everything flow up to the root
+            "handlers": [],
+        },
         "procrastinate.blueprints": {
             "filters": ["procrastinate"],
         },
