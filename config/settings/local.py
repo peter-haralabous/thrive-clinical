@@ -1,3 +1,43 @@
+# ruff: noqa: E402, PLC0415
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def update_env_from_ssm() -> None:
+    """
+    Pulls params directly from SSM for local development. Ensure aws cli is
+    properly configured.
+    """
+    import os
+
+    import boto3
+    from botocore.exceptions import NoRegionError
+
+    params = {
+        "GOOGLE_OAUTH_CLIENT_ID": "/integration/sandwich/google_oauth_client_id",
+        "GOOGLE_OAUTH_SECRET": "/integration/sandwich/google_oauth_secret",
+    }
+
+    for env_var, ssm_param in params.items():
+        try:
+            client = boto3.client("ssm")
+
+            try:
+                res = client.get_parameter(Name=ssm_param, WithDecryption=True)
+                if value := res.get("Parameter", {}).get("Value"):
+                    os.environ[env_var] = value
+            except client.exceptions.ParameterNotFound:
+                logging.warning("Could not find SSM parameter")
+
+        # NB: We log instead of erroring so ci can pass. This is not ideal
+        # because these logs get buried during startup.
+        except NoRegionError:
+            logging.warning("aws cli not properly configured")
+
+
+update_env_from_ssm()
+
 from .base import *  # noqa: F403
 from .base import INSTALLED_APPS
 from .base import LOGGING

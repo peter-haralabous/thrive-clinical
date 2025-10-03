@@ -84,6 +84,7 @@ THIRD_PARTY_APPS = [
     "allauth.account",
     "allauth.mfa",
     "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "webpack_loader",
     "django_jsonform",
     "procrastinate.contrib.django",
@@ -112,6 +113,37 @@ AUTH_USER_MODEL = "users.User"
 LOGIN_REDIRECT_URL = "users:redirect"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
+
+# Google OAuth
+# When run locally, these envs get set by `settings/local.py`
+GOOGLE_OAUTH_CLIENT_ID = env.str("GOOGLE_OAUTH_CLIENT_ID", default=None)
+GOOGLE_OAUTH_SECRET = env.str("GOOGLE_OAUTH_SECRET", default=None)
+
+if GOOGLE_OAUTH_SECRET and GOOGLE_OAUTH_CLIENT_ID:
+    SOCIALACCOUNT_PROVIDERS = {
+        "google": {
+            "APPS": [
+                {
+                    "client_id": GOOGLE_OAUTH_CLIENT_ID,
+                    "secret": GOOGLE_OAUTH_SECRET,
+                    "key": "",
+                    "settings": {
+                        "scope": [
+                            "profile",
+                            "email",
+                        ],
+                        "auth_params": {
+                            "access_type": "online",
+                        },
+                    },
+                },
+            ],
+            "SCOPE": ["profile", "email"],
+            "AUTH_PARAMS": {
+                "access_type": "online",
+            },
+        }
+    }
 
 # PASSWORDS
 # ------------------------------------------------------------------------------
