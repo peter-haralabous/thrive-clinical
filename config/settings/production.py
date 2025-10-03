@@ -138,7 +138,11 @@ INSTALLED_APPS += ["anymail"]
 # https://anymail.readthedocs.io/en/stable/installation/#anymail-settings-reference
 # https://anymail.readthedocs.io/en/stable/esps/amazon_ses/
 EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
-ANYMAIL = {}  # type: ignore[var-annotated]
+ANYMAIL = {
+    "WEBHOOK_SECRET": [
+        env("SANDWICH_ANYMAIL_WEBHOOK_SECRET", default=None),
+    ],
+}
 
 
 # DATADOG MIDDLEWARE

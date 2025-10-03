@@ -58,7 +58,8 @@ def test_all_routes_are_authenticated():
     urls = get_all_urls(get_resolver().url_patterns)
     for url in urls:
         # ignoring admin and allauth routes for now; they don't use the same decorators as the rest of the app
-        if url["pattern"].startswith(("admin/", "accounts/")):
+        # Ignore all the anymail routes. These are used for the webhooks
+        if url["pattern"].startswith(("admin/", "accounts/", "anymail/")):
             continue
 
         if not is_login_required(url["view"]):
