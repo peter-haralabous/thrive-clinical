@@ -80,7 +80,12 @@ def render(
     context = context or {}
     language = language or settings.LANGUAGE_CODE
 
-    engine = ClassLoaderEngine(loaders=[(TemplateLoader, {"organization": organization, "language": language})])
+    engine = ClassLoaderEngine(
+        libraries={
+            "i18n": "django.templatetags.i18n",
+        },
+        loaders=[(TemplateLoader, {"organization": organization, "language": language})],
+    )
     markdown_str = engine.render_to_string(template_name=template_name, context=context)
     return MarkdownIt().render(markdown_str)
 
