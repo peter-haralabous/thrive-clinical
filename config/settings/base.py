@@ -261,11 +261,21 @@ LOGGING = {
             "formatter": "json",
         },
     },
+    "filters": {
+        "procrastinate": {
+            "()": "config.logging.ProcrastinateBlueprintFilter",
+            "name": "procrastinate",
+        },
+    },
     "root": {
         "level": "INFO",
         "handlers": ["json_stdout"],
     },
-    "loggers": {},
+    "loggers": {
+        "procrastinate.blueprints": {
+            "filters": ["procrastinate"],
+        },
+    },
 }
 
 # pass `extra={}` through to datadog
