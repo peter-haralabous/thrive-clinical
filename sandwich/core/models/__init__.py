@@ -1,6 +1,7 @@
 from .consent import Consent
 from .encounter import Encounter
 from .entity import Entity
+from .formio_submission import FormioSubmission
 from .invitation import Invitation
 from .organization import Organization
 from .patient import Patient
@@ -12,6 +13,7 @@ __all__ = [
     "Consent",
     "Encounter",
     "Entity",
+    "FormioSubmission",
     "Invitation",
     "Organization",
     "Patient",
