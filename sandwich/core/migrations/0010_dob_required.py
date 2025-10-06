@@ -2,6 +2,7 @@
 
 from django.db import migrations
 
+
 def delete_patients_without_dob(apps, schema_editor):
     Patient = apps.get_model("core", "Patient")
     Patient.objects.filter(date_of_birth__isnull=True).delete()
@@ -9,7 +10,7 @@ def delete_patients_without_dob(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0009_document'),
+        ("core", "0009_document"),
     ]
 
     operations = [

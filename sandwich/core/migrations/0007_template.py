@@ -13,9 +13,8 @@ def load_initial_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0006_predicate'),
+        ("core", "0006_predicate"),
     ]
 
     operations = [

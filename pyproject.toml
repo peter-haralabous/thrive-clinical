@@ -67,7 +67,6 @@ indent_size = 2
 target-version = "py312"
 # Exclude a variety of commonly ignored directories.
 extend-exclude = [
-    "*/migrations/*.py",
     "staticfiles/*",
 ]
 line-length = 119

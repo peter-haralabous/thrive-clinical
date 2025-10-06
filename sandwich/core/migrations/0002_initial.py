@@ -2,74 +2,124 @@
 
 import django.db.models.deletion
 from django.conf import settings
-from django.db import migrations, models
+from django.db import migrations
+from django.db import models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('core', '0001_initial'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("core", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='patient',
-            name='user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL),
+            model_name="patient",
+            name="user",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='invitation',
-            name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.patient'),
+            model_name="invitation",
+            name="patient",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.patient"),
         ),
         migrations.AddField(
-            model_name='encounter',
-            name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.patient'),
+            model_name="encounter",
+            name="patient",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.patient"),
         ),
         migrations.AddField(
-            model_name='role',
-            name='group',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='auth.group'),
+            model_name="role",
+            name="group",
+            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to="auth.group"),
         ),
         migrations.AddField(
-            model_name='role',
-            name='organization',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.organization'),
+            model_name="role",
+            name="organization",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.organization"),
         ),
         migrations.AddField(
-            model_name='task',
-            name='encounter',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.encounter'),
+            model_name="task",
+            name="encounter",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.encounter"),
         ),
         migrations.AddField(
-            model_name='task',
-            name='patient',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='core.patient'),
+            model_name="task",
+            name="patient",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to="core.patient"),
         ),
         migrations.AddField(
-            model_name='formiosubmission',
-            name='task',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='_formio_submission', to='core.task'),
+            model_name="formiosubmission",
+            name="task",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE, related_name="_formio_submission", to="core.task"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='invitation',
-            constraint=models.CheckConstraint(condition=models.Q(('status__in', ['PENDING', 'ACCEPTED', 'DECLINED', 'EXPIRED', 'FAILED_VERIFICATION'])), name='core_Invitation_status_InvitationStatus'),
+            model_name="invitation",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    ("status__in", ["PENDING", "ACCEPTED", "DECLINED", "EXPIRED", "FAILED_VERIFICATION"])
+                ),
+                name="core_Invitation_status_InvitationStatus",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='encounter',
-            constraint=models.CheckConstraint(condition=models.Q(('status__in', ['planned', 'in-progress', 'on-hold', 'discharged', 'completed', 'cancelled', 'discontinued', 'entered-in-error', 'unknown'])), name='core_Encounter_status_EncounterStatus'),
+            model_name="encounter",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    (
+                        "status__in",
+                        [
+                            "planned",
+                            "in-progress",
+                            "on-hold",
+                            "discharged",
+                            "completed",
+                            "cancelled",
+                            "discontinued",
+                            "entered-in-error",
+                            "unknown",
+                        ],
+                    )
+                ),
+                name="core_Encounter_status_EncounterStatus",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='role',
-            constraint=models.UniqueConstraint(fields=('name', 'organization'), name='unique_role_name_per_organization'),
+            model_name="role",
+            constraint=models.UniqueConstraint(
+                fields=("name", "organization"), name="unique_role_name_per_organization"
+            ),
         ),
         migrations.AddConstraint(
-            model_name='task',
-            constraint=models.CheckConstraint(condition=models.Q(('status__in', ['draft', 'requested', 'received', 'accepted', 'rejected', 'ready', 'cancelled', 'in-progress', 'on-hold', 'failed', 'completed', 'entered-in-error'])), name='core_Task_status_TaskStatus'),
+            model_name="task",
+            constraint=models.CheckConstraint(
+                condition=models.Q(
+                    (
+                        "status__in",
+                        [
+                            "draft",
+                            "requested",
+                            "received",
+                            "accepted",
+                            "rejected",
+                            "ready",
+                            "cancelled",
+                            "in-progress",
+                            "on-hold",
+                            "failed",
+                            "completed",
+                            "entered-in-error",
+                        ],
+                    )
+                ),
+                name="core_Task_status_TaskStatus",
+            ),
         ),
     ]
