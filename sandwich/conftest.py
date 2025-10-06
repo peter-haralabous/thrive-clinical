@@ -1,6 +1,8 @@
 import os
+from collections.abc import Iterable
 
 import pytest
+from django.core.management import call_command
 
 from sandwich.core.factories import OrganizationFactory
 from sandwich.core.models import Organization
@@ -29,3 +31,14 @@ def organization(db) -> Organization:
 @pytest.fixture
 def other_organization(db) -> Organization:
     return OrganizationFactory.create(name="Other")
+
+
+def django_session_fixtures(fixtures: Iterable[str]):
+    """Build a session fixture that loads some Django fixtures once per test session."""
+
+    @pytest.fixture(scope="session")
+    def load_data(django_db_setup, django_db_blocker):
+        with django_db_blocker.unblock():
+            call_command("loaddata", *fixtures)
+
+    return load_data

@@ -34,7 +34,7 @@ def test_mask_uuids():
 
 
 @pytest.mark.django_db
-def test_resend_patient_invitation_email(patient: Patient, mailoutbox, snapshot):
+def test_resend_patient_invitation_email(template_fixture: None, patient: Patient, mailoutbox, snapshot):
     resend_patient_invitation_email(patient)
     assert len(mailoutbox) == 1
     assert mailoutbox[0].to == [patient.email]

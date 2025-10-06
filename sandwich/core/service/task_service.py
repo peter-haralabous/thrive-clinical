@@ -1,13 +1,12 @@
 import logging
 
 from django.conf import settings
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import TaskStatus
-from sandwich.core.service.email_service import send_email
+from sandwich.core.service.email_service import send_templated_email
 from sandwich.core.service.invitation_service import find_or_create_patient_invitation
 
 logger = logging.getLogger(__name__)
@@ -62,9 +61,6 @@ def send_task_added_email(task: Task) -> None:
         },
     )
 
-    to = task.patient.email
-    subject = "You've been assigned a task!"
-
     if task.patient.user:
         # they've already signed up; just send them to their tasks page
         task_url = settings.APP_URL + reverse("patients:patient_details", kwargs={"patient_id": task.patient.id})
@@ -80,7 +76,13 @@ def send_task_added_email(task: Task) -> None:
             extra={"task_id": task.id, "patient_id": task.patient.id, "invitation_id": invitation.id},
         )
 
-    body = render_to_string("email/task_added_body.txt", {"task": task, "task_url": task_url})
-    send_email(to, subject, body)
+    send_templated_email(
+        to=task.patient.email,
+        subject_template="email/task/send_task_added_subject",
+        body_template="email/task/send_task_added_body",
+        context={"task": task, "task_url": task_url},
+        organization=task.patient.organization,
+        language=None,
+    )
 
     logger.info("Task notification email sent", extra={"task_id": task.id, "patient_id": task.patient.id})

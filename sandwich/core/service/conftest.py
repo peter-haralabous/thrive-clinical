@@ -1,5 +1,6 @@
 import pytest
 
+from sandwich.conftest import django_session_fixtures
 from sandwich.core.factories import PatientFactory
 from sandwich.core.models import Encounter
 from sandwich.core.models import Organization
@@ -29,3 +30,6 @@ def encounter(organization: Organization, patient: Patient):
 @pytest.fixture
 def task(encounter: Encounter):
     return Task.objects.create(patient=encounter.patient, encounter=encounter, status=TaskStatus.REQUESTED)
+
+
+template_fixture = django_session_fixtures(["template"])

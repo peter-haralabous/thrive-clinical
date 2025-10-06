@@ -1,14 +1,13 @@
 import logging
 
 from django.conf import settings
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
 from sandwich.core.models.invitation import Invitation
 from sandwich.core.models.invitation import InvitationStatus
 from sandwich.core.models.patient import Patient
-from sandwich.core.service.email_service import send_email
+from sandwich.core.service.email_service import send_templated_email
 from sandwich.users.models import User
 
 logger = logging.getLogger(__name__)
@@ -84,10 +83,14 @@ def resend_patient_invitation_email(patient: Patient) -> None:
     invitation = find_or_create_patient_invitation(patient)
     task_url = settings.APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
 
-    to = invitation.patient.email
-    subject = "Reminder: you have tasks assigned!"
-    body = render_to_string("email/invitation_body.txt", {"invitation": invitation, "task_url": task_url})
-    send_email(to, subject, body)
+    send_templated_email(
+        to=invitation.patient.email,
+        subject_template="email/invitation/resend_patient_invitation_subject",
+        body_template="email/invitation/resend_patient_invitation_body",
+        context={"invitation": invitation, "task_url": task_url},
+        organization=patient.organization,
+        language=None,
+    )
 
     logger.info("Patient invitation email resent", extra={"patient_id": patient.id, "invitation_id": invitation.id})
 
