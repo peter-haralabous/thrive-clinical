@@ -1,6 +1,8 @@
 import logging
 
+from anymail.signals import tracking
 from django.core.mail import EmailMessage
+from django.dispatch import receiver
 
 logger = logging.getLogger(__name__)
 
@@ -35,3 +37,12 @@ def send_email(to, subject, body):
         logger.info("Email sent successfully", extra={"has_recipient": bool(to)})
     except Exception as e:
         logger.exception("Failed to send email", extra={"error_type": type(e).__name__})
+
+
+@receiver(tracking)
+def handle_tracking(sender, event, esp_name, **kwargs):
+    if esp_name == "Amazon SES":
+        logger.info("Received email tracking event")
+        if event.event_type == "bounced":
+            logger.warning("Email bounced", extra={"reason": event.reject_reason, "message_id": event.message_id})
+            # TODO: Update email record in db
