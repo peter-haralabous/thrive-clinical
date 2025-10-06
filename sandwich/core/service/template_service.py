@@ -7,7 +7,7 @@ from typing import TypeGuard
 from django.conf import settings
 from django.db.models import Q
 from django.template import Engine
-from django.template import Origin
+from django.template.base import Origin
 from django.template.loaders.base import Loader
 from django.utils import translation
 from markdown_it import MarkdownIt
