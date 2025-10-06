@@ -20,6 +20,9 @@ if READ_DOT_ENV_FILE:
 # GENERAL
 # ------------------------------------------------------------------------------
 ENVIRONMENT = env.str("ENVIRONMENT_NAME", default="not set")
+APP_URL = env.str(
+    "APP_URL", default={"integration": "https://hc.wethrive.ninja"}.get(ENVIRONMENT, "https://hc.thrive.health")
+)
 APP_VERSION = env.str("APP_VERSION", default="latest")
 # https://docs.djangoproject.com/en/dev/ref/settings/#debug
 DEBUG = env.bool("DJANGO_DEBUG", False)

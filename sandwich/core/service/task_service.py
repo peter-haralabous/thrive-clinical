@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -10,9 +11,6 @@ from sandwich.core.service.email_service import send_email
 from sandwich.core.service.invitation_service import find_or_create_patient_invitation
 
 logger = logging.getLogger(__name__)
-
-# FIXME-NG: move to settings.py
-APP_URL = "http://localhost:3000"
 
 
 def cancel_task(task: Task) -> None:
@@ -69,14 +67,14 @@ def send_task_added_email(task: Task) -> None:
 
     if task.patient.user:
         # they've already signed up; just send them to their tasks page
-        task_url = APP_URL + reverse("patients:patient_details", kwargs={"patient_id": task.patient.id})
+        task_url = settings.APP_URL + reverse("patients:patient_details", kwargs={"patient_id": task.patient.id})
         logger.debug(
             "Using direct task URL for existing user", extra={"task_id": task.id, "patient_id": task.patient.id}
         )
     else:
         # otherwise we need to send them an invitation link
         invitation = find_or_create_patient_invitation(task.patient)
-        task_url = APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
+        task_url = settings.APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
         logger.debug(
             "Using invitation URL for new user",
             extra={"task_id": task.id, "patient_id": task.patient.id, "invitation_id": invitation.id},

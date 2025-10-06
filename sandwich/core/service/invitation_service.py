@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -11,9 +12,6 @@ from sandwich.core.service.email_service import send_email
 from sandwich.users.models import User
 
 logger = logging.getLogger(__name__)
-
-# FIXME-NG: move to settings.py
-APP_URL = "http://localhost:3000"
 
 
 def get_pending_invitation(patient: Patient) -> Invitation | None:
@@ -84,7 +82,7 @@ def resend_patient_invitation_email(patient: Patient) -> None:
 
     # this is a bit messy, because we didn't track why the invitation was originally sent
     invitation = find_or_create_patient_invitation(patient)
-    task_url = APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
+    task_url = settings.APP_URL + reverse("patients:accept_invite", kwargs={"token": invitation.token})
 
     to = invitation.patient.email
     subject = "Reminder: you have tasks assigned!"
