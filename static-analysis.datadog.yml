@@ -8,3 +8,6 @@ rulesets:
       any-type-disallow:
         ignore:
           - '**/*'
+      comment-fixme-todo-ownership:
+        ignore:
+          - '**/*'
