@@ -11,6 +11,7 @@ from sandwich.core.service.organization_service import create_default_roles
 class OrganizationFactory(DjangoModelFactory[Organization]):
     class Meta:
         model = Organization
+        skip_postgeneration_save = True
 
     name = factory.Faker("company")
     slug = factory.LazyAttribute(lambda o: slugify(o.name))
