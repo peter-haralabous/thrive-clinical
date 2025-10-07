@@ -51,7 +51,7 @@ class Organization(BaseModel):  # type: ignore[django-manager-missing] # see doc
 
     slug = models.SlugField(max_length=255, unique=True)
 
-    patient_statuses: list[PatientStatus] = SchemaField(schema=list[PatientStatus], default=[])
+    patient_statuses: list[PatientStatus] = SchemaField(schema=list[PatientStatus], default=[], blank=True)
 
     verification_type: models.Field[VerificationType, VerificationType] = EnumField(
         VerificationType,
