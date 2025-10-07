@@ -1,13 +1,38 @@
 import logging
 
 from anymail.signals import tracking
+from django.conf import settings
 from django.core.mail import EmailMessage
 from django.dispatch import receiver
+
+from sandwich.core.models import Organization
+from sandwich.core.service.template_service import render
+from sandwich.core.types import HtmlStr
 
 logger = logging.getLogger(__name__)
 
 
-def send_email(to, subject, body):
+def send_templated_email(  # noqa: PLR0913
+    to: str,
+    subject_template: str,
+    body_template: str,
+    context: dict[str, object],
+    organization: Organization | None = None,
+    language: str | None = None,
+):
+    context.setdefault("app_url", settings.APP_URL)
+    subject = render(
+        template_name=subject_template,
+        organization=organization,
+        language=language,
+        context=context,
+        as_markdown=False,
+    )
+    body = render(template_name=body_template, organization=organization, language=language, context=context)
+    send_email(to, subject, body)
+
+
+def send_email(to: str, subject: str, body: HtmlStr):
     logger.info(
         "Sending email",
         extra={
