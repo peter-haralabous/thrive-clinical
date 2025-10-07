@@ -2,8 +2,9 @@
 {% load socialaccount %}
 
 <!-- https://developers.google.com/identity/branding-guidelines -->
-<a class="gsi-link-container" href="{% provider_login_url 'google' %}">
-  <button class="gsi-material-button">
+<form action="{% provider_login_url 'google' %}" method="post">
+  {% csrf_token %}
+  <button class="gsi-material-button" type="submit">
     <div class="gsi-material-button-state"></div>
     <div class="gsi-material-button-content-wrapper">
       <div class="gsi-material-button-icon">
@@ -29,4 +30,4 @@
       <span class="gsi-hidden-button-label">{% trans "Continue with Google" %}</span>
     </div>
   </button>
-</a>
+</form>
