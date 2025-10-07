@@ -27,7 +27,7 @@ class PatientEdit(forms.ModelForm[Patient]):
 
     class Meta:
         model = Patient
-        fields = ("first_name", "last_name", "email", "phn", "date_of_birth")
+        fields = ("first_name", "last_name", "date_of_birth", "province", "phn")
         widgets = {
             "date_of_birth": forms.DateInput(attrs={"type": "date"}),
         }

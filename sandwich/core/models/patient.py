@@ -64,6 +64,21 @@ class Patient(BaseModel):
     https://hl7.org/fhir/R5/patient.html
     """
 
+    class ProvinceChoices(models.TextChoices):
+        ALBERTA = "AB", "Alberta"
+        BRITISH_COLUMBIA = "BC", "British Columbia"
+        MANITOBA = "MB", "Manitoba"
+        NEW_BRUNSWICK = "NB", "New Brunswick"
+        NEWFOUNDLAND_AND_LABRADOR = "NL", "Newfoundland and Labrador"
+        NOVA_SCOTIA = "NS", "Nova Scotia"
+        ONTARIO = "ON", "Ontario"
+        PRINCE_EDWARD_ISLAND = "PE", "Prince Edward Island"
+        QUEBEC = "QC", "Quebec"
+        SASKATCHEWAN = "SK", "Saskatchewan"
+        NORTHWEST_TERRITORIES = "NT", "Northwest Territories"
+        NUNAVUT = "NU", "Nunavut"
+        YUKON = "YT", "Yukon"
+
     # TODO: keep this in sync with the "owning" user's profile?
     #       this is the email that a practitioner set when sending the first message to a patient
     #       once the user has claimed their Patient we shouldn't be using it anymore
@@ -78,6 +93,10 @@ class Patient(BaseModel):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
 
+    # Province/Territory is used to validate PHN
+    province = models.CharField(
+        max_length=2, blank=True, choices=ProvinceChoices.choices, verbose_name="Province / Territory"
+    )
     # TODO: patients may have multiple identifiers, not just a BC PHN
     #       i.e. this is implicitly system=https://fhir.infoway-inforoute.ca/NamingSystem/ca-bc-patient-healthcare-id
     #       see https://simplifier.net/canadianuriregistry/~resources?category=NamingSystem&sortBy=LastUpdateDate_desc
