@@ -1,6 +1,4 @@
 from http import HTTPStatus
-from typing import TYPE_CHECKING
-from typing import cast
 
 from django.test import Client
 from django.urls import URLPattern
@@ -15,9 +13,6 @@ from sandwich.core.service.organization_service import assign_organization_role
 from sandwich.core.urls_test import get_all_urls
 from sandwich.providers.urls import urlpatterns as providers_urlpatterns
 
-if TYPE_CHECKING:
-    from sandwich.core.models import Patient
-
 
 def get_provider_urls() -> list[URLPattern | URLResolver]:
     return get_all_urls(providers_urlpatterns)  # type: ignore[arg-type]
@@ -30,7 +25,7 @@ def test_provider_http_get_urls_return_status_200(db, user, organization) -> Non
     client.force_login(user)
 
     # Need a patient in the org with an encounter
-    patient = cast("Patient", PatientFactory(organization=organization))
+    patient = PatientFactory.create(organization=organization)
     encounter = Encounter.objects.create(
         patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
     )
