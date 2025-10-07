@@ -16,23 +16,30 @@ from sandwich.users.models import User
 logger = logging.getLogger(__name__)
 
 
+def to_search_query(query: str) -> SearchQuery | None:
+    if not query:
+        return None
+
+    # Sanitize the query to remove problematic characters
+    # Remove or replace characters that cause tsquery syntax errors
+    sanitized_query = re.sub(r"[^\w\s]", " ", query)
+
+    terms = sanitized_query.split()
+    if not terms:
+        return None
+
+    # For partial matching, add :* suffix for prefix search
+    prefix_terms = [f"{term}:*" for term in terms]
+
+    return SearchQuery(" & ".join(prefix_terms), search_type="raw", config="english")
+
+
 class PatientQuerySet(models.QuerySet):
     def search(self, query: str) -> Self:
-        if not query:
+        search_query = to_search_query(query)
+        if not search_query:
             return self
 
-        # Sanitize the query to remove problematic characters
-        # Remove or replace characters that cause tsquery syntax errors
-        sanitized_query = re.sub(r"[^\w\s]", " ", query)
-
-        terms = sanitized_query.split()
-        if not terms:
-            return self
-
-        # For partial matching, add :* suffix for prefix search
-        prefix_terms = [f"{term}:*" for term in terms]
-
-        search_query = SearchQuery(" & ".join(prefix_terms), search_type="raw", config="english")
         return (
             self.filter(search_vector=search_query)
             .annotate(rank=SearchRank(F("search_vector"), search_query))
@@ -82,6 +89,8 @@ class Patient(BaseModel):
     # each patient record belongs to at most one organization
     # TODO: pull in patient merging logic from Classic
     organization = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True)
+
+    # this field is updated by database triggers when the patient's name changes
     search_vector = SearchVectorField(null=True, blank=True)
 
     objects = PatientManager()

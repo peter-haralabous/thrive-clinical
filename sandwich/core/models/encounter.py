@@ -1,10 +1,15 @@
+from typing import Self
+
+from django.contrib.postgres.search import SearchRank
 from django.db import models
+from django.db.models import F
 from django.utils.translation import gettext_lazy as _
 from django_enum import EnumField
 
 from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
+from sandwich.core.models.patient import to_search_query
 
 
 class EncounterStatus(models.TextChoices):
@@ -35,6 +40,27 @@ def terminal_encounter_status(status: EncounterStatus) -> bool:
     ]
 
 
+class EncounterQuerySet(models.QuerySet):
+    def search(self, query: str) -> Self:
+        search_query = to_search_query(query)
+        if not search_query:
+            return self
+
+        return (
+            self.filter(patient__search_vector=search_query)
+            .annotate(rank=SearchRank(F("patient__search_vector"), search_query))
+            .order_by("-rank")
+        )
+
+
+class EncounterManager(models.Manager["Encounter"]):
+    def get_queryset(self):
+        return EncounterQuerySet(self.model, using=self._db)
+
+    def search(self, query: str):
+        return self.get_queryset().search(query)
+
+
 class Encounter(BaseModel):
     """
     An interaction between a patient and healthcare provider(s) for the purpose of providing healthcare service(s) or
@@ -59,6 +85,8 @@ class Encounter(BaseModel):
 
     # this is Encounter.actualPeriod.end in FHIR
     ended_at = models.DateTimeField(blank=True, null=True)
+
+    objects = EncounterManager()
 
     @property
     def name(self):
