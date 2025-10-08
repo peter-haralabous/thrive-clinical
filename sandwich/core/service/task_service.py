@@ -68,6 +68,7 @@ def send_task_added_email(task: Task) -> None:
         logger.debug(
             "Using direct task URL for existing user", extra={"task_id": task.id, "patient_id": task.patient.id}
         )
+        invitation = None
     else:
         # otherwise we need to send them an invitation link
         invitation = find_or_create_patient_invitation(task.patient)
@@ -85,6 +86,8 @@ def send_task_added_email(task: Task) -> None:
         organization=task.patient.organization,
         language=None,
         email_type=EmailType.task,
+        task=task,
+        invitation=invitation,
     )
 
     logger.info("Task notification email sent", extra={"task_id": task.id, "patient_id": task.patient.id})
