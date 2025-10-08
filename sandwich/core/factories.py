@@ -2,10 +2,22 @@ import factory
 from factory.django import DjangoModelFactory
 from slugify import slugify
 
+from sandwich.core.models import Consent
 from sandwich.core.models import Organization
 from sandwich.core.models import Patient
 from sandwich.core.models import Template
+from sandwich.core.models.consent import ConsentPolicy
 from sandwich.core.service.organization_service import create_default_roles
+
+
+class ConsentFactory(DjangoModelFactory[Consent]):
+    user = factory.SubFactory("sandwich.users.factories.UserFactory")
+    policy = ConsentPolicy.THRIVE_PRIVACY_POLICY
+    decision = True
+
+    class Meta:
+        model = Consent
+        skip_postgeneration_save = True
 
 
 class OrganizationFactory(DjangoModelFactory[Organization]):
