@@ -2,22 +2,6 @@ import { LitElement, html, css, type PropertyValues } from 'lit';
 import { property, query, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
-// Trigger the command-palette to open when a trigger is pressed
-document.addEventListener('DOMContentLoaded', () => {
-  document
-    .getElementById('command-palette-trigger')
-    ?.addEventListener('focus', (event) => {
-      const commandPalette: CommandPalette | null =
-        document.querySelector('command-palette');
-      if (commandPalette) {
-        commandPalette.isOpen = true;
-      }
-      if (event.target instanceof HTMLInputElement) {
-        event.target?.blur();
-      }
-    });
-});
-
 class CommandPalette extends LitElement {
   // --- STYLES ---
   // Scoped CSS is a first-class citizen in Lit.

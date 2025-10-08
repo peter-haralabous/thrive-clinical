@@ -8,7 +8,6 @@ import django_stubs_ext
 import environ
 from allauth.socialaccount.providers.patreon.constants import API_VERSION
 from csp.constants import NONCE
-from csp.constants import NONE
 from csp.constants import SELF
 from csp.constants import UNSAFE_HASHES
 
@@ -292,40 +291,16 @@ CONTENT_SECURITY_POLICY = {
         "form-action": [SELF],
         "report-uri": report_uri,
         "img-src": [SELF, "data:"],
-        "script-src": [SELF],  # Report has nonce
-        "script-src-elem": [SELF],  # Report has nonce
-        "style-src-elem": [
-            SELF,
-            NONCE,
-            UNSAFE_HASHES,
-            "'sha256-faU7yAF8NxuMTNEwVmBz+VcYeIoBQ2EMHW3WaVxCvnk='",  # htmx injects a <style> tag
-        ],
-    },
-}
-CONTENT_SECURITY_POLICY_REPORT_ONLY = {
-    "DIRECTIVES": {
-        "default-src": [NONE],
-        "connect-src": [SELF],
-        "img-src": [SELF, "data:"],
-        "form-action": [SELF],
-        "frame-ancestors": [SELF],
         "script-src": [SELF, NONCE],
         "script-src-elem": [SELF, NONCE],
-        "style-src": [
-            SELF,
-            NONCE,
-        ],
         "style-src-elem": [
             SELF,
             NONCE,
             UNSAFE_HASHES,
             "'sha256-faU7yAF8NxuMTNEwVmBz+VcYeIoBQ2EMHW3WaVxCvnk='",  # htmx injects a <style> tag
         ],
-        "upgrade-insecure-requests": True,
-        "report-uri": report_uri,
     },
 }
-
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
