@@ -26,6 +26,9 @@ def json_script_safe(context, value, element_id=None):
         template = '<script id="{}" type="application/json" nonce="{}">{}</script>'
         args = (element_id, context.request.csp_nonce, mark_safe(json_str))  # noqa: S308 # this is for code
     else:
-        template = '<script type="application/json">{}</script>'
-        args = (mark_safe(json_str),)  # type: ignore[assignment]  # noqa: S308 # this is for code
+        template = '<script type="application/json" nonce="{}">{}</script>'
+        args = (
+            context.request.csp_nonce,
+            mark_safe(json_str),  # noqa: S308 # this is for code
+        )  # type: ignore[assignment]
     return format_html(template, *args)
