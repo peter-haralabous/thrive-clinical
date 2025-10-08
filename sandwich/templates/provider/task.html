@@ -6,7 +6,7 @@
 {% block extra_head %}
   <script src="https://cdn.form.io/js/formio.form.js"></script>
   {# can't load fonts inside a shadow root. this is the first couple lines of https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css #}
-  <style>
+  <style nonce="{{request.csp_nonce}}">
     @font-face {
       font-display: block;
       font-family: "bootstrap-icons";
@@ -23,7 +23,8 @@
   </div>
   <div id="formio"></div>
   {{ formio_user | json_script:"formio_user" }}
-  <script type="text/javascript">
+  {# TODO(WF): This violates our script-src policy, and must be moved to static/js #}
+  <script type="text/javascript" nonce="{{ request.csp_nonce }}">
     (async function() {
       const formio_user = JSON.parse(document.getElementById('formio_user').textContent)
       Formio.getUser = () => formio_user;

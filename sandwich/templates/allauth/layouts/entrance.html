@@ -4,7 +4,7 @@
 
 {% block css %}
   {{ block.super }}
-  <style>
+  <style nonce="{{ request.csp_nonce }}">
     .entrance_card {
       & a {
         text-decoration: underline;

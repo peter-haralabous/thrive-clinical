@@ -1,4 +1,5 @@
 {% load static i18n %}
+{% load json %}
 {% load render_bundle from webpack_loader %}
 
 <!DOCTYPE html>
@@ -28,20 +29,18 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Thrive Health" />
     {% block css %}
-      <!-- Your stuff: Third-party CSS libraries go here -->
-      <!-- This file stores project-specific CSS -->
+      {# Your stuff: Third-party CSS libraries go here #}
+      {# This file stores project-specific CSS#}
       {% render_bundle 'project' 'css' %}
     {% endblock css %}
-    <!-- Le javascript
-    ================================================== -->
     {# Placed at the top of the document so pages load faster with defer #}
     {% block javascript %}
       {# You can find these variables supplied by server.core.context_processors.settings_context #}
-      {{ environment | json_script:"environment" }}
-      {{ app_version | json_script:"app_version" }}
-      <!-- Vendor dependencies bundled as one file -->
+      {% json_script_safe environment "environment" %}
+      {% json_script_safe app_version "app_version" %}
+      {# Vendor dependencies bundled as one file #}
       {% render_bundle 'vendors' 'js' %}
-      <!-- place project specific Javascript in this file -->
+      {# place project specific Javascript in this file #}
       {% render_bundle 'project' 'js' %}
     {% endblock javascript %}
     {% block extra_head %}

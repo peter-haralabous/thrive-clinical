@@ -7,8 +7,10 @@ from urllib.parse import urlencode
 import django_stubs_ext
 import environ
 from allauth.socialaccount.providers.patreon.constants import API_VERSION
+from csp.constants import NONCE
 from csp.constants import NONE
 from csp.constants import SELF
+from csp.constants import UNSAFE_HASHES
 
 django_stubs_ext.monkeypatch()
 
@@ -279,27 +281,41 @@ report_params = urlencode(
         "dd-api-key": "pub7f4333094988c697036a7a428df4dcf6",
         "dd-evp-origin": "content-security-policy",
         "ddsource": "csp-report",
-        "ddtags": quote_plus(f"service:sandwich,environment:{ENVIRONMENT},version:{API_VERSION}"),
     }
 )
-report_uri = f"https://browser-intake-datadoghq.eu/api/v2/logs?{report_params}"
+report_tags = quote_plus(f"service:sandwich,environment:{ENVIRONMENT},version:{API_VERSION}")
+report_uri = f"https://browser-intake-datadoghq.eu/api/v2/logs?{report_params}&ddtags={report_tags}"
 CONTENT_SECURITY_POLICY = {
     "DIRECTIVES": {
         "default-src": [SELF],
         "frame-ancestors": [SELF],
         "form-action": [SELF],
         "report-uri": report_uri,
+        "img-src": [SELF, "data:"],
+        "style-src-elem": [
+            NONCE,
+            UNSAFE_HASHES,
+            "'sha256-faU7yAF8NxuMTNEwVmBz+VcYeIoBQ2EMHW3WaVxCvnk='",  # htmx injects a <style> tag
+        ],
     },
 }
 CONTENT_SECURITY_POLICY_REPORT_ONLY = {
     "DIRECTIVES": {
         "default-src": [NONE],
         "connect-src": [SELF],
-        "img-src": [SELF],
+        "img-src": [SELF, "data:"],
         "form-action": [SELF],
         "frame-ancestors": [SELF],
-        "script-src": [SELF],
-        "style-src": [SELF],
+        "script-src": [SELF, NONCE],
+        "style-src": [
+            SELF,
+            NONCE,
+        ],
+        "style-src-elem": [
+            NONCE,
+            UNSAFE_HASHES,
+            "'sha256-faU7yAF8NxuMTNEwVmBz+VcYeIoBQ2EMHW3WaVxCvnk='",  # htmx injects a <style> tag
+        ],
         "upgrade-insecure-requests": True,
         "report-uri": report_uri,
     },
@@ -400,6 +416,7 @@ SOCIALACCOUNT_FORMS = {"signup": "sandwich.users.forms.UserSocialSignupForm"}
 WEBPACK_LOADER = {
     "DEFAULT": {
         "CACHE": not DEBUG,
+        "CSP_NONCE": True,
         "STATS_FILE": BASE_DIR / "webpack-stats.json",
         "POLL_INTERVAL": 0.1,
         "IGNORE": [r".+\.hot-update.js", r".+\.map"],

@@ -1,5 +1,6 @@
 import '../sass/project.scss';
 import './components/command-palette';
+import './components/message';
 import { initializeDatadog } from './lib/datadog';
 
 /* Project specific Javascript goes here. */

@@ -43,7 +43,14 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
 
+    // Decorators: enable legacy decorators used by lit's current decorator implementation
+    // https://lit.dev/docs/components/decorators/
+    // "Our code samples are written for experimental decorators because we recommend them for production at the moment"
+    "experimentalDecorators": true,
+
     // we rely on webpack for output
     "noEmit": true
-  }
+  },
+  // Exclude built/static artifact directory from type checking to avoid duplicate decorator processing
+  "exclude": ["staticfiles"]
 }
