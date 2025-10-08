@@ -11,8 +11,17 @@ See Also:
   - [`manage template render`](../sandwich/core/management/commands/template.py)
     - The template management command has an option to render a template and send to the email service
 
-> [!TIP]
-> If you want the templates to update on the next deploy, you need to add a data migration. See [0015_update_templates](../sandwich/core/migrations/0015_update_templates.py) for an example
+## Organization templates (Future)
+
+Because the templates can be associated with organizations, it will (in the future) be possible to author templates that
+might want to be different in different environments (e.g. staging vs production) or for different customers. These
+will need more design around authoring and promotion.
+
+## System templates
+
+Some templates (like `email/base`) are not associated with any organization. These are used for system emails like
+password resets and the like. These templates should be committed to the repo and deployed via a data migration. See 
+[0015_update_templates](../sandwich/core/migrations/0015_update_templates.py) for an example
 
 ## `allauth`
 
