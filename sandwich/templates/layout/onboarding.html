@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 
 {% block main %}
-  <div class="min-h-screen flex flex-col items-center justify-center px-4 md:px-0 py-10">
-    <div class="max-w-xl w-full p-6 md:p-8 bg-white rounded-none md:rounded-lg shadow-none sm:shadow-lg prose border border-green-50">
-      <h1 class="text-center text-primary">HealthConnect</h1>
+  <div class="min-h-screen grid grid-rows-[1fr_min-content] items-center justify-center px-4 md:px-0 py-10">
+    <div class="prose max-w-xl w-full p-6 md:p-8 bg-white rounded-none md:rounded-lg shadow-none sm:shadow-lg">
       {% block content %}
       {% endblock content %}
     </div>
-    <div class="w-full text-center mt-10">
+    <div class="w-full text-center mt-10 self-end">
       <a class="link"
          target="_blank"
          href="https://www.thrive.health/privacynotice">Privacy Policy</a>
