@@ -191,6 +191,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "sandwich.core.middleware.TimezoneMiddleware",
+    "sandwich.core.middleware.ConsentMiddleware",
 ]
 
 # STATIC

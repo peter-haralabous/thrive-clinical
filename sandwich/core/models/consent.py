@@ -25,6 +25,8 @@ class Consent(BaseModel):
     """
     Consent tracks a User's consent to a specified policy.
 
+    _Required_ consent is configured and enforced in core.middleware.consent.ConsentMiddleware.
+
     Do not update Consent records once they have been created; instead, create a new record with the updated decision.
 
     We're currently only modelling Users consenting to Thrive policies, but this should be extensible to support
