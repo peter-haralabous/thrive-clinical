@@ -1,10 +1,8 @@
-import json
 import logging
 
-from anymail.signals import post_send
+from anymail.message import AnymailMessage
 from anymail.signals import tracking
 from django.conf import settings
-from django.core.mail import EmailMessage
 from django.dispatch import receiver
 
 from sandwich.core.models import Email
@@ -18,6 +16,7 @@ from sandwich.core.service.template_service import render
 from sandwich.core.types import HtmlStr
 
 logger = logging.getLogger(__name__)
+ANYMAIL_INSTALLED = "anymail" in settings.INSTALLED_APPS
 
 
 def send_templated_email(  # noqa: PLR0913
@@ -65,54 +64,30 @@ def send_email(  # noqa: PLR0913
         logger.warning("Dropping email - no recipient specified", extra={"subject": subject})
         return
 
-    msg = EmailMessage(
+    msg = AnymailMessage(
         subject=subject,
         body=body,
         from_email=None,
         to=[to],
     )
     msg.content_subtype = "html"
-    email = Email.objects.create(to=to, type=email_type, invitation=invitation, task=task)
-    # Note: the email id header allows the post send signal to find the correct
-    # email record to update. This is done in favour of using msg.anymail.message_id
-    # to avoid switching EmailMessage to AnymailMessage.
-    # https://anymail.dev/en/stable/sending/anymail_additions/#anymail.message.AnymailStatus
-    msg.extra_headers["X-Email-Id"] = f'{{"email_id": "{email.id}"}}'
 
     try:
-        msg.send()
+        sent = msg.send()
+        if sent > 0:  # This should only ever be 1 (an email was sent) or 0 (something went wrong)
+            if ANYMAIL_INSTALLED:
+                recipient = next(iter(msg.anymail_status.recipients.items()))
+                status = msg.anymail_status.status
+                message_id = recipient.message_id
+            else:
+                status = EmailStatus.SENT
+                message_id = ""
+            Email.objects.create(
+                to=to, type=email_type, message_id=message_id, status=status, invitation=invitation, task=task
+            )
         logger.info("Email sent successfully", extra={"has_recipient": bool(to)})
     except Exception as e:
-        # TODO: failed to send. update email record
         logger.exception("Failed to send email", extra={"error_type": type(e).__name__})
-
-
-@receiver(post_send)
-def email_sent_post_process(sender, message, status, esp_name, **kwargs):
-    logger.info("Email post send processing started")
-    for recipient_status in status.recipients.items():
-        email_id_header = message.extra_headers.get("X-Email-Id")
-        if email_id_header:
-            header_dict = json.loads(email_id_header)
-            try:
-                email = Email.objects.get(id=header_dict.get("email_id"))
-                email.status = recipient_status.status
-                email.message_id = recipient_status.message_id  # might be None if send failed
-                logger.info(
-                    "Updating email record",
-                    extra={
-                        "email_id": email.id,
-                        "message_id": recipient_status.message_id,
-                        "status": recipient_status.status,
-                    },
-                )
-                email.save(update_fields=["status", "message_id"])
-            except Exception as e:
-                logger.exception(
-                    "Failed to update status and message_id on email",
-                    extra={"message_id": recipient_status.message_id, "error_type": type(e).__name__},
-                )
-    logger.info("Email post send processing finished")
 
 
 @receiver(tracking)
