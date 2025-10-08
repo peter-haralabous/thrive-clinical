@@ -2,6 +2,8 @@ import logging
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
+from csp.constants import UNSAFE_INLINE
+from csp.decorators import csp_update
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -50,6 +52,8 @@ class OrganizationAdd(forms.ModelForm[Organization]):
         fields = ("name", "patient_statuses", "verification_type")
 
 
+# The JSONFormWidget for PatientStatuses uses this method for style
+@csp_update({"style-src-attr": UNSAFE_INLINE})  # type:ignore[arg-type]
 @login_required
 def organization_edit(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
     logger.info("Accessing organization edit", extra={"user_id": request.user.id, "organization_id": organization_id})
