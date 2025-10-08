@@ -10,6 +10,16 @@ class EmailType(models.TextChoices):
 
 
 class EmailStatus(models.TextChoices):
+    """
+    This set of values comes from the signal types supported by anymail.
+    https://anymail.dev/en/stable/sending/tracking/#anymail.signals.AnymailTrackingEvent.event_type
+
+    We do not use all of them. Our current setup uses SNS Notifcations
+    which only support Bounced, Delivered, Complained statuses.
+    https://docs.aws.amazon.com/ses/latest/dg/notification-examples.html
+    https://anymail.dev/en/stable/esps/amazon_ses/#status-tracking-webhooks
+    """
+
     AUTORESPONDED = EventType.AUTORESPONDED, "Autoresponded"
     BOUNCED = EventType.BOUNCED, "Bounced"
     CLICKED = EventType.CLICKED, "Clicked"
@@ -34,3 +44,4 @@ class Email(BaseModel):
     status = models.CharField(max_length=50, choices=EmailStatus, blank=True, default="")
     message_id = models.TextField(blank=True, default="")  # from ses
     invitation = models.ForeignKey("Invitation", on_delete=models.CASCADE, null=True)
+    task = models.ForeignKey("Task", on_delete=models.CASCADE, null=True)

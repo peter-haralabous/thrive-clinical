@@ -10,6 +10,7 @@ from django.dispatch import receiver
 from sandwich.core.models import Email
 from sandwich.core.models import Invitation
 from sandwich.core.models import Organization
+from sandwich.core.models import Task
 from sandwich.core.models.email import EmailType
 from sandwich.core.service.template_service import render
 from sandwich.core.types import HtmlStr
@@ -26,6 +27,7 @@ def send_templated_email(  # noqa: PLR0913
     organization: Organization | None = None,
     language: str | None = None,
     invitation: Invitation | None = None,
+    task: Task | None = None,
 ):
     context.setdefault("app_url", settings.APP_URL)
     subject = render(
@@ -36,10 +38,17 @@ def send_templated_email(  # noqa: PLR0913
         as_markdown=False,
     )
     body = render(template_name=body_template, organization=organization, language=language, context=context)
-    send_email(to, subject, body, email_type=email_type, invitation=invitation)
+    send_email(to, subject, body, email_type=email_type, invitation=invitation, task=task)
 
 
-def send_email(to: str, subject: str, body: HtmlStr, email_type: EmailType, invitation: Invitation | None = None):
+def send_email(
+    to: str,
+    subject: str,
+    body: HtmlStr,
+    email_type: EmailType,
+    invitation: Invitation | None = None,
+    task: Task | None = None,
+):
     logger.info(
         "Sending email",
         extra={
@@ -63,7 +72,11 @@ def send_email(to: str, subject: str, body: HtmlStr, email_type: EmailType, invi
         to=[to],
     )
     msg.content_subtype = "html"
-    email = Email.objects.create(to=to, type=email_type, invitation=invitation)
+    email = Email.objects.create(to=to, type=email_type, invitation=invitation, task=task)
+    # Note: the email id header allows the post send signal to find the correct
+    # email record to update. This is done in favour of using msg.anymail.message_id
+    # to avoid switching EmailMessage to AnymailMessage.
+    # https://anymail.dev/en/stable/sending/anymail_additions/#anymail.message.AnymailStatus
     msg.extra_headers["X-Email-Id"] = f'{{"email_id": "{email.id}"}}'
 
     try:
@@ -76,6 +89,7 @@ def send_email(to: str, subject: str, body: HtmlStr, email_type: EmailType, invi
 
 @receiver(post_send)
 def email_sent_post_process(sender, message, status, esp_name, **kwargs):
+    logger.info("Email post send processing started")
     for recipient_status in status.recipients.items():
         email_id_header = message.extra_headers.get("X-Email-Id")
         if email_id_header:
@@ -84,12 +98,21 @@ def email_sent_post_process(sender, message, status, esp_name, **kwargs):
                 email = Email.objects.get(id=header_dict.get("email_id"))
                 email.status = recipient_status.status
                 email.message_id = recipient_status.message_id  # might be None if send failed
+                logger.info(
+                    "Updating email record",
+                    extra={
+                        "email_id": email.id,
+                        "message_id": recipient_status.message_id,
+                        "status": recipient_status.status,
+                    },
+                )
                 email.save(update_fields=["status", "message_id"])
             except Exception as e:
                 logger.exception(
                     "Failed to update status and message_id on email",
                     extra={"message_id": recipient_status.message_id, "error_type": type(e).__name__},
                 )
+    logger.info("Email post send processing finished")
 
 
 @receiver(tracking)
