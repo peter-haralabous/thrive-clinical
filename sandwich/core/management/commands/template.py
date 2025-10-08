@@ -8,6 +8,7 @@ from sandwich.core.management.lib.generic import CreateListDeleteCommand
 from sandwich.core.management.lib.json import json_object_type
 from sandwich.core.management.types import template_type
 from sandwich.core.models import Template
+from sandwich.core.models.email import EmailType
 from sandwich.core.service.email_service import send_email
 from sandwich.core.service.template_service import render_template
 
@@ -61,6 +62,7 @@ class Command(CreateListDeleteCommand[Template]):
                 to=email,
                 subject=f"Rendered Template: {template.slug}",
                 body=rendered_template,
+                email_type=EmailType.invitation,
             )
         else:
             self.output(rendered_template)

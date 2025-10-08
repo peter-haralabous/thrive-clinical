@@ -41,7 +41,7 @@ def send_templated_email(  # noqa: PLR0913
     send_email(to, subject, body, email_type=email_type, invitation=invitation, task=task)
 
 
-def send_email(
+def send_email(  # noqa: PLR0913
     to: str,
     subject: str,
     body: HtmlStr,
