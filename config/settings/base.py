@@ -1,9 +1,14 @@
 """Base settings to build other settings files upon."""
 
 from pathlib import Path
+from urllib.parse import quote_plus
+from urllib.parse import urlencode
 
 import django_stubs_ext
 import environ
+from allauth.socialaccount.providers.patreon.constants import API_VERSION
+from csp.constants import NONE
+from csp.constants import SELF
 
 django_stubs_ext.monkeypatch()
 
@@ -88,6 +93,7 @@ THIRD_PARTY_APPS = [
     "allauth.mfa",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
+    "csp",
     "webpack_loader",
     "django_jsonform",
     "procrastinate.contrib.django",
@@ -190,6 +196,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "csp.middleware.CSPMiddleware",
     "sandwich.core.middleware.TimezoneMiddleware",
     "sandwich.core.middleware.ConsentMiddleware",
 ]
@@ -264,6 +271,39 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = "DENY"
+
+# https://docs.datadoghq.com/integrations/content_security_policy_logs/?tab=firefox#use-csp-with-real-user-monitoring-and-session-replay
+report_params = urlencode(
+    {
+        # This is a public key, meant to be shared
+        "dd-api-key": "pub7f4333094988c697036a7a428df4dcf6",
+        "dd-evp-origin": "content-security-policy",
+        "ddsource": "csp-report",
+        "ddtags": quote_plus(f"service:sandwich,environment:{ENVIRONMENT},version:{API_VERSION}"),
+    }
+)
+report_uri = f"https://browser-intake-datadoghq.eu/api/v2/logs?{report_params}"
+CONTENT_SECURITY_POLICY = {
+    "DIRECTIVES": {
+        "default-src": [SELF],
+        "frame-ancestors": [SELF],
+        "form-action": [SELF],
+        "report-uri": report_uri,
+    },
+}
+CONTENT_SECURITY_POLICY_REPORT_ONLY = {
+    "DIRECTIVES": {
+        "default-src": [NONE],
+        "connect-src": [SELF],
+        "img-src": [SELF],
+        "form-action": [SELF],
+        "frame-ancestors": [SELF],
+        "script-src": [SELF],
+        "style-src": [SELF],
+        "upgrade-insecure-requests": True,
+        "report-uri": report_uri,
+    },
+}
 
 # EMAIL
 # ------------------------------------------------------------------------------

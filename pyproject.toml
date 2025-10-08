@@ -183,6 +183,7 @@ dependencies = [
     "django-allauth[mfa,socialaccount]==65.11.2",
     "django-anymail[amazon-ses]==13.1",
     "django-crispy-forms==2.4",
+    "django-csp>=4.0",
     "django-datadog-logger>=0.7.3",
     "django-enum>=2.2.3",
     "django-environ==0.12.0",
