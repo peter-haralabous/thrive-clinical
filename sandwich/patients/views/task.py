@@ -1,6 +1,7 @@
 import logging
 
-from csp.constants import NONCE
+from csp.constants import UNSAFE_EVAL
+from csp.constants import UNSAFE_INLINE
 from csp.decorators import csp_update
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -18,8 +19,9 @@ logger = logging.getLogger(__name__)
 # but that unsafe-eval seems to be a core function of how formio works
 @csp_update(  # type: ignore[arg-type]
     {
-        "script-src-elem": (NONCE, "https://cdn.form.io/js/formio.form.js"),
-        "script-src": "'unsafe-eval'",
+        "script-src-elem": "https://cdn.form.io/js/formio.form.js",
+        "script-src": UNSAFE_EVAL,
+        "style-src-attr": UNSAFE_INLINE,
         # Allow required external stylesheets.
         "style-src-elem": (
             "https://cdn.form.io/js/formio.form.min.css",

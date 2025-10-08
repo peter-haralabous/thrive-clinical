@@ -1,5 +1,7 @@
 {% extends "provider/base.html" %}
 
+{% load json %}
+
 {% block sidenav %}
   {% include 'provider/partials/sidenav.html' %}
 {% endblock sidenav %}
@@ -22,8 +24,7 @@
     viewing {{ task.status }} task {{ task.name }}
   </div>
   <div id="formio"></div>
-  {{ formio_user | json_script:"formio_user" }}
-  {# TODO(WF): This violates our script-src policy, and must be moved to static/js #}
+  {% json_script_safe formio_user "formio_user" %}
   <script type="text/javascript" nonce="{{ request.csp_nonce }}">
     (async function() {
       const formio_user = JSON.parse(document.getElementById('formio_user').textContent)
