@@ -1,3 +1,4 @@
+import pytest
 from django.utils import timezone
 
 from sandwich.core.models import Consent
@@ -23,3 +24,12 @@ def test_for_user(user: User):
     assert Consent.objects.for_user(user).count() == 2
     consent = Consent.objects.for_user(user).get(policy=ConsentPolicy.THRIVE_PRIVACY_POLICY)
     assert consent.decision is False
+
+
+@pytest.mark.xfail(reason="Filtering by decision gives the wrong result.")
+def test_for_user_filter_by_decision(user: User):
+    Consent.objects.create(user=user, policy=ConsentPolicy.THRIVE_PRIVACY_POLICY, decision=True, date=timezone.now())
+    Consent.objects.create(user=user, policy=ConsentPolicy.THRIVE_PRIVACY_POLICY, decision=False, date=timezone.now())
+
+    consents = Consent.objects.for_user(user).filter(decision=True)
+    assert consents.count() == 0
