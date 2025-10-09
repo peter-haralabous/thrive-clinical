@@ -200,6 +200,7 @@ MIDDLEWARE = [
     "csp.middleware.CSPMiddleware",
     "sandwich.core.middleware.TimezoneMiddleware",
     "sandwich.core.middleware.ConsentMiddleware",
+    "sandwich.patients.middleware.patient_access.PatientAccessMiddleware",
 ]
 
 # STATIC
