@@ -2,6 +2,7 @@ from unittest import mock
 
 import pytest
 from anymail.message import AnymailMessage
+from anymail.message import AnymailRecipientStatus
 from django.core import mail
 
 from sandwich.core.models import Email
@@ -11,6 +12,7 @@ from sandwich.core.models.email import EmailStatus
 from sandwich.core.models.email import EmailType
 from sandwich.core.models.invitation import InvitationStatus
 from sandwich.core.service.email_service import handle_tracking
+from sandwich.core.service.email_service import record_email_delivery
 from sandwich.core.service.email_service import send_email
 
 
@@ -94,6 +96,38 @@ def test_send_email_with_none_recipient() -> None:
 
         # Verify no Email record was created
         assert Email.objects.count() == 0
+
+
+@pytest.mark.django_db
+def test_record_email_delivery_with_anymail() -> None:
+    to = "test@example.com"
+    subject = "Test Subject"
+    body = "Test body content"
+    email_type = EmailType.task
+    msg = AnymailMessage(
+        subject=subject,
+        body=body,
+        from_email=None,
+        to=[to],
+    )
+    msg.anymail_status.recipients = {
+        "test@example.com": AnymailRecipientStatus(message_id="fake_message_id", status="sent")
+    }
+
+    with mock.patch("sandwich.core.service.email_service.ANYMAIL_INSTALLED", new=True):
+        record_email_delivery(to=to, email_type=email_type, msg=msg)
+
+    # Verify Email record was created even without message_id
+    email_records = Email.objects.all()
+    assert len(email_records) == 1
+
+    email_record = email_records[0]
+    assert email_record.to == to
+    assert email_record.type == email_type
+    assert email_record.message_id == "fake_message_id"
+    assert email_record.status == EmailStatus.SENT
+    assert email_record.invitation is None
+    assert email_record.task is None
 
 
 @pytest.mark.django_db

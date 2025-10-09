@@ -75,19 +75,25 @@ def send_email(  # noqa: PLR0913
     try:
         sent = msg.send()
         if sent > 0:  # This should only ever be 1 (an email was sent) or 0 (something went wrong)
-            if ANYMAIL_INSTALLED:
-                recipient = next(iter(msg.anymail_status.recipients.values()))
-                status = recipient.status
-                message_id = recipient.message_id
-            else:
-                status = EmailStatus.SENT
-                message_id = ""
-            Email.objects.create(
-                to=to, type=email_type, message_id=message_id, status=status, invitation=invitation, task=task
-            )
+            record_email_delivery(to, email_type, msg, invitation, task)
         logger.info("Email sent successfully", extra={"has_recipient": bool(to)})
     except Exception as e:
         logger.exception("Failed to send email", extra={"error_type": type(e).__name__})
+
+
+def record_email_delivery(
+    to: str, email_type: EmailType, msg: AnymailMessage, invitation: Invitation | None = None, task: Task | None = None
+):
+    if ANYMAIL_INSTALLED:
+        recipient = next(iter(msg.anymail_status.recipients.values()))
+        status = recipient.status
+        message_id = recipient.message_id
+    else:
+        status = EmailStatus.SENT
+        message_id = ""
+    Email.objects.create(
+        to=to, type=email_type, message_id=message_id, status=status, invitation=invitation, task=task
+    )
 
 
 # Note: We don't expect handle_tracking to fire locally as
