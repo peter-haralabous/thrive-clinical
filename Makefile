@@ -67,7 +67,7 @@ smoke-test-development:
 		"latest"
 
 .PHONY: smoke-test-integration
-smoke-test-integration:
+smoke-test-integration: .playwright-browsers
 	uv run --script ./scripts/check_version.py \
 		https://hc.wethrive.ninja/ \
 		"${GITHUB_SHA}"
