@@ -3,7 +3,6 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect
-from django.shortcuts import render
 
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
@@ -19,5 +18,5 @@ def home(request: AuthenticatedHttpRequest) -> HttpResponse:
         logger.info("Redirecting to patient details", extra={"user_id": request.user.id, "patient_id": patient.id})
         return redirect("patients:patient_details", patient_id=patient.id)
 
-    logger.info("Rendering patient home page - no existing patient", extra={"user_id": request.user.id})
-    return render(request, "patient/home.html")
+    logger.info("Redirecting user to patient_add, they have no patient", extra={"user_id": request.user.id})
+    return redirect("patients:patient_add")

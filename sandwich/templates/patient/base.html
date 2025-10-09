@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base_left_nav.html" %}
 
 {% block nav_items %}
   <a class="btn btn-ghost" href="{% url 'patients:home' %}">Home</a>
@@ -6,6 +6,5 @@
 {% block main %}
   {% include "patient/partials/switcher.html" %}
   {% block content %}
-    <p>Use this document as a way to quick start any new project.</p>
   {% endblock content %}
 {% endblock main %}
