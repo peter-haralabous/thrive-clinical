@@ -100,8 +100,8 @@ def record_email_delivery(
 # emails locally do not go though SES or anymail
 @receiver(tracking)
 def handle_tracking(sender, event, esp_name, **kwargs):
+    logger.info("Received email tracking event")
     if esp_name == "Amazon SES":
-        logger.info("Received email tracking event")
         if event.event_type == "bounced":
             logger.warning("Email bounced", extra={"reason": event.reject_reason, "message_id": event.message_id})
             email = Email.objects.get(message_id=event.message_id)
@@ -112,3 +112,6 @@ def handle_tracking(sender, event, esp_name, **kwargs):
             if invitation:
                 invitation.status = InvitationStatus.FAILED
                 invitation.save(update_fields=["status"])
+        else:
+            logger.info("Unhandled tracking event", extra={"event": event.event_type})
+    logger.info("Finished processing email tracking event")
