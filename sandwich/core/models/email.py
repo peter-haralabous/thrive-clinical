@@ -39,7 +39,7 @@ class EmailStatus(models.TextChoices):
 
 
 class Email(BaseModel):
-    to = models.TextField()
+    to = models.EmailField()
     type = models.TextField(choices=EmailType)
     status = models.CharField(max_length=50, choices=EmailStatus, blank=True, default="")
     message_id = models.TextField(blank=True, default="")  # from ses
