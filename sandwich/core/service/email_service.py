@@ -90,6 +90,8 @@ def send_email(  # noqa: PLR0913
         logger.exception("Failed to send email", extra={"error_type": type(e).__name__})
 
 
+# Note: We don't expect handle_tracking to fire locally as
+# emails locally do not go though SES or anymail
 @receiver(tracking)
 def handle_tracking(sender, event, esp_name, **kwargs):
     if esp_name == "Amazon SES":
