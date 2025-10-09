@@ -10,7 +10,7 @@ this breaks when libraries are defining their own managers without using django-
 > [!WARNING]
 > This also applies to the related managers that get defined on models with FK from translated models.
 
-> I'm afraid it's not much to do other than ignoring the error until 
+> I'm afraid it's not much to do other than ignoring the error until
 > <library> starts to export types. At least as far as I'm aware
 
 See: https://github.com/typeddjango/django-stubs/issues/1023

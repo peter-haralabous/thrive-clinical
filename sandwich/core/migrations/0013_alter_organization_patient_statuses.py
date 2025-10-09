@@ -3,20 +3,28 @@
 import django.core.serializers.json
 import django_pydantic_field.compat.django
 import django_pydantic_field.fields
-import sandwich.core.models.organization
 from django.db import migrations
+
+import sandwich.core.models.organization
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('core', '0012_organization_slug'),
+        ("core", "0012_organization_slug"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='organization',
-            name='patient_statuses',
-            field=django_pydantic_field.fields.PydanticSchemaField(blank=True, config=None, default=[], encoder=django.core.serializers.json.DjangoJSONEncoder, schema=django_pydantic_field.compat.django.GenericContainer(list, (sandwich.core.models.organization.PatientStatus,))),
+            model_name="organization",
+            name="patient_statuses",
+            field=django_pydantic_field.fields.PydanticSchemaField(
+                blank=True,
+                config=None,
+                default=[],
+                encoder=django.core.serializers.json.DjangoJSONEncoder,
+                schema=django_pydantic_field.compat.django.GenericContainer(
+                    list, (sandwich.core.models.organization.PatientStatus,)
+                ),
+            ),
         ),
     ]

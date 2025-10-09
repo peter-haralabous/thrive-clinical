@@ -6,13 +6,14 @@ from django.db import migrations
 def load_initial_data(apps, schema_editor):
     call_command("loaddata", "sandwich/core/migrations/fixtures/0015_template.json")
 
+
 def remove_extra_template(apps, schema_editor):
     apps.get_model("core", "Template").objects.filter(slug="email/welcome", organization__isnull=True).delete()
 
-class Migration(migrations.Migration):
 
+class Migration(migrations.Migration):
     dependencies = [
-        ('core', '0014_patient_province'),
+        ("core", "0014_patient_province"),
     ]
 
     operations = [

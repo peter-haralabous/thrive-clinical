@@ -20,7 +20,7 @@ will need more design around authoring and promotion.
 ## System templates
 
 Some templates (like `email/base`) are not associated with any organization. These are used for system emails like
-password resets and the like. These templates should be committed to the repo and deployed via a data migration. See 
+password resets and the like. These templates should be committed to the repo and deployed via a data migration. See
 [0015_update_templates](../sandwich/core/migrations/0015_update_templates.py) for an example
 
 ## `allauth`
@@ -29,8 +29,8 @@ Account management emails are generated from the `django-allauth` package. Some 
 
 
 We have [configured](../sandwich/users/adapters.py) the package to use only HTML emails and to use templates stored in the database (if they are defined)
-    
-The names of the templates that the package uses can be found in the [source repo](https://codeberg.org/allauth/django-allauth/src/branch/main/allauth/templates/account/email)  
+
+The names of the templates that the package uses can be found in the [source repo](https://codeberg.org/allauth/django-allauth/src/branch/main/allauth/templates/account/email)
 
 > [!IMPORTANT]
 > The Template instances should have organization set to `None` and the slug set to the name of the template as defined in the repo (including the `.txt` suffix)
