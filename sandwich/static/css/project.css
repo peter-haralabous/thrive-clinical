@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import "google-button";
+@import './_google-button.css';
 
 @plugin "@tailwindcss/typography";
 @plugin "daisyui" {

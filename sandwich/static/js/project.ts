@@ -1,4 +1,4 @@
-import '../sass/project.scss';
+import '../css/project.css';
 import './components/command-palette';
 import './components/message';
 import { initializeDatadog } from './lib/datadog';

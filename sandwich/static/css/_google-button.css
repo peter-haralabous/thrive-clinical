@@ -1,5 +1,6 @@
-// Styles for "Sign in with Google" button
-// adapted from: https://developers.google.com/identity/branding-guidelines
+/* Styles for "Sign in with Google" button */
+/* adapted from: https://developers.google.com/identity/branding-guidelines */
+
 .gsi-link-container {
   width: 100%;
   display: inline-block;
@@ -28,8 +29,14 @@
   padding: 0 12px;
   position: relative;
   text-align: center;
-  -webkit-transition: background-color .218s, border-color .218s, box-shadow .218s;
-  transition: background-color .218s, border-color .218s, box-shadow .218s;
+  -webkit-transition:
+    background-color 0.218s,
+    border-color 0.218s,
+    box-shadow 0.218s;
+  transition:
+    background-color 0.218s,
+    border-color 0.218s,
+    box-shadow 0.218s;
   vertical-align: middle;
   white-space: nowrap;
   width: 100%;
@@ -67,8 +74,8 @@
 }
 
 .gsi-material-button .gsi-material-button-state {
-  -webkit-transition: opacity .218s;
-  transition: opacity .218s;
+  -webkit-transition: opacity 0.218s;
+  transition: opacity 0.218s;
   bottom: 0;
   left: 0;
   opacity: 0;
