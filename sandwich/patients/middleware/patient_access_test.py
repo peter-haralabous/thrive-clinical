@@ -20,7 +20,7 @@ def test_patient_access_middleware(user: User, rf: RequestFactory):
     middleware = PatientAccessMiddleware(lambda req: HttpResponse("OK"))
     response = middleware(request)
     assert isinstance(response, HttpResponseRedirect)
-    assert response.url == reverse("patients:patient_add")
+    assert response.url == reverse("patients:patient_onboarding_add")
 
 
 @pytest.mark.django_db
@@ -30,7 +30,7 @@ def test_patient_access_middleware_allowed_route(user: User, rf: RequestFactory)
     WHEN they try to access a page that is on the allowed list
     THEN they should be allowed to access the page
     """
-    request = rf.get(reverse("patients:patient_add"))
+    request = rf.get(reverse("patients:patient_onboarding_add"))
     request.user = user
     middleware = PatientAccessMiddleware(lambda req: HttpResponse("OK"))
     response = middleware(request)

@@ -17,7 +17,7 @@ class PatientAccessMiddleware:
     Detect when someone is about to go to a patient URL, but has no patient of their own currently.
     """
 
-    _allowed_routes = ["patient_add", "accept_invite"]
+    _allowed_routes = ["patient_onboarding_add", "accept_invite"]
     """These routes are allowed to be visited without the user having an associated patient yet."""
 
     def __init__(self, get_response: Callable[[HttpRequest], HttpResponse]) -> None:
@@ -33,6 +33,6 @@ class PatientAccessMiddleware:
                 has_patient = Patient.objects.filter(user=request.user).exists()
                 if not has_patient:
                     logger.info("User has no patient, redirecting to add patient", extra={"user_id": request.user.id})
-                    return HttpResponseRedirect(reverse("patients:patient_add"))
+                    return HttpResponseRedirect(reverse("patients:patient_onboarding_add"))
 
         return self.get_response(request)

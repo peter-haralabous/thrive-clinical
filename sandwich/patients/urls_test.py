@@ -44,6 +44,7 @@ def test_patient_http_get_urls_return_status_200(db, user) -> None:
 
     urls = [
         (reverse("patients:patient_add"), "patient_add"),
+        (reverse("patients:patient_onboarding_add"), "patient_onboarding_add"),
         (reverse("patients:patient_details", kwargs={"patient_id": patient.pk}), "patient_details"),
         (reverse("patients:patient_edit", kwargs={"patient_id": patient.pk}), "patient_edit"),
     ]
