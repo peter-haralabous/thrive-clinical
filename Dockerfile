@@ -68,6 +68,10 @@ COPY --chown=django:django ./docker/start /start
 RUN sed -i 's/\r$//g' /start
 RUN chmod +x /start
 
+COPY --chown=django:django ./docker/start_worker /start_worker
+RUN sed -i 's/\r$//g' /start_worker
+RUN chmod +x /start_worker
+
 # Copy the application from the builder
 COPY --from=python-build-stage --chown=django:django ${APP_HOME} ${APP_HOME}
 
