@@ -3,7 +3,6 @@ name: Continuous Deployment
 on:
   push:
     branches: ['main']
-    paths-ignore: ['docs/**']
 
 permissions:
   contents: read
