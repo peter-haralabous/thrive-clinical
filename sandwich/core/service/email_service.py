@@ -76,8 +76,8 @@ def send_email(  # noqa: PLR0913
         sent = msg.send()
         if sent > 0:  # This should only ever be 1 (an email was sent) or 0 (something went wrong)
             if ANYMAIL_INSTALLED:
-                recipient = next(iter(msg.anymail_status.recipients.items()))
-                status = msg.anymail_status.status
+                recipient = next(iter(msg.anymail_status.recipients.values()))
+                status = recipient.status
                 message_id = recipient.message_id
             else:
                 status = EmailStatus.SENT
