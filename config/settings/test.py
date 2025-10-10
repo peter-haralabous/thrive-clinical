@@ -2,6 +2,15 @@
 With these settings, tests run faster.
 """
 
+import os
+
+# when running in GitHub Actions set up fake AWS credentials
+# not doing this locally as devs might want to record vcrpy fixtures using their real credentials
+if os.getenv("GITHUB_WORKFLOW"):
+    os.environ.setdefault("AWS_DEFAULT_REGION", "ca-central-1")
+    os.environ.setdefault("AWS_ACCESS_KEY_ID", "fake")
+    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", "fake")
+
 from .base import *  # noqa: F403
 from .base import TEMPLATES
 from .base import env
@@ -37,5 +46,6 @@ MEDIA_URL = "http://media.testserver/"
 # django-webpack-loader
 # ------------------------------------------------------------------------------
 WEBPACK_LOADER["DEFAULT"]["LOADER_CLASS"] = "webpack_loader.loaders.FakeWebpackLoader"  # noqa: F405
+
 # Your stuff...
 # ------------------------------------------------------------------------------
