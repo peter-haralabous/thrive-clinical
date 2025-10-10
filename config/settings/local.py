@@ -19,21 +19,24 @@ def update_env_from_ssm() -> None:
         "GOOGLE_OAUTH_SECRET": "/integration/sandwich/google_oauth_secret",
     }
 
-    for env_var, ssm_param in params.items():
-        try:
-            client = boto3.client("ssm")
-
+    try:
+        client = boto3.client("ssm")
+        for env_var, ssm_param in params.items():
             try:
                 res = client.get_parameter(Name=ssm_param, WithDecryption=True)
                 if value := res.get("Parameter", {}).get("Value"):
                     os.environ[env_var] = value
             except client.exceptions.ParameterNotFound:
-                logging.warning("Could not find SSM parameter")
+                logger.warning("SSM parameter does not exist.", extra={"param_name": ssm_param})
+            # Using a bare exception here because failure to fetch SSM params
+            # should not prevent us from starting the dev server locally.
+            except Exception:  # noqa: BLE001
+                logger.warning("Something went wrong trying to fetch SSM param.", extra={"param_name": ssm_param})
 
-        # NB: We log instead of erroring so ci can pass. This is not ideal
-        # because these logs get buried during startup.
-        except NoRegionError:
-            logging.warning("aws cli not properly configured")
+    # NB: We log instead of erroring so ci can pass. This is not ideal
+    # because these logs get buried during startup.
+    except NoRegionError:
+        logger.warning("aws cli not properly configured")
 
 
 update_env_from_ssm()
