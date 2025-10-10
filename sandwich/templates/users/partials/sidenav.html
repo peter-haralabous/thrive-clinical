@@ -60,7 +60,7 @@
     </a>
   </li>
   <li>
-    <a href="{% url 'accounts:delete' %}"
+    <a href="{% url 'core:account_delete' %}"
        class="flex items-center justify-start w-full btn btn-ghost {% if request.resolver_match.url_name == 'delete' %}btn-active{% endif %}">
       {# heroicons user #}
       <svg xmlns="http://www.w3.org/2000/svg"

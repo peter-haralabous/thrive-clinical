@@ -17,7 +17,6 @@ urlpatterns = [
     path("users/", include("sandwich.users.urls", namespace="users")),
     path("accounts/", include("allauth.urls")),
     path("accounts/", include("allauth.socialaccount.urls")),
-    path("accounts/", include("sandwich.users.accounts_urls", namespace="accounts")),
     # Anymail webhooks
     path("anymail/", include("anymail.urls")),
     # Your stuff: custom urls includes go here
