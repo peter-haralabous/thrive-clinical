@@ -1,6 +1,8 @@
 import logging
 
 from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Div
+from crispy_forms.layout import Layout
 from crispy_forms.layout import Submit
 from django import forms
 from django.contrib import messages
@@ -40,11 +42,17 @@ class PatientEdit(forms.ModelForm[Patient]):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit("submit", "Submit"))
+        self.helper.layout = Layout(
+            Div("first_name", "last_name", css_class="flex gap-4"),
+            "date_of_birth",
+            "province",
+            "phn",
+            Submit("submit", "Submit"),
+        )
 
     class Meta:
         model = Patient
-        fields = ("first_name", "last_name", "email", "phn", "date_of_birth")
+        fields = ("first_name", "last_name", "date_of_birth", "province", "phn")
         widgets = {
             "date_of_birth": forms.DateInput(attrs={"type": "date"}),
         }
@@ -57,7 +65,13 @@ class PatientAdd(forms.ModelForm[Patient]):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.add_input(Submit("submit", "Submit"))
+        self.helper.layout = Layout(
+            Div("first_name", "last_name", css_class="flex gap-4"),
+            "date_of_birth",
+            "province",
+            "phn",
+            Submit("submit", "Submit"),
+        )
 
     def save(self, commit: bool = True, organization: Organization | None = None) -> Patient:  # noqa: FBT001,FBT002
         instance = super().save(commit=False)
@@ -69,7 +83,7 @@ class PatientAdd(forms.ModelForm[Patient]):
 
     class Meta:
         model = Patient
-        fields = ("first_name", "last_name", "email", "phn", "date_of_birth")
+        fields = ("first_name", "last_name", "date_of_birth", "province", "phn")
         widgets = {
             "date_of_birth": forms.DateInput(attrs={"type": "date"}),
         }
