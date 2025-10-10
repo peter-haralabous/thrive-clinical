@@ -1,6 +1,5 @@
 from django.conf import settings
-
-from sandwich.core.util.http import AuthenticatedHttpRequest
+from django.http import HttpRequest
 
 
 def settings_context(request):
@@ -11,7 +10,10 @@ def settings_context(request):
     }
 
 
-def patients_context(request: AuthenticatedHttpRequest):
+def patients_context(request: HttpRequest):
+    if not request.user.is_authenticated:
+        return {}
+
     """Attaches all patients for the current user."""
     patients = request.user.patient_set.all()
     return {
