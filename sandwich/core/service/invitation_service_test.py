@@ -2,7 +2,10 @@ import re
 
 import pytest
 
+from sandwich.core.models import Invitation
 from sandwich.core.models import Patient
+from sandwich.core.models.invitation import InvitationStatus
+from sandwich.core.service.invitation_service import get_unaccepted_invitation
 from sandwich.core.service.invitation_service import resend_patient_invitation_email
 
 UUID_PATTERN = re.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}|[0-9a-zA-Z_-]{43}")
@@ -41,3 +44,26 @@ def test_resend_patient_invitation_email(template_fixture: None, patient: Patien
 
     # if the template changes, the snapshot will need to be updated
     assert mask_uuids(mailoutbox[0].body) == snapshot
+
+
+@pytest.mark.django_db
+def test_get_unaccepted_invitation_returns_non_accepted_invites() -> None:
+    patient = Patient.objects.create(
+        email="test@example.com", first_name="Test", last_name="Patient", date_of_birth="1990-01-01"
+    )
+
+    expected = Invitation.objects.create(patient=patient)
+    actual = get_unaccepted_invitation(patient)
+    assert actual is not None
+    assert expected.id == actual.id
+
+
+@pytest.mark.django_db
+def test_get_unaccepted_invitation_ignores_accepted() -> None:
+    patient = Patient.objects.create(
+        email="test@example.com", first_name="Test", last_name="Patient", date_of_birth="1990-01-01"
+    )
+
+    Invitation.objects.create(patient=patient, status=InvitationStatus.ACCEPTED)
+    actual = get_unaccepted_invitation(patient)
+    assert actual is None

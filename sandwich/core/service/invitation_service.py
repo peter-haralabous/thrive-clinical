@@ -14,7 +14,7 @@ from sandwich.users.models import User
 logger = logging.getLogger(__name__)
 
 
-def get_pending_invitation(patient: Patient) -> Invitation | None:
+def get_unaccepted_invitation(patient: Patient) -> Invitation | None:
     logger.debug(
         "Checking for pending invitation",
         extra={
@@ -23,7 +23,7 @@ def get_pending_invitation(patient: Patient) -> Invitation | None:
         },
     )
 
-    invitation = patient.invitation_set.filter(status=InvitationStatus.PENDING).first()
+    invitation = patient.invitation_set.exclude(status=InvitationStatus.ACCEPTED).first()
 
     logger.debug(
         "Pending invitation query result",

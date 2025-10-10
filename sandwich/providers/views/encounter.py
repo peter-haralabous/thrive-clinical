@@ -18,7 +18,7 @@ from django.urls import reverse
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.organization import Organization
-from sandwich.core.service.invitation_service import get_pending_invitation
+from sandwich.core.service.invitation_service import get_unaccepted_invitation
 from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.util.http import validate_sort
@@ -55,7 +55,7 @@ def encounter_details(request: AuthenticatedHttpRequest, organization_id: UUID, 
     patient = encounter.patient
     tasks = encounter.task_set.all()
     other_encounters = patient.encounter_set.exclude(id=encounter_id)
-    pending_invitation = get_pending_invitation(patient)
+    pending_invitation = get_unaccepted_invitation(patient)
 
     EncounterForm = build_encounter_form_class(organization)  # noqa: N806
     if request.method == "POST":

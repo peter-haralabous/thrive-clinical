@@ -23,7 +23,7 @@ from sandwich.core.models.task import Task
 from sandwich.core.models.task import TaskStatus
 from sandwich.core.service.encounter_service import complete_encounter
 from sandwich.core.service.encounter_service import get_current_encounter
-from sandwich.core.service.invitation_service import get_pending_invitation
+from sandwich.core.service.invitation_service import get_unaccepted_invitation
 from sandwich.core.service.invitation_service import resend_patient_invitation_email
 from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.service.patient_service import maybe_patient_name
@@ -87,7 +87,7 @@ def patient_details(request: AuthenticatedHttpRequest, organization_id: int, pat
     current_encounter = get_current_encounter(patient)
     tasks = current_encounter.task_set.all() if current_encounter else []
     past_encounters = patient.encounter_set.exclude(status=EncounterStatus.IN_PROGRESS)
-    pending_invitation = get_pending_invitation(patient)
+    pending_invitation = get_unaccepted_invitation(patient)
 
     logger.debug(
         "Patient details loaded",
