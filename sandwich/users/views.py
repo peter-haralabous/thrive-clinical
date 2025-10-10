@@ -74,3 +74,5 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+# Note: Before adding new views here, see the README.md file in this directory.
