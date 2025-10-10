@@ -4,10 +4,10 @@ from collections.abc import Callable
 from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
-from django.urls import resolve
 from django.urls import reverse
 
 from sandwich.core.models.patient import Patient
+from sandwich.core.util.http import cached_resolve
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class PatientAccessMiddleware:
         if request.user and request.user.is_authenticated:
             # We want to check for any url that starts with "patient/" that isn't "patient/add"
             # to avoid a redirect loop.
-            match = resolve(request.path_info)
+            match = cached_resolve(request)
 
             if match.app_name == "patients" and match.url_name not in self._allowed_routes:
                 has_patient = Patient.objects.filter(user=request.user).exists()
