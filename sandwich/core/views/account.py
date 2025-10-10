@@ -1,5 +1,6 @@
 import logging
 
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -27,7 +28,7 @@ def account_delete(request: AuthenticatedHttpRequest) -> HttpResponse:
         logout(request)
         user.delete_account()
         logger.info("Account deleted successfully", extra={"user_id": user.id})
-        # TODO: send them to a "we're sorry to see you go" page instead?
+        messages.add_message(request, messages.SUCCESS, "Account deleted successfully. We're sorry to see you go.")
         return redirect(reverse("account_login"))
 
     logger.debug("Rendering account delete form", extra={"user_id": request.user.id})
