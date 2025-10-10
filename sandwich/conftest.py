@@ -46,7 +46,15 @@ def django_session_fixtures(fixtures: Iterable[str]):
 
 @pytest.fixture(scope="module")
 def vcr_config():
+    def before_record_request(request):
+        # skip requests to get temporary credentials from STS
+        # these vary depending on how your AWS profiles are set up
+        if request.host in ("sts.amazonaws.com", "sts.ca-central-1.amazonaws.com"):
+            return None
+        return request
+
     return {
         # strip sensitive headers by default
         "filter_headers": [("Authorization", None), ("X-Amz-Security-Token", None)],
+        "before_record_request": before_record_request,
     }
