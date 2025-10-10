@@ -201,6 +201,7 @@ dependencies = [
     "factory-boy==3.3.3",
     "gunicorn==23.0.0",
     "hiredis==3.2.1",
+    "langchain[aws,google-genai]>=0.3.27",
     "markdown-it-py==4.0.0",
     "pillow==11.3.0",
     "procrastinate>=3.5.2",

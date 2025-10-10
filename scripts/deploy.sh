@@ -34,6 +34,7 @@ done
 
 # 3: wait for the previous deployment to drain
 for SERVICE in "${SERVICES[@]}"; do
+  echo "waiting for deployment of $SERVICE in $CLUSTER to finish..."
   while true; do
     DEPLOYMENTS=$(aws ecs describe-services --cluster "$CLUSTER" --services "$SERVICE" --query 'services[].deployments[].[rolloutState,createdAt]' --output text)
     echo "$DEPLOYMENTS"

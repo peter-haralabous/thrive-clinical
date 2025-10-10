@@ -414,3 +414,11 @@ PROCRASTINATE_IMPORT_PATHS = ["sandwich.core.service.procrastinate_service"]
 # TODO-NG: write our own permission function
 PRIVATE_STORAGE_AUTH_FUNCTION = "private_storage.permissions.allow_staff"
 PRIVATE_STORAGE_ROOT = str(APPS_DIR / "private-media")
+
+# LLM API keys
+# they're all defaulted to None so that tests don't need to mock them eagerly;
+# trying to use them will fail at runtime (see sandwich/core/service/llm.py)
+GEMINI_API_KEY = env.str("GEMINI_API_KEY", default=None)
+BEDROCK_CLAUDE_3_SONNET_ARN = env.str("BEDROCK_CLAUDE_3_SONNET_ARN", default=None)
+BEDROCK_CLAUDE_SONNET_4_5_ARN = env.str("BEDROCK_CLAUDE_SONNET_4_5_ARN", default=None)
+BEDROCK_GPT_OSS_120B_ARN = env.str("BEDROCK_GPT_OSS_120B_ARN", default=None)
