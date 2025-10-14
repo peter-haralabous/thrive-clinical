@@ -60,6 +60,7 @@ class ReportMixin:
     def add_report_arguments(self: SelfProtocol, parser: ArgumentParser) -> None:
         parser.add_argument(
             "--format",
+            dest="format_",
             default=None,
             choices=_valid_tablib_format(),
         )
