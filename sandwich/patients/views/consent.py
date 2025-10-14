@@ -7,6 +7,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from sandwich.core.models.consent import ConsentPolicy
@@ -52,7 +53,7 @@ def patient_consent(request: AuthenticatedHttpRequest) -> HttpResponse:
                 ConsentPolicy.THRIVE_MARKETING_POLICY: form.cleaned_data["marketing"],
             },
         )
-        return HttpResponseRedirect(request.GET.get("next", "patients:home"))
+        return HttpResponseRedirect(redirect_to=request.GET.get("next", reverse("patients:home")))
 
     context = {"form": form}
     return render(request, "patient/patient_consent.html", context)
