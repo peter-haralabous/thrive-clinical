@@ -1,61 +1,7 @@
-{% load static i18n %}
+{% extends 'partials/topnav.html' %}
 
-<nav class="navbar bg-base-100 border-b border-base-300 px-6">
-  <div class="flex-1">
-    {% block topnav_items_start %}
-    {% endblock topnav_items_start %}
-  </div>
-  <div class="flex gap-2 items-center">
-    {% block nav_items %}
-    {% endblock nav_items %}
-    {% if request.user.is_authenticated %}
-      <div class="dropdown dropdown-end">
-        <div tabindex="0"
-             role="button"
-             class="btn btn-ghost btn-circle border-none avatar avatar-placeholder">
-          <div class="bg-neutral text-neutral-content w-10 rounded-full">
-            <span class="text-sm">{{ patient.initials }}</span>
-          </div>
-        </div>
-        {% if patient %}
-          <ul tabindex="0"
-              class="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 min-w-52 p-2 shadow">
-            <li class="menu-title pointer-events-none">
-              {# TODO: patient switcher #}
-              <div class="text-base-content">{{ patient.full_name }}</div>
-              <div class="text-xs">{{ user.email }}</div>
-            </li>
-            <li>
-              <a href="{% url "patients:patient_edit" patient_id=patient.id %}">{% translate "Settings" %}</a>
-            </li>
-            <li>
-              <a href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-            </li>
-          </ul>
-        {% else %}
-          <ul tabindex="0"
-              class="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 min-w-52 p-2 shadow">
-            <li class="menu-title pointer-events-none">
-              <div class="text-xs">{{ user.email }}</div>
-            </li>
-            <li>
-              <a href="{% url 'account_email' %}">{% translate "Settings" %}</a>
-            </li>
-            <li>
-              <a href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
-            </li>
-          </ul>
-        {% endif %}
-      </div>
-    {% else %}
-      {% if ACCOUNT_ALLOW_REGISTRATION %}
-        <a id="sign-up-link"
-           class="btn btn-ghost"
-           href="{% url 'account_signup' %}">{% translate "Sign Up" %}</a>
-      {% endif %}
-      <a id="log-in-link"
-         class="btn btn-ghost"
-         href="{% url 'account_login' %}">{% translate "Sign In" %}</a>
-    {% endif %}
-  </div>
-</nav>
+{% if patient %}
+  {% block avatar_initials %}
+    <span class="text-sm">{{ patient.initials }}</span>
+  {% endblock avatar_initials %}
+{% endif %}

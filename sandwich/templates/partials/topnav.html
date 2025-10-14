@@ -18,7 +18,9 @@
                role="button"
                class="btn btn-ghost btn-circle border-none avatar avatar-placeholder">
             <div class="bg-neutral text-neutral-content w-10 rounded-full">
-              <span class="text-sm">{{ request.user.initials }}</span>
+              {% block avatar_initials %}
+                <span class="text-sm">{{ request.user.initials }}</span>
+              {% endblock avatar_initials %}
             </div>
           </div>
           <ul tabindex="0"
