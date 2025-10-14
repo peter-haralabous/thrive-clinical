@@ -3,13 +3,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.templatetags.static import static as resolve_static
+from django.urls import URLPattern
+from django.urls import URLResolver
 from django.urls import include
 from django.urls import path
 from django.views import defaults as default_views
 from django.views.generic import RedirectView
 from django.views.generic import TemplateView
 
-urlpatterns = [
+urlpatterns: list[URLResolver | URLPattern] = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
