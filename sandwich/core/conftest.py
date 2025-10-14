@@ -1,7 +1,9 @@
 import pytest
+from django.core.files.base import ContentFile
 
 from sandwich.conftest import django_session_fixtures
 from sandwich.core.factories import PatientFactory
+from sandwich.core.models import Document
 from sandwich.core.models import Encounter
 from sandwich.core.models import Organization
 from sandwich.core.models import Patient
@@ -23,15 +25,24 @@ def organization():
 
 
 @pytest.fixture
-def patient(organization: Organization) -> Patient:
+def patient(organization: Organization, user: User) -> Patient:
     return PatientFactory.create(
-        first_name="John", last_name="Doe", email="jdoe@example.com", organization=organization
+        first_name="John", last_name="Doe", email="jdoe@example.com", organization=organization, user=user
     )
 
 
 @pytest.fixture
 def encounter(organization: Organization, patient: Patient):
     return Encounter.objects.create(patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS)
+
+
+@pytest.fixture
+def document(patient: Patient, encounter: Encounter) -> Document:
+    return Document.objects.create(
+        patient=patient,
+        encounter=encounter,
+        file=ContentFile("Hello World", name="hello_world.txt"),
+    )
 
 
 @pytest.fixture
