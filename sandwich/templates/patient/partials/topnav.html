@@ -18,13 +18,12 @@
           </div>
         </div>
         <ul tabindex="0"
-            class="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+            class="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
           <li>
-            <a href="{% url "patients:patient_edit" patient_id=patient.id %}"
-               class="text-base">{% translate "Settings" %}</a>
+            <a href="{% url "patients:patient_edit" patient_id=patient.id %}">{% translate "Settings" %}</a>
           </li>
           <li>
-            <a href="{% url 'account_logout' %}" class="text-base">{% translate "Sign Out" %}</a>
+            <a href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
           </li>
         </ul>
       </div>
