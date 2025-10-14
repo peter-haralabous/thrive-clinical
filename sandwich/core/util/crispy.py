@@ -19,7 +19,7 @@ default_styles = {
     "date": base_input,
     "datetime": base_input,
     "time": base_input,
-    "checkbox": "",
+    "checkbox": "checkbox",
     "select": "",
     "nullbooleanselect": "",
     "selectmultiple": "",
