@@ -38,3 +38,10 @@
     })
   </script>
 {% endblock topnav_items_center %}
+{% block avatar_nav_items %}
+  {% if organization %}
+    <li>
+      <a href="{% url 'providers:organization_edit' organization_id=organization.id %}">Organization Settings</a>
+    </li>
+  {% endif %}
+{% endblock avatar_nav_items %}

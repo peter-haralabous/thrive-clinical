@@ -29,6 +29,8 @@
             <li>
               <a href="{% url 'account_email' %}">{% translate "Settings" %}</a>
             </li>
+            {% block avatar_nav_items %}
+            {% endblock avatar_nav_items %}
             <li>
               <a href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
             </li>
