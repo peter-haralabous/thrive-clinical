@@ -48,7 +48,7 @@ def test_middleware(client: Client, user: User) -> None:
     client.force_login(user)
 
     with patch("sandwich.core.middleware.consent._handle_missing_consent") as mock_handle_missing_consent:
-        client.get(reverse("home"))
+        client.get(reverse("core:home"))
         mock_handle_missing_consent.assert_called_once()
 
 
@@ -61,7 +61,7 @@ def test_middleware_consented(
     client.force_login(user)
 
     with patch("sandwich.core.middleware.consent._handle_missing_consent") as mock_handle_missing_consent:
-        client.get(reverse("home"))
+        client.get(reverse("core:home"))
         mock_handle_missing_consent.assert_not_called()
 
 

@@ -5,7 +5,8 @@
     <a class="btn btn-ghost normal-case text-xl"
        href="{% url 'providers:organization' organization_id=organization.id %}">{{ organization.name }}</a>
   {% else %}
-    <a class="btn btn-ghost normal-case text-xl" href="{% url 'home' %}">HealthConnect</a>
+    <a class="btn btn-ghost normal-case text-xl"
+       href="{% url 'core:home' %}">HealthConnect</a>
   {% endif %}
 {% endblock sidenav-title %}
 {% block sidenav-items %}
