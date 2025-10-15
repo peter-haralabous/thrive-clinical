@@ -1,5 +1,4 @@
 {% load sortable %}
-{% load query_string %}
 
 <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
   <table class="table">
@@ -36,7 +35,7 @@
 <nav aria-label="Patient pagination" class="join mt-2">
   {% if patients.has_previous %}
     <a class="join-item btn"
-       href="{% query_string request.GET page=patients.previous_page_number %}"
+       href="{% querystring page=patients.previous_page_number %}"
        aria-label="Previous">
       <span aria-hidden="true">&laquo; Previous</span>
     </a>
@@ -48,7 +47,7 @@
   <span class="join-item btn">Page {{ patients.number }} of {{ patients.paginator.num_pages }}</span>
   {% if patients.has_next %}
     <a class="join-item btn"
-       href="{% query_string request.GET page=patients.next_page_number %}"
+       href="{% querystring page=patients.next_page_number %}"
        aria-label="Next">
       <span aria-hidden="true">Next &raquo;</span>
     </a>
