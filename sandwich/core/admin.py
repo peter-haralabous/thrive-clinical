@@ -12,6 +12,13 @@ from sandwich.core.models import Task
 from sandwich.core.models import Template
 
 
+@admin.register(Email)
+class EmailAdmin(admin.ModelAdmin):
+    list_display = ("to", "status", "created_at", "updated_at")
+    search_fields = ("to",)
+    list_filter = ("status", "created_at", "updated_at")
+
+
 @admin.register(Organization)
 class OrganizationAdmin(admin.ModelAdmin):
     list_display = ("slug", "name", "created_at", "updated_at")
@@ -29,13 +36,6 @@ class TemplateAdmin(admin.ModelAdmin):
     @admin.display(description="Description", boolean=False)
     def short_description(self, obj):
         return obj.description.splitlines()[0] if obj.description else ""
-
-
-@admin.register(Email)
-class EmailAdmin(admin.ModelAdmin):
-    list_display = ("to", "status", "created_at", "updated_at")
-    search_fields = ("to",)
-    list_filter = ("status", "created_at", "updated_at")
 
 
 admin.site.register(
