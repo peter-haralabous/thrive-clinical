@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = "==3.13.*"
 resolution-markers = [
     "platform_python_implementation != 'PyPy'",
@@ -521,6 +521,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/6d/b3/ed0f54ed706ec0b54fd251cc0364a249c6cd6c6ec97f04dc34be5e929eac/django_extensions-4.1.tar.gz", hash = "sha256:7b70a4d28e9b840f44694e3f7feb54f55d495f8b3fa6c5c0e5e12bcb2aa3cdeb", size = 283078, upload-time = "2025-04-11T01:15:39.617Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/64/96/d967ca440d6a8e3861120f51985d8e5aec79b9a8bdda16041206adfe7adc/django_extensions-4.1-py3-none-any.whl", hash = "sha256:0699a7af28f2523bf8db309a80278519362cd4b6e1fd0a8cd4bf063e1e023336", size = 232980, upload-time = "2025-04-11T01:15:37.701Z" },
+]
+
+[[package]]
+name = "django-guardian"
+version = "3.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e2/f9/bcff6a931298b9eb55e1550b55ab964fab747f594ba6d2d81cbe19736c5f/django_guardian-3.2.0.tar.gz", hash = "sha256:9e18ecd2e211b665972690c2d03d27bce0ea4932b5efac24a4bb9d526950a69e", size = 99940, upload-time = "2025-09-16T10:35:53.609Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2f/23/63a7d868373a73d25c4a5c2dd3cce3aaeb22fbee82560d42b6e93ba01403/django_guardian-3.2.0-py3-none-any.whl", hash = "sha256:0768565a057988a93fc4a1d93649c4a794abfd7473a8408a079cfbf83c559d77", size = 134674, upload-time = "2025-09-16T10:35:51.69Z" },
 ]
 
 [[package]]
@@ -2126,6 +2138,7 @@ dependencies = [
     { name = "django-datadog-logger" },
     { name = "django-enum" },
     { name = "django-environ" },
+    { name = "django-guardian" },
     { name = "django-jsonform" },
     { name = "django-model-utils" },
     { name = "django-modeltranslation" },
@@ -2188,6 +2201,7 @@ requires-dist = [
     { name = "django-datadog-logger", specifier = ">=0.7.3" },
     { name = "django-enum", specifier = ">=2.2.3" },
     { name = "django-environ", specifier = "==0.12.0" },
+    { name = "django-guardian", specifier = ">=3.2.0" },
     { name = "django-jsonform", specifier = ">=2.23.2" },
     { name = "django-model-utils", specifier = "==5.0.0" },
     { name = "django-modeltranslation", specifier = "==0.19.17" },

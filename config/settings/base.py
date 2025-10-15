@@ -103,6 +103,7 @@ THIRD_PARTY_APPS = [
     "django_jsonform",
     "procrastinate.contrib.django",
     "private_storage",
+    "guardian",
 ]
 
 LOCAL_APPS = [
@@ -121,6 +122,7 @@ INSTALLED_APPS = PRIORITY_APPS + DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
+    "guardian.backends.ObjectPermissionBackend",
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
