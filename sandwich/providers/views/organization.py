@@ -47,7 +47,7 @@ class OrganizationAdd(forms.ModelForm[Organization]):
 
     class Meta:
         model = Organization
-        fields = ("name", "verification_type")
+        fields = ("name",)
 
 
 # The JSONFormWidget for PatientStatuses uses this method for style
