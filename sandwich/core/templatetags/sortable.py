@@ -12,8 +12,8 @@ def sortable_column(context, label, field):
     params = request.GET.copy()
     current_sort = sort or ""
 
-    if "sort" in params:
-        params.pop("sort")
+    params.pop("sort", None)
+    params.pop("page", None)  # reset pagination on sort change
 
     if current_sort == field:
         new_sort = f"-{field}"
