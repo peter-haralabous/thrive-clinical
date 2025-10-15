@@ -3,6 +3,7 @@ from .document import Document
 from .email import Email
 from .encounter import Encounter
 from .entity import Entity
+from .fact import Fact
 from .formio_submission import FormioSubmission
 from .invitation import Invitation
 from .organization import Organization
@@ -17,6 +18,7 @@ __all__ = [
     "Email",
     "Encounter",
     "Entity",
+    "Fact",
     "FormioSubmission",
     "Invitation",
     "Organization",
