@@ -77,7 +77,7 @@
               <div class="badge badge-outline badge-error">Inactive</div>
             {% endif %}
             <p>Assigned on {{ task.created_at }}</p>
-            {% if task.ended_at %}<p>Complated on {{ task.ended_at }}</p>{% endif %}
+            {% if task.ended_at %}<p>Completed on {{ task.ended_at }}</p>{% endif %}
             <div class="card-actions justify-end">
               <a href="{% url "patients:task" patient_id=task.patient_id task_id=task.id %}"
                  class="btn btn-primary">Go to
