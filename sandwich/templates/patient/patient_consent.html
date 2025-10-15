@@ -2,8 +2,11 @@
 
 {% load crispy_forms_tags %}
 
-{% block component_logo %}
-  <h1 class="text-center my-5">
+{% block component_max_width %}
+  2xl
+{% endblock component_max_width %}
+{% block component_title %}
+  <h1 class="text-center mb-3 text-3xl">
     <svg xmlns="http://www.w3.org/2000/svg"
          class="text-primary inline-block"
          width="40"
@@ -20,16 +23,13 @@
     </svg>
     HealthConnect
   </h1>
-{% endblock component_logo %}
-{% block component_max_width %}
-  2xl
-{% endblock component_max_width %}
+  <hr />
+{% endblock component_title %}
 {% block component_content %}
   <div class="text-center">
     <h2>Your Consent Matters</h2>
     <p>Please review how we use your data to provide our services.</p>
   </div>
-  <hr />
   <h3>Your Health Data</h3>
   <p>
     To provide you with personalized insights, summaries, and recommendations, Health Connect processes the health information you provide. This data is stored securely and is only used to power the features within your account.
