@@ -54,6 +54,20 @@
 }
 
 @layer utility {
+  /* Update DaisyUI prose styling to match desired typography */
+  .prose {
+    line-height: 1.4;
+
+    h2 {
+      margin: 1em 0;
+    }
+
+    hr {
+      margin: 1em 0;
+      height: 1px;
+    }
+  }
+
   /* Fix alignment on checkboxes */
   .checkbox_wrapper {
     div {
