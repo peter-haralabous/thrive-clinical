@@ -1,12 +1,18 @@
 {% extends 'partials/topnav.html' %}
 
-{% if patient %}
-  {% block avatar_initials %}
+{% block avatar_initials %}
+  {% if patient %}
     <span class="text-sm">{{ patient.initials }}</span>
-  {% endblock avatar_initials %}
-  {% block avatar_menu_title %}
+  {% else %}
+    <span class="text-sm">{{ request.user.initials }}</span>
+  {% endif %}
+{% endblock avatar_initials %}
+{% block avatar_menu_title %}
+  {% if patient %}
     {# TODO: patient switcher #}
     <div class="text-base-content">{{ patient.full_name }}</div>
     <div class="text-xs">{{ user.email }}</div>
-  {% endblock avatar_menu_title %}
-{% endif %}
+  {% else %}
+    <div class="text-xs">{{ user.email }}</div>
+  {% endif %}
+{% endblock avatar_menu_title %}
