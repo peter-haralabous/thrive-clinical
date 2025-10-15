@@ -1,7 +1,7 @@
 {% extends "patient/base.html" %}
 
 {% block content %}
-  <h2 class="mb-4">Hi {{ patient.full_name }}</h2>
+  <h2 class="mb-4">Welcome, {{ patient.full_name }}</h2>
   <h3 class="my-2 flex items-center gap-2">
     Documents
     <button id="upload-btn" type="button" class="btn btn-sm btn-primary">Upload</button>
@@ -64,34 +64,26 @@
     });
   </script>
   {# NOTE: tasks are only relevant if this patient is linked with an organization #}
-  <h3 class="my-2">Tasks</h3>
-  <div class="overflow-x-auto rounded-box border border-base-content/5 bg-base-100">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Started</th>
-          <th>Ended</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for task in tasks %}
-          <tr>
-            <td>
-              <a href="{% url "patients:task" patient_id=task.patient_id task_id=task.id %}"
-                 class="link">{{ task.name }}</a>
-            </td>
-            <td>{{ task.created_at }}</td>
-            <td>{{ task.ended_at|default:"—" }}</td>
-            <td>{{ task.get_status_display }}</td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="4" class="text-center">No tasks found.</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+  {% if tasks.length > 0 %}
+    <h3 class="mb-2">Tasks</h3>
+    {% for task in tasks %}
+      <div class="card card-border bg-base-100 rounded-2xl">
+        <div class="card-body">
+          <h2 class="card-title">{{ task.name }}</h2>
+          {% if task.active %}
+            <div class="badge badge-outline badge-success">Active</div>
+          {% else %}
+            <div class="badge badge-outline badge-error">Inactive</div>
+          {% endif %}
+          <p>Assigned on {{ task.created_at }}</p>
+          {% if task.ended_at %}<p>Complated on {{ task.ended_at }}</p>{% endif %}
+          <div class="card-actions justify-end">
+            <a href="{% url " patients:task" patient_id=task.patient_id task_id=task.id %}"
+               class="btn btn-primary">Go to
+            task</a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
 {% endblock content %}
