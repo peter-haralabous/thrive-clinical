@@ -40,8 +40,6 @@ class OrganizationEdit(forms.ModelForm[Organization]):
 
 
 class OrganizationAdd(forms.ModelForm[Organization]):
-    patient_statuses = SchemaField(schema=list[PatientStatus], widget=JSONFormWidget, required=False)
-
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
@@ -49,7 +47,7 @@ class OrganizationAdd(forms.ModelForm[Organization]):
 
     class Meta:
         model = Organization
-        fields = ("name", "patient_statuses", "verification_type")
+        fields = ("name", "verification_type")
 
 
 # The JSONFormWidget for PatientStatuses uses this method for style
