@@ -4,4 +4,9 @@
   {% block avatar_initials %}
     <span class="text-sm">{{ patient.initials }}</span>
   {% endblock avatar_initials %}
+  {% block avatar_menu_title %}
+    {# TODO: patient switcher #}
+    <div class="text-base-content">{{ patient.full_name }}</div>
+    <div class="text-xs">{{ user.email }}</div>
+  {% endblock avatar_menu_title %}
 {% endif %}

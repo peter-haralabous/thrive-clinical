@@ -26,7 +26,9 @@
           <ul tabindex="0"
               class="menu menu-md dropdown-content bg-base-100 rounded-box z-1 mt-3 min-w-52 p-2 shadow">
             <li class="menu-title pointer-events-none">
-              <div class="text-xs">{{ user.email }}</div>
+              {% block avatar_menu_title %}
+                <div class="text-xs">{{ user.email }}</div>
+              {% endblock avatar_menu_title %}
             </li>
             <li>
               <a href="{% url 'account_email' %}">{% translate "Settings" %}</a>
