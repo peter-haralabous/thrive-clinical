@@ -1,6 +1,20 @@
+import enum
+
 from django.db import models
+from django_enum import EnumField
 
 from sandwich.core.models.abstract import BaseModel
+
+
+class EntityType(enum.Enum):
+    PATIENT = "Patient"
+    CONDITION = "Condition"
+    MEDICATION = "Medication"
+    OBSERVATION = "Observation"
+    ALLERGY_INTOLERANCE = "AllergyIntolerance"
+    IMMUNIZATION = "Immunization"
+    PROCEDURE = "Procedure"
+    FAMILY_MEMBER = "FamilyMember"
 
 
 class Entity(BaseModel):
@@ -8,7 +22,9 @@ class Entity(BaseModel):
     A node in the knowledge graph (e.g. patient, symptom, drug, place, etc.)
     """
 
-    type = models.CharField(max_length=100, help_text="e.g., 'person', 'medication'")
+    type: models.Field[EntityType, EntityType] = EnumField(
+        EntityType, null=True, blank=True, help_text="Type of the entity in the knowledge graph."
+    )
     metadata = models.JSONField(blank=True, null=True, help_text="e.g., FHIR codes, LOINC, etc.")
 
     class Meta:
