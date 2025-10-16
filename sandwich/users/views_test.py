@@ -3,16 +3,14 @@ from http import HTTPStatus
 import pytest
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.models import AnonymousUser
 from django.contrib.messages.middleware import MessageMiddleware
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.http import HttpRequest
 from django.http import HttpResponseRedirect
-from django.test import RequestFactory
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from sandwich.users.factories import UserFactory
+from sandwich.core.util.testing import UserRequestFactory
 from sandwich.users.forms import UserAdminChangeForm
 from sandwich.users.models import User
 from sandwich.users.views import UserRedirectView
@@ -34,31 +32,28 @@ class TestUserUpdateView:
     def dummy_get_response(self, request: HttpRequest):
         return None
 
-    def test_get_success_url(self, user: User, rf: RequestFactory):
+    def test_get_success_url(self, user: User, urf: UserRequestFactory):
         view = UserUpdateView()
-        request = rf.get("/fake-url/")
-        request.user = user
+        request = urf(user).get("/fake-url/")
 
         view.request = request
         assert view.get_success_url() == f"/users/{user.pk}/"
 
-    def test_get_object(self, user: User, rf: RequestFactory):
+    def test_get_object(self, user: User, urf: UserRequestFactory):
         view = UserUpdateView()
-        request = rf.get("/fake-url/")
-        request.user = user
+        request = urf(user).get("/fake-url/")
 
         view.request = request
 
         assert view.get_object() == user
 
-    def test_form_valid(self, user: User, rf: RequestFactory):
+    def test_form_valid(self, user: User, urf: UserRequestFactory):
         view = UserUpdateView()
-        request = rf.get("/fake-url/")
+        request = urf(user).get("/fake-url/")
 
         # Add the session/message middleware to the request
         SessionMiddleware(self.dummy_get_response).process_request(request)
         MessageMiddleware(self.dummy_get_response).process_request(request)
-        request.user = user
 
         view.request = request
 
@@ -73,26 +68,23 @@ class TestUserUpdateView:
 
 
 class TestUserRedirectView:
-    def test_get_redirect_url(self, user: User, rf: RequestFactory):
+    def test_get_redirect_url(self, user: User, urf: UserRequestFactory):
         view = UserRedirectView()
-        request = rf.get("/fake-url")
-        request.user = user
+        request = urf(user).get("/fake-url")
 
         view.request = request
         assert view.get_redirect_url() == f"/users/{user.pk}/"
 
 
 class TestUserDetailView:
-    def test_authenticated(self, user: User, rf: RequestFactory):
-        request = rf.get("/fake-url/")
-        request.user = UserFactory()  # type: ignore[assignment]
+    def test_authenticated(self, user: User, urf: UserRequestFactory):
+        request = urf(user).get("/fake-url/")
         response = user_detail_view(request, pk=user.pk)
 
         assert response.status_code == HTTPStatus.OK
 
-    def test_not_authenticated(self, user: User, rf: RequestFactory):
-        request = rf.get("/fake-url/")
-        request.user = AnonymousUser()
+    def test_not_authenticated(self, user: User, urf: UserRequestFactory):
+        request = urf.get("/fake-url/")
         response = user_detail_view(request, pk=user.pk)
         login_url = reverse(settings.LOGIN_URL)
 

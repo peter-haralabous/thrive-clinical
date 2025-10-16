@@ -4,7 +4,6 @@ from importlib import reload
 
 import pytest
 from django.contrib import admin
-from django.contrib.auth.models import AnonymousUser
 from django.urls import reverse
 from pytest_django.asserts import assertRedirects
 
@@ -55,9 +54,8 @@ class TestUserAdmin:
 
     @pytest.mark.django_db
     @pytest.mark.usefixtures("_force_allauth")
-    def test_allauth_login(self, rf, settings):
-        request = rf.get("/fake-url")
-        request.user = AnonymousUser()
+    def test_allauth_login(self, urf, settings):
+        request = urf.get("/fake-url")
         response = admin.site.login(request)
 
         # The `admin` login view should redirect to the `allauth` login view
