@@ -18,6 +18,11 @@ class UserFactory(DjangoModelFactory[User]):
         self.consents = None
 
     @post_generation
+    def groups(self, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
+        if create and extracted:
+            self.groups.add(*extracted)
+
+    @post_generation
     def password(self, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
         password = (
             extracted
