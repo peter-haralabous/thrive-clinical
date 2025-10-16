@@ -35,7 +35,7 @@ def user(db) -> User:
 
 @pytest.fixture
 def user_wo_consent(db) -> User:
-    return UserFactory.create(consent=None)
+    return UserFactory.create(consents=None)
 
 
 @pytest.fixture
