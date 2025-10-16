@@ -87,6 +87,7 @@ def test_all_routes_are_authenticated():
         "patients/api/docs",
         "patients/api/openapi.json",
         "patients/invite/<str:token>/accept",
+        "policy/<slug:slug>/",
         "private-media/^(?P<path>.*)$",
     }
     found_public_routes = set()

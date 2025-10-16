@@ -10,6 +10,7 @@ from sandwich.core.views.healthcheck import healthcheck
 from sandwich.core.views.home import home
 from sandwich.core.views.legal import legal_view
 from sandwich.core.views.notifications import account_notifications
+from sandwich.core.views.policy import policy_detail
 from sandwich.core.views.switcher import switcher
 
 app_name = "core"
@@ -21,6 +22,7 @@ urlpatterns = [
     path("notifications", account_notifications, name="account_notifications"),
     path("legal/", legal_view, name="legal"),
     path("favicon.ico", RedirectView.as_view(url=resolve_static("images/favicons/favicon.ico"))),
+    path("policy/<slug:slug>/", policy_detail, name="policy_detail"),
 ]
 
 

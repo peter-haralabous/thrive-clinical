@@ -43,6 +43,7 @@ class ConsentMiddleware:
     exempt_view_names: set[ViewName] = {
         "core:healthcheck",
         "core:home",
+        "core:policy_detail",
         "patients:consent",
         "serve_private_file",
     }
