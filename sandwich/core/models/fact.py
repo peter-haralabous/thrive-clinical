@@ -21,9 +21,10 @@ class Fact(BaseModel):
         related_name="facts",
         on_delete=models.SET_NULL,
     )
-    # TODO-RG: Add status/validity field (e.g., active, inactive)
-    # TODO-RG: Add patient reference if needed
     metadata = models.JSONField(blank=True, null=True, help_text="Additional data about the fact.")
+
+    start_datetime = models.DateTimeField(null=True, blank=True, help_text="The start date and time of the fact.")
+    end_datetime = models.DateTimeField(null=True, blank=True, help_text="The end date and time of the fact.")
 
     def __str__(self):
         return f"{self.subject} {self.predicate} {self.object}"
