@@ -17,14 +17,12 @@ from sandwich.core.util.http import AuthenticatedHttpRequest
 logger = logging.getLogger(__name__)
 
 _blank_link = '<a class="link" target="_blank" href="%s">%s</a>'
-tos_link = _blank_link % ("https://www.thrive.health/terms", "Terms of Use")
-privacy_link = _blank_link % ("https://www.thrive.health/privacynotice", "Privacy Policy")
 
 
 class PatientConsentForm(forms.Form):
     required = forms.BooleanField(
         required=True,
-        label=mark_safe(f"I agree to the {tos_link} and {privacy_link}"),  # noqa: S308
+        label="",  # will be set in __init__
         help_text="I consent to the use of my health data to power the features within this application.",
     )
     marketing = forms.BooleanField(
@@ -35,6 +33,15 @@ class PatientConsentForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        tos_link = _blank_link % (
+            reverse("core:policy_detail", args=["terms-of-use"]),
+            "Terms of Use",
+        )
+        privacy_link = _blank_link % (
+            reverse("core:policy_detail", args=["privacy-notice"]),
+            "Privacy Policy",
+        )
+        self.fields["required"].label = mark_safe(f"I agree to the {tos_link} and {privacy_link}")  # noqa: S308
         self.helper = FormHelper(self)
         self.helper.add_input(Submit("continue", "Continue", css_class="btn btn-primary w-full"))
         self.helper.field_template = "form/field.html"  # type: ignore[assignment]

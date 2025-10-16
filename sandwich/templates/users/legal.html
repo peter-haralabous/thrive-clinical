@@ -8,7 +8,7 @@
         {% if consent.decision %}
           {% if consent.policy == "THRIVE_PRIVACY_POLICY" %}
             <li>
-              <a href="https://www.thrive.health/privacynotice"
+              <a href="{% url 'core:policy_detail' slug='privacy-notice' %}"
                  target="_blank"
                  rel="noopener"
                  class="list-row no-underline">
@@ -24,7 +24,7 @@
             </li>
           {% elif consent.policy == "THRIVE_TERMS_OF_USE" %}
             <li>
-              <a href="https://www.thrive.health/terms"
+              <a href="{% url 'core:policy_detail' slug='terms-of-use' %}"
                  target="_blank"
                  rel="noopener"
                  class="list-row no-underline">
