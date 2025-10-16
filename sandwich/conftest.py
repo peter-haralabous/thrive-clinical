@@ -9,6 +9,7 @@ from sandwich.core.factories import PatientFactory
 from sandwich.core.middleware import ConsentMiddleware
 from sandwich.core.models import Organization
 from sandwich.core.models.patient import Patient
+from sandwich.core.models.role import RoleName
 from sandwich.core.util.testing import UserRequestFactory
 from sandwich.users.factories import UserFactory
 from sandwich.users.models import User
@@ -47,6 +48,15 @@ def patient(organization: Organization, user: User) -> Patient:
 @pytest.fixture
 def organization(db) -> Organization:
     return OrganizationFactory.create(name="Organization")
+
+
+@pytest.fixture
+def provider(db, organization: Organization) -> User:
+    return UserFactory.create(
+        email="provider@organization.org",
+        consents=ConsentMiddleware.required_policies,
+        groups={role.group for role in organization.role_set.filter(name=RoleName.STAFF)},  # type: ignore[attr-defined]
+    )
 
 
 @pytest.fixture
