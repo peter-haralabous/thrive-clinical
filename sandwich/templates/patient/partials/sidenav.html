@@ -2,8 +2,8 @@
 
 {% block sidenav-items %}
   <li>
-    <a href="{% url 'patients:home' %}"
-       class="flex items-center justify-start w-full btn btn-ghost {% if request.resolver_match.url_name == 'encounter_list' %}btn-active{% endif %}">
+    <a href="{% if patient %}{% url 'patients:patient_details' patient_id=patient.id %}{% else %}{% url 'patients:home' %}{% endif %}"
+       class="flex items-center justify-start w-full btn btn-ghost {% if request.resolver_match.url_name == 'patient_details' %}btn-active{% endif %}">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="24"
            height="24"

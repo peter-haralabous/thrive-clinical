@@ -220,7 +220,11 @@ def patient_details(request: AuthenticatedHttpRequest, patient_id: int) -> HttpR
 
 def _patient_context(request: AuthenticatedHttpRequest, patient: Patient | None = None) -> dict[str, Any]:
     """Fetch additional template context required for patient context"""
-    return {"patient": patient, "patients": request.user.patient_set.all()}
+    return {
+        # used to show the right name in the top nav
+        # and contextualizes all the links in the side nav
+        "patient": patient
+    }
 
 
 @login_required

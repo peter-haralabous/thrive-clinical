@@ -11,6 +11,7 @@ from django.urls import reverse
 
 from sandwich.core.models.task import terminal_task_status
 from sandwich.core.util.http import AuthenticatedHttpRequest
+from sandwich.patients.views.patient import _patient_context
 
 logger = logging.getLogger(__name__)
 
@@ -86,8 +87,7 @@ def task(request: AuthenticatedHttpRequest, patient_id: int, task_id: int) -> Ht
 
     formio_user = {"_id": request.user.id}
 
-    return render(
-        request,
-        "patient/form.html",
-        context={"form_url": form_url, "formio_user": formio_user, "read_only": read_only},
+    context = {"form_url": form_url, "formio_user": formio_user, "read_only": read_only} | _patient_context(
+        request, patient
     )
+    return render(request, "patient/form.html", context=context)
