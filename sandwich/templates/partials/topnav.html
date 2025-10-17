@@ -42,7 +42,10 @@
             {% block avatar_nav_items %}
             {% endblock avatar_nav_items %}
             <li>
-              <a href="{% url 'account_logout' %}">{% translate "Sign Out" %}</a>
+              <form action="{% url 'account_logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Sign Out</button>
+              </form>
             </li>
           </ul>
         </div>
