@@ -10,12 +10,14 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
 from django_jsonform.widgets import JSONFormWidget
 from django_pydantic_field.forms import SchemaField
 from guardian.decorators import permission_required_or_403
 
+from sandwich.core.forms import DeleteConfirmationForm
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.organization import PatientStatus
 from sandwich.core.models.role import RoleName
@@ -130,3 +132,21 @@ def organization_add(request: AuthenticatedHttpRequest) -> HttpResponse:
 
     context = {"form": form}
     return render(request, "provider/organization_add.html", context)
+
+
+@login_required
+def organization_delete(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
+    if request.method == "POST":
+        logger.info("Processing organization deletion", extra={"user_id": request.user.id})
+        form = DeleteConfirmationForm(request.POST)
+        if form.is_valid():
+            org = Organization.objects.get(id=str(organization_id))
+            logger.info("Deleting organization", extra={"org_id": org.id})
+            org.delete()
+            return redirect(reverse("providers:home"))
+
+    form = DeleteConfirmationForm(
+        form_action=reverse("providers:organization_delete", kwargs={"organization_id": organization_id})
+    )
+    context = {"form": form}
+    return render(request, "provider/partials/organization_delete_modal.html", context)

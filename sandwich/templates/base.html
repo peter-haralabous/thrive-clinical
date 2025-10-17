@@ -13,6 +13,8 @@
         HealthConnect
       {% endblock title %}
     </title>
+    <meta name="htmx-config"
+          content='{"inlineScriptNonce":"{{ request.csp_nonce }}"}' />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="bread + htmx" />
     <meta name="author" content="Thrive Health" />

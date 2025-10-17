@@ -13,9 +13,14 @@ class DeleteConfirmationForm(forms.Form):
     )
 
     def __init__(self, *args, **kwargs) -> None:
+        form_action = kwargs.pop("form_action", "")
+
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Delete"))
+
+        if form_action:
+            self.helper.form_action = form_action
 
     def clean_confirmation(self):
         confirmation = self.cleaned_data["confirmation"]

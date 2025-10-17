@@ -85,6 +85,9 @@ If it violates any criterion, move it to `project.ts` (medium) or a new entrypoi
 </script>
 ```
 
+> [!NOTE]
+> The Nonce will be included automatically for any additional html loaded after the initial page load, if the html is requested through an HTMX operation (e.g. modals)
+
 ### Size-Based JavaScript Guidance (Bridging CSP & Bundling)
 
 Pick the lightest compliant option:
