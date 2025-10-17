@@ -18,12 +18,6 @@ def extract_facts_from_text(
 ) -> list[Triple]:
     """
     Extract facts from unstructured text using an LLM, validate output as Triples, and persist to DB.
-    Args:
-        text: The unstructured input text.
-        llm_name: The LLM model to use.
-        temperature: Optional temperature for the LLM.
-    Returns:
-        List of validated triples.
     """
     llm_client = get_llm(llm_name, temperature=temperature)
     prompt = get_ingest_prompt(text)
