@@ -2,6 +2,7 @@ from django.conf import settings
 from django.templatetags.static import static as resolve_static
 from django.urls import path
 from django.views import defaults as default_views
+from django.views.csrf import csrf_failure
 from django.views.generic import RedirectView
 
 from sandwich.core.views.account import account_delete
@@ -36,6 +37,10 @@ if settings.SERVE_ERROR_VIEWS:
             "403/",
             default_views.permission_denied,
             kwargs={"exception": Exception("Permission Denied")},
+        ),
+        path(
+            "403_csrf/",
+            csrf_failure,
         ),
         path(
             "404/",

@@ -6,7 +6,7 @@
 {% block bodyclass %}
   bg-base-200 min-h-screen flex items-center justify-center
 {% endblock bodyclass %}
-{% block body %}
+{% block content %}
   <div class="text-center px-4">
     <!-- Heroicon: lock-closed (outline) -->
     <svg class="w-32 h-32 mx-auto text-base-content/10 float-animation"
@@ -21,4 +21,4 @@
     <p class="text-xl text-base-content/70 mb-8">Access Denied. You don't have permission to view this page.</p>
     <div class="flex flex-wrap gap-3 justify-center">{% include 'partials/error-options.html' %}</div>
   </div>
-{% endblock body %}
+{% endblock content %}

@@ -6,6 +6,8 @@
     Documents
     <button id="upload-btn" type="button" class="btn btn-sm btn-primary">Upload</button>
     <form id="upload-form"
+          method="post"
+          action="{% url 'patients:document_upload' patient_id=patient.id %}"
           hx-post="{% url 'patients:document_upload' patient_id=patient.id %}"
           hx-target="#documents-table-container"
           hx-encoding="multipart/form-data"
