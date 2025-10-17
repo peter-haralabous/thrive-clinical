@@ -19,6 +19,7 @@ class InvitationStatus(models.TextChoices):
 
 
 INVITE_EXPIRY_DAYS = 90
+MAX_VERIFICATION_ATTEMPTS = 3
 
 
 def default_expiry() -> datetime:
@@ -38,3 +39,14 @@ class Invitation(BaseModel):
     last_invited_at = models.DateTimeField(default=timezone.now)
 
     patient = models.ForeignKey("Patient", on_delete=models.CASCADE)
+    verification_attempts = models.PositiveIntegerField(default=0, help_text="number of failed verification attempts")
+
+    def increment_verification_attempts(self) -> None:
+        """Increment verification attempts and update status if limit exceeded."""
+        self.verification_attempts += 1
+        if self.verification_attempts >= MAX_VERIFICATION_ATTEMPTS:
+            self.status = InvitationStatus.FAILED_VERIFICATION
+        self.save(update_fields=["verification_attempts", "status"])
+
+    def get_remaining_verification_attempts(self) -> int:
+        return MAX_VERIFICATION_ATTEMPTS - self.verification_attempts
