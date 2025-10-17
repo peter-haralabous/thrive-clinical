@@ -16,8 +16,7 @@ def get_provider_organizations(user: User) -> QuerySet[Organization]:
     logger.debug("Retrieving provider organizations for user", extra={"user_id": user.id})
 
     # TODO: move to user.provider_organizations?
-    # FIXME: why does mypy think that `role` isn't an Organization field?
-    organizations = Organization.objects.filter(  # type: ignore[misc]
+    organizations = Organization.objects.filter(
         role__group__user=user, role__name__in=(RoleName.OWNER, RoleName.STAFF)
     ).distinct()
 
@@ -67,5 +66,4 @@ def assign_organization_role(organization: Organization, role_name: str, user: U
             "user_id": user.id,
         },
     )
-    # FIXME: why does mypy think that `role_set` isn't an Organization field?
-    organization.role_set.get(name=role_name).group.user_set.add(user)  # type: ignore[attr-defined]
+    organization.role_set.get(name=role_name).group.user_set.add(user)
