@@ -405,6 +405,7 @@ SOCIALACCOUNT_FORMS = {"signup": "sandwich.users.forms.UserSocialSignupForm"}
 GUARDIAN_MONKEY_PATCH_USER = (
     False  # https://django-guardian.readthedocs.io/en/latest/userguide/custom-user-model#custom-user-model
 )
+GUARDIAN_RAISE_403 = True  # show our styled 403 error page
 
 
 # django-webpack-loader
