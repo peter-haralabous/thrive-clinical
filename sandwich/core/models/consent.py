@@ -5,13 +5,15 @@ from sandwich.core.models.abstract import BaseModel
 from sandwich.users.models import User
 
 
-# TODO-NG: should these identifiers include a date in the name?
-#          i.e. THRIVE_PRIVACY_POLICY_2024_01
+# This enum class captures versioned policies identifiers for consents.
+# Enum values should be unique strings and can contain __version suffix.
+# Further details about the policy must be defined in PolicyService.registry
+# for each of these policy identifiers.
 class ConsentPolicy(models.TextChoices):
-    THRIVE_TERMS_OF_USE = "THRIVE_TERMS_OF_USE"
-    THRIVE_PRIVACY_POLICY = "THRIVE_PRIVACY_POLICY"
-    # THRIVE_AI_POLICY = "THRIVE_AI_POLICY"
-    THRIVE_MARKETING_POLICY = "THRIVE_MARKETING_POLICY"
+    THRIVE_TERMS_OF_USE = "THRIVE_TERMS_OF_USE__2020-06-26"
+    THRIVE_PRIVACY_POLICY = "THRIVE_PRIVACY_POLICY__2021-11-09"
+    # THRIVE_AI_POLICY = "THRIVE_AI_POLICY"  # Add version if/when used
+    THRIVE_MARKETING_POLICY = "THRIVE_MARKETING_POLICY__2025-10-16"
 
 
 class ConsentManager(models.Manager["Consent"]):

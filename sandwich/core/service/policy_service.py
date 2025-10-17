@@ -70,6 +70,13 @@ class PolicyService:
     }
 
     @classmethod
+    def extract_version_from_value(cls, value: str) -> str | None:
+        """Extracts the version suffix from a policy value string,
+        e.g. 'THRIVE_TERMS_OF_USE__2020-06-26' -> '2020-06-26'."""
+        parts = value.rsplit("__", 1)
+        return parts[1] if len(parts) > 1 else None
+
+    @classmethod
     def get_content_by_slug(cls, slug, lang=None) -> str:
         lang_info = cls.get_by_slug(slug)
         if not lang_info:
