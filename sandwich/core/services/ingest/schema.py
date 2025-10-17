@@ -107,6 +107,7 @@ TRAITS = {
     ],
 }
 
+# TODO-RG: hook this up with the constraints (`PredicateName``) defined in the Predicate model
 RELATIONSHIPS = [
     {
         "label": "HAS_CONDITION",
@@ -119,29 +120,6 @@ RELATIONSHIPS = [
             },
         ],
         "description": "Subject has been diagnosed with a medical condition.",
-    },
-    {
-        "label": "TOOK_MEDICATION",
-        "properties": [
-            {
-                "name": "quantity",
-                "type": "STRING",
-                "description": "The quantity of medication taken with this particular dosage.",
-            },
-            {"name": "unit", "type": "STRING", "description": "The unit of measurement of the medication quantity."},
-            {
-                "name": "form",
-                "type": "STRING",
-                "description": "The form of the medication (eg. tablets, capsule, powder, etc.)",
-            },
-            {
-                "name": "frequency",
-                "type": "STRING",
-                "description": "How frequently the patient takes this medication.",
-            },
-            {"name": "date", "type": "STRING", "description": "When the medication was taken"},
-        ],
-        "description": "Subject took or was given a medication.",
     },
     {
         "label": "TAKES_MEDICATION",
@@ -188,7 +166,7 @@ RELATIONSHIPS = [
                 "name": "value",
                 "type": "STRING",
                 "required": True,
-                "description": "The quantatitive value of the associated observation.",
+                "description": "The quantitative value of the associated observation.",
             },
             {"name": "unit", "type": "STRING", "description": "Unit of measurement."},
             {"name": "date", "type": "STRING", "description": "When the observation was made"},
@@ -230,7 +208,7 @@ RELATIONSHIPS = [
         "description": "Subject has a family member with a known medical history.",
     },
     {
-        "label": "RECIEVED_IMMUNIZATION",
+        "label": "RECEIVED_IMMUNIZATION",
         "properties": [
             {"name": "date", "type": "DATE", "description": "The date the immunization was administered."},
             {"name": "status", "type": "STRING", "description": "The status of the immunization (e.g., 'completed')."},
@@ -261,7 +239,7 @@ PATTERNS = [
     ("Patient", "HAS_ALLERGY", "AllergyIntolerance"),
     ("Patient", "HAS_FAMILY_HISTORY", "Condition"),
     ("Patient", "HAS_FAMILY_HISTORY", "Observation"),
-    ("Patient", "RECIEVED_IMMUNIZATION", "Immunization"),
+    ("Patient", "RECEIVED_IMMUNIZATION", "Immunization"),
     ("Patient", "UNDERWENT_PROCEDURE", "Procedure"),
 ]
 
