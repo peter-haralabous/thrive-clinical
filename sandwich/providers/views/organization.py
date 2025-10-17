@@ -72,7 +72,9 @@ def organization_edit(request: AuthenticatedHttpRequest, organization_id: int) -
                 extra={"user_id": request.user.id, "organization_id": organization_id},
             )
             messages.add_message(request, messages.SUCCESS, "Organization updated successfully.")
-            return HttpResponseRedirect(reverse("providers:organization", kwargs={"organization_id": organization_id}))
+            return HttpResponseRedirect(
+                reverse("providers:organization_edit", kwargs={"organization_id": organization_id})
+            )
         logger.warning(
             "Invalid organization edit form",
             extra={
