@@ -135,7 +135,7 @@ def patient_edit(request: AuthenticatedHttpRequest, patient_id: int) -> HttpResp
             form.save()
             logger.info("Patient updated successfully", extra={"user_id": request.user.id, "patient_id": patient_id})
             messages.add_message(request, messages.SUCCESS, "Patient updated successfully.")
-            return HttpResponseRedirect(reverse("patients:patient_details", kwargs={"patient_id": patient_id}))
+            return HttpResponseRedirect(reverse("patients:patient_edit", kwargs={"patient_id": patient_id}))
         logger.warning(
             "Invalid patient edit form",
             extra={"user_id": request.user.id, "patient_id": patient_id, "form_errors": list(form.errors.keys())},

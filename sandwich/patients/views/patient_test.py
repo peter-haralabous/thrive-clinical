@@ -27,7 +27,7 @@ def test_patient_edit_post_updates_patient(db, user: User) -> None:
     }
     response = client.post(url, data)
     assert response.status_code == HTTPStatus.FOUND
-    assert response.headers.get("Location") == reverse("patients:patient_details", kwargs={"patient_id": patient.id})
+    assert response.headers.get("Location") == reverse("patients:patient_edit", kwargs={"patient_id": patient.id})
     patient.refresh_from_db()
     assert patient.first_name == "New"
 
