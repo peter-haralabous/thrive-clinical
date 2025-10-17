@@ -15,7 +15,6 @@
     </form>
   </h3>
   <div id="documents-table-container">{% include "patient/partials/documents_table.html" %}</div>
-  <div id="upload-status" class="mt-2 text-sm"></div>
   <script nonce="{{ request.csp_nonce }}">
     document.getElementById('upload-btn').addEventListener('click', () => {
       document.getElementById('file-input').click()
@@ -41,8 +40,8 @@
       if (!files.length) return;
       const file = files[0];
       if (file.type !== 'application/pdf') {
-        document.getElementById('upload-status').textContent = 'Only PDF files are allowed.';
-        document.getElementById('upload-status').classList.add('text-error');
+        // TODO: add javascript interface for showing toast messages
+        alert("Only PDF files are supported.");
         return;
       }
       const fileInput = document.getElementById('file-input');
@@ -50,17 +49,6 @@
       dataTransfer.items.add(file);
       fileInput.files = dataTransfer.files;
       document.getElementById('upload-form').requestSubmit();
-    });
-    // htmx event handlers for status
-    document.body.addEventListener('htmx:afterSwap', function(evt) {
-      if (evt.detail.target.id === 'documents-table-container') {
-        document.getElementById('upload-status').textContent = 'Upload successful!';
-        document.getElementById('upload-status').classList.remove('text-error');
-      }
-    });
-    document.body.addEventListener('htmx:responseError', function(evt) {
-      document.getElementById('upload-status').textContent = 'Upload failed.';
-      document.getElementById('upload-status').classList.add('text-error');
     });
   </script>
   {# NOTE: tasks are only relevant if this patient is linked with an organization #}

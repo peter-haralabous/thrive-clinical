@@ -1,8 +1,8 @@
-from typing import cast
 from uuid import UUID
 
+from django import forms
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
@@ -31,22 +31,40 @@ class DocumentDownloadView(PrivateStorageDetailView):
 document_download = login_required(DocumentDownloadView.as_view())
 
 
+class DocumentForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ("file", "patient", "encounter")
+
+    def clean_file(self):
+        file = self.cleaned_data.get("file")
+        if getattr(file, "content_type", None) != "application/pdf":
+            msg = "Only PDF files are supported."
+            raise forms.ValidationError(msg)
+        return file
+
+    def save(self, commit=True):  # noqa: FBT002
+        instance = super().save(commit=False)
+        file = self.cleaned_data.get("file")
+        if file:
+            instance.content_type = getattr(file, "content_type", "")
+            instance.size = getattr(file, "size", None)
+            instance.original_filename = getattr(file, "name", "")
+        if commit:
+            instance.save()
+        return instance
+
+
 @require_POST
 @login_required
 def document_upload(request: AuthenticatedHttpRequest, patient_id: UUID):
     patient = get_object_or_404(request.user.patient_set, id=patient_id)
-    file = request.FILES.get("file")
-    if not file:
-        return JsonResponse({"success": False, "error": "No file uploaded."})
-    if file.content_type != "application/pdf":
-        return JsonResponse({"success": False, "error": "Only PDF files are allowed."})
-    Document.objects.create(
-        patient=patient,
-        file=file,
-        content_type=file.content_type,
-        size=file.size,
-        original_filename=cast("str", file.name),
-    )
+    form = DocumentForm({"patient": patient.id}, request.FILES)
+    if form.is_valid():
+        form.save()
+    else:
+        error = ", ".join([str(e) for e in form.errors.get("file", [])])
+        messages.add_message(request, messages.ERROR, f"Failed to upload document: {error}")
     documents = patient.document_set.all()
     return render(request, "patient/partials/documents_table.html", {"documents": documents})
 
