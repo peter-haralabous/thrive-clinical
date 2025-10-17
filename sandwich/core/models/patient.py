@@ -8,6 +8,7 @@ from django.contrib.postgres.search import SearchRank
 from django.contrib.postgres.search import SearchVectorField
 from django.db import models
 from django.db.models import F
+from guardian.shortcuts import assign_perm
 
 from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.organization import Organization
@@ -130,3 +131,8 @@ class Patient(BaseModel):
     @property
     def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}"
+
+    def assign_user_owner_perms(self, user: User) -> None:
+        perms = ["view_patient", "change_patient", "delete_patient"]
+        for perm in perms:
+            assign_perm(perm, user, self)

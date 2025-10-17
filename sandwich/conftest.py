@@ -5,8 +5,10 @@ import pytest
 from django.core.management import call_command
 
 from sandwich.core.factories import OrganizationFactory
+from sandwich.core.factories import PatientFactory
 from sandwich.core.middleware import ConsentMiddleware
 from sandwich.core.models import Organization
+from sandwich.core.models.patient import Patient
 from sandwich.users.factories import UserFactory
 from sandwich.users.models import User
 
@@ -22,6 +24,18 @@ def _media_storage(settings, tmpdir) -> None:
 @pytest.fixture
 def user(db) -> User:
     return UserFactory.create(consents=ConsentMiddleware.required_policies)
+
+
+@pytest.fixture
+def patient(organization: Organization, user: User) -> Patient:
+    """
+    Creates a user-owned patient
+    """
+    patient = PatientFactory.create(
+        first_name="John", last_name="Doe", email="jdoe@example.com", organization=organization, user=user
+    )
+    patient.assign_user_owner_perms(user)
+    return patient
 
 
 @pytest.fixture

@@ -5,7 +5,6 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client
 from django.urls import reverse
 
-from sandwich.core.factories import PatientFactory
 from sandwich.core.models import Document
 from sandwich.core.urls_test import UrlRegistration
 from sandwich.core.urls_test import get_all_urls
@@ -13,7 +12,7 @@ from sandwich.patients.urls import urlpatterns as patients_urlspatterns
 
 
 def get_patient_urls() -> list[UrlRegistration]:
-    return get_all_urls(patients_urlspatterns)  # type: ignore[arg-type]
+    return get_all_urls(patients_urlspatterns)
 
 
 # List of urls which are other http verbs (e.g. POST) or redirect (non HTTP 200)
@@ -41,13 +40,9 @@ def test_no_stale_exclusions():
 
 
 @pytest.mark.parametrize("url", get_patient_urls(), ids=lambda url: url.name)
-def test_patient_http_get_urls_return_status_200(db, user, url) -> None:
+def test_patient_http_get_urls_return_status_200(db, user, url, patient) -> None:
     if url.name in EXCLUDED_URL_NAMES:
         pytest.skip(f"{url.name} is excluded")
-
-    # NOTE: always creating a patient, even when it is not needed for the route,
-    # because we don't want to get redirected to onboarding_add by middleware
-    patient = PatientFactory.create(user=user)
 
     client = Client()
     client.force_login(user)

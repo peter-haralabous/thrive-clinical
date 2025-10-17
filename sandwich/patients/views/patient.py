@@ -14,6 +14,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
+from guardian.decorators import permission_required_or_403
 
 from sandwich.core.models.patient import Patient
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -124,6 +125,7 @@ class PatientAdd(forms.ModelForm[Patient]):
 
 
 @login_required
+@permission_required_or_403("change_patient", (Patient, "id", "patient_id"))
 def patient_edit(request: AuthenticatedHttpRequest, patient_id: int) -> HttpResponse:
     logger.info("Accessing patient edit", extra={"user_id": request.user.id, "patient_id": patient_id})
 
@@ -157,6 +159,7 @@ def patient_add(request: AuthenticatedHttpRequest) -> HttpResponse:
         form = PatientAdd(request.POST)
         if form.is_valid():
             patient = form.save(user=request.user)
+            patient.assign_user_owner_perms(request.user)
             logger.info("Patient created successfully", extra={"user_id": request.user.id, "patient_id": patient.id})
             messages.add_message(request, messages.SUCCESS, "Patient added successfully.")
             return HttpResponseRedirect(reverse("patients:patient_details", kwargs={"patient_id": patient.id}))

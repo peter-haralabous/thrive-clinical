@@ -4,6 +4,7 @@ from sandwich.core.factories import OrganizationFactory
 from sandwich.core.factories import PatientFactory
 from sandwich.core.models import Organization
 from sandwich.core.models import Patient
+from sandwich.users.models import User
 
 
 @pytest.mark.django_db
@@ -51,3 +52,16 @@ def test_initials() -> None:
 
     p = Patient(first_name="", last_name="")
     assert p.initials() == ""
+
+
+@pytest.mark.django_db
+def test_patient_assign_user_owner_perms(user: User) -> None:
+    patient = PatientFactory.create()
+
+    assert user.has_perm("change_patient", patient) is False
+    assert user.has_perm("delete_patient", patient) is False
+
+    patient.assign_user_owner_perms(user)
+
+    assert user.has_perm("change_patient", patient)
+    assert user.has_perm("delete_patient", patient)

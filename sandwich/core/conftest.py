@@ -25,13 +25,6 @@ def organization():
 
 
 @pytest.fixture
-def patient(organization: Organization, user: User) -> Patient:
-    return PatientFactory.create(
-        first_name="John", last_name="Doe", email="jdoe@example.com", organization=organization, user=user
-    )
-
-
-@pytest.fixture
 def encounter(organization: Organization, patient: Patient):
     return Encounter.objects.create(patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS)
 

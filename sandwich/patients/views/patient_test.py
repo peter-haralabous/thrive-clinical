@@ -1,3 +1,4 @@
+from datetime import date
 from http import HTTPStatus
 from typing import Any
 
@@ -5,7 +6,6 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
-from sandwich.core.factories import PatientFactory
 from sandwich.core.models.patient import Patient
 from sandwich.patients.views.patient import PatientAdd
 from sandwich.patients.views.patient import PatientEdit
@@ -13,8 +13,7 @@ from sandwich.users.models import User
 
 
 @pytest.mark.django_db
-def test_patient_edit_post_updates_patient(db, user: User) -> None:
-    patient = PatientFactory.create(user=user, first_name="Old")
+def test_patient_edit_post_updates_patient(db, patient: Patient, user: User) -> None:
     client = Client()
     client.force_login(user)
     url = reverse("patients:patient_edit", kwargs={"patient_id": patient.pk})
@@ -33,24 +32,20 @@ def test_patient_edit_post_updates_patient(db, user: User) -> None:
 
 
 @pytest.mark.django_db
-def test_patient_add(db, user: User) -> None:
-    # Needs an existing patient so we don't get redirected to onboarding_add
-    existing_patient = PatientFactory.create(user=user)
-    existing_patient.save()
-
-    patient = PatientFactory.create()
+# NB: patient fixture required, user needs a patient to bypass profile creation
+def test_patient_add(db, user: User, patient: Patient) -> None:
     client = Client()
     client.force_login(user)
     url = reverse("patients:patient_add")
     data = {
-        "first_name": patient.first_name,
+        "first_name": "Jacob",
         "last_name": "Newpatient",
-        "date_of_birth": patient.date_of_birth,
+        "date_of_birth": date(1961, 6, 6),
         "province": "BC",
         "phn": "9111111117",  # BC requires more specific PHN
     }
     response = client.post(url, data)
-    created_patient = Patient.objects.get(last_name="Newpatient", date_of_birth=patient.date_of_birth)
+    created_patient = Patient.objects.get(last_name="Newpatient")
     assert created_patient
     assert response.status_code == HTTPStatus.FOUND
     assert response.headers.get("Location") == reverse(
@@ -60,19 +55,18 @@ def test_patient_add(db, user: User) -> None:
 
 @pytest.mark.django_db
 def test_patient_onboarding_add(db, user: User) -> None:
-    patient = PatientFactory.create()
     client = Client()
     client.force_login(user)
     url = reverse("patients:patient_onboarding_add")
     data = {
-        "first_name": patient.first_name,
+        "first_name": "Jacob",
         "last_name": "Newpatient",
-        "date_of_birth": patient.date_of_birth,
+        "date_of_birth": date(1961, 6, 6),
         "province": "BC",
         "phn": "9111111117",  # BC requires more specific PHN
     }
     response = client.post(url, data)
-    created_patient = Patient.objects.get(last_name="Newpatient", date_of_birth=patient.date_of_birth)
+    created_patient = Patient.objects.get(last_name="Newpatient")
     assert created_patient
     assert response.status_code == HTTPStatus.FOUND
     assert response.headers.get("Location") == reverse("patients:home")
