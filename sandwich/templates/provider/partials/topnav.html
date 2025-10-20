@@ -47,7 +47,11 @@
   </script>
 {% endblock topnav_items_center %}
 {% block avatar_menu_title %}
-  {% if organization %}{{ organization.name }}{% endif %}
+  {% if organization %}
+    {{ organization.name }}
+  {% else %}
+    Switch context
+  {% endif %}
 {% endblock avatar_menu_title %}
 {% block avatar_nav_items %}
   {% if organization %}
