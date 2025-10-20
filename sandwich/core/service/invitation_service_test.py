@@ -1,10 +1,14 @@
 import re
+from datetime import timedelta
 
 import pytest
+from django.utils import timezone
 
+from sandwich.core.factories.invitation import InvitationFactory
 from sandwich.core.models import Invitation
 from sandwich.core.models import Patient
 from sandwich.core.models.invitation import InvitationStatus
+from sandwich.core.service.invitation_service import expire_invitations
 from sandwich.core.service.invitation_service import get_unaccepted_invitation
 from sandwich.core.service.invitation_service import resend_patient_invitation_email
 
@@ -67,3 +71,23 @@ def test_get_unaccepted_invitation_ignores_accepted() -> None:
     Invitation.objects.create(patient=patient, status=InvitationStatus.ACCEPTED)
     actual = get_unaccepted_invitation(patient)
     assert actual is None
+
+
+@pytest.mark.parametrize(
+    ("expires_at", "expected_status", "expected_expiry_count"),
+    [
+        pytest.param(None, InvitationStatus.PENDING, 0, id="no expiry, remains PENDING"),
+        pytest.param(
+            timezone.now() + timedelta(days=90), InvitationStatus.PENDING, 0, id="future expiry, remains PENDING"
+        ),
+        pytest.param(
+            timezone.now() - timedelta(seconds=1), InvitationStatus.EXPIRED, 1, id="past expiry, updates to EXPIRED"
+        ),
+    ],
+)
+def test_expire_invitations(db, expires_at, expected_status, expected_expiry_count) -> None:
+    invite = InvitationFactory.create(expires_at=expires_at)
+    expiry_count = expire_invitations()
+    invite.refresh_from_db()
+    assert invite.status == expected_status
+    assert expiry_count == expected_expiry_count

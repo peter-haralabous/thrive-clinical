@@ -1,12 +1,15 @@
 import logging
 
-# from procrastinate.contrib.django import app
+from procrastinate.contrib.django import app
+
+from sandwich.core.service import invitation_service
 
 logger = logging.getLogger(__name__)
 
 
 # Tasks go here.
 # https://procrastinate.readthedocs.io/en/stable/howto/basics/tasks.html
+# https://procrastinate.readthedocs.io/en/stable/howto/advanced/cron.html#launch-a-task-periodically
 
 # If the task has a better suited place, put it there instead of here.
 # For Procrastinate to find your task(s), make sure that the module is
@@ -16,11 +19,8 @@ logger = logging.getLogger(__name__)
 # https://procrastinate.readthedocs.io/en/stable/howto/django/settings.html#customize-the-app-integration-through-settings
 
 
-# Periodic tasks.
-# https://procrastinate.readthedocs.io/en/stable/howto/advanced/cron.html#launch-a-task-periodically
-
-# Uncomment the following to have a periodic task that runs every 5 minutes.
-# @app.periodic(cron="*/5 * * * *")  # every 5 mins
-# @app.task
-# def dummy_task(timestamp: int):
-#     logger.info("I'm a working worker.")
+@app.periodic(cron="0 2 * * *")  # every day at 2am
+@app.task(lock="expire_invitations_lock")
+def expire_invitations_job(timestamp: int) -> None:
+    expired_count = invitation_service.expire_invitations()
+    logger.info("Expired %d invitations", expired_count)

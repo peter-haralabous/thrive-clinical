@@ -123,3 +123,18 @@ def accept_patient_invitation(invitation: Invitation, user: User) -> None:
         "Patient invitation accepted successfully",
         extra={"invitation_id": invitation.id, "patient_id": invitation.patient.id, "user_id": user.id},
     )
+
+
+def expire_invitations() -> int:
+    """
+    Update Invitations.status to EXPIRED if the current datetime is past the Invitation.expires_at datetime
+    """
+    logger.debug("Updating invitation status to EXPIRED for invitations past their expires_at datetime")
+    expired_count = (
+        Invitation.objects.exclude(expires_at=None)
+        .filter(expires_at__lt=timezone.now())
+        .filter(status=InvitationStatus.PENDING)
+        .update(status=InvitationStatus.EXPIRED)
+    )
+    logger.debug("Expired %d invitations", expired_count)
+    return expired_count
