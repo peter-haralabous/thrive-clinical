@@ -133,6 +133,6 @@ class Patient(BaseModel):
         return f"{self.first_name} {self.last_name}"
 
     def assign_user_owner_perms(self, user: User) -> None:
-        perms = ["view_patient", "change_patient", "delete_patient"]
-        for perm in perms:
-            assign_perm(perm, user, self)
+        assign_perm("view_patient", user, self)
+        assign_perm("change_patient", user, self)
+        assign_perm("delete_patient", user, self)
