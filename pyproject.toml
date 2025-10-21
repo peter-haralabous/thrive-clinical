@@ -207,6 +207,7 @@ dependencies = [
     "langchain[aws,google-genai]>=0.3.27",
     "markdown==3.9",
     "markdown-it-py==4.0.0",
+    "pdf2image>=1.17.0",
     "pillow==11.3.0",
     "procrastinate>=3.5.2",
     "psycopg[binary]>=3.2.10",
