@@ -1,5 +1,6 @@
 import datetime
 import logging
+from typing import TYPE_CHECKING
 
 import pydantic
 from django.db import IntegrityError
@@ -11,6 +12,9 @@ from django_pydantic_field import SchemaField
 from slugify import slugify
 
 from sandwich.core.models.abstract import BaseModel
+
+if TYPE_CHECKING:
+    from sandwich.core.models.role import Role
 
 
 class PatientStatus(pydantic.BaseModel):
@@ -83,5 +87,11 @@ class Organization(BaseModel):  # type: ignore[django-manager-missing] # see doc
         logging.info("Organization slug collision: %s", self.slug)  # no pk yet
         super().save(*args, **kwargs)
 
+    def get_role(self, name: str) -> "Role":
+        return self.role_set.get(name=name)
+
     def natural_key(self) -> tuple[object, ...]:
         return (self.slug,)
+
+    class Meta:
+        permissions = (("create_encounter", "Can create a new patient encounter in this organization."),)

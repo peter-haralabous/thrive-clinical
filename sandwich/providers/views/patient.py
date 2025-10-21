@@ -11,12 +11,16 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Exists
 from django.db.models import OuterRef
+from django.db.models import QuerySet
 from django.http import HttpResponse
+from django.http import HttpResponseNotFound
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
+from guardian.decorators import permission_required_or_403
+from guardian.shortcuts import get_objects_for_user
 
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
@@ -24,6 +28,7 @@ from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import TaskStatus
+from sandwich.core.service.encounter_service import assign_default_encounter_perms
 from sandwich.core.service.encounter_service import complete_encounter
 from sandwich.core.service.encounter_service import get_current_encounter
 from sandwich.core.service.invitation_service import get_unaccepted_invitation
@@ -245,6 +250,7 @@ def patient_edit(request: AuthenticatedHttpRequest, organization_id: int, patien
 
 
 @login_required
+@permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
 def patient_add(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
     logger.info(
         "Accessing provider patient add", extra={"user_id": request.user.id, "organization_id": organization_id}
@@ -262,6 +268,7 @@ def patient_add(request: AuthenticatedHttpRequest, organization_id: int) -> Http
             encounter = Encounter.objects.create(
                 patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
             )
+            assign_default_encounter_perms(encounter)
             logger.info(
                 "Provider patient and encounter created successfully",
                 extra={
@@ -336,9 +343,10 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
     )
 
     patients = Patient.objects.filter(organization=organization)
+    provider_encounters: QuerySet = get_objects_for_user(request.user, "core.view_encounter")
     patients = patients.annotate(
         has_active_encounter=Exists(
-            Encounter.objects.filter(patient=OuterRef("pk"), status=EncounterStatus.IN_PROGRESS)
+            provider_encounters.filter(patient=OuterRef("pk"), status=EncounterStatus.IN_PROGRESS)
         )
     )
 
@@ -393,6 +401,8 @@ def patient_archive(request: AuthenticatedHttpRequest, organization_id: int, pat
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
     patient = get_object_or_404(organization.patient_set, id=patient_id)
     current_encounter = get_current_encounter(patient)
+    if not current_encounter or not request.user.has_perm("change_encounter", current_encounter):
+        return HttpResponseNotFound()
 
     # in the future we might want to capture _why_ the patient was archived
     # i.e. should status be COMPLETED / CANCELLED / ...
@@ -415,6 +425,9 @@ def patient_archive(request: AuthenticatedHttpRequest, organization_id: int, pat
 
 @login_required
 @require_POST
+@permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
+# TODO(MM): create task perms
+# TODO(MM): when we have org-patient perms check can view patient
 def patient_add_task(request: AuthenticatedHttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     logger.info(
         "Adding task to patient",
@@ -425,10 +438,14 @@ def patient_add_task(request: AuthenticatedHttpRequest, organization_id: int, pa
     patient = get_object_or_404(organization.patient_set, id=patient_id)
 
     current_encounter = get_current_encounter(patient)
+    if current_encounter and not request.user.has_perm("view_encounter", current_encounter):
+        return HttpResponseNotFound()
+
     if not current_encounter:
         current_encounter = Encounter.objects.create(
             patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
         )
+        assign_default_encounter_perms(current_encounter)
         logger.debug(
             "Created new encounter for task",
             extra={

@@ -1,10 +1,12 @@
 import logging
 
 from django.utils import timezone
+from guardian.shortcuts import assign_perm
 
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.patient import Patient
+from sandwich.core.models.role import RoleName
 from sandwich.core.service.task_service import cancel_task
 
 logger = logging.getLogger(__name__)
@@ -75,3 +77,22 @@ def get_current_encounter(patient: Patient) -> Encounter | None:
     )
 
     return encounter
+
+
+DEFAULT_ORGANIZATION_ROLE_PERMS = {
+    RoleName.OWNER: ["change_encounter", "view_encounter"],
+    RoleName.ADMIN: ["change_encounter", "view_encounter"],
+    RoleName.STAFF: ["change_encounter", "view_encounter"],
+}
+
+
+def assign_default_encounter_perms(encounter: Encounter) -> None:
+    # Apply org-wide role perms
+    for role_name, perms in DEFAULT_ORGANIZATION_ROLE_PERMS.items():
+        role = encounter.organization.get_role(role_name)
+        for perm in perms:
+            assign_perm(perm, role.group, encounter)
+
+    # Apply encounter-user perms
+    if encounter.patient.user:
+        assign_perm("view_encounter", encounter.patient.user, encounter)

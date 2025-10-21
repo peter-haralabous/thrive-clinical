@@ -13,5 +13,8 @@ def test_create_default_roles_and_perms() -> None:
     org = OrganizationFactory.create()
 
     assert user.has_perm("change_organization", org) is False
+    assert user.has_perm("create_encounter", org) is False
+
     assign_organization_role(org, RoleName.OWNER, user)
     assert user.has_perm("change_organization", org)
+    assert user.has_perm("create_encounter", org)
