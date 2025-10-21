@@ -25,28 +25,18 @@ def get_or_create_entity(object_type, object_label, node):
     node_str = stringify_uuids(node)
     # for Patient, deduplicate by patient_id if present
     if object_type == "Patient" and "patient_id" in node_str:
-        try:
-            entity = Entity.objects.get(type=object_type, metadata__patient_id=str(node_str["patient_id"]))
-            metadata = entity.metadata or {}
-            metadata.update(node_str)
-            entity.metadata = metadata
-            entity.save()
-        except Entity.DoesNotExist:
-            return Entity.objects.create(type=object_type, metadata=node_str)
-        else:
-            return entity
-    # for all other types, fall back to name-based lookup
-    try:
-        entity = Entity.objects.get(type=object_type, metadata__name=object_label)
-        metadata = entity.metadata or {}
-        metadata.update(node_str)
-        entity.metadata = metadata
-        entity.save()
-    except Entity.DoesNotExist:
-        entity = Entity.objects.create(
+        entity, _ = Entity.objects.update_or_create(
             type=object_type,
-            metadata=node_str,
+            metadata__patient_id=str(node_str["patient_id"]),
+            defaults={"metadata": node_str},
         )
+        return entity
+    # for all other types, fall back to name-based lookup
+    entity, _ = Entity.objects.update_or_create(
+        type=object_type,
+        metadata__name=object_label,
+        defaults={"metadata": node_str},
+    )
     return entity
 
 
