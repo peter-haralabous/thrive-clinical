@@ -1,9 +1,13 @@
 import enum
+import typing
 
 from django.db import models
 from django_enum import EnumField
 
 from sandwich.core.models.abstract import BaseModel
+
+if typing.TYPE_CHECKING:
+    from sandwich.core.models import Patient
 
 
 class EntityType(enum.Enum):
@@ -42,3 +46,14 @@ class Entity(BaseModel):
         if self.metadata and "label" in self.metadata:
             return str(self.metadata["label"])
         return str(self.pk)
+
+    @staticmethod
+    def for_patient(patient: "Patient") -> "Entity":
+        return Entity.objects.get_or_create(
+            type=EntityType.PATIENT,
+            metadata__patient_id=str(patient.id),
+            defaults={
+                "type": EntityType.PATIENT,
+                "metadata": {"patient_id": str(patient.id), "label": patient.full_name},
+            },
+        )[0]
