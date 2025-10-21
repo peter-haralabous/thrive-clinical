@@ -183,6 +183,7 @@ def patient_onboarding_add(request: AuthenticatedHttpRequest) -> HttpResponse:
         form = PatientAdd(request.POST)
         if form.is_valid():
             patient = form.save(user=request.user)
+            patient.assign_user_owner_perms(request.user)
             logger.info("Patient created successfully", extra={"user_id": request.user.id, "patient_id": patient.id})
             messages.add_message(request, messages.SUCCESS, "Patient added successfully.")
             return HttpResponseRedirect(reverse("patients:home"))

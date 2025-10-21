@@ -51,6 +51,7 @@ def test_patient_add(db, user: User, patient: Patient) -> None:
     assert response.headers.get("Location") == reverse(
         "patients:patient_details", kwargs={"patient_id": created_patient.id}
     )
+    assert user.has_perm("change_patient", created_patient)
 
 
 @pytest.mark.django_db
@@ -70,6 +71,7 @@ def test_patient_onboarding_add(db, user: User) -> None:
     assert created_patient
     assert response.status_code == HTTPStatus.FOUND
     assert response.headers.get("Location") == reverse("patients:home")
+    assert user.has_perm("change_patient", created_patient)
 
 
 @pytest.mark.parametrize(
