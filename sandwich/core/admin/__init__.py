@@ -1,0 +1,21 @@
+from django.contrib import admin
+
+from sandwich.core.models import Document
+from sandwich.core.models import Encounter
+from sandwich.core.models import FormioSubmission
+from sandwich.core.models import Invitation
+from sandwich.core.models import Patient
+from sandwich.core.models import Task
+
+# For some reason ruff wants a redundant alias
+from .consent import ConsentAdmin as ConsentAdmin
+from .email import EmailAdmin as EmailAdmin
+from .entity import EntityAdmin as EntityAdmin
+from .fact import FactAdmin as FactAdmin
+from .organization import OrganizationAdmin as OrganizationAdmin
+from .predicate import PredicateAdmin as PredicateAdmin
+from .template import TemplateAdmin as TemplateAdmin
+
+admin.site.register(
+    [Document, Encounter, FormioSubmission, Invitation, Patient, Task],
+)
