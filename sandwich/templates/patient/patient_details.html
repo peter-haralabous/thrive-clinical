@@ -1,7 +1,8 @@
 {% extends "patient/base.html" %}
 
 {% block content %}
-  <h2 class="mb-4">Welcome, {{ patient.full_name }}</h2>
+  <h1 class="mb-4">My Health Records</h1>
+  {% include "patient/partials/personal_information.html" with patient=patient %}
   <h3 class="my-2 flex items-center gap-2">
     Documents
     <button id="upload-btn" type="button" class="btn btn-sm btn-primary">Upload</button>
