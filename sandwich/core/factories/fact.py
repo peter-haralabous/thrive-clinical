@@ -1,5 +1,6 @@
 import factory
 
+from sandwich.core.factories.errors import FactoryError
 from sandwich.core.models import Entity
 from sandwich.core.models import Fact
 from sandwich.core.models import Patient
@@ -27,7 +28,10 @@ class FactFactory(factory.django.DjangoModelFactory[Fact]):
         filter_kwargs = {}
         if self.predicate and self.predicate.name in predicate_entity_map:  # type: ignore[attr-defined]
             filter_kwargs = predicate_entity_map[self.predicate.name]  # type: ignore[attr-defined]
-        return Entity.objects.filter(**filter_kwargs).order_by("?").first()
+        random_object = Entity.objects.filter(**filter_kwargs).order_by("?").first()
+        if not random_object:
+            raise FactoryError(f"No entities found {filter_kwargs=}")
+        return random_object
 
 
 def generate_facts_for_predicate(patient: Patient, predicate_name: PredicateName, count: int) -> list[Fact]:
