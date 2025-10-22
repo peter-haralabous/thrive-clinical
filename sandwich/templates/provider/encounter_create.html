@@ -58,13 +58,13 @@
   <script nonce="{{ request.csp_nonce }}">
     let selectedPatientId = null;
 
-    function selectPatient(patientId, patientName, patientEmail, patientDob) {
+    function selectPatient(patientId, patientName, patientEmail, patientDob, patientPhn) {
       selectedPatientId = patientId;
 
       // Hide search results and show selected patient
       document.getElementById('patient-search-results').innerHTML = '';
       document.getElementById('patient-search').value = '';
-      document.getElementById('selected-patient-name').textContent = `${patientName} - DOB: ${patientDob}`;
+      document.getElementById('selected-patient-name').textContent = `${patientName} • DOB: ${patientDob || "None"} • PHN: ${patientPhn || "None"}`;
       document.getElementById('selected-patient').classList.remove('hidden');
 
       // Show the encounter form and set the patient
@@ -83,8 +83,9 @@
       const patientName = element.dataset.patientName;
       const patientEmail = element.dataset.patientEmail;
       const patientDob = element.dataset.patientDob;
+      const patientPhn = element.dataset.patientPhn;
 
-      selectPatient(patientId, patientName, patientEmail, patientDob);
+      selectPatient(patientId, patientName, patientEmail, patientDob, patientPhn);
     }
 
     function clearSelectedPatient() {

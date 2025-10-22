@@ -54,6 +54,8 @@ class EncounterCreateForm(forms.ModelForm[Encounter]):
     def save(self, commit: bool = True) -> Encounter:  # noqa: FBT001, FBT002
         encounter = super().save(commit=False)
         encounter.organization = self.organization
+        # TODO-WH: Update the default encounter status below if needed once we have
+        # established default statuses for/per organization
         encounter.status = EncounterStatus.IN_PROGRESS  # Default status for new encounters
         if commit:
             encounter.save()
@@ -273,8 +275,31 @@ def encounter_create(request: AuthenticatedHttpRequest, organization_id: UUID) -
         "form": form,
     }
 
-    # Now let's use a simplified template that should work
     return render(request, "provider/encounter_create.html", context)
+
+
+def _search_patients_for_organization(
+    request: AuthenticatedHttpRequest,
+    organization: Organization,
+    query: str,
+    limit: int = 10,
+    log_context: str = "Patient search",
+) -> list[Patient]:
+    """Reusable function to search for patients within an organization."""
+    patients = []
+    if query and len(query) >= MIN_SEARCH_QUERY_LENGTH:
+        patients = list(Patient.objects.filter(organization=organization).search(query)[:limit])  # type: ignore[attr-defined]
+
+        logger.debug(
+            log_context,
+            extra={
+                "user_id": request.user.id,
+                "organization_id": organization.id,
+                "query_length": len(query),
+                "results_count": len(patients),
+            },
+        )
+    return patients
 
 
 @login_required
@@ -282,20 +307,11 @@ def encounter_create_search(request: AuthenticatedHttpRequest, organization_id: 
     """HTMX endpoint for searching patients when creating an encounter."""
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
     query = request.GET.get("q", "").strip()
+    limit = int(request.GET.get("limit", "10"))
 
-    patients = []
-    if query and len(query) >= MIN_SEARCH_QUERY_LENGTH:  # Only search if query is at least minimum characters
-        patients = Patient.objects.filter(organization=organization).search(query)[:10]  # type: ignore[attr-defined]
-
-        logger.debug(
-            "Patient search for encounter creation",
-            extra={
-                "user_id": request.user.id,
-                "organization_id": organization_id,
-                "query_length": len(query),
-                "results_count": len(patients),
-            },
-        )
+    patients = _search_patients_for_organization(
+        request, organization, query, limit, "Patient search for encounter creation"
+    )
 
     context = {
         "patients": patients,
