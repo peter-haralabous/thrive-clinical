@@ -47,9 +47,7 @@
               <h4 class="font-bold">Selected Patient:</h4>
               <p id="selected-patient-name"></p>
             </div>
-            <button type="button"
-                    onclick="clearSelectedPatient()"
-                    class="btn btn-sm btn-outline">Change</button>
+            <button type="button" id="clear-patient-btn" class="btn btn-sm btn-outline">Change</button>
           </div>
         </div>
       </div>
@@ -57,7 +55,7 @@
       <div id="encounter-form-container" class="hidden">{% crispy form %}</div>
     </div>
   </div>
-  <script>
+  <script nonce="{{ request.csp_nonce }}">
     let selectedPatientId = null;
 
     function selectPatient(patientId, patientName, patientEmail, patientDob) {
@@ -98,6 +96,21 @@
 
     // Initialize form when page loads
     document.addEventListener('DOMContentLoaded', function() {
+      // Add event listener for clear patient button
+      const clearButton = document.getElementById('clear-patient-btn');
+      if (clearButton) {
+        clearButton.addEventListener('click', clearSelectedPatient);
+      }
+
+      // Add event delegation for patient selection from search results
+      const searchResults = document.getElementById('patient-search-results');
+      searchResults.addEventListener('click', function(e) {
+        const button = e.target.closest('.patient-select-btn');
+        if (button) {
+          selectPatientFromData(button);
+        }
+      });
+
       // If there's already a patient selected (form errors), show the form
       const patientField = document.querySelector('input[name="patient"]');
       if (patientField && patientField.value) {
