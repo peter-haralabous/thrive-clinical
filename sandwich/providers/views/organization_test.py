@@ -39,6 +39,73 @@ def test_organization_edit_deny_access(user: User, organization: Organization) -
 
 
 @pytest.mark.django_db
+def test_organization_delete_success(user: User, organization: Organization) -> None:
+    assign_organization_role(organization=organization, role_name=RoleName.OWNER, user=user)
+
+    client = Client()
+    client.force_login(user)
+    url = reverse("providers:organization_delete", kwargs={"organization_id": organization.id})
+    data = {"confirmation": "DELETE"}
+    result = client.post(url, data)
+
+    assert result.status_code == 302
+    assert result.url == reverse("providers:home")  # type: ignore[attr-defined]
+    assert not Organization.objects.filter(id=organization.id).exists()
+
+
+@pytest.mark.django_db
+def test_organization_delete_deny_access(user: User, organization: Organization) -> None:
+    assign_organization_role(organization=organization, role_name=RoleName.PATIENT, user=user)
+
+    client = Client()
+    client.force_login(user)
+    url = reverse("providers:organization_delete", kwargs={"organization_id": organization.id})
+    data = {"confirmation": "DELETE"}
+    res = client.post(url, data)
+
+    assert res.status_code == 403
+
+
+@pytest.mark.django_db
+def test_organization_delete_get_modal(user: User, organization: Organization) -> None:
+    assign_organization_role(organization=organization, role_name=RoleName.OWNER, user=user)
+
+    client = Client()
+    client.force_login(user)
+    url = reverse("providers:organization_delete", kwargs={"organization_id": organization.id})
+    result = client.get(url)
+
+    assert result.status_code == 200
+    assert "provider/partials/organization_delete_modal.html" in [template.name for template in result.templates]
+
+
+@pytest.mark.django_db
+def test_organization_delete_invalid_form(user: User, organization: Organization) -> None:
+    assign_organization_role(organization=organization, role_name=RoleName.OWNER, user=user)
+
+    client = Client()
+    client.force_login(user)
+    url = reverse("providers:organization_delete", kwargs={"organization_id": organization.id})
+    data = {"confirmation": "INVALID"}
+    result = client.post(url, data)
+
+    assert result.status_code == 200
+    assert "provider/partials/organization_delete_modal.html" in [template.name for template in result.templates]
+    assert Organization.objects.filter(id=organization.id).exists()
+
+
+@pytest.mark.django_db
+def test_organization_delete_unauthenticated(organization: Organization) -> None:
+    client = Client()
+    url = reverse("providers:organization_delete", kwargs={"organization_id": organization.id})
+    result = client.post(url, {"confirmation": "DELETE"})
+
+    assert result.status_code == 302
+    assert "/login/" in result.url  # type: ignore[attr-defined]
+    assert Organization.objects.filter(id=organization.id).exists()
+
+
+@pytest.mark.django_db
 def test_organization_add_form() -> None:
     form_data = {
         "name": "Test Organization",
