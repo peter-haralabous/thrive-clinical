@@ -86,7 +86,7 @@ If it violates any criterion, move it to `project.ts` (medium) or a new entrypoi
 ```
 
 > [!NOTE]
-> The Nonce will be included automatically for any additional html loaded after the initial page load, if the html is requested through an HTMX operation (e.g. modals)
+> The Nonce will be included automatically by HTMX for `<script>`s in html request after the initial page load (e.g. modals) using `htmx.config.inlineScriptNonce`.
 
 ### Size-Based JavaScript Guidance (Bridging CSP & Bundling)
 
