@@ -1,6 +1,9 @@
 import logging
 import uuid
 
+from dateutil.parser import isoparse
+from django.utils import timezone
+
 from sandwich.core.models import Entity
 from sandwich.core.models import Fact
 from sandwich.core.models import Patient
@@ -49,18 +52,27 @@ def get_or_create_predicate(predicate_name, predicate_text):
 
 
 def create_provenance(provenance_data, source_type):
-    # FIXME: Use a default value for source_type and extracted_by if missing
     stype = provenance_data.get("source_type") if provenance_data.get("source_type") else source_type
     if stype is None:
         stype = "unknown"
-    extracted_by = provenance_data.get("extracted_by")
-    if extracted_by is None:
-        extracted_by = "unknown"
-    return Provenance.objects.create(
-        page=provenance_data.get("page"),
-        extracted_by=extracted_by,
-        source_type=stype,
-    )
+    extracted_by = provenance_data.get("extracted_by") or "unknown"
+    page = provenance_data.get("page")
+    extracted_at = provenance_data.get("extracted_at")
+    dt = None
+    if extracted_at:
+        try:
+            dt = isoparse(extracted_at)
+        except (ValueError, TypeError):
+            dt = timezone.now()
+    else:
+        dt = timezone.now()
+    provenance_kwargs = {
+        "page": page,
+        "extracted_by": extracted_by,
+        "source_type": stype,
+        "extracted_at": dt,
+    }
+    return Provenance.objects.create(**provenance_kwargs)
 
 
 def _create_patient_if_needed(subj_node, patient=None):
