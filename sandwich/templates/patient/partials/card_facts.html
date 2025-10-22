@@ -1,0 +1,16 @@
+{% extends "component/card.html" %}
+
+{% load heroicons %}
+
+{% block card_title %}
+  {{ category }}
+{% endblock card_title %}
+{% block card_body_content %}
+  <ul>
+    {% for fact in facts %}
+      <li class="mb-2 pt-2 border-t-neutral-200 border-t">{{ fact.object }}</li>
+    {% empty %}
+      <li>No records for {{ category|lower }}</li>
+    {% endfor %}
+  </ul>
+{% endblock card_body_content %}

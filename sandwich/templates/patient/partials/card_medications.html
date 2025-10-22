@@ -1,0 +1,8 @@
+{% extends "patient/partials/card_facts.html" %}
+
+{% load heroicons %}
+
+{% block card_title %}
+  <div class="rounded-full p-3 bg-teal-200 text-teal-800">{% heroicon_outline "eye-dropper" class="size-6" %}</div>
+  {{ block.super }}
+{% endblock card_title %}

@@ -16,11 +16,13 @@ from django.shortcuts import render
 from django.urls import reverse
 from guardian.decorators import permission_required_or_403
 
+from sandwich.core.models import Entity
 from sandwich.core.models.patient import Patient
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.validators.date_of_birth import valid_date_of_birth
 from sandwich.core.validators.phn import clean_phn
 from sandwich.core.validators.phn import phn_attr_for_province
+from sandwich.patients.service.fact_service import categorized_facts_for_patient
 from sandwich.users.models import User
 
 logger = logging.getLogger(__name__)
@@ -208,17 +210,14 @@ def patient_details(request: AuthenticatedHttpRequest, patient_id: int) -> HttpR
     tasks = patient.task_set.all()
     documents = patient.document_set.all()
 
-    logger.debug(
-        "Patient details loaded",
-        extra={
-            "user_id": request.user.id,
-            "patient_id": patient_id,
-            "task_count": tasks.count(),
-            "document_count": documents.count(),
-        },
-    )
+    patient_entity = Entity.for_patient(patient)
 
-    context = {"patient": patient, "tasks": tasks, "documents": documents} | _patient_context(request, patient=patient)
+    context = {
+        "patient": patient,
+        "tasks": tasks,
+        "documents": documents,
+        "facts": categorized_facts_for_patient(patient_entity),
+    } | _patient_context(request, patient=patient)
     return render(request, "patient/patient_details.html", context)
 
 

@@ -5,6 +5,18 @@
 {% block content %}
   <h1 class="mb-4">My Health Records</h1>
   {% include "patient/partials/personal_information.html" with patient=patient %}
+  {% include "patient/partials/card_conditions.html" with category="Conditions" facts=facts.conditions %}
+  {% include "patient/partials/card_symptoms.html" with category="Symptoms" facts=facts.symptoms %}
+  {% include "patient/partials/card_medications.html" with category="Medications" facts=facts.medications %}
+  {% include "patient/partials/card_allergies.html" with category="Allergies" facts=facts.allergies %}
+  {% include "patient/partials/card_hospital_visits.html" with category="Hospital Visits" facts=facts.hospital_visits %}
+  {% include "patient/partials/card_injuries.html" with category="Injuries" facts=facts.injuries %}
+  {% include "patient/partials/card_practitioners.html" with category="Practitioners" facts=facts.practitioners %}
+  {% include "patient/partials/card_lab_results.html" with category="Lab Results" facts=facts.lab_results %}
+  {% include "patient/partials/card_immunizations.html" with category="Immunizations" facts=facts.immunizations %}
+  {% include "patient/partials/card_procedures.html" with category="Procedures" facts=facts.procedures %}
+  {% include "patient/partials/card_family_history.html" with category="Family History" facts=facts.family_history %}
+  {% include "patient/partials/card_documents_and_notes.html" with category="Documents and Notes" facts=facts.documents_and_notes %}
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-8 mb-6">
     <div class="flex items-center gap-3">
       <span class="text-lg font-semibold">Documents</span>

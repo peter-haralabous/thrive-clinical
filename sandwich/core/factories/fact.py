@@ -35,6 +35,19 @@ class FactFactory(factory.django.DjangoModelFactory[Fact]):
         return random_object
 
 
+class EntityMetadataFactory(factory.DictFactory):
+    label = factory.Faker("word")
+
+
+class EntityFactory(factory.django.DjangoModelFactory[Entity]):
+    class Meta:
+        model = Entity
+        skip_postgeneration_save = True
+
+    type = factory.Iterator(EntityType)
+    metadata = factory.SubFactory(EntityMetadataFactory)
+
+
 def generate_facts_for_predicate(patient: Patient, predicate_name: PredicateName, count: int) -> list[Fact]:
     return FactFactory.create_batch(
         size=count,

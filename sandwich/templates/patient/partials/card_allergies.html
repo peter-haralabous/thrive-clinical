@@ -1,0 +1,10 @@
+{% extends "patient/partials/card_facts.html" %}
+
+{% load heroicons %}
+
+{% block card_title %}
+  <div class="rounded-full p-3 bg-yellow-200 text-yellow-800">
+    {% heroicon_outline "exclamation-triangle" class="size-6" %}
+  </div>
+  {{ block.super }}
+{% endblock card_title %}
