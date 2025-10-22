@@ -1,6 +1,8 @@
 import uuid
 
 import pytest
+from django.utils import timezone
+from freezegun import freeze_time
 
 from sandwich.core.models import Entity
 from sandwich.core.models import Fact
@@ -129,3 +131,31 @@ def test_save_triples_with_provenance(triple_factory):
     assert fact.provenance is not None
     assert fact.provenance.source_type == provenance["source_type"]
     assert fact.provenance.extracted_by == provenance["extracted_by"]
+
+
+@pytest.mark.parametrize(
+    "input_str",
+    [
+        "2025-10-22T18:24:01.232704+00:00Z",
+        "2025-10-22T18:24:01.232704+00:00",
+        "2025-10-22T18:24:01+00:00",
+        "2025-10-22T18:24:01Z",
+        "2025-10-22T18:24:01",
+    ],
+)
+@pytest.mark.django_db
+def test_create_provenance_date_parsing_valid(input_str):
+    provenance_data = {"extracted_at": input_str}
+    prov = db.create_provenance(provenance_data, source_type="pdf")
+    assert prov.extracted_at is not None
+    assert hasattr(prov.extracted_at, "year")
+    assert prov.extracted_at.year == 2025
+
+
+@pytest.mark.django_db
+def test_create_provenance_date_parsing_invalid():
+    with freeze_time("2025-01-01T12:00:00Z"):
+        for input_str in ["not-a-date", None]:
+            provenance_data = {"extracted_at": input_str}
+            prov = db.create_provenance(provenance_data, source_type="pdf")
+            assert prov.extracted_at == timezone.now()
