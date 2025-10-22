@@ -1,16 +1,16 @@
-{% extends "base_top_nav.html" %}
+{% extends "provider/base.html" %}
 
 {% load crispy_forms_tags %}
 
 {% block content %}
   <div class="flex justify-between items-center mb-6">
-    <h2 class="text-2xl font-bold">Create New Encounter</h2>
+    <h2 class="text-2xl font-bold">Create New Interaction</h2>
     <a href="{% url "providers:encounter_list" organization_id=organization.id %}"
-       class="btn btn-secondary">Back to Encounters</a>
+       class="btn btn-secondary">Back to Interactions</a>
   </div>
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
-      <h3 class="card-title mb-4">Select Patient and Encounter Type</h3>
+      <h3 class="card-title mb-4">New Interaction → Select patient</h3>
       <!-- Patient Search Section -->
       <div class="form-control mb-6">
         <label class="label">
@@ -20,7 +20,7 @@
           <input type="text"
                  id="patient-search"
                  class="input input-bordered w-full"
-                 placeholder="Type patient name to search..."
+                 placeholder="Start typing a patient name to start..."
                  hx-get="{% url 'providers:encounter_create_search' organization_id=organization.id %}"
                  hx-target="#patient-search-results"
                  hx-trigger="keyup changed delay:300ms"
@@ -64,7 +64,7 @@
       // Hide search results and show selected patient
       document.getElementById('patient-search-results').innerHTML = '';
       document.getElementById('patient-search').value = '';
-      document.getElementById('selected-patient-name').textContent = `${patientName} (${patientEmail}) - DOB: ${patientDob}`;
+      document.getElementById('selected-patient-name').textContent = `${patientName} - DOB: ${patientDob}`;
       document.getElementById('selected-patient').classList.remove('hidden');
 
       // Show the encounter form and set the patient
