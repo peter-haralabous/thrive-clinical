@@ -1,5 +1,6 @@
 from typing import Self
 
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.search import SearchRank
 from django.db import models
 from django.db.models import F
@@ -7,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from django_enum import EnumField
 
 from sandwich.core.models.abstract import BaseModel
+from sandwich.core.models.custom_attribute import CustomAttributeValue
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
 from sandwich.core.models.patient import to_search_query
@@ -85,6 +87,12 @@ class Encounter(BaseModel):
 
     # this is Encounter.actualPeriod.end in FHIR
     ended_at = models.DateTimeField(blank=True, null=True)
+
+    # User defined custom attributes (EAV model)
+    attributes = GenericRelation(
+        CustomAttributeValue,
+        related_query_name="encounter",
+    )
 
     objects = EncounterManager()
 
