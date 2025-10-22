@@ -9,6 +9,7 @@ from django.views.decorators.http import require_POST
 from private_storage.views import PrivateStorageDetailView
 
 from sandwich.core.models.document import Document
+from sandwich.core.services.ingest.extract_pdf import extract_pdf_background
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
 
@@ -61,7 +62,13 @@ def document_upload(request: AuthenticatedHttpRequest, patient_id: UUID):
     patient = get_object_or_404(request.user.patient_set, id=patient_id)
     form = DocumentForm({"patient": patient.id}, request.FILES)
     if form.is_valid():
-        form.save()
+        document = form.save()
+        if document.content_type == "application/pdf":
+            try:
+                # enqueue background extraction task
+                extract_pdf_background.defer(document_id=str(document.id))
+            except RuntimeError as e:
+                messages.add_message(request, messages.ERROR, f"PDF ingestion failed: {e}")
     else:
         error = ", ".join([str(e) for e in form.errors.get("file", [])])
         messages.add_message(request, messages.ERROR, f"Failed to upload document: {error}")
