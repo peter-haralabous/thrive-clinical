@@ -120,6 +120,8 @@ LOGGING["loggers"]["sandwich"] = {  # type: ignore[index]
     "level": "DEBUG",
     "propagate": False,
 }
+# and don't expect devs to read JSON
+LOGGING["handlers"]["console"]["formatter"] = "pretty"  # type: ignore[index]
 
 # django-extensions
 # ------------------------------------------------------------------------------

@@ -351,6 +351,7 @@ LOGGING = {
     "disable_existing_loggers": False,
     "formatters": {
         "json": {"()": "config.logging.CustomDataDogJSONFormatter"},
+        "pretty": {"()": "config.logging.ColorPrettyFormatter"},
     },
     "handlers": {
         "console": {

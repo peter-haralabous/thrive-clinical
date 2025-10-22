@@ -223,5 +223,6 @@ dependencies = [
     "python-slugify==8.0.4",
     "tablib==3.8.0",
     "tablib[cli]==3.8.0",
+    "tzlocal>=5.3.1",
     "whitenoise==6.11.0",
 ]
