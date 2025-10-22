@@ -114,6 +114,7 @@ def accept_patient_invitation(invitation: Invitation, user: User) -> None:
 
     invitation.patient.user = user
     invitation.patient.save()
+    invitation.patient.assign_user_owner_perms(user)
 
     invitation.status = InvitationStatus.ACCEPTED
     invitation.accepted_at = timezone.now()
