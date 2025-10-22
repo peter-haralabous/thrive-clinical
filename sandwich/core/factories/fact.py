@@ -2,6 +2,7 @@ import factory
 
 from sandwich.core.models import Entity
 from sandwich.core.models import Fact
+from sandwich.core.models import Patient
 from sandwich.core.models import Predicate
 from sandwich.core.models.entity import EntityType
 from sandwich.core.models.predicate import PredicateName
@@ -27,3 +28,11 @@ class FactFactory(factory.django.DjangoModelFactory[Fact]):
         if self.predicate and self.predicate.name in predicate_entity_map:  # type: ignore[attr-defined]
             filter_kwargs = predicate_entity_map[self.predicate.name]  # type: ignore[attr-defined]
         return Entity.objects.filter(**filter_kwargs).order_by("?").first()
+
+
+def generate_facts_for_predicate(patient: Patient, predicate_name: PredicateName, count: int) -> list[Fact]:
+    return FactFactory.create_batch(
+        size=count,
+        subject=Entity.for_patient(patient),
+        predicate=Predicate.for_name(predicate_name),
+    )
