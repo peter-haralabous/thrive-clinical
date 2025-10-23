@@ -7,6 +7,7 @@ from sandwich.core.models import Patient
 from sandwich.core.models import Predicate
 from sandwich.core.models.entity import EntityType
 from sandwich.core.models.predicate import PredicateName
+from sandwich.core.service.entity_service import entity_for_patient
 from sandwich.core.service.predicate_service import predicate_for_predicate_name
 
 # Map a predicate name to kwargs for Entity.objects.filter
@@ -52,6 +53,6 @@ class EntityFactory(factory.django.DjangoModelFactory[Entity]):
 def generate_facts_for_predicate(patient: Patient, predicate_name: PredicateName, count: int) -> list[Fact]:
     return FactFactory.create_batch(
         size=count,
-        subject=Entity.for_patient(patient),
+        subject=entity_for_patient(patient),
         predicate=predicate_for_predicate_name(predicate_name),
     )

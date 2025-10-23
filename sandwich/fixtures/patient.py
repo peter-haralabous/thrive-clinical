@@ -9,6 +9,7 @@ from sandwich.core.models import Organization
 from sandwich.core.models import Patient
 from sandwich.core.models.entity import EntityType
 from sandwich.core.models.predicate import PredicateName
+from sandwich.core.service.entity_service import entity_for_patient
 from sandwich.core.service.predicate_service import predicate_for_predicate_name
 from sandwich.users.models import User
 
@@ -27,7 +28,7 @@ def patient(organization: Organization, user: User) -> Patient:
 
 @pytest.fixture
 def patient_entity(patient: Patient) -> Entity:
-    return Entity.for_patient(patient)
+    return entity_for_patient(patient)
 
 
 @pytest.fixture
