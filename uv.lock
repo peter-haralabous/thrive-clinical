@@ -90,19 +90,19 @@ wheels = [
 
 [[package]]
 name = "autobahn"
-version = "25.10.1"
+version = "25.10.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
     { name = "hyperlink" },
     { name = "txaio" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/28/3b/c0b4fa15135d094b621ed9791c7d5279de79bb5710a6002c8e4d0fbea45a/autobahn-25.10.1.tar.gz", hash = "sha256:81ffa321040533725806d8b1724226f45b4249afc0b86bbe3e0eff6f91e18646", size = 374166, upload-time = "2025-10-20T12:25:46.919Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/5c/5d/095541ec46347cdb6d94b1cde7b0236eee7dcdaadb2daad45232d74eeff1/autobahn-25.10.2.tar.gz", hash = "sha256:173d5d836789dffc4292473ea359dcb7f708456a0ff82dcb8ca938d6ccadb12f", size = 375689, upload-time = "2025-10-22T23:34:56.017Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/36/17/cd0dd6cbffc7c43b9d88b3b1a4c95e39787bbadaa0a6217e5a1f84e1a90c/autobahn-25.10.1-cp313-cp313-macosx_15_0_arm64.whl", hash = "sha256:4d4413a9af14282a69c9f3a503e107fa5f725769f0e546f5b576d4b477c6dc6c", size = 515578, upload-time = "2025-10-20T12:25:25.523Z" },
-    { url = "https://files.pythonhosted.org/packages/be/b1/f5eba6cd7be6b0ac70e9dbce23f73c29ebf99293a795658c25403755715c/autobahn-25.10.1-cp313-cp313-manylinux1_x86_64.manylinux_2_34_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:dc1d83b9b35be28b87b67507c353e2abe9cc164db552df445a5a62440dfd4413", size = 568361, upload-time = "2025-10-20T12:25:27.186Z" },
-    { url = "https://files.pythonhosted.org/packages/ec/85/87a2d76a41ba7f9489b93b3327fd5590fe0ec90779b711f0650de576e0d8/autobahn-25.10.1-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b240273bc96201ee38b2d6bfb1b6d09a47bb909e3a63744b1dc453f93169d295", size = 544027, upload-time = "2025-10-20T12:25:29.224Z" },
-    { url = "https://files.pythonhosted.org/packages/1b/68/924ace721f8d5b05b258e7b28b2eea87072350f95493c35caf32f02eaae6/autobahn-25.10.1-cp313-cp313-win_amd64.whl", hash = "sha256:a0491093122c55d42b6044b0f805d05adb8777c856a97e3253f771a37e370b67", size = 524401, upload-time = "2025-10-20T12:25:31.636Z" },
+    { url = "https://files.pythonhosted.org/packages/6f/f6/601e87ab8e314e211850570325acc59dad27fc78268b919a8b8344e61785/autobahn-25.10.2-cp313-cp313-macosx_15_0_arm64.whl", hash = "sha256:7b503e282082b823e85e963d00b49ed72aeae79d4d3b3929a997cad0780ffdb1", size = 517000, upload-time = "2025-10-22T23:34:40.069Z" },
+    { url = "https://files.pythonhosted.org/packages/3f/d1/e8f42bbbcbac63ff7041322523479de78138cf527ff43a814b363dc9609a/autobahn-25.10.2-cp313-cp313-manylinux1_x86_64.manylinux_2_34_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:764f01bf3778a4e3fd1f6d3df9bfbf079772181c5e4915af5a588f7aa92d3d96", size = 569847, upload-time = "2025-10-22T23:34:41.103Z" },
+    { url = "https://files.pythonhosted.org/packages/36/04/8cd5eac3be9f5e61d8d7299f0813da0d420eb49964d1884394fa67f7d84f/autobahn-25.10.2-cp313-cp313-manylinux2014_aarch64.manylinux_2_17_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:a66252583ee2b00e55d4f311618f87e7f0c0d1f837bbeb40b9277fc86ea027fd", size = 545484, upload-time = "2025-10-22T23:34:42.304Z" },
+    { url = "https://files.pythonhosted.org/packages/3d/c5/1512d54744a4565e2c3e1a16782d72241ed8a3800b12b9e097b5d4041d8d/autobahn-25.10.2-cp313-cp313-win_amd64.whl", hash = "sha256:684fe4200ede3840b4973da8c04f0026459c8189d6bc10df31b1d933b5f01b7e", size = 525963, upload-time = "2025-10-22T23:34:43.8Z" },
 ]
 
 [[package]]
