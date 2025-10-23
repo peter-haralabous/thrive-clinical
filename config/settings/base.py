@@ -106,6 +106,7 @@ THIRD_PARTY_APPS = [
     "private_storage",
     "guardian",
     "lucide",
+    "django_eventstream",
 ]
 
 LOCAL_APPS = [
@@ -445,3 +446,13 @@ GEMINI_API_KEY = env.str("GEMINI_API_KEY", default=None)
 BEDROCK_CLAUDE_3_SONNET_ARN = env.str("BEDROCK_CLAUDE_3_SONNET_ARN", default=None)
 BEDROCK_CLAUDE_SONNET_4_5_ARN = env.str("BEDROCK_CLAUDE_SONNET_4_5_ARN", default=None)
 BEDROCK_GPT_OSS_120B_ARN = env.str("BEDROCK_GPT_OSS_120B_ARN", default=None)
+
+# https://github.com/fanout/django-eventstream
+EVENTSTREAM_REDIS = {
+    "host": env.str("REDIS_HOST", default="localhost"),
+    "port": env.int("REDIS_PORT", default=6379),
+    "db": env.int("REDIS_DB", default=0),
+    "password": env.str("REDIS_PASSWORD", default=None),
+    "ssl": env.bool("REDIS_SSL", default=False),
+}
+EVENTSTREAM_CHANNELMANAGER_CLASS = "sandwich.core.eventstream.ChannelManager"

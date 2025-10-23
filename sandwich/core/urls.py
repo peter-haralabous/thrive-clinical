@@ -5,8 +5,8 @@ from django.views import defaults as default_views
 from django.views.csrf import csrf_failure
 from django.views.generic import RedirectView
 
+from sandwich.core.eventstream import events_view
 from sandwich.core.views.account import account_delete
-from sandwich.core.views.events import events
 from sandwich.core.views.healthcheck import healthcheck
 from sandwich.core.views.home import home
 from sandwich.core.views.legal import legal_view
@@ -24,7 +24,7 @@ urlpatterns = [
     path("legal/", legal_view, name="legal"),
     path("favicon.ico", RedirectView.as_view(url=resolve_static("images/favicons/favicon.ico"))),
     path("policy/<slug:slug>/", policy_detail, name="policy_detail"),
-    path("events/", events, name="events"),
+    path("events/", events_view, name="events"),
 ]
 
 

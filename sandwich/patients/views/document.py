@@ -1,3 +1,4 @@
+import logging
 from uuid import UUID
 
 from django import forms
@@ -10,7 +11,10 @@ from private_storage.views import PrivateStorageDetailView
 
 from sandwich.core.models.document import Document
 from sandwich.core.service.ingest_service import extract_facts_from_pdf_job
+from sandwich.core.service.ingest_service import send_ingest_progress
 from sandwich.core.util.http import AuthenticatedHttpRequest
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentDownloadView(PrivateStorageDetailView):
@@ -67,9 +71,12 @@ def document_upload_and_extract(request: AuthenticatedHttpRequest, patient_id: U
             try:
                 # enqueue background extraction task
                 extract_facts_from_pdf_job.defer(document_id=str(document.id))
-            except RuntimeError as e:
-                messages.add_message(request, messages.ERROR, f"PDF ingestion failed: {e}")
+                send_ingest_progress(patient.id, text=f"Uploaded {document.original_filename}...")
+            except RuntimeError:
+                logger.warning("Failed to enqueue document analysis", exc_info=True)
+                messages.add_message(request, messages.ERROR, "Failed to enqueue document analysis")
     else:
+        logger.info("Invalid document upload form")
         error = ", ".join([str(e) for e in form.errors.get("file", [])])
         messages.add_message(request, messages.ERROR, f"Failed to upload document: {error}")
     documents = patient.document_set.all()
