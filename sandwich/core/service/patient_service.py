@@ -11,12 +11,18 @@ logger = logging.getLogger(__name__)
 DEFAULT_ORGANIZATION_ROLE_PERMS = {
     RoleName.OWNER: [
         "assign_task",
+        "view_patient",
+        "change_patient",
     ],
     RoleName.ADMIN: [
         "assign_task",
+        "view_patient",
+        "change_patient",
     ],
     RoleName.STAFF: [
         "assign_task",
+        "view_patient",
+        "change_patient",
     ],
 }
 
