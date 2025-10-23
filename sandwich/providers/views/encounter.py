@@ -307,6 +307,10 @@ def _search_patients_for_organization(
     return patients
 
 
+# NOTE-WH: The following patient search is only searching for patients within
+# the provider's organization. Should this search need to be expanded to a
+# broader/global search, we will need to refactor _search_patients_for_organization
+# and potentially permissions. TBC by product.
 @login_required
 @permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
 def encounter_create_search(request: AuthenticatedHttpRequest, organization_id: UUID) -> HttpResponse:
