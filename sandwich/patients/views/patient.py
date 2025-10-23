@@ -16,7 +16,6 @@ from django.shortcuts import render
 from django.urls import reverse
 from guardian.decorators import permission_required_or_403
 
-from sandwich.core.models import Entity
 from sandwich.core.models.patient import Patient
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.validators.date_of_birth import valid_date_of_birth
@@ -204,19 +203,17 @@ def patient_onboarding_add(request: AuthenticatedHttpRequest) -> HttpResponse:
 def patient_details(request: AuthenticatedHttpRequest, patient_id: int) -> HttpResponse:
     logger.info("Accessing patient details", extra={"user_id": request.user.id, "patient_id": patient_id})
 
-    patient = get_object_or_404(request.user.patient_set, id=patient_id)
+    patient: Patient = get_object_or_404(request.user.patient_set, id=patient_id)
 
     # TODO-NG: page & sort these lists
     tasks = patient.task_set.all()
     documents = patient.document_set.all()
 
-    patient_entity = Entity.for_patient(patient)
-
     context = {
         "patient": patient,
         "tasks": tasks,
         "documents": documents,
-        "facts": categorized_facts_for_patient(patient_entity),
+        "facts": categorized_facts_for_patient(patient),
     } | _patient_context(request, patient=patient)
     return render(request, "patient/patient_details.html", context)
 
