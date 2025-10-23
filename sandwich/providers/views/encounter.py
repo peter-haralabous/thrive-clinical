@@ -14,11 +14,13 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
+from guardian.decorators import permission_required_or_403
 
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
+from sandwich.core.service.encounter_service import assign_default_encounter_perms
 from sandwich.core.service.invitation_service import get_unaccepted_invitation
 from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -59,6 +61,8 @@ class EncounterCreateForm(forms.ModelForm[Encounter]):
         encounter.status = EncounterStatus.IN_PROGRESS  # Default status for new encounters
         if commit:
             encounter.save()
+            # Assign default permissions to the new encounter
+            assign_default_encounter_perms(encounter)
         return encounter
 
 
@@ -235,6 +239,7 @@ def encounter_list(request: AuthenticatedHttpRequest, organization_id: UUID) -> 
 
 
 @login_required
+@permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
 def encounter_create(request: AuthenticatedHttpRequest, organization_id: UUID) -> HttpResponse:
     """View for creating a new encounter."""
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
@@ -303,6 +308,7 @@ def _search_patients_for_organization(
 
 
 @login_required
+@permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
 def encounter_create_search(request: AuthenticatedHttpRequest, organization_id: UUID) -> HttpResponse:
     """HTMX endpoint for searching patients when creating an encounter."""
     organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
