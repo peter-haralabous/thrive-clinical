@@ -9,7 +9,9 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
+from guardian.decorators import permission_required_or_403
 
+from sandwich.core.models.task import Task
 from sandwich.core.models.task import terminal_task_status
 from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -17,7 +19,7 @@ from sandwich.core.util.http import AuthenticatedHttpRequest
 logger = logging.getLogger(__name__)
 
 
-@csp_update(  # type: ignore[arg-type]
+@csp_update(
     {
         "script-src-elem": "https://cdn.form.io/js/formio.form.js",
         "script-src": UNSAFE_EVAL,
@@ -36,6 +38,7 @@ logger = logging.getLogger(__name__)
     }
 )
 @login_required
+@permission_required_or_403("view_task", (Task, "id", "task_id"))
 def task(request: AuthenticatedHttpRequest, organization_id: UUID, patient_id: UUID, task_id: UUID) -> HttpResponse:
     logger.info(
         "Accessing patient task", extra={"user_id": request.user.id, "patient_id": patient_id, "task_id": task_id}

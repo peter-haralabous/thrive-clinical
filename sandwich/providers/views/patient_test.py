@@ -58,7 +58,6 @@ def test_patient_add_deny_access(user: User, organization: Organization, patient
     assert res.status_code == 403
 
 
-# TODO(MM): Backfill with Task perm tests
 @pytest.mark.django_db
 def test_patient_add_task(provider: User, organization: Organization, patient: Patient) -> None:
     client = Client()

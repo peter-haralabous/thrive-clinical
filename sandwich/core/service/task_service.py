@@ -3,14 +3,23 @@ import logging
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+from guardian.shortcuts import assign_perm
 
 from sandwich.core.models.email import EmailType
+from sandwich.core.models.role import RoleName
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import TaskStatus
 from sandwich.core.service.email_service import send_templated_email
 from sandwich.core.service.invitation_service import find_or_create_patient_invitation
 
 logger = logging.getLogger(__name__)
+
+
+DEFAULT_ORGANIZATION_ROLE_PERMS = {
+    RoleName.OWNER: ["change_task", "view_task", "complete_task"],
+    RoleName.ADMIN: ["change_task", "view_task", "complete_task"],
+    RoleName.STAFF: ["change_task", "view_task", "complete_task"],
+}
 
 
 def cancel_task(task: Task) -> None:
@@ -91,3 +100,30 @@ def send_task_added_email(task: Task) -> None:
     )
 
     logger.info("Task notification email sent", extra={"task_id": task.id, "patient_id": task.patient.id})
+
+
+def assign_default_provider_task_perms(task: Task) -> None:
+    if not task.patient.organization:
+        logger.info(
+            "Task from patient does not belong to organization",
+            extra={
+                "patient_id": task.patient.id,
+                "task_id": task.id,
+            },
+        )
+        return
+
+    # Apply org-wide role perms
+    for role_name, perms in DEFAULT_ORGANIZATION_ROLE_PERMS.items():
+        role = task.patient.organization.get_role(role_name)
+        for perm in perms:
+            assign_perm(perm, role.group, task)
+
+    logger.info(
+        "Providers from org have been given task permissions",
+        extra={
+            "organization_id": task.patient.organization.id,
+            "patient_id": task.patient.id,
+            "task_id": task.id,
+        },
+    )

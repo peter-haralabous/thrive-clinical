@@ -76,3 +76,6 @@ class Task(BaseModel):
             return self._formio_submission
         except FormioSubmission.DoesNotExist:
             return None
+
+    class Meta:
+        permissions = (("complete_task", "Can complete a task."),)
