@@ -31,7 +31,7 @@ def expire_invitations_job(timestamp: int) -> None:
 
 
 @app.task
-def extract_facts_from_pdf_job(document_id: str, llm_name: str = "claude-3-sonnet"):
+def extract_facts_from_pdf_job(document_id: str, llm_name: str = ModelName.CLAUDE_SONNET_4_5):
     document = Document.objects.get(id=document_id)
     patient = document.patient if hasattr(document, "patient") else None
     llm_client = get_llm(ModelName(llm_name))
