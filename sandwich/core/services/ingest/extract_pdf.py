@@ -1,11 +1,11 @@
 import base64
-import json
 import logging
 from datetime import UTC
 from datetime import datetime
 from io import BytesIO
 
 import pydantic
+from langchain_core.language_models import BaseChatModel
 from pdf2image import convert_from_path
 
 from sandwich.core.services.ingest.db import save_triples
@@ -65,19 +65,6 @@ def _validate_or_trim(parsed):
             return result
 
 
-def _strip_markdown_fences(text: str) -> str:
-    """Remove Markdown code fences (``` or ```json) from LLM output."""
-    stripped = text.strip()
-    if stripped.startswith("```"):
-        lines = stripped.splitlines()
-        if lines[0].startswith("```"):
-            lines = lines[1:]
-        if lines and lines[-1].startswith("```"):
-            lines = lines[:-1]
-        return "\n".join(lines)
-    return text
-
-
 def _filter_triples(parsed):
     """Filter out invalid triples from a list."""
     filtered = []
@@ -92,27 +79,13 @@ def _filter_triples(parsed):
     return {"triples": filtered}
 
 
-def _process_response(valid_response, patient, page_index: int, llm_client) -> list:
+def _process_response(response, patient, page_index: int, llm_client) -> list:
     """
     Process LLM response to extract and validate triples, filtering out invalid ones.
-    Uses robust Pydantic validation and attempts to recover from partial output.
-    If the LLM output is empty, skip the page.
     """
-    output_text = getattr(valid_response, "content", str(valid_response))
-    output_text = _strip_markdown_fences(output_text)
-    if not output_text or not output_text.strip():
-        logger.error(
-            "LLM output is empty for page %d. Skipping page.",
-            page_index,
-        )
-        return []
     try:
-        parsed = json.loads(output_text)
-        if isinstance(parsed, list):
-            parsed = _filter_triples(parsed)
-        valid_response = _validate_or_trim(parsed)
-        triples = valid_response.triples
-        filtered_triples = []
+        triples = response.triples
+        filtered_triples: list = []
         for t in triples:
             pred = getattr(t, "normalized_predicate", None)
             pred_label = pred.predicate_type if (pred is not None and hasattr(pred, "predicate_type")) else pred
@@ -125,8 +98,8 @@ def _process_response(valid_response, patient, page_index: int, llm_client) -> l
             t.subject.node["patient_id"] = str(getattr(patient, "id", "-1"))
             t.provenance = _provenance_dict(page_index, llm_client)
             filtered_triples.append(t)
-    except (json.JSONDecodeError, TypeError, AttributeError, pydantic.ValidationError, ValueError):
-        logger.exception("Could not parse or validate content as triples.")
+    except (TypeError, AttributeError, pydantic.ValidationError, ValueError):
+        logger.exception("Could not validate structured triples for page %d", page_index)
         return []
     else:
         return filtered_triples
@@ -134,7 +107,7 @@ def _process_response(valid_response, patient, page_index: int, llm_client) -> l
 
 def extract_facts_from_pdf(
     pdf_path: str,
-    llm_client,
+    llm_client: BaseChatModel,
     patient=None,
 ) -> list:
     """
@@ -145,14 +118,18 @@ def extract_facts_from_pdf(
         - Persist valid triples to DB.
         - Returns all extracted triples across pages.
     """
+    structured_llm_client = llm_client.with_structured_output(
+        schema=IngestPromptWithContextResponse, method="json_mode"
+    )
+
     images = convert_pages(pdf_path)
     all_triples: list = []
     for i, image_bytes in enumerate(images, start=1):
         base64_img = base64.b64encode(image_bytes).decode("utf-8")
         messages = _build_image_messages(i, base64_img)
         try:
-            response = llm_client.invoke(messages)
-            triples_to_save = _process_response(response, patient, i, llm_client)
+            response = structured_llm_client.invoke(messages)
+            triples_to_save = _process_response(response, patient, i, structured_llm_client)
             if triples_to_save:
                 all_triples.extend(triples_to_save)
                 save_triples(triples_to_save, patient=patient, source_type="pdf")
