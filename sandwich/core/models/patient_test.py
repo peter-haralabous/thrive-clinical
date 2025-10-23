@@ -2,7 +2,6 @@ import pytest
 
 from sandwich.core.factories.organization import OrganizationFactory
 from sandwich.core.factories.patient import PatientFactory
-from sandwich.core.models import Organization
 from sandwich.core.models import Patient
 from sandwich.users.models import User
 
@@ -13,9 +12,8 @@ def test_patient_search() -> None:
     p = PatientFactory.create(first_name="John", last_name="Doe", organization=o)
 
     # don't match this one
-    PatientFactory.create(
-        first_name="Jane", last_name="Doe", organization=Organization.objects.create(name="Other Organization")
-    )
+    o2 = OrganizationFactory.create(name="Other Test Organization")
+    PatientFactory.create(first_name="Jane", last_name="Doe", organization=o2)
 
     def search(query: str) -> list[Patient]:
         return list(Patient.objects.filter(organization=o).search(query))  # type: ignore[attr-defined]

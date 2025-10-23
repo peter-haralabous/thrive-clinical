@@ -266,6 +266,7 @@ def patient_add(request: AuthenticatedHttpRequest, organization_id: int) -> Http
         form = PatientAdd(request.POST)
         if form.is_valid():
             patient = form.save(organization=organization)
+            assign_default_provider_patient_permissions(patient)
             encounter = Encounter.objects.create(
                 patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
             )
@@ -279,7 +280,6 @@ def patient_add(request: AuthenticatedHttpRequest, organization_id: int) -> Http
                     "encounter_id": encounter.id,
                 },
             )
-            assign_default_provider_patient_permissions(patient)
             messages.add_message(request, messages.SUCCESS, "Patient added successfully.")
             return HttpResponseRedirect(
                 reverse("providers:patient", kwargs={"patient_id": patient.id, "organization_id": organization.id})
@@ -429,7 +429,6 @@ def patient_archive(request: AuthenticatedHttpRequest, organization_id: int, pat
 @require_POST
 @permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
 @permission_required_or_403("assign_task", (Patient, "id", "patient_id"))
-# TODO(MM): create task perms
 # TODO(MM): when we have org-patient perms check can view patient
 def patient_add_task(request: AuthenticatedHttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     logger.info(
