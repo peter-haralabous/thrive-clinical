@@ -40,17 +40,26 @@
                 {% lucide "arrow-right-left" class="size-4" %}
               </a>
             </li>
+            <hr class="divider my-1" />
             <li>
-              <a href="{% url 'account_email' %}">{% translate "Account Settings" %}</a>
+              <a href="{% url 'account_email' %}" class="flex gap-2">
+                <div>{% lucide "user" class="size-4" %}</div>
+                <p>{% translate "Account Settings" %}</p>
+              </a>
             </li>
             {% block avatar_nav_items %}
               {% if active_organization %}
                 {% comment %} Note: will need to swap this out for org perms {% endcomment %}
                 <li>
-                  <a href="{% url 'providers:organization_edit' organization_id=active_organization.id %}">Organization Settings</a>
+                  <a href="{% url 'providers:organization_edit' organization_id=active_organization.id %}"
+                     class="flex gap-2">
+                    <div>{% lucide "settings" class="size-4" %}</div>
+                    <p>Organization Settings</p>
+                  </a>
                 </li>
               {% endif %}
             {% endblock avatar_nav_items %}
+            <hr class="divider my-1" />
             <li>
               <form action="{% url 'account_logout' %}" method="post">
                 {% csrf_token %}
