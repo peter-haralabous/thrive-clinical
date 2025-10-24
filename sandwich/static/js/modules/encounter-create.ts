@@ -60,6 +60,9 @@ export class EncounterCreateController {
     const selectedPatientName = document.getElementById(
       'selected-patient-name',
     );
+    const selectedPatientDetails = document.getElementById(
+      'selected-patient-details',
+    );
     const selectedPatient = document.getElementById('selected-patient');
 
     if (searchResults) {
@@ -71,7 +74,11 @@ export class EncounterCreateController {
     }
 
     if (selectedPatientName) {
-      selectedPatientName.textContent = `${patientData.name} • DOB: ${patientData.dob || 'None'} • PHN: ${patientData.phn || 'None'}`;
+      selectedPatientName.textContent = patientData.name;
+    }
+
+    if (selectedPatientDetails) {
+      selectedPatientDetails.textContent = `DOB: ${patientData.dob || 'None'} • PHN: ${patientData.phn || 'None'}`;
     }
 
     if (selectedPatient) {
