@@ -1,181 +1,293 @@
 [
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c01",
+    "pk": "48029128-d6cb-4453-988d-aaceddcab2d7",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Disease (disorder)",
-        "snomed": "64572001",
+        "name": "name",
+        "snomed": "snomed_ct_code",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c02",
+    "pk": "80db0fa1-d144-4961-bf4c-545617cdfd88",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Fetal finding (finding)",
-        "snomed": "106112009",
+        "name": "Generalized anxiety disorder (GAD)",
+        "snomed": "21897009",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c03",
+    "pk": "90a271fe-3fd4-47b3-9d24-ef3da4cd7396",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Finding by site (finding)",
-        "snomed": "118234003",
+        "name": "Migraine",
+        "snomed": "37796009",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c04",
+    "pk": "8acf4d00-eeac-431d-9dba-ab6ff9b37c1c",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Finding by method (finding)",
-        "snomed": "118240005",
+        "name": "Acute pharyngitis (Strep throat/Sore throat)",
+        "snomed": "410294000",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c05",
+    "pk": "082eaa00-4c87-4677-b1bf-c05b37083af7",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "General clinical state finding (finding)",
-        "snomed": "248536006",
+        "name": "Benign prostatic hyperplasia (BPH)",
+        "snomed": "266569009",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c06",
+    "pk": "9ede91db-7f8f-4e96-a24e-1aaffbdf18de",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Neurological finding (finding)",
-        "snomed": "102957003",
+        "name": "Gout",
+        "snomed": "90560007",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c07",
+    "pk": "d7219b8e-7450-4960-b88b-b873c340c19e",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Finding related to physiologic substance (finding)",
-        "snomed": "127357005",
+        "name": "Eczema (Atopic dermatitis)",
+        "snomed": "10620002",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c08",
+    "pk": "1c274b66-6d68-46f9-bb4f-6dd317839c17",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Abnormal structure (finding)",
-        "snomed": "396263004",
+        "name": "Irritable bowel syndrome (IBS)",
+        "snomed": "35061005",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c09",
+    "pk": "0ec4412f-87b7-49c2-ba76-d43cb2d8e397",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Accident or injury (finding)",
-        "snomed": "444109000",
+        "name": "Cataract",
+        "snomed": "19357000",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c10",
+    "pk": "b334a3d9-089c-4fb1-9c91-d79b620f2870",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Infectious disease (disorder)",
-        "snomed": "363742007",
+        "name": "Fibromyalgia",
+        "snomed": "32454006",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c11",
+    "pk": "77b6d7ac-a97c-4c52-a83f-4c91345a0415",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Asthma (disorder)",
-        "snomed": "416431000",
+        "name": "Thyroid nodule",
+        "snomed": "1731004",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c12",
+    "pk": "fb29eb67-728c-47ac-87e2-d42c4eed08bf",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Hypertensive disorder (disorder)",
-        "snomed": "38341003",
+        "name": "Post-traumatic stress disorder (PTSD)",
+        "snomed": "47505003",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c13",
+    "pk": "957f8633-500f-414a-83a0-0975332020a0",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Diabetes mellitus (disorder)",
+        "name": "Vertigo (Vestibular disorder)",
+        "snomed": "39816001",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "eca08c7a-e379-4989-8639-cfd241aa963b",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Iron deficiency anemia",
+        "snomed": "303958008",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "d14f9810-acf8-41b2-80b2-d2eb9bc6197b",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Allergy to pollen",
+        "snomed": "419199002",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "ae6641b8-e0d9-4851-a7fd-91f8ac2f3386",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Acute otitis media (Middle ear infection)",
+        "snomed": "65368002",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "a2e2fec0-797d-43e6-845a-2216bf8f584f",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Chronic pain",
+        "snomed": "82423001",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "6dba4c04-21c1-4bff-bfed-5667ad8b55f0",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Chronic hepatitis C",
+        "snomed": "408332007",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "36b9228a-2df0-4ec7-8940-455a30330b5e",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Carotid artery stenosis",
+        "snomed": "43224003",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "d3251589-c874-4a5a-b78c-d9e97057f880",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Bipolar disorder",
+        "snomed": "13754005",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "12f92979-1cb6-469a-8b9b-4d52a5987c03",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Chronic lower back pain",
         "snomed": "73211009",
         "_predicates": ["HAS_CONDITION"]
       }
@@ -183,13 +295,27 @@
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c14",
+    "pk": "b3954ac3-e994-4d0e-963b-77f3221f85c2",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Myocardial infarction (disorder)",
+        "name": "Essential hypertension (High blood pressure)",
+        "snomed": "59621000",
+        "_predicates": ["HAS_CONDITION"]
+      }
+    }
+  },
+  {
+    "model": "core.entity",
+    "pk": "3ffb8c54-299e-4121-bbe0-57342aa6a177",
+    "fields": {
+      "created_at": "2025-10-21T13:35:10.973Z",
+      "updated_at": "2025-10-21T13:35:10.973Z",
+      "type": "Condition",
+      "metadata": {
+        "name": "Type 2 diabetes mellitus",
         "snomed": "44054006",
         "_predicates": ["HAS_CONDITION"]
       }
@@ -197,645 +323,252 @@
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c15",
+    "pk": "e0e0a9e0-c4fa-4bb9-a54e-8644f108e2ac",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Fracture of bone (finding)",
-        "snomed": "40055000",
+        "name": "Asthma",
+        "snomed": "195967001",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c16",
+    "pk": "5624299d-d743-4b9c-ad3c-90b855406aac",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Abdominal pain (finding)",
-        "snomed": "233604007",
+        "name": "Coronary heart disease",
+        "snomed": "53741008",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c17",
+    "pk": "567c91f4-62a3-42ff-97c7-609f7f212137",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Fatigue (finding)",
-        "snomed": "84227008",
+        "name": "Acute bronchitis",
+        "snomed": "4963003",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c18",
+    "pk": "9a9a88d4-1676-4f4c-b2b3-a53b510bc947",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Edema (finding)",
-        "snomed": "267035008",
+        "name": "Major depressive disorder",
+        "snomed": "35489000",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c19",
+    "pk": "b8990af8-3863-4e8e-8f7d-64913bcfc9c0",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Headache (finding)",
-        "snomed": "439401007",
+        "name": "Gastroesophageal reflux disease (GERD)",
+        "snomed": "235593005",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c20",
+    "pk": "d4a9327b-131b-4a12-90ba-91c4913c7567",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Cough (finding)",
-        "snomed": "422400008",
+        "name": "Hyperlipidemia (High cholesterol)",
+        "snomed": "298382003",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c21",
+    "pk": "f1eef2dd-9040-4368-aa36-78849f36575c",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Nausea (finding)",
-        "snomed": "162506004",
+        "name": "Influenza (Flu)",
+        "snomed": "614620003",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c22",
+    "pk": "d37eaf08-8ddb-455b-8a86-d320298ed4bd",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Vomiting (finding)",
-        "snomed": "162547009",
+        "name": "Osteoarthritis",
+        "snomed": "24012002",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c23",
+    "pk": "574f130a-bb0a-4cfb-8568-1b0fca08989c",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Fever (finding)",
-        "snomed": "440620005",
+        "name": "Allergic rhinitis (Hay fever)",
+        "snomed": "60810001",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c24",
+    "pk": "1907a33e-412e-408f-a835-c6d4a3428709",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Jaundice (finding)",
-        "snomed": "267036009",
+        "name": "Chronic kidney disease (Stage 3)",
+        "snomed": "709395007",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c25",
+    "pk": "ac805613-b896-45e2-9369-87e757fd9b8d",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Cyanosis (finding)",
-        "snomed": "267038005",
+        "name": "Anemia",
+        "snomed": "271737000",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c26",
+    "pk": "30f777a8-d4ab-4603-8203-692a259ef612",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Erythema (finding)",
-        "snomed": "267041001",
+        "name": "Hypothyroidism",
+        "snomed": "32139002",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c27",
+    "pk": "c4fe3950-0f22-4176-a0df-ff09cf046e81",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Swelling (finding)",
-        "snomed": "271168003",
+        "name": "Obesity",
+        "snomed": "414916001",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c28",
+    "pk": "69a809f4-ca67-4d56-8f6a-5554844741fd",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Stiffness (finding)",
-        "snomed": "271336007",
+        "name": "Attention deficit hyperactivity disorder (ADHD)",
+        "snomed": "40650005",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c29",
+    "pk": "663ee305-804a-4d9a-aa74-f3dc5e395bb0",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Finding of grade (finding)",
-        "snomed": "247475003",
+        "name": "Chronic obstructive pulmonary disease (COPD)",
+        "snomed": "13645005",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c30",
+    "pk": "64e7ac93-a713-41ca-a957-1346104bcd11",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Finding reported by subject or history provider (finding)",
-        "snomed": "47301000124102",
+        "name": "Pneumonia",
+        "snomed": "66318001",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c31",
+    "pk": "6d96ff5c-5286-4b6b-b30f-146f9cbb810a",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Drug action (finding)",
-        "snomed": "50974000",
+        "name": "Urinary tract infection (UTI)",
+        "snomed": "68566005",
         "_predicates": ["HAS_CONDITION"]
       }
     }
   },
   {
     "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c32",
+    "pk": "6722a4a5-9c12-4e42-86ce-1ddc7e827db4",
     "fields": {
       "created_at": "2025-10-21T13:35:10.973Z",
       "updated_at": "2025-10-21T13:35:10.973Z",
       "type": "Condition",
       "metadata": {
-        "name": "Prognosis/outlook finding (finding)",
-        "snomed": "409096001",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c33",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Bleeding (finding)",
-        "snomed": "443048008",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c34",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Drug interaction (finding)",
-        "snomed": "116514007",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c35",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Wound finding (finding)",
-        "snomed": "420399009",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c36",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Finding related to urine (finding)",
-        "snomed": "260029007",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c37",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Finding related to mental state (finding)",
-        "snomed": "129285004",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c38",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Abnormal result (finding)",
-        "snomed": "312854002",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c39",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Pain (finding)",
-        "snomed": "105001003",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820c40",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Abnormal posture (finding)",
-        "snomed": "249673005",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d01",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Palpitations (finding)",
-        "snomed": "271327008",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d02",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Abdominal distension (finding)",
-        "snomed": "162607003",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d03",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Abdominal tenderness (finding)",
-        "snomed": "162608008",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d04",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Rectal bleeding (finding)",
-        "snomed": "162610000",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d05",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Melena (finding)",
-        "snomed": "162611001",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d06",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Hematemesis (finding)",
-        "snomed": "162614009",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d07",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Hemoptysis (finding)",
-        "snomed": "162615005",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d08",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Night sweats (finding)",
-        "snomed": "162619004",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d09",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Weight loss (finding)",
-        "snomed": "162620005",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d10",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Weight gain (finding)",
-        "snomed": "162621009",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d11",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Polyuria (finding)",
-        "snomed": "162622002",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d12",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Polydipsia (finding)",
-        "snomed": "162623007",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d13",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Polyphagia (finding)",
-        "snomed": "162624001",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d14",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Oliguria (finding)",
-        "snomed": "162625000",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d15",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Dizziness (finding)",
-        "snomed": "271442005",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d16",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Weakness (finding)",
-        "snomed": "271807003",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d17",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Constipation (finding)",
-        "snomed": "162573006",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d18",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Diarrhea (finding)",
-        "snomed": "162476003",
-        "_predicates": ["HAS_CONDITION"],
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d19",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Chest pain (finding)",
-        "snomed": "162397003",
-        "_predicates": ["HAS_CONDITION"]
-      }
-    }
-  },
-  {
-    "model": "core.entity",
-    "pk": "b15ad924-be52-49ce-b61d-d1ab6d820d20",
-    "fields": {
-      "created_at": "2025-10-21T13:35:10.973Z",
-      "updated_at": "2025-10-21T13:35:10.973Z",
-      "type": "Condition",
-      "metadata": {
-        "name": "Shortness of breath (finding)",
-        "snomed": "422587007",
+        "name": "Alzheimer's disease",
+        "snomed": "26929004",
         "_predicates": ["HAS_CONDITION"]
       }
     }
