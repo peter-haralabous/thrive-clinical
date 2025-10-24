@@ -59,31 +59,6 @@ def _provenance_dict(page_index: int, llm_client) -> dict:
     }
 
 
-def _validate_or_trim(parsed):
-    try:
-        return IngestPromptWithContextResponse.model_validate(parsed)
-    except pydantic.ValidationError:
-        if isinstance(parsed, dict) and "triples" in parsed and isinstance(parsed["triples"], list):
-            parsed["triples"] = parsed["triples"][:-1]
-            result = IngestPromptWithContextResponse.model_validate(parsed)
-            logger.warning("Skipped invalid last record in triples extraction")
-            return result
-
-
-def _filter_triples(parsed):
-    """Filter out invalid triples from a list."""
-    filtered = []
-    for t in parsed:
-        subject = t.get("subject")
-        node = subject.get("node") if isinstance(subject, dict) else None
-        if not isinstance(node, dict):
-            continue
-        if t.get("normalized_predicate") is None or t.get("object") is None:
-            continue
-        filtered.append(t)
-    return {"triples": filtered}
-
-
 def _process_response(response, patient, page_index: int, llm_client) -> list:
     """
     Process LLM response to extract and validate triples, filtering out invalid ones.
