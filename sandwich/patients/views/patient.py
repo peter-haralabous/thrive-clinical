@@ -15,9 +15,10 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from guardian.decorators import permission_required_or_403
-from guardian.decorators import permission_required_or_404
 
 from sandwich.core.models.patient import Patient
+from sandwich.core.service.permissions_service import ObjPerm
+from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.validators.date_of_birth import valid_date_of_birth
 from sandwich.core.validators.phn import clean_phn
@@ -201,11 +202,9 @@ def patient_onboarding_add(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 
 @login_required
-@permission_required_or_404("view_patient", (Patient, "id", "patient_id"))
-def patient_details(request: AuthenticatedHttpRequest, patient_id: int) -> HttpResponse:
-    logger.info("Accessing patient details", extra={"user_id": request.user.id, "patient_id": patient_id})
-
-    patient: Patient = get_object_or_404(request.user.patient_set, id=patient_id)
+@authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient"])])
+def patient_details(request: AuthenticatedHttpRequest, patient: Patient) -> HttpResponse:
+    logger.info("Accessing patient details", extra={"user_id": request.user.id, "patient_id": patient.id})
 
     # TODO-NG: page & sort these lists
     tasks = patient.task_set.all()
