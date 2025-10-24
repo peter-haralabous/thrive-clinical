@@ -2,11 +2,11 @@ import json
 
 import pydantic
 
+from sandwich.core.service.ingest.db import save_triples
+from sandwich.core.service.ingest.prompt import get_ingest_prompt
+from sandwich.core.service.ingest.types import Triple
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
-from sandwich.core.services.ingest.db import save_triples
-from sandwich.core.services.ingest.prompt import get_ingest_prompt
-from sandwich.core.services.ingest.types import Triple
 
 
 def extract_facts_from_text(

@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pytest
 
+from sandwich.core.service.ingest.extract_pdf import convert_pages
+from sandwich.core.service.ingest.extract_pdf import extract_facts_from_pdf
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
-from sandwich.core.services.ingest.extract_pdf import convert_pages
-from sandwich.core.services.ingest.extract_pdf import extract_facts_from_pdf
 
 
 @pytest.mark.vcr

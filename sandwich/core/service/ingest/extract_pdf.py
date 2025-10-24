@@ -9,10 +9,10 @@ from langchain_core.language_models import BaseChatModel
 from pdf2image import convert_from_bytes
 from pdf2image import convert_from_path
 
-from sandwich.core.services.ingest.db import save_triples
-from sandwich.core.services.ingest.prompt import get_ingest_prompt
-from sandwich.core.services.ingest.response_models import IngestPromptWithContextResponse
-from sandwich.core.services.ingest.schema import PREDICATE_NAMES
+from sandwich.core.service.ingest.db import save_triples
+from sandwich.core.service.ingest.prompt import get_ingest_prompt
+from sandwich.core.service.ingest.response_models import IngestPromptWithContextResponse
+from sandwich.core.service.ingest.schema import PREDICATE_NAMES
 
 logger = logging.getLogger(__name__)
 

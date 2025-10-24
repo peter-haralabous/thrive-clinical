@@ -9,7 +9,7 @@ from sandwich.core.models import Fact
 from sandwich.core.models import Patient
 from sandwich.core.models import Predicate
 from sandwich.core.models.provenance import Provenance
-from sandwich.core.services.ingest.types import Triple
+from sandwich.core.service.ingest.types import Triple
 
 logger = logging.getLogger(__name__)
 

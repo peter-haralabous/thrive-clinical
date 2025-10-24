@@ -1,8 +1,8 @@
 import json
 
-from sandwich.core.services.ingest.schema import NODES
-from sandwich.core.services.ingest.schema import PATTERNS
-from sandwich.core.services.ingest.schema import RELATIONSHIPS
+from sandwich.core.service.ingest.schema import NODES
+from sandwich.core.service.ingest.schema import PATTERNS
+from sandwich.core.service.ingest.schema import RELATIONSHIPS
 
 
 def get_ingest_prompt(input_text: str, input_description: str = "") -> str:

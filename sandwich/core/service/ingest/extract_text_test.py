@@ -1,6 +1,6 @@
 import pytest
 
-from sandwich.core.services.ingest.extract_text import extract_facts_from_text
+from sandwich.core.service.ingest.extract_text import extract_facts_from_text
 
 
 @pytest.mark.vcr

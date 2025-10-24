@@ -8,10 +8,10 @@ from sandwich.core.models import Entity
 from sandwich.core.models import Fact
 from sandwich.core.models import Patient
 from sandwich.core.models.entity import EntityType
-from sandwich.core.services.ingest import db
-from sandwich.core.services.ingest.types import Entity as TripleEntity
-from sandwich.core.services.ingest.types import NormalizedPredicate
-from sandwich.core.services.ingest.types import Triple
+from sandwich.core.service.ingest import db
+from sandwich.core.service.ingest.types import Entity as TripleEntity
+from sandwich.core.service.ingest.types import NormalizedPredicate
+from sandwich.core.service.ingest.types import Triple
 
 
 @pytest.mark.django_db

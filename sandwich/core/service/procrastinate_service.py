@@ -4,9 +4,9 @@ from procrastinate.contrib.django import app
 
 from sandwich.core.models.document import Document
 from sandwich.core.service import invitation_service
+from sandwich.core.service.ingest.extract_pdf import extract_facts_from_pdf
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
-from sandwich.core.services.ingest.extract_pdf import extract_facts_from_pdf
 
 logger = logging.getLogger(__name__)
 

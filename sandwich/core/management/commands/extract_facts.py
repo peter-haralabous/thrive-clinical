@@ -1,9 +1,9 @@
 from django.core.management.base import BaseCommand
 
+from sandwich.core.service.ingest.extract_pdf import extract_facts_from_pdf
+from sandwich.core.service.ingest.extract_text import extract_facts_from_text
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
-from sandwich.core.services.ingest.extract_pdf import extract_facts_from_pdf
-from sandwich.core.services.ingest.extract_text import extract_facts_from_text
 
 
 class Command(BaseCommand):
