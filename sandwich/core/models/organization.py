@@ -94,4 +94,7 @@ class Organization(BaseModel):  # type: ignore[django-manager-missing] # see doc
         return (self.slug,)
 
     class Meta:
-        permissions = (("create_encounter", "Can create a new patient encounter in this organization."),)
+        permissions = (
+            ("create_patient", "Can create a new patient in this organization."),
+            ("create_encounter", "Can create a new patient encounter in this organization."),
+        )
