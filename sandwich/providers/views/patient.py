@@ -20,6 +20,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 from guardian.decorators import permission_required_or_403
+from guardian.decorators import permission_required_or_404
 from guardian.shortcuts import get_objects_for_user
 
 from sandwich.core.models.encounter import Encounter
@@ -109,6 +110,8 @@ class PatientAdd(forms.ModelForm[Patient]):
 
 
 @login_required
+@permission_required_or_404("view_patient", (Patient, "id", "patient_id"))
+@permission_required_or_404("view_organization", (Organization, "id", "organization_id"))
 def patient_details(request: AuthenticatedHttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     logger.info(
         "Accessing provider patient details",
@@ -203,6 +206,8 @@ def patient_details(request: AuthenticatedHttpRequest, organization_id: int, pat
 
 
 @login_required
+@permission_required_or_403("change_patient", (Patient, "id", "patient_id"))
+@permission_required_or_404("view_organization", (Organization, "id", "organization_id"))
 def patient_edit(request: AuthenticatedHttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     logger.info(
         "Accessing provider patient edit",
@@ -345,7 +350,9 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
         },
     )
 
-    patients = Patient.objects.filter(organization=organization)
+    provider_patients: QuerySet = get_objects_for_user(request.user, "core.view_patient")
+    patients = provider_patients.filter(organization=organization)
+
     provider_encounters: QuerySet = get_objects_for_user(request.user, "core.view_encounter")
     patients = patients.annotate(
         has_active_encounter=Exists(
@@ -360,7 +367,7 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
         patients = patients.filter(encounter__patient_status=patient_status_filter)
 
     if search:
-        patients = patients.search(search)  # type: ignore[attr-defined]
+        patients = patients.search(search)
 
     if sort:
         patients = patients.order_by(sort)
@@ -430,7 +437,6 @@ def patient_archive(request: AuthenticatedHttpRequest, organization_id: int, pat
 @require_POST
 @permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
 @permission_required_or_403("assign_task", (Patient, "id", "patient_id"))
-# TODO(MM): when we have org-patient perms check can view patient
 def patient_add_task(request: AuthenticatedHttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
     logger.info(
         "Adding task to patient",

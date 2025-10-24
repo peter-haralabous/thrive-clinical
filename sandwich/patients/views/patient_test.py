@@ -6,6 +6,7 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
+from sandwich.core.factories.patient import PatientFactory
 from sandwich.core.models import Fact
 from sandwich.core.models.patient import Patient
 from sandwich.patients.views.patient import PatientAdd
@@ -73,6 +74,40 @@ def test_patient_onboarding_add(db, user: User) -> None:
     assert response.status_code == HTTPStatus.FOUND
     assert response.headers.get("Location") == reverse("patients:home")
     assert user.has_perm("change_patient", created_patient)
+
+
+@pytest.mark.django_db
+def test_patient_details(user: User, patient: Patient) -> None:
+    client = Client()
+    client.force_login(user)
+    res = client.get(
+        reverse(
+            "patients:patient_details",
+            kwargs={
+                "patient_id": patient.id,
+            },
+        )
+    )
+
+    assert res.status_code == 200
+
+
+@pytest.mark.django_db
+# NB: patient fixture required
+def test_patient_details_deny_access(user: User, patient: Patient) -> None:
+    other_patient = PatientFactory.create()
+    client = Client()
+    client.force_login(user)
+    res = client.get(
+        reverse(
+            "patients:patient_details",
+            kwargs={
+                "patient_id": other_patient.id,
+            },
+        )
+    )
+
+    assert res.status_code == 404
 
 
 @pytest.mark.parametrize(

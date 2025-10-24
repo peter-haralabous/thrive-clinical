@@ -15,6 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from guardian.decorators import permission_required_or_403
+from guardian.decorators import permission_required_or_404
 
 from sandwich.core.models.patient import Patient
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -200,6 +201,7 @@ def patient_onboarding_add(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 
 @login_required
+@permission_required_or_404("view_patient", (Patient, "id", "patient_id"))
 def patient_details(request: AuthenticatedHttpRequest, patient_id: int) -> HttpResponse:
     logger.info("Accessing patient details", extra={"user_id": request.user.id, "patient_id": patient_id})
 
