@@ -62,8 +62,6 @@ class EncounterCreateForm(forms.ModelForm[Encounter]):
         encounter.status = EncounterStatus.UNKNOWN  # Default status for new encounters
         if commit:
             encounter.save()
-            # Assign default permissions to the new encounter
-            assign_default_encounter_perms(encounter)
         return encounter
 
 
@@ -249,6 +247,8 @@ def encounter_create(request: AuthenticatedHttpRequest, organization_id: UUID) -
         form = EncounterCreateForm(organization, request.POST)
         if form.is_valid():
             encounter = form.save()
+            # Assign default permissions to the new encounter
+            assign_default_encounter_perms(encounter)
             logger.info(
                 "Encounter created successfully",
                 extra={
