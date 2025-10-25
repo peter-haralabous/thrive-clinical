@@ -43,7 +43,7 @@ dev: init collectstatic migrate mailpit postgres redis
 	yarn run dev
 
 .PHONY: test-unit
-test-unit: .venv postgres
+test-unit: .venv postgres redis
 	uv run pytest -m "not e2e and not smoke_test" --exitfirst # --snapshot-update
 
 .PHONY: test-e2e
