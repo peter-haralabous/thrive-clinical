@@ -7,14 +7,21 @@ from procrastinate.contrib.django import app
 
 from sandwich.core.models import Document
 from sandwich.core.service.ingest.extract_pdf import extract_facts_from_pdf
+from sandwich.core.service.ingest.extract_text import extract_facts_from_text
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
 
 logger = logging.getLogger(__name__)
 
 
+# this task is no longer in use. remove it once all jobs have drained from the production database.
 @app.task
 def extract_facts_from_pdf_job(document_id: str, llm_name: str = ModelName.CLAUDE_SONNET_4_5):
+    extract_facts_from_document_job(document_id, llm_name)
+
+
+@app.task
+def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.CLAUDE_SONNET_4_5):
     document = Document.objects.get(id=document_id)
     patient = document.patient
     llm_client = get_llm(ModelName(llm_name))
@@ -22,12 +29,22 @@ def extract_facts_from_pdf_job(document_id: str, llm_name: str = ModelName.CLAUD
 
     try:
         with document.file.open("rb") as f:
-            pdf_bytes = f.read()
+            content = f.read()
     except Exception:
         logger.exception("Failed to read document file", extra={"document_id": str(document_id)})
         return
 
-    triples = extract_facts_from_pdf(pdf_bytes, llm_client, patient=patient, document=document)
+    if document.content_type == "application/pdf":
+        triples = extract_facts_from_pdf(content, llm_client, patient=patient, document=document)
+    elif document.content_type == "text/plain":
+        triples = extract_facts_from_text(content, llm_client, patient=patient, document=document)
+    else:
+        logger.warning(
+            "Unsupported document content type",
+            extra={"document_id": str(document_id), "content_type": document.content_type},
+        )
+        triples = []
+
     send_ingest_progress(
         patient.id, text=f"Extracted {len(triples)} facts from {document.original_filename}", done=True
     )

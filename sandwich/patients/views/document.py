@@ -10,7 +10,7 @@ from django.views.decorators.http import require_POST
 from private_storage.views import PrivateStorageDetailView
 
 from sandwich.core.models.document import Document
-from sandwich.core.service.ingest_service import extract_facts_from_pdf_job
+from sandwich.core.service.ingest_service import extract_facts_from_document_job
 from sandwich.core.service.ingest_service import send_ingest_progress
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
@@ -35,6 +35,8 @@ class DocumentDownloadView(PrivateStorageDetailView):
 
 document_download = login_required(DocumentDownloadView.as_view())
 
+SUPPORTED_FILE_TYPES = ["application/pdf", "text/plain"]
+
 
 class DocumentForm(forms.ModelForm):
     class Meta:
@@ -43,8 +45,8 @@ class DocumentForm(forms.ModelForm):
 
     def clean_file(self):
         file = self.cleaned_data.get("file")
-        if getattr(file, "content_type", None) != "application/pdf":
-            msg = "Only PDF files are supported."
+        if getattr(file, "content_type", None) not in SUPPORTED_FILE_TYPES:
+            msg = "Unsupported file type."
             raise forms.ValidationError(msg)
         return file
 
@@ -67,14 +69,13 @@ def document_upload_and_extract(request: AuthenticatedHttpRequest, patient_id: U
     form = DocumentForm({"patient": patient.id}, request.FILES)
     if form.is_valid():
         document = form.save()
-        if document.content_type == "application/pdf":
-            try:
-                # enqueue background extraction task
-                extract_facts_from_pdf_job.defer(document_id=str(document.id))
-                send_ingest_progress(patient.id, text=f"Uploaded {document.original_filename}...")
-            except RuntimeError:
-                logger.warning("Failed to enqueue document analysis", exc_info=True)
-                messages.add_message(request, messages.ERROR, "Failed to enqueue document analysis")
+        try:
+            # enqueue background extraction task
+            extract_facts_from_document_job.defer(document_id=str(document.id))
+            send_ingest_progress(patient.id, text=f"Uploaded {document.original_filename}...")
+        except RuntimeError:
+            logger.warning("Failed to enqueue document analysis", exc_info=True)
+            messages.add_message(request, messages.ERROR, "Failed to enqueue document analysis")
     else:
         logger.info("Invalid document upload form")
         error = ", ".join([str(e) for e in form.errors.get("file", [])])

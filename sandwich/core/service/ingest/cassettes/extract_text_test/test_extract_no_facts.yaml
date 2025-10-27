@@ -1,17 +1,32 @@
 interactions:
   - request:
       body:
-        '{"anthropic_version": "bedrock-2023-05-31", "messages": [{"role": "user",
-        "content": "\nYou are extracting structured (subject, predicate, object) triples
-        from clinical text to create a knowledge graph.\n\nYou must structure your output
-        according to the schema below:\n\n For each triple:\n- Subjects and objects
-        must be valid node types and predicates must be valid predicates.\n- The relationship
-        between `subject`, `object`, and `predicate` must be one of the allowed patterns
-        in the schema.\n- If a sentence contains multiple facts (e.g., a symptom and
-        its cause), extract multiple triples.\n\nAttempt to capture all clinically relevant
-        data.\n\nRules for parsing:\n- For observations (vital signs, tests, etc.) with
-        multiple measurements over time, capture each recorded value as its\nown (triple)
-        to ensure we are capturing every Observation in the text.\n  - for example:\n      ```\n        His
+        '{"tools": [{"name": "IngestPromptWithContextResponse", "description": "IngestPromptWithContextResponse",
+        "input_schema": {"properties": {"triples": {"items": {"properties": {"subject":
+        {"properties": {"entityType": {"type": "string"}, "node": {"additionalProperties":
+        true, "type": "object"}}, "required": ["entityType", "node"], "type": "object"},
+        "predicate": {"type": "string"}, "normalizedPredicate": {"properties": {"predicateType":
+        {"type": "string"}, "traits": {"anyOf": [{"additionalProperties": {"type": "boolean"},
+        "type": "object"}, {"type": "null"}], "default": null}, "properties": {"anyOf":
+        [{"additionalProperties": true, "type": "object"}, {"type": "null"}], "default":
+        null}}, "required": ["predicateType"], "type": "object"}, "object": {"properties":
+        {"entityType": {"type": "string"}, "node": {"additionalProperties": true, "type":
+        "object"}}, "required": ["entityType", "node"], "type": "object"}}, "required":
+        ["subject", "predicate", "normalizedPredicate", "object"], "type": "object"},
+        "type": "array"}, "context_summary": {"anyOf": [{"type": "string"}, {"type":
+        "null"}], "default": null}}, "required": ["triples"], "type": "object"}}], "tool_choice":
+        {"type": "tool", "name": "IngestPromptWithContextResponse"}, "anthropic_version":
+        "bedrock-2023-05-31", "messages": [{"role": "user", "content": "\nYou are extracting
+        structured (subject, predicate, object) triples from clinical text to create
+        a knowledge graph.\n\nYou must structure your output according to the schema
+        below:\n\n For each triple:\n- Subjects and objects must be valid node types
+        and predicates must be valid predicates.\n- The relationship between `subject`,
+        `object`, and `predicate` must be one of the allowed patterns in the schema.\n-
+        If a sentence contains multiple facts (e.g., a symptom and its cause), extract
+        multiple triples.\n\nAttempt to capture all clinically relevant data.\n\nRules
+        for parsing:\n- For observations (vital signs, tests, etc.) with multiple measurements
+        over time, capture each recorded value as its\nown (triple) to ensure we are
+        capturing every Observation in the text.\n  - for example:\n      ```\n        His
         weight has been monitored due to steroid use:\n        - July 2018: 175 lbs\n        -
         August 2019: 183 lbs\n        - May 2021: 179 lbs\n        - May 2025: 171 lbs\n      ```\n    should
         be captured as 4 distinct triples\n\n- No need to extract data verbatim, try
@@ -25,10 +40,11 @@ interactions:
         row.\n\n- If the clinical fact is negated, hypothetical, or mentioned as past
         history, include a traits object with keys like\nnegation, hypothetical, or
         past_history, each set to true. Omit keys that are not relevant.\"\n\n- If present
-        in the text, include patient demographics on the Patient subject node: dateOfBirth
-        (YYYY-MM-DD), phn,\nemail.\n\nEnsure the generated triples are valid according
-        to the schema.\n\n---\n\n### Schema\n{\n  \"predicates\": [\n    {\n      \"label\":
-        \"HAS_CONDITION\",\n      \"properties\": [\n        {\n          \"name\":
+        in the text, include patient demographics on the Patient subject node:\n    first_name,
+        last_name, date_of_birth (YYYY-MM-DD), phn, email.\n    Do NOT use a single
+        \"name\" field for Patient. Always use \"first_name\" and \"last_name\".\n\nEnsure
+        the generated triples are valid according to the schema.\n\n---\n\n### Schema\n{\n  \"predicates\":
+        [\n    {\n      \"label\": \"HAS_CONDITION\",\n      \"properties\": [\n        {\n          \"name\":
         \"date\",\n          \"type\": \"DATE\",\n          \"description\": \"Estimated
         or actual date the condition started\"\n        }\n      ],\n      \"description\":
         \"Subject has been diagnosed with a medical condition.\"\n    },\n    {\n      \"label\":
@@ -93,8 +109,9 @@ interactions:
         the procedure happened.\"\n        },\n        {\n          \"name\": \"performer\",\n          \"type\":
         \"STRING\",\n          \"description\": \"Who performed the procedure.\"\n        }\n      ],\n      \"description\":
         \"Subject underwent a clinical procedure.\"\n    }\n  ],\n  \"nodes\": [\n    {\n      \"label\":
-        \"Patient\",\n      \"properties\": [\n        {\n          \"name\": \"name\",\n          \"type\":
+        \"Patient\",\n      \"properties\": [\n        {\n          \"name\": \"first_name\",\n          \"type\":
         \"STRING\",\n          \"required\": true\n        },\n        {\n          \"name\":
+        \"last_name\",\n          \"type\": \"STRING\",\n          \"required\": true\n        },\n        {\n          \"name\":
         \"dateOfBirth\",\n          \"type\": \"DATE\"\n        },\n        {\n          \"name\":
         \"phn\",\n          \"type\": \"STRING\"\n        },\n        {\n          \"name\":
         \"email\",\n          \"type\": \"STRING\"\n        }\n      ],\n      \"description\":
@@ -136,22 +153,22 @@ interactions:
           - !!binary |
             YXBwbGljYXRpb24vanNvbg==
         Content-Length:
-          - '12336'
+          - '13827'
         Content-Type:
           - !!binary |
             YXBwbGljYXRpb24vanNvbg==
         User-Agent:
           - !!binary |
-            Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC41LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjIgbWQvcHlpbXBsI0NQeXRob24gbS9aLGIs
+            Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjIgbWQvcHlpbXBsI0NQeXRob24gbS9iLFos
             RCBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
             cms6bGFuZ2NoYWluLWF3cw==
         X-Amz-Date:
           - !!binary |
-            MjAyNTEwMTdUMjI1NDU0Wg==
+            MjAyNTEwMjdUMjI0OTE1Wg==
         amz-sdk-invocation-id:
           - !!binary |
-            ZDZjNTYxMTMtZDUxNS00ZGQwLTk1MmItYTAzYWY0NTc5Yjkz
+            NzVmMDFkMDctZDlhZi00MjdmLTk3NWEtNWFkZTI4N2IzNjQ0
         amz-sdk-request:
           - !!binary |
             YXR0ZW1wdD0x
@@ -159,24 +176,24 @@ interactions:
       uri: https://bedrock-runtime.ca-central-1.amazonaws.com/model/anthropic.claude-3-sonnet-20240229-v1%3A0/invoke
     response:
       body:
-        string: '{"id":"msg_bdrk_01URzWJzDG1sH9UvUYsZhvze","type":"message","role":"assistant","model":"claude-3-sonnet-20240229","content":[{"type":"text","text":"[]"}],"stop_reason":"end_turn","stop_sequence":null,"usage":{"input_tokens":3071,"output_tokens":4}}'
+        string: '{"id":"msg_bdrk_01KwchRLZFwC357u3GaPgUQi","type":"message","role":"assistant","model":"claude-3-sonnet-20240229","content":[{"type":"tool_use","id":"toolu_bdrk_015UwgCEVJR3fELDR7QdP31A","name":"IngestPromptWithContextResponse","input":{"triples":[]}}],"stop_reason":"tool_use","stop_sequence":null,"usage":{"input_tokens":3746,"output_tokens":34}}'
       headers:
         Connection:
           - keep-alive
         Content-Length:
-          - '247'
+          - '347'
         Content-Type:
           - application/json
         Date:
-          - Fri, 17 Oct 2025 22:54:56 GMT
+          - Mon, 27 Oct 2025 22:49:18 GMT
         X-Amzn-Bedrock-Input-Token-Count:
-          - '3071'
+          - '3746'
         X-Amzn-Bedrock-Invocation-Latency:
-          - '1423'
+          - '2091'
         X-Amzn-Bedrock-Output-Token-Count:
-          - '4'
+          - '34'
         x-amzn-RequestId:
-          - 51a34975-340c-4bcd-90dc-778fff32d23f
+          - 17e61ae3-7c78-47b8-8bc7-e6868147379c
       status:
         code: 200
         message: OK

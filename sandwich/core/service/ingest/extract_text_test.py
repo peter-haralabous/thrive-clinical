@@ -10,8 +10,8 @@ def test_extract_facts_from_text():
     input_text = "Jane has a fever and a cough."
     triples = extract_facts_from_text(input_text, llm_client=get_claude_3_sonnet())
     assert len(triples) > 0
-    assert triples[0].subject.node["name"] == "Jane"
-    assert triples[0].obj.node["name"] in {"Fever", "Cough"}
+    assert triples[0].subject.node["first_name"] == "Jane"
+    assert triples[0].obj.node["name"] in {"fever", "cough"}
 
 
 @pytest.mark.vcr
@@ -20,7 +20,7 @@ def test_extract_single_symptom():
     input_text = "John has a headache."
     triples = extract_facts_from_text(input_text, llm_client=get_claude_3_sonnet())
     assert len(triples) > 0
-    assert triples[0].subject.node["name"] == "John"
+    assert triples[0].subject.node["first_name"] == "John"
     assert triples[0].obj.node["name"] == "Headache"
 
 
@@ -30,7 +30,7 @@ def test_extract_medication():
     input_text = "Alice is taking ibuprofen."
     triples = extract_facts_from_text(input_text, llm_client=get_claude_3_sonnet())
     assert len(triples) > 0
-    assert triples[0].subject.node["name"] == "Alice"
+    assert triples[0].subject.node["first_name"] == "Alice"
     assert "ibuprofen" in str(triples[0].obj.node["name"])
 
 

@@ -39,7 +39,10 @@
             hx-target="#documents-table-container"
             hx-encoding="multipart/form-data"
             class="hidden">
-        <input type="file" id="file-input" name="file" accept="application/pdf" />
+        <input type="file"
+               id="file-input"
+               name="file"
+               accept="application/pdf, text/plain" />
         {% csrf_token %}
       </form>
     </div>
@@ -69,9 +72,9 @@
       const files = e.dataTransfer.files;
       if (!files.length) return;
       const file = files[0];
-      if (file.type !== 'application/pdf') {
+      if (!["application/pdf", "text/plain"].includes(file.type)) {
         // TODO: add javascript interface for showing toast messages
-        alert("Only PDF files are supported.");
+        alert("Unsupported file type. Please upload a PDF or plain text file.");
         return;
       }
       const fileInput = document.getElementById('file-input');
