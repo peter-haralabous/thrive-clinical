@@ -107,6 +107,8 @@ THIRD_PARTY_APPS = [
     "guardian",
     "lucide",
     "django_eventstream",
+    "pghistory",
+    "pgtrigger",
 ]
 
 LOCAL_APPS = [
