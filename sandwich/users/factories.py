@@ -18,12 +18,12 @@ class UserFactory(DjangoModelFactory[User]):
         self.consents = None
 
     @post_generation
-    def groups(self, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
+    def groups(self: User, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
         if create and extracted:
             self.groups.add(*extracted)
 
     @post_generation
-    def password(self, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
+    def password(self: User, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
         password = (
             extracted
             if extracted
@@ -39,9 +39,9 @@ class UserFactory(DjangoModelFactory[User]):
         self.password = password
 
     @post_generation
-    def consents(self, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
+    def consents(self: User, create: bool, extracted: Sequence[Any], **kwargs):  # noqa: FBT001
         if create and extracted:
-            record_consent(user=self, decisions=dict.fromkeys(extracted, True))  # type: ignore[arg-type]
+            record_consent(user=self, decisions=dict.fromkeys(extracted, True))
 
     @classmethod
     def _after_postgeneration(cls, instance, create, results=None):
