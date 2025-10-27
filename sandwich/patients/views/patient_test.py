@@ -9,8 +9,8 @@ from django.urls import reverse
 from sandwich.core.factories.patient import PatientFactory
 from sandwich.core.models import Fact
 from sandwich.core.models.patient import Patient
-from sandwich.patients.views.patient import PatientAdd
-from sandwich.patients.views.patient import PatientEdit
+from sandwich.patients.views.patient.add import PatientAdd
+from sandwich.patients.views.patient.edit import PatientEdit
 from sandwich.users.models import User
 
 

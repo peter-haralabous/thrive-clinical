@@ -7,11 +7,11 @@ from .views.document import document_download
 from .views.document import document_upload_and_extract
 from .views.home import home
 from .views.invitation import accept_invite
-from .views.patient import get_phn_validation
-from .views.patient import patient_add
-from .views.patient import patient_details
-from .views.patient import patient_edit
-from .views.patient import patient_onboarding_add
+from .views.patient.add import patient_add
+from .views.patient.add import patient_onboarding_add
+from .views.patient.details import patient_details
+from .views.patient.edit import get_phn_validation
+from .views.patient.edit import patient_edit
 from .views.task import task
 
 app_name = "patients"
