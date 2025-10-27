@@ -33,6 +33,13 @@
               —
             {% endif %}
           </td>
+          <td>
+            {% if fact.provenance %}
+              <a class="tooltip"
+                 href="{{ fact.provenance.patient_url }}"
+                 data-tip="{{ fact.provenance }}">{% lucide "arrow-up-right" size=15 class="inline mb-1" %}</a>
+            {% endif %}
+          </td>
         </tr>
       {% endfor %}
     </table>
