@@ -14,12 +14,12 @@ def test_assign_default_patient_permissions_provider_created(
 
     assert provider.has_perm("view_patient", new_patient)
     assert provider.has_perm("change_patient", new_patient)
-    assert provider.has_perm("assign_task", new_patient)
+    assert provider.has_perm("create_task", new_patient)
 
     # random user doesn't have perms
     assert user.has_perm("view_patient", new_patient) is False
     assert user.has_perm("change_patient", new_patient) is False
-    assert user.has_perm("assign_task", new_patient) is False
+    assert user.has_perm("create_task", new_patient) is False
 
 
 @pytest.mark.django_db
@@ -35,4 +35,4 @@ def test_assign_default_patient_permissions_user_created(user: User) -> None:
     # random user doesn't have perms
     assert other_user.has_perm("view_patient", new_patient) is False
     assert other_user.has_perm("change_patient", new_patient) is False
-    assert other_user.has_perm("assign_task", new_patient) is False
+    assert other_user.has_perm("create_task", new_patient) is False

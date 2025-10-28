@@ -132,7 +132,7 @@ class Patient(BaseModel):
         ]
 
         permissions = (
-            ("assign_task", "Can assign a task to this patient"),
+            ("create_task", "Can create a task for this patient"),
             ("create_document", "Can create a new document for this patient."),
         )
 

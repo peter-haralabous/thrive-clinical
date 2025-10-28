@@ -11,28 +11,6 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-DEFAULT_ORGANIZATION_ROLE_PERMS = {
-    RoleName.OWNER: [
-        "assign_task",
-        "view_patient",
-        "change_patient",
-        "create_document",
-    ],
-    RoleName.ADMIN: [
-        "assign_task",
-        "view_patient",
-        "change_patient",
-        "create_document",
-    ],
-    RoleName.STAFF: [
-        "assign_task",
-        "view_patient",
-        "change_patient",
-        "create_document",
-    ],
-}
-
-
 def maybe_patient_name(q: str) -> list[str] | None:
     """
     try to turn unstructured text into a patient name
@@ -79,10 +57,12 @@ def assign_default_patient_permissions(patient: "Patient") -> None:
     # Patient doesn't belong to any organization
     if patient.organization:
         # Apply org-wide role perms
-        for role_name, perms in DEFAULT_ORGANIZATION_ROLE_PERMS.items():
+        for role_name in [RoleName.OWNER, RoleName.ADMIN, RoleName.STAFF]:
             role = patient.organization.get_role(role_name)
-            for perm in perms:
-                assign_perm(perm, role.group, patient)
+            assign_perm("create_task", role.group, patient)
+            assign_perm("view_patient", role.group, patient)
+            assign_perm("change_patient", role.group, patient)
+            assign_perm("create_document", role.group, patient)
         logger.debug(
             "Provider has been given permissions to patient",
             extra={
