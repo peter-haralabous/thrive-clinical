@@ -2,13 +2,11 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
-from sandwich.conftest import RoleName
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.invitation import Invitation
 from sandwich.core.models.invitation import InvitationStatus
 from sandwich.core.models.organization import Organization
 from sandwich.core.service.invitation_service import assign_default_invitation_perms
-from sandwich.core.service.organization_service import assign_organization_role
 from sandwich.users.models import User
 
 
@@ -37,13 +35,12 @@ def test_encounter_details_not_found_without_view_invitation_perms(
 
 
 @pytest.mark.django_db
-def test_encounter_details_returns_template(user: User, organization: Organization, encounter: Encounter) -> None:
-    assign_organization_role(organization=organization, role_name=RoleName.OWNER, user=user)
+def test_encounter_details_returns_template(provider: User, organization: Organization, encounter: Encounter) -> None:
     invitation = Invitation.objects.create(status=InvitationStatus.PENDING, token="", patient=encounter.patient)
     assign_default_invitation_perms(invitation)
 
     client = Client()
-    client.force_login(user)
+    client.force_login(provider)
     url = reverse("providers:encounter", kwargs={"organization_id": organization.id, "encounter_id": encounter.id})
     result = client.get(url)
 
