@@ -8,6 +8,7 @@ from sandwich.core.models import Fact
 from sandwich.core.models import Patient
 from sandwich.core.models import Provenance
 from sandwich.core.models.entity import EntityType
+from sandwich.core.models.provenance import SourceType
 from sandwich.core.service.ingest import db
 from sandwich.core.service.ingest.types import Entity as TripleEntity
 from sandwich.core.service.ingest.types import NormalizedPredicate
@@ -63,7 +64,7 @@ def triple_factory():
 
 @pytest.fixture
 def provenance() -> Provenance:
-    return Provenance.objects.create(source_type="unknown", extracted_by="test", extracted_at=timezone.now())
+    return Provenance.objects.create(source_type=SourceType.UNKNOWN, extracted_by="test", extracted_at=timezone.now())
 
 
 @pytest.mark.django_db

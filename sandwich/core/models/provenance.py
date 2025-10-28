@@ -3,17 +3,23 @@ import uuid
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from django_enum import EnumField
 
 from sandwich.core.models.abstract import BaseModel
 from sandwich.core.models.document import Document
 from sandwich.users.models import User
 
 
-class SourceTypes(models.TextChoices):
-    DOCUMENT = "document", "Document upload"
-    TEXT = "text", "Text"
-    CONVERSATION = "conversation", "Conversation"
-    FORM_SUBMISSION = "form_submission", "Form submission"
+class SourceType(models.TextChoices):
+    DOCUMENT = "document", _("Document upload")
+    TEXT = "text", _("Text")
+    UNKNOWN = "unknown", _("Unknown")
+
+    # these are planned, but not yet implemented
+    # when adding them, also add a ForeignKey to the appropriate model
+    # CONVERSATION = "conversation", _("Conversation")
+    # FORM_SUBMISSION = "form_submission", _("Form submission")
 
 
 class Provenance(BaseModel):
@@ -32,12 +38,9 @@ class Provenance(BaseModel):
         related_name="provenances",
         help_text="The document from which this fact was extracted.",
     )
-    source_type = models.CharField(
-        blank=True,
-        default="",
-        max_length=50,
-        choices=SourceTypes,
-        help_text="The type of source, e.g., 'application/pdf', 'conversation'.",
+    source_type: models.Field[SourceType, SourceType] = EnumField(
+        SourceType,
+        default=SourceType.UNKNOWN,
     )
     page = models.IntegerField(
         null=True,
@@ -63,11 +66,17 @@ class Provenance(BaseModel):
         constraints = [
             models.CheckConstraint(
                 condition=(
-                    models.Q(source_type=SourceTypes.TEXT, user__isnull=False)
-                    | ~models.Q(source_type=SourceTypes.TEXT)
+                    models.Q(source_type=SourceType.TEXT, user__isnull=False) | ~models.Q(source_type=SourceType.TEXT)
                 ),
                 name="user_required_for_text_source",
-            )
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(source_type=SourceType.DOCUMENT, document__isnull=False)
+                    | ~models.Q(source_type=SourceType.DOCUMENT)
+                ),
+                name="document_required_for_document_source",
+            ),
         ]
 
     def __str__(self) -> str:

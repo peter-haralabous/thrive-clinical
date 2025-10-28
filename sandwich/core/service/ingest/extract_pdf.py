@@ -12,7 +12,7 @@ from pdf2image import convert_from_path
 from sandwich.core.models import Document
 from sandwich.core.models import Patient
 from sandwich.core.models import Provenance
-from sandwich.core.models.provenance import SourceTypes
+from sandwich.core.models.provenance import SourceType
 from sandwich.core.service.ingest.db import save_triples
 from sandwich.core.service.ingest.prompt import get_ingest_prompt
 from sandwich.core.service.ingest.response_models import IngestPromptWithContextResponse
@@ -113,7 +113,7 @@ def extract_facts_from_pdf(
                 provenance = Provenance.objects.create(
                     document=document,
                     page=i,
-                    source_type=SourceTypes.DOCUMENT if document else "unknown",
+                    source_type=SourceType.DOCUMENT if document else SourceType.UNKNOWN,
                     extracted_at=timezone.now(),
                     extracted_by=llm_client.__class__.__name__,
                 )
