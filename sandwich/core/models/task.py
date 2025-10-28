@@ -56,6 +56,15 @@ class Task(BaseModel):
     # this is Task.executionPeriod.end in FHIR
     ended_at = models.DateTimeField(blank=True, null=True)
 
+    form_version = models.ForeignKey(
+        "core.FormEvent",
+        on_delete=models.PROTECT,
+        related_name="tasks",
+        null=True,
+        blank=True,
+        help_text="The specific version of the form this task uses",
+    )
+
     def clean(self):
         if self.encounter and self.patient and self.encounter.patient != self.patient:
             msg = "Encounter and patient do not match."
