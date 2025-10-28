@@ -1,17 +1,18 @@
 import logging
-from uuid import UUID
 
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from private_storage.views import PrivateStorageDetailView
 
 from sandwich.core.models.document import Document
+from sandwich.core.models.patient import Patient
 from sandwich.core.service.ingest_service import extract_facts_from_document_job
 from sandwich.core.service.ingest_service import send_ingest_progress
+from sandwich.core.service.permissions_service import ObjPerm
+from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
 logger = logging.getLogger(__name__)
@@ -64,8 +65,8 @@ class DocumentForm(forms.ModelForm):
 
 @require_POST
 @login_required
-def document_upload_and_extract(request: AuthenticatedHttpRequest, patient_id: UUID):
-    patient = get_object_or_404(request.user.patient_set, id=patient_id)
+@authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient", "create_document"])])
+def document_upload_and_extract(request: AuthenticatedHttpRequest, patient: Patient):
     form = DocumentForm({"patient": patient.id}, request.FILES)
     if form.is_valid():
         document = form.save()
@@ -86,9 +87,13 @@ def document_upload_and_extract(request: AuthenticatedHttpRequest, patient_id: U
 
 @require_POST
 @login_required
-def document_delete(request: AuthenticatedHttpRequest, patient_id: UUID, document_id: UUID):
-    patient = get_object_or_404(request.user.patient_set, id=patient_id)
-    document = get_object_or_404(patient.document_set, id=document_id)
+@authorize_objects(
+    [
+        ObjPerm(Patient, "patient_id", ["view_patient"]),
+        ObjPerm(Document, "document_id", ["view_document", "delete_document"]),
+    ]
+)
+def document_delete(request: AuthenticatedHttpRequest, patient: Patient, document: Document):
     document.delete()
     documents = patient.document_set.all()
     return render(request, "patient/partials/documents_table.html", {"documents": documents})
