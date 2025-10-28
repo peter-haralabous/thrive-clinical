@@ -25,7 +25,7 @@ class Task:
 
     class Meta:
         permissions = (
-            ("complete_task", "Can complete an task."),
+            ("complete_task", "Can complete a task."),
         )
 ```
 
@@ -60,22 +60,23 @@ user has permission to add new patients to this organization".
 
 #### Views
 
-At the view-level, we can use the [decorators](https://django-guardian.readthedocs.io/en/stable/api/decorators/)
-provided by Django Guardian.
+We can secure views by using our own `authorize_objects` decorator. This function extracts the object id
+from the params, retrieves the object, checks whether the user has the permissions you specified, and then
+injects the authorized object back into the view for use.
+
+If the requesting user is not authorized, the decorator throws a 404.
 
 ```py
-@permission_required_or_403("change_organization", (Organization, "id", "organization_id"))
-def organization_edit(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
+@authorize_objects([
+    ObjPerm(Patient, "patient_id", ["view_patient", "change_patient"]),
+    ObjPerm(Organization, "organization_id", ["view_organization"]),
+])
+def patient_edit(request: AuthenticatedHttpRequest, organization: Organization, patient: Patient) -> HttpResponse:
     ...
 ```
 
-The decorator restricts access to users who have the "change_organization" permission for that particular
-organization. The "lookup variable" tuple is what allows us to check the if the user has permissions on a
-specific object. If we omit the lookup tuple, we would be performing a global check for anyone with the
-`change_organization` role. **We should almost always be using specific object checks.**
-
-Django Guardian gives us three view decorators: `permission_required`, `permission_required_or_403`,  and
-`permission_required_or_404`.
+Django Guardian also provides us some view decorators, but these **should not** be used as they can introduce
+information leaks, can be awkward to use on complex views, and make redundant db lookups.
 
 #### has_perm method
 
