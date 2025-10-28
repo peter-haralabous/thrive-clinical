@@ -26,6 +26,15 @@ def default_expiry() -> datetime:
     return timezone.now() + timedelta(days=INVITE_EXPIRY_DAYS)
 
 
+class InvitationManager(models.Manager["Invitation"]):
+    def create(self, **kwargs) -> "Invitation":
+        from sandwich.core.service.invitation_service import assign_default_invitation_perms  # noqa: PLC0415
+
+        created = super().create(**kwargs)
+        assign_default_invitation_perms(created)
+        return created
+
+
 class Invitation(BaseModel):
     status: models.Field[InvitationStatus, InvitationStatus] = EnumField(
         InvitationStatus,
@@ -40,6 +49,8 @@ class Invitation(BaseModel):
 
     patient = models.ForeignKey("Patient", on_delete=models.CASCADE)
     verification_attempts = models.PositiveIntegerField(default=0, help_text="number of failed verification attempts")
+
+    objects = InvitationManager()
 
     def increment_verification_attempts(self) -> None:
         """Increment verification attempts and update status if limit exceeded."""
