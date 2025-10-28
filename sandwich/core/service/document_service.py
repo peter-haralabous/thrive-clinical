@@ -10,16 +10,20 @@ def assign_default_document_permissions(document: Document) -> None:
         org = document.patient.organization
         owner_role = org.get_role(RoleName.OWNER)
         admin_role = org.get_role(RoleName.ADMIN)
-        staff_roll = org.get_role(RoleName.STAFF)
+        staff_role = org.get_role(RoleName.STAFF)
 
         # Providers can view and change documents in the org
         assign_perm("view_document", owner_role.group, document)
         assign_perm("view_document", admin_role.group, document)
-        assign_perm("view_document", staff_roll.group, document)
+        assign_perm("view_document", staff_role.group, document)
 
         assign_perm("change_document", owner_role.group, document)
         assign_perm("change_document", admin_role.group, document)
-        assign_perm("change_document", staff_roll.group, document)
+        assign_perm("change_document", staff_role.group, document)
+
+        assign_perm("delete_document", owner_role.group, document)
+        assign_perm("delete_document", admin_role.group, document)
+        assign_perm("delete_document", staff_role.group, document)
 
     # apply user-owner permissions
     if document.patient.user:
