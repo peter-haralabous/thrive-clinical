@@ -56,7 +56,6 @@ def find_or_create_patient_invitation(patient: Patient) -> Invitation:
 
     if not invitation:
         invitation = Invitation.objects.create(patient=patient)
-        assign_default_invitation_perms(invitation)
         logger.info(
             "Created new patient invitation",
             extra={
