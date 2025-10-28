@@ -7,7 +7,7 @@ from django.db import models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0051_alter_patient_options"),
+        ("core", "0059_update_patient_permissions_name"),
     ]
 
     operations = [

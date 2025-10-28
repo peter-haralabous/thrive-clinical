@@ -34,6 +34,6 @@ def backfill_entity_patient(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-    dependencies = [("core", "0052_entity_patient")]
+    dependencies = [("core", "0060_entity_patient")]
 
     operations = [migrations.RunPython(backfill_entity_patient, migrations.RunPython.noop)]

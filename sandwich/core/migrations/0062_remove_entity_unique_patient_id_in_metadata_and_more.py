@@ -6,7 +6,7 @@ from django.db import models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("core", "0053_backfill_entity_patient"),
+        ("core", "0061_backfill_entity_patient"),
     ]
 
     operations = [
