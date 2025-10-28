@@ -48,10 +48,10 @@ class Entity(BaseModel):
         verbose_name_plural = "Entities"
         constraints = [
             models.UniqueConstraint(
-                models.F("metadata__patient_id"),
-                name="unique_patient_id_in_metadata",
-                condition=(models.Q(metadata__has_key="patient_id") & models.Q(type=EntityType.PATIENT.value)),
-            )
+                fields=["patient"],
+                name="unique_patient_fk",
+                condition=(models.Q(patient__isnull=False) & models.Q(type=EntityType.PATIENT.value)),
+            ),
         ]
 
     def __str__(self) -> str:

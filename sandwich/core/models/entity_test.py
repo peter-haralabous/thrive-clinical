@@ -4,39 +4,41 @@ from django.db import transaction
 
 from sandwich.core.models import Entity
 from sandwich.core.models.entity import EntityType
+from sandwich.core.models.patient import Patient
 
 
 @pytest.mark.django_db
-def test_entity_unique_patient_id():
-    # Create an entity with a patient_id in metadata
-    e1 = Entity.objects.create(type=EntityType.PATIENT, metadata={"patient_id": "abc"})
+def test_entity_unique_patient_fk():
+    # FK-based uniqueness: only one Entity of type Patient may reference a given Patient
+    p1 = Patient.objects.create(first_name="Jane", last_name="Doe", date_of_birth="2000-01-01")
+    p2 = Patient.objects.create(first_name="John", last_name="Smith", date_of_birth="1990-01-01")
+
+    e1 = Entity.objects.create(type=EntityType.PATIENT, patient=p1)
     assert e1.pk is not None
 
-    # Creating another entity with the same patient_id should fail
+    # Creating another entity that references the same Patient should violate the unique constraint
     with pytest.raises(IntegrityError), transaction.atomic():
-        Entity.objects.create(type=EntityType.PATIENT, metadata={"patient_id": "abc"})
+        Entity.objects.create(type=EntityType.PATIENT, patient=p1)
 
-    # Creating another entity with a different patient_id should succeed
-    e2 = Entity.objects.create(type=EntityType.PATIENT, metadata={"patient_id": "def"})
+    # Different patient is allowed
+    e2 = Entity.objects.create(type=EntityType.PATIENT, patient=p2)
     assert e2.pk is not None
-
-    # Creating an entity without patient_id in metadata should succeed
-    e3 = Entity.objects.create(type=EntityType.PATIENT, metadata={})
-    assert e3.pk is not None
 
 
 @pytest.mark.django_db
-def test_entity_non_patient_no_constraint():
+def test_entity_non_patient_patient_fk_allowed():
     # Non-Patient entities: patient_id can be duplicated
     # Although this probably won't occur in practice,
     # we want to ensure that the constraint only applies to Patient entities.
-    e1 = Entity.objects.create(type=EntityType.CONDITION, metadata={"patient_id": "abc"})
-    e2 = Entity.objects.create(type=EntityType.CONDITION, metadata={"patient_id": "abc"})
+    p = Patient.objects.create(first_name="Alice", last_name="Jones", date_of_birth="1985-05-05")
+
+    e1 = Entity.objects.create(type=EntityType.CONDITION, patient=p)
+    e2 = Entity.objects.create(type=EntityType.CONDITION, patient=p)
     assert e1.pk is not None
     assert e2.pk is not None
 
-    e3 = Entity.objects.create(type=EntityType.MEDICATION, metadata={"patient_id": "abc"})
-    e4 = Entity.objects.create(type=EntityType.MEDICATION, metadata={"patient_id": "abc"})
+    e3 = Entity.objects.create(type=EntityType.MEDICATION, patient=p)
+    e4 = Entity.objects.create(type=EntityType.MEDICATION, patient=p)
     assert e3.pk is not None
     assert e4.pk is not None
 
