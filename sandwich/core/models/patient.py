@@ -126,7 +126,10 @@ class Patient(BaseModel):
             GinIndex(fields=["search_vector"]),
         ]
 
-        permissions = (("assign_task", "Can assign a task to this patient"),)
+        permissions = (
+            ("assign_task", "Can assign a task to this patient"),
+            ("create_document", "Can create a new document for this patient."),
+        )
 
     def initials(self) -> str:
         """
