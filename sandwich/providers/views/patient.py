@@ -206,7 +206,7 @@ def patient_details(request: AuthenticatedHttpRequest, organization: Organizatio
 @login_required
 @authorize_objects(
     [
-        ObjPerm(Patient, "patient_id", ["view_patient"]),
+        ObjPerm(Patient, "patient_id", ["view_patient", "change_patient"]),
         ObjPerm(Organization, "organization_id", ["view_organization"]),
     ]
 )
