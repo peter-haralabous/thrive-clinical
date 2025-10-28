@@ -14,7 +14,6 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
-from guardian.decorators import permission_required_or_403
 
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
@@ -23,6 +22,8 @@ from sandwich.core.models.patient import Patient
 from sandwich.core.service.encounter_service import assign_default_encounter_perms
 from sandwich.core.service.invitation_service import get_unaccepted_invitation
 from sandwich.core.service.organization_service import get_provider_organizations
+from sandwich.core.service.permissions_service import ObjPerm
+from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.util.http import validate_sort
 
@@ -235,11 +236,9 @@ def encounter_list(request: AuthenticatedHttpRequest, organization_id: UUID) -> 
 
 
 @login_required
-@permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
-def encounter_create(request: AuthenticatedHttpRequest, organization_id: UUID) -> HttpResponse:
+@authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization"])])
+def encounter_create(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
     """View for creating a new encounter."""
-    organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
-
     if request.method == "POST":
         form = EncounterCreateForm(organization, request.POST)
         if form.is_valid():
@@ -250,7 +249,7 @@ def encounter_create(request: AuthenticatedHttpRequest, organization_id: UUID) -
                 "Encounter created successfully",
                 extra={
                     "user_id": request.user.id,
-                    "organization_id": organization_id,
+                    "organization_id": organization.id,
                     "patient_id": encounter.patient.id,
                     "encounter_id": encounter.id,
                 },
@@ -266,7 +265,7 @@ def encounter_create(request: AuthenticatedHttpRequest, organization_id: UUID) -
             "Invalid encounter creation form",
             extra={
                 "user_id": request.user.id,
-                "organization_id": organization_id,
+                "organization_id": organization.id,
                 "form_errors": list(form.errors.keys()),
             },
         )
@@ -285,10 +284,9 @@ def encounter_create(request: AuthenticatedHttpRequest, organization_id: UUID) -
 # the provider's organization. Should this search need to be expanded to a
 # broader/global search, we will need to refactor and potentially permissions. TBC by product.
 @login_required
-@permission_required_or_403("create_encounter", (Organization, "id", "organization_id"))
-def encounter_create_search(request: AuthenticatedHttpRequest, organization_id: UUID) -> HttpResponse:
+@authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization", "create_encounter"])])
+def encounter_create_search(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
     """HTMX endpoint for searching patients when creating an encounter."""
-    organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
     query = request.GET.get("q", "").strip()
     page_size = int(request.GET.get("limit", "10"))
     page = request.GET.get("page", 1)
