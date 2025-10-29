@@ -27,7 +27,6 @@ from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import TaskStatus
-from sandwich.core.service.encounter_service import assign_default_encounter_perms
 from sandwich.core.service.encounter_service import complete_encounter
 from sandwich.core.service.encounter_service import get_current_encounter
 from sandwich.core.service.invitation_service import get_unaccepted_invitation
@@ -280,7 +279,6 @@ def patient_add(request: AuthenticatedHttpRequest, organization: Organization) -
             encounter = Encounter.objects.create(
                 patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
             )
-            assign_default_encounter_perms(encounter)
             logger.info(
                 "Provider patient and encounter created successfully",
                 extra={
@@ -459,7 +457,6 @@ def patient_add_task(request: AuthenticatedHttpRequest, organization: Organizati
         current_encounter = Encounter.objects.create(
             patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS
         )
-        assign_default_encounter_perms(current_encounter)
         logger.debug(
             "Created new encounter for task",
             extra={

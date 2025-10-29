@@ -10,7 +10,6 @@ from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
-from sandwich.core.service.encounter_service import assign_default_encounter_perms
 from sandwich.users.models import User
 
 
@@ -259,10 +258,7 @@ def test_patient_add_task_deny_access(user: User, organization: Organization, pa
 def test_patient_archive(provider: User, organization: Organization, patient: Patient) -> None:
     client = Client()
     client.force_login(provider)
-    encounter = Encounter.objects.create(
-        organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
-    )
-    assign_default_encounter_perms(encounter)
+    Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
 
     res = client.post(
         reverse(
@@ -280,10 +276,7 @@ def test_patient_archive_deny_access(user: User, organization: Organization, pat
     client = Client()
     # This user doesn't have change_encounter perms, only view
     client.force_login(user)
-    encounter = Encounter.objects.create(
-        organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
-    )
-    assign_default_encounter_perms(encounter)
+    Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
 
     res = client.post(
         reverse(

@@ -247,6 +247,9 @@ def encounter_create(request: AuthenticatedHttpRequest, organization: Organizati
         if form.is_valid():
             encounter = form.save()
             # Assign default permissions to the new encounter
+            # form.save() does not call the create method of the
+            # underlying model so we need to explictly call
+            # assign_default_encounter_perms
             assign_default_encounter_perms(encounter)
             logger.info(
                 "Encounter created successfully",

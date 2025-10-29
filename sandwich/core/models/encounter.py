@@ -62,6 +62,13 @@ class EncounterManager(models.Manager["Encounter"]):
     def search(self, query: str):
         return self.get_queryset().search(query)
 
+    def create(self, **kwargs) -> "Encounter":
+        from sandwich.core.service.encounter_service import assign_default_encounter_perms  # noqa: PLC0415
+
+        created = super().create(**kwargs)
+        assign_default_encounter_perms(created)
+        return created
+
 
 class Encounter(BaseModel):
     """
