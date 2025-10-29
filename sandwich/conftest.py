@@ -15,13 +15,14 @@ from sandwich.core.util.testing import UserRequestFactory
 from sandwich.fixtures.patient import patient
 from sandwich.fixtures.patient import patient_entity
 from sandwich.fixtures.patient import patient_knowledge_graph
+from sandwich.fixtures.webpack import conditional_webpack
 from sandwich.users.factories import UserFactory
 from sandwich.users.models import User
 
 # For playwright tests, it uses async internally.
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
-__all__ = ["patient", "patient_entity", "patient_knowledge_graph"]
+__all__ = ["conditional_webpack", "patient", "patient_entity", "patient_knowledge_graph"]
 
 
 @pytest.fixture(autouse=True)
