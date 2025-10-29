@@ -34,7 +34,7 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form list",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    forms = Form.objects.filter(organization=organization)
+    forms = Form.objects.filter(organization=organization).order_by("name")
 
     page = request.GET.get("page", 1)
     paginator = Paginator(forms, 25)
