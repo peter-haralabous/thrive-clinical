@@ -55,6 +55,10 @@ test-e2e: .playwright-browsers collectstatic
 	# https://pytest-xdist.readthedocs.io/en/stable/distribution.html
 	uv run pytest -m e2e --screenshot only-on-failure --numprocesses logical --exitfirst
 
+.PHONY: debug-test-e2e
+debug-test-e2e: .playwright-browsers collectstatic
+	PWDEBUG=1 PLAYWRIGHT_HEADLESS=0 $(MAKE) test-e2e
+
 .PHONY: record-test-e2e
 record-test-e2e: .playwright-browsers collectstatic
 	uv run playwright codegen http://localhost:3000
