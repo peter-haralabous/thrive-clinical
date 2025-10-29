@@ -34,6 +34,15 @@ def terminal_task_status(status: TaskStatus) -> bool:
     return status in [TaskStatus.CANCELLED, TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.ENTERED_IN_ERROR]
 
 
+class TaskManager(models.Manager["Task"]):
+    def create(self, **kwargs) -> "Task":
+        from sandwich.core.service.task_service import assign_default_task_perms  # noqa: PLC0415
+
+        created = super().create(**kwargs)
+        assign_default_task_perms(created)
+        return created
+
+
 # NOTE-NG: this is just a placeholder for now. We'll want to expand this model significantly in the future.
 class Task(BaseModel):
     """
@@ -64,6 +73,8 @@ class Task(BaseModel):
         blank=True,
         help_text="The specific version of the form this task uses",
     )
+
+    objects = TaskManager()
 
     def clean(self):
         if self.encounter and self.patient and self.encounter.patient != self.patient:

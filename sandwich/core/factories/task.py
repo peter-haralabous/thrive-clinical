@@ -6,7 +6,6 @@ from sandwich.core.models import Task
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.task import TaskStatus
-from sandwich.core.service.task_service import assign_default_task_perms
 
 
 class TaskFactory(DjangoModelFactory[Task]):
@@ -21,10 +20,3 @@ class TaskFactory(DjangoModelFactory[Task]):
     )
 
     status = TaskStatus.REQUESTED
-
-    @factory.post_generation
-    def set_permissions(obj: Task, create, extracted, **kwargs):  # noqa: N805
-        """Assign default permissions after the task is created."""
-        if not create:
-            return
-        assign_default_task_perms(obj)
