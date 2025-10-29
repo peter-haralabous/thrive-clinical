@@ -6,7 +6,7 @@
   {# the sse-swap here is misleading -- the messages themselves have hx-swap-oob set to their actual target #}
   <div sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
        sse-swap="ingest_progress"></div>
-  <h1 class="mb-4">My Health Records</h1>
+  <h2 id="health-records" class="mb-4">My Health Records</h2>
   {% include "patient/partials/personal_information.html" with patient=patient %}
   {% include "patient/partials/card_conditions.html" with category="Conditions" facts=facts.conditions %}
   {% include "patient/partials/card_symptoms.html" with category="Symptoms" facts=facts.symptoms %}
@@ -22,7 +22,7 @@
   {% include "patient/partials/card_documents_and_notes.html" with category="Documents and Notes" facts=facts.documents_and_notes %}
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mt-8 mb-6">
     <div class="flex items-center gap-3">
-      <span class="text-lg font-semibold">Documents</span>
+      <h2 id="documents" class="text-lg font-semibold">Documents</h2>
       <span class="badge badge-info badge-outline text-xs">PDF upload will extract clinical facts automatically</span>
     </div>
     <div class="flex items-center gap-2">
@@ -86,7 +86,7 @@
   </script>
   {# NOTE: tasks are only relevant if this patient is linked with an organization #}
   {% if tasks %}
-    <h3 class="my-4">Tasks</h3>
+    <h2 id="tasks" class="my-4">Tasks</h2>
     <div class="flex space-y-4 flex-col">
       {% for task in tasks %}
         <div class="card card-border bg-base-100 w-full">

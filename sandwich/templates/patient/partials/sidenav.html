@@ -3,7 +3,7 @@
 {% block sidenav-items %}
   <li>
     <a href="{% if patient %}{% url 'patients:patient_details' patient_id=patient.id %}{% else %}{% url 'patients:home' %}{% endif %}"
-       class="flex items-center justify-start w-full btn btn-ghost {% if request.resolver_match.url_name == 'patient_details' %}btn-active{% endif %}">
+       class="menu-title flex gap-3">
       <svg xmlns="http://www.w3.org/2000/svg"
            width="24"
            height="24"
@@ -19,7 +19,18 @@
         <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z">
         </path>
       </svg>
-      <span class="ml-3">Home</span>
+      Home
     </a>
+    <ul>
+      <li>
+        <a href="#health-records">Health Records</a>
+      </li>
+      <li>
+        <a href="#documents">Documents</a>
+      </li>
+      <li>
+        <a href="#tasks">Tasks</a>
+      </li>
+    </ul>
   </li>
 {% endblock sidenav-items %}
