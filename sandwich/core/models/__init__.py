@@ -18,6 +18,7 @@ from .patient import Patient
 from .predicate import Predicate
 from .provenance import Provenance
 from .role import Role
+from .submission import Submission
 from .task import Task
 from .template import Template
 
@@ -42,6 +43,7 @@ __all__ = [
     "PreferenceScope",
     "Provenance",
     "Role",
+    "Submission",
     "Task",
     "Template",
 ]
