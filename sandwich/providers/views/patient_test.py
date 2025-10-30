@@ -1,4 +1,5 @@
 from datetime import date
+from http import HTTPStatus
 
 import pytest
 from django.test import Client
@@ -55,6 +56,14 @@ def test_patient_list_filter_allowed_patients(provider: User, organization: Orga
 
 @pytest.mark.django_db
 def test_patient_add(provider: User, organization: Organization) -> None:
+    data = {
+        "first_name": "Jacob",
+        "last_name": "Newpatient",
+        "date_of_birth": date(1961, 6, 6),
+        "province": "BC",
+        "phn": "9111111117",  # BC requires more specific PHN
+    }
+
     client = Client()
     client.force_login(provider)
     res = client.post(
@@ -63,10 +72,19 @@ def test_patient_add(provider: User, organization: Organization) -> None:
             kwargs={
                 "organization_id": organization.id,
             },
-        )
+        ),
+        data=data,
     )
 
-    assert res.status_code == 200
+    assert res.status_code == HTTPStatus.FOUND
+    created_patient = Patient.objects.get(last_name="Newpatient")
+    assert created_patient
+    assert res.url == reverse(  # type: ignore[attr-defined]
+        "providers:patient",
+        kwargs={"patient_id": created_patient.id, "organization_id": organization.id},
+    )
+    assert provider.has_perm("view_patient", created_patient)
+    assert provider.has_perm("create_task", created_patient)
 
 
 @pytest.mark.django_db
@@ -216,7 +234,6 @@ def test_patient_edit_deny_access(provider: User, patient: Patient, organization
     assert res.status_code == 404
 
 
-# TODO(MM): Backfill with Task perm tests
 @pytest.mark.django_db
 def test_patient_add_task(provider: User, organization: Organization, patient: Patient) -> None:
     client = Client()

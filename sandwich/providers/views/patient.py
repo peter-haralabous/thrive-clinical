@@ -35,6 +35,7 @@ from sandwich.core.service.invitation_service import resend_patient_invitation_e
 from sandwich.core.service.list_preference_service import get_available_columns
 from sandwich.core.service.list_preference_service import get_list_view_preference
 from sandwich.core.service.organization_service import get_provider_organizations
+from sandwich.core.service.patient_service import assign_default_patient_permissions
 from sandwich.core.service.patient_service import maybe_patient_name
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
@@ -271,6 +272,9 @@ def patient_add(request: AuthenticatedHttpRequest, organization: Organization) -
         form = PatientAdd(request.POST)
         if form.is_valid():
             patient = form.save(organization=organization)
+            # Form `save()` does not call `Object.create` so we manually apply
+            # permissions.
+            assign_default_patient_permissions(patient)
             # Check if this patient was created via the encounter flow (by checking for a GET param or session flag)
             if request.GET.get("from_encounter"):
                 # Redirect to encounter create page with patient preselected
