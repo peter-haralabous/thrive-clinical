@@ -172,7 +172,7 @@ def test_mixin_restore_to(db: Any, organization: Organization) -> None:
     form.schema = {"q1": "yes/no", "q2": "text"}
     form.save()
 
-    assert form.events.count() == 3  # Three versions exist.
+    assert form.get_total_versions() == 3  # Three versions exist. Current is v3.
 
     # Current version should have the latest changes.
     assert form.name == "Customer Survey"
@@ -182,10 +182,10 @@ def test_mixin_restore_to(db: Any, organization: Organization) -> None:
     restored_form = form.restore_to(previous_version_id=v1_id)
     assert restored_form.name == "Survey"
     assert restored_form.schema == {"q1": "yes/no"}
-    assert form.events.count() == 4  # A version was created for the restore action.
+    assert form.get_total_versions() == 4  # A version was created for the restore action (v4)
 
     # Restore to version 2.
     restored_form = form.restore_to(previous_version_id=v2_id)
     assert restored_form.name == "Customer Survey"
     assert restored_form.schema == {"q1": "yes/no"}
-    assert form.events.count() == 5  # A version was created for the restore action.
+    assert form.get_total_versions() == 5  # A version was created for the restore action (v5)
