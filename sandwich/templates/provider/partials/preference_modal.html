@@ -67,7 +67,9 @@
                   hx-swap="none"
                   class="btn btn-ghost">{% trans "Reset to Defaults" %}</button>
         {% endif %}
-        <button type="button" class="btn">{% trans "Cancel" %}</button>
+        <form method="dialog">
+          <button class="btn">{% trans "Cancel" %}</button>
+        </form>
         <button type="submit" class="btn btn-primary">
           {% if is_org_default %}
             {% trans "Save Organization Defaults" %}
