@@ -2,10 +2,12 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 
 from sandwich.core.models import Form
 from sandwich.core.models import Organization
+from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -41,3 +43,23 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
     forms_page = paginator.get_page(page)
 
     return render(request, "provider/form_list.html", {"organization": organization, "forms": forms_page})
+
+
+# TODO: Form permissions needed to switch to authorize_objects
+@login_required
+def form_details(request: AuthenticatedHttpRequest, organization_id, form_id):
+    """Provider view of a single form template.
+
+    Displays the list of form versions.
+    """
+    logger.info(
+        "Accessing organization form details",
+        extra={"user_id": request.user.id, "organization_id": organization_id, "form_id": form_id},
+    )
+    organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
+    form = get_object_or_404(Form, id=form_id, organization=organization)
+    form_versions = form.get_versions()
+
+    return render(
+        request, "provider/form_details.html", {"organization": organization, "form": form, "forms": form_versions}
+    )

@@ -66,7 +66,7 @@ def test_all_views_permissioned() -> None:
 
     # TODO(MM): These views should be secured.
     #
-    # This list acts as a registery of unpermissioned views. Remove entries
+    # This list acts as a registry of unpermissioned views. Remove entries
     # from this list when they are properly permissioned.
     unpermissioned_routes = {
         "providers/organization/<uuid:organization_id>/patient/<uuid:patient_id>/archive",
@@ -80,6 +80,7 @@ def test_all_views_permissioned() -> None:
         "providers/organization/<uuid:organization_id>/preferences/org/<str:list_type>/settings",
         "providers/organization/<uuid:organization_id>/preferences/org/<str:list_type>/save",
         "providers/organization/<uuid:organization_id>/preferences/org/<str:list_type>/reset",
+        "providers/organization/<uuid:organization_id>/form/<uuid:form_id>",
         # Formio endpoints to be removed after SurveyJS implemented
         "patients/api/formio/<name>",
         "patients/api/formio/<name>/submission",
