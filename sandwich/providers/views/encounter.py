@@ -38,18 +38,13 @@ class EncounterCreateForm(forms.ModelForm[Encounter]):
         super().__init__(*args, **kwargs)
         self.organization = organization
 
-        # Set up patient status choices
-        patient_status_choices = [(s.value, s.label) for s in (organization.patient_statuses or [])]
-        patient_status_choices.insert(0, ("", "—"))
-        self.fields["patient_status"].widget = forms.Select(choices=patient_status_choices)
-
         # Set up form helper
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Create Encounter", css_class="btn btn-primary"))
 
     class Meta:
         model = Encounter
-        fields = ("patient", "patient_status")
+        fields = ("patient",)
         widgets = {
             "patient": forms.HiddenInput(),
         }
