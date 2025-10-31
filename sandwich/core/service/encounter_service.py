@@ -2,12 +2,14 @@ import logging
 
 from django.utils import timezone
 from guardian.shortcuts import assign_perm
+from guardian.shortcuts import get_objects_for_user
 
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.patient import Patient
 from sandwich.core.models.role import RoleName
 from sandwich.core.service.task_service import cancel_task
+from sandwich.users.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +17,7 @@ logger = logging.getLogger(__name__)
 # NOTE-NG: It might feel like this belongs as a method on the Encounter model, but
 # that doesn't scale well to actions that touch multiple objects (e.g. cancelling tasks)
 # We don't want to have a dependency cycle between the Encounter and Task models.
-def complete_encounter(encounter: Encounter) -> None:
+def complete_encounter(encounter: Encounter, user: User) -> None:
     """Mark an encounter as completed; cancel any outstanding tasks associated with it."""
     logger.info(
         "Completing encounter",
@@ -30,6 +32,8 @@ def complete_encounter(encounter: Encounter) -> None:
 
     # Count active tasks before cancelling them
     active_tasks = encounter.task_set.filter(status__in=["REQUESTED", "IN_PROGRESS"])
+    # Ensure user has perms to change these tasks
+    active_tasks = get_objects_for_user(user, ["view_task", "change_task"], active_tasks)
     active_task_count = active_tasks.count()
 
     logger.debug(

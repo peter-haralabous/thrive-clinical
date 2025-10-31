@@ -363,14 +363,18 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
 
 @login_required
 @require_POST
-def patient_archive(request: AuthenticatedHttpRequest, organization_id: int, patient_id: int) -> HttpResponse:
+@authorize_objects(
+    [
+        ObjPerm(Organization, "organization_id", ["view_organization"]),
+        ObjPerm(Patient, "patient_id", ["view_patient"]),
+    ]
+)
+def patient_archive(request: AuthenticatedHttpRequest, organization: Organization, patient: Patient) -> HttpResponse:
     logger.info(
         "Archiving patient",
-        extra={"user_id": request.user.id, "organization_id": organization_id, "patient_id": patient_id},
+        extra={"user_id": request.user.id, "organization_id": organization.id, "patient_id": patient.id},
     )
 
-    organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
-    patient = get_object_or_404(organization.patient_set, id=patient_id)
     current_encounter = get_current_encounter(patient)
     if not current_encounter or not request.user.has_perm("change_encounter", current_encounter):
         return HttpResponseNotFound()
@@ -378,14 +382,14 @@ def patient_archive(request: AuthenticatedHttpRequest, organization_id: int, pat
     # in the future we might want to capture _why_ the patient was archived
     # i.e. should status be COMPLETED / CANCELLED / ...
     assert current_encounter is not None, "No current encounter found for patient"
-    complete_encounter(current_encounter)
+    complete_encounter(current_encounter, request.user)
 
     logger.info(
         "Patient archived successfully",
         extra={
             "user_id": request.user.id,
-            "organization_id": organization_id,
-            "patient_id": patient_id,
+            "organization_id": organization.id,
+            "patient_id": patient.id,
             "encounter_id": current_encounter.id,
         },
     )
