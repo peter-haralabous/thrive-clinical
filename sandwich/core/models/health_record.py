@@ -1,0 +1,27 @@
+from django.core.exceptions import ValidationError
+from django.db import models
+
+from sandwich.core.models.abstract import BaseModel
+
+
+class HealthRecord(BaseModel):
+    """
+    All records that show up in the PHR have some common fields.
+
+    1. They are associated with a patient.
+    2. They may be associated with an encounter (if provider-uploaded).
+    3. They track where they came from (provenance)
+    """
+
+    patient = models.ForeignKey("core.Patient", on_delete=models.CASCADE)
+
+    # only provider-uploaded records will have an encounter
+    encounter = models.ForeignKey("core.Encounter", on_delete=models.SET_NULL, null=True, blank=True)
+
+    def clean(self):
+        if self.encounter and self.patient and self.encounter.patient != self.patient:
+            msg = "Encounter and patient do not match."
+            raise ValidationError(msg)
+
+    class Meta:
+        abstract = True
