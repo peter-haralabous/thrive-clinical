@@ -1,7 +1,6 @@
 from datetime import date
 from http import HTTPStatus
 
-import pytest
 from django.test import Client
 from django.urls import reverse
 from guardian.shortcuts import assign_perm
@@ -16,7 +15,6 @@ from sandwich.core.models.task import TaskStatus
 from sandwich.users.models import User
 
 
-@pytest.mark.django_db
 def test_patient_list(provider: User, organization: Organization) -> None:
     client = Client()
     client.force_login(provider)
@@ -29,10 +27,9 @@ def test_patient_list(provider: User, organization: Organization) -> None:
         )
     )
 
-    assert res.status_code == 200
+    assert res.status_code == HTTPStatus.OK
 
 
-@pytest.mark.django_db
 def test_patient_list_filter_allowed_patients(provider: User, organization: Organization) -> None:
     # Create org patients
     PatientFactory.create(organization=organization)
@@ -51,12 +48,11 @@ def test_patient_list_filter_allowed_patients(provider: User, organization: Orga
         )
     )
 
-    assert res.status_code == 200
+    assert res.status_code == HTTPStatus.OK
     # We only get the patients the provider has permissions to view
     assert len(res.context["patients"]) == 2
 
 
-@pytest.mark.django_db
 def test_patient_add(provider: User, organization: Organization) -> None:
     data = {
         "first_name": "Jacob",
@@ -89,7 +85,6 @@ def test_patient_add(provider: User, organization: Organization) -> None:
     assert provider.has_perm("create_task", created_patient)
 
 
-@pytest.mark.django_db
 def test_patient_add_deny_access_not_provider(user: User, organization: Organization) -> None:
     data = {
         "first_name": "Jacob",
@@ -111,10 +106,9 @@ def test_patient_add_deny_access_not_provider(user: User, organization: Organiza
         data=data,
     )
 
-    assert res.status_code == 404
+    assert res.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db
 def test_patient_add_deny_access_missing_perms(user: User, organization: Organization) -> None:
     data = {
         "first_name": "Jacob",
@@ -139,10 +133,9 @@ def test_patient_add_deny_access_missing_perms(user: User, organization: Organiz
         data=data,
     )
 
-    assert res.status_code == 404
+    assert res.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db
 def test_patient_details(provider: User, patient: Patient, organization: Organization) -> None:
     client = Client()
     client.force_login(provider)
@@ -156,10 +149,9 @@ def test_patient_details(provider: User, patient: Patient, organization: Organiz
         )
     )
 
-    assert res.status_code == 200
+    assert res.status_code == HTTPStatus.OK
 
 
-@pytest.mark.django_db
 def test_patient_details_deny_access(provider: User, organization: Organization) -> None:
     other_patient = PatientFactory.create()
     client = Client()
@@ -174,10 +166,9 @@ def test_patient_details_deny_access(provider: User, organization: Organization)
         )
     )
 
-    assert res.status_code == 404
+    assert res.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db
 def test_patient_edit(provider: User, patient: Patient, organization: Organization) -> None:
     data = {
         "first_name": "Jacob",
@@ -200,7 +191,7 @@ def test_patient_edit(provider: User, patient: Patient, organization: Organizati
         data=data,
     )
 
-    assert res.status_code == 302
+    assert res.status_code == HTTPStatus.FOUND
     assert res.url == reverse(  # type: ignore[attr-defined]
         "providers:patient",
         kwargs={"patient_id": patient.id, "organization_id": organization.id},
@@ -209,7 +200,6 @@ def test_patient_edit(provider: User, patient: Patient, organization: Organizati
     assert patient.last_name == "Newname"
 
 
-@pytest.mark.django_db
 def test_patient_edit_deny_access(provider: User, patient: Patient, organization: Organization) -> None:
     other_patient = PatientFactory.create()
     data = {
@@ -233,10 +223,9 @@ def test_patient_edit_deny_access(provider: User, patient: Patient, organization
         data=data,
     )
 
-    assert res.status_code == 404
+    assert res.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db
 def test_patient_add_task(provider: User, organization: Organization, patient: Patient) -> None:
     client = Client()
     client.force_login(provider)
@@ -252,14 +241,13 @@ def test_patient_add_task(provider: User, organization: Organization, patient: P
     assert task is not None
     assert task.form_version is None  # No form associated yet. Formio still hardcoded in.
 
-    assert res.status_code == 302
+    assert res.status_code == HTTPStatus.FOUND
     assert res.url == reverse(  # type:ignore [attr-defined]
         "providers:patient",
         kwargs={"organization_id": organization.id, "patient_id": patient.id},
     )
 
 
-@pytest.mark.django_db
 def test_patient_add_task_deny_access(user: User, organization: Organization, patient: Patient) -> None:
     client = Client()
     client.force_login(user)
@@ -270,7 +258,7 @@ def test_patient_add_task_deny_access(user: User, organization: Organization, pa
         )
     )
 
-    assert res.status_code == 404
+    assert res.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_patient_cancel_task(provider: User, patient, organization) -> None:
@@ -315,7 +303,6 @@ def test_patient_cancel_task_deny_access(user: User, patient, organization) -> N
     assert res.status_code == HTTPStatus.NOT_FOUND
 
 
-@pytest.mark.django_db
 def test_patient_archive(provider: User, organization: Organization, patient: Patient) -> None:
     client = Client()
     client.force_login(provider)
@@ -328,11 +315,10 @@ def test_patient_archive(provider: User, organization: Organization, patient: Pa
         )
     )
 
-    assert res.status_code == 302
+    assert res.status_code == HTTPStatus.FOUND
     assert res.url == reverse("providers:patient_list", kwargs={"organization_id": organization.id})  # type:ignore [attr-defined]
 
 
-@pytest.mark.django_db
 def test_patient_archive_deny_access(user: User, organization: Organization, patient: Patient) -> None:
     client = Client()
     # This user doesn't have change_encounter perms, only view
@@ -346,7 +332,7 @@ def test_patient_archive_deny_access(user: User, organization: Organization, pat
         )
     )
 
-    assert res.status_code == 404
+    assert res.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_patient_resend_invite(template_fixture, provider: User, organization: Organization, mailoutbox) -> None:
