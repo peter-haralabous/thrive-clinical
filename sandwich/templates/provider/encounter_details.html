@@ -48,13 +48,6 @@
     </div>
   {% endif %}
   <hr />
-  <div class="space-y-2">
-    <h2>Encounter</h2>
-    <p>
-      <strong>Patient Status:</strong> {{ encounter.get_patient_status_display|default:"—" }}
-    </p>
-  </div>
-  <hr />
   {% include 'provider/partials/encounter_tasks.html' %}
   {% if other_encounters %}
     <hr />
