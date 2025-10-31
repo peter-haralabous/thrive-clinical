@@ -15,7 +15,6 @@ from django.db.models import QuerySet
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
@@ -35,7 +34,6 @@ from sandwich.core.service.invitation_service import get_unaccepted_invitation
 from sandwich.core.service.invitation_service import resend_patient_invitation_email
 from sandwich.core.service.list_preference_service import get_available_columns
 from sandwich.core.service.list_preference_service import get_list_view_preference
-from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.service.patient_service import assign_default_patient_permissions
 from sandwich.core.service.patient_service import maybe_patient_name
 from sandwich.core.service.permissions_service import ObjPerm
@@ -273,10 +271,9 @@ def patient_add(request: AuthenticatedHttpRequest, organization: Organization) -
 
 
 @login_required
-def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
-    logger.info("Accessing patient list", extra={"user_id": request.user.id, "organization_id": organization_id})
-
-    organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
+@authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization"])])
+def patient_list(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
+    logger.info("Accessing patient list", extra={"user_id": request.user.id, "organization_id": organization.id})
 
     preference = get_list_view_preference(
         request.user,
@@ -299,7 +296,7 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
         "Patient list filters applied",
         extra={
             "user_id": request.user.id,
-            "organization_id": organization_id,
+            "organization_id": organization.id,
             "search_length": len(search),
             "sort": sort,
             "page": page,
@@ -337,7 +334,7 @@ def patient_list(request: AuthenticatedHttpRequest, organization_id: int) -> Htt
         "Patient list results",
         extra={
             "user_id": request.user.id,
-            "organization_id": organization_id,
+            "organization_id": organization.id,
             "total_count": paginator.count,
             "page_count": len(patients_page),
             "is_htmx": bool(request.headers.get("HX-Request")),

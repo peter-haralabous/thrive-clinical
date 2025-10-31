@@ -288,7 +288,7 @@ def test_patient_cancel_task(provider: User, patient, organization) -> None:
         )
     )
 
-    assert res.status_code == 302
+    assert res.status_code == HTTPStatus.FOUND
     assert res.url == reverse(  # type: ignore[attr-defined]
         "providers:patient",
         kwargs={"organization_id": organization.id, "patient_id": patient.id},
@@ -363,7 +363,7 @@ def test_patient_resend_invite(template_fixture, provider: User, organization: O
 
     assert len(mailoutbox) == 1
     assert mailoutbox[0].to == [unclaimed_patient.email]
-    assert res.status_code == 302
+    assert res.status_code == HTTPStatus.FOUND
     assert res.url == reverse(  # type: ignore[attr-defined]
         "providers:patient",
         kwargs={"organization_id": organization.id, "patient_id": unclaimed_patient.id},
