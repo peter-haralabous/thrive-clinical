@@ -1,5 +1,3 @@
-import uuid
-
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
@@ -29,7 +27,6 @@ class Provenance(BaseModel):
     This model serves as a detailed provenance record for a single Fact instance.
     """
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     document = models.ForeignKey(
         Document,
         null=True,
