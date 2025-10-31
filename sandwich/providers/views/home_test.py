@@ -1,4 +1,3 @@
-import uuid
 from unittest.mock import Mock
 from unittest.mock import patch
 
@@ -7,12 +6,14 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 from sandwich.core.factories.organization import OrganizationFactory
+from sandwich.core.models import Organization
 from sandwich.core.models.role import RoleName
 from sandwich.core.service.organization_service import assign_organization_role
 from sandwich.core.util.testing import UserRequestFactory
 from sandwich.providers.views.home import home
 from sandwich.providers.views.home import organization_home
 from sandwich.users.factories import UserFactory
+from sandwich.users.models import User
 
 # mypy: disable-error-code="arg-type, assignment"
 
@@ -76,13 +77,13 @@ def test_home_redirects_to_organization_when_single_org(urf: UserRequestFactory)
 
 
 @pytest.mark.django_db
-def test_organization_home_redirects_to_encounter_list(urf: UserRequestFactory):
+def test_organization_home_redirects_to_encounter_list(
+    urf: UserRequestFactory, provider: User, organization: Organization
+):
     """Test that organization_home redirects to encounter list."""
-    user = UserFactory.create()
-    request = urf(user).get("/")
-    organization_id = uuid.uuid4()
+    request = urf(provider).get("/")
 
-    response = organization_home(request, organization_id)
+    response = organization_home(request, organization_id=organization.id)
 
     assert isinstance(response, HttpResponseRedirect)
-    assert response.url == reverse("providers:encounter_list", kwargs={"organization_id": organization_id})
+    assert response.url == reverse("providers:encounter_list", kwargs={"organization_id": organization.id})

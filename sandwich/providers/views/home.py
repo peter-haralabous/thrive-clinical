@@ -6,7 +6,10 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.shortcuts import resolve_url
 
+from sandwich.core.models.organization import Organization
 from sandwich.core.service.organization_service import get_provider_organizations
+from sandwich.core.service.permissions_service import ObjPerm
+from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
 logger = logging.getLogger(__name__)
@@ -33,8 +36,9 @@ def home(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 
 @login_required
-def organization_home(request: AuthenticatedHttpRequest, organization_id: int) -> HttpResponse:
+@authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization"])])
+def organization_home(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
     """
     Maybe we'll use this page one day, but for now, it's vestigial - all the action happens on the encounters list.
     """
-    return redirect(to=resolve_url("providers:encounter_list", organization_id=organization_id))
+    return redirect(to=resolve_url("providers:encounter_list", organization_id=organization.id))
