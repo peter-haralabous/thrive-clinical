@@ -1,7 +1,13 @@
 import os
 from collections.abc import Iterable
+from urllib.parse import urlparse
 
 import pytest
+from django.conf import settings
+from django.contrib.auth import BACKEND_SESSION_KEY
+from django.contrib.auth import HASH_SESSION_KEY
+from django.contrib.auth import SESSION_KEY
+from django.contrib.sessions.backends.db import SessionStore
 from django.core.management import call_command
 
 from sandwich.core.factories.organization import OrganizationFactory
@@ -43,6 +49,30 @@ def encounter(organization: Organization, patient: Patient):
 @pytest.fixture
 def user(db) -> User:
     return UserFactory.create(consents=ConsentMiddleware.required_policies)
+
+
+@pytest.fixture
+def auth_cookies(user, transactional_db, live_server, page):
+    """Create a Django session for `user` and add its auth cookies to Playwright page."""
+    session = SessionStore()
+    session[SESSION_KEY] = str(user.pk)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = user.get_session_auth_hash()
+    session.save()
+
+    parsed = urlparse(live_server.url)
+    domain = parsed.hostname or "localhost"
+
+    cookie = {
+        "name": settings.SESSION_COOKIE_NAME,
+        "value": session.session_key,
+        "domain": domain,
+        "path": "/",
+        "httpOnly": True,
+    }
+
+    page.context.add_cookies([cookie])
+    return [cookie]
 
 
 @pytest.fixture
