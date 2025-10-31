@@ -83,6 +83,8 @@ class Task(BaseModel):
 
     @property
     def name(self) -> str:
+        if self.form_version and self.form_version.name:
+            return f'Form "{self.form_version.name}"'
         return f"Task {self.id}"
 
     @property
