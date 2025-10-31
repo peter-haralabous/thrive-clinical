@@ -461,22 +461,28 @@ def patient_add_task(request: AuthenticatedHttpRequest, organization: Organizati
 
 @login_required
 @require_POST
+@authorize_objects(
+    [
+        ObjPerm(Organization, "organization_id", ["view_organization"]),
+        ObjPerm(Patient, "patient_id", ["view_patient"]),
+        ObjPerm(Task, "task_id", ["view_task", "change_task"]),
+    ]
+)
 def patient_cancel_task(
-    request: AuthenticatedHttpRequest, organization_id: int, patient_id: int, task_id: int
+    request: AuthenticatedHttpRequest,
+    organization: Organization,
+    patient: Patient,
+    task: Task,
 ) -> HttpResponse:
     logger.info(
         "Cancelling patient task",
         extra={
             "user_id": request.user.id,
-            "organization_id": organization_id,
-            "patient_id": patient_id,
-            "task_id": task_id,
+            "organization_id": organization.id,
+            "patient_id": patient.id,
+            "task_id": task.id,
         },
     )
-
-    organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
-    patient = get_object_or_404(organization.patient_set, id=patient_id)
-    task = get_object_or_404(patient.task_set, id=task_id)
 
     cancel_task(task)
 
@@ -484,9 +490,9 @@ def patient_cancel_task(
         "Task cancelled successfully",
         extra={
             "user_id": request.user.id,
-            "organization_id": organization_id,
-            "patient_id": patient_id,
-            "task_id": task_id,
+            "organization_id": organization.id,
+            "patient_id": patient.id,
+            "task_id": task.id,
         },
     )
 

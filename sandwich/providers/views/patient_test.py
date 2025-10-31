@@ -7,10 +7,12 @@ from django.urls import reverse
 from guardian.shortcuts import assign_perm
 
 from sandwich.core.factories.patient import PatientFactory
+from sandwich.core.factories.task import TaskFactory
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.patient import Patient
+from sandwich.core.models.task import TaskStatus
 from sandwich.users.models import User
 
 
@@ -269,6 +271,48 @@ def test_patient_add_task_deny_access(user: User, organization: Organization, pa
     )
 
     assert res.status_code == 404
+
+
+def test_patient_cancel_task(provider: User, patient, organization) -> None:
+    client = Client()
+    client.force_login(provider)
+    task = TaskFactory.create(patient=patient)
+    res = client.post(
+        reverse(
+            "providers:patient_cancel_task",
+            kwargs={
+                "organization_id": organization.id,
+                "patient_id": patient.id,
+                "task_id": task.id,
+            },
+        )
+    )
+
+    assert res.status_code == 302
+    assert res.url == reverse(  # type: ignore[attr-defined]
+        "providers:patient",
+        kwargs={"organization_id": organization.id, "patient_id": patient.id},
+    )
+    task.refresh_from_db()
+    assert task.status == TaskStatus.CANCELLED
+
+
+def test_patient_cancel_task_deny_access(user: User, patient, organization) -> None:
+    client = Client()
+    client.force_login(user)
+    task = TaskFactory.create(patient=patient)
+    res = client.post(
+        reverse(
+            "providers:patient_cancel_task",
+            kwargs={
+                "organization_id": organization.id,
+                "patient_id": patient.id,
+                "task_id": task.id,
+            },
+        )
+    )
+
+    assert res.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.django_db

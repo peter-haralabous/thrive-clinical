@@ -1,5 +1,6 @@
 import logging
 
+from django.core.exceptions import PermissionDenied
 from django.utils import timezone
 from guardian.shortcuts import assign_perm
 from guardian.shortcuts import get_objects_for_user
@@ -30,11 +31,16 @@ def complete_encounter(encounter: Encounter, user: User) -> None:
 
     assert encounter.active, "Cannot complete an inactive encounter."
 
-    # Count active tasks before cancelling them
     active_tasks = encounter.task_set.filter(status__in=["REQUESTED", "IN_PROGRESS"])
+
     # Ensure user has perms to change these tasks
-    active_tasks = get_objects_for_user(user, ["view_task", "change_task"], active_tasks)
-    active_task_count = active_tasks.count()
+    authorized_active_tasks = get_objects_for_user(user, ["view_task", "change_task"], active_tasks)
+    for task in active_tasks:
+        if task not in authorized_active_tasks:
+            raise PermissionDenied(f"You do not have permissions to cancel task {task.id} in this encounter.")
+
+    # Count active tasks before cancelling them
+    active_task_count = authorized_active_tasks.count()
 
     logger.debug(
         "Encounter completion details", extra={"encounter_id": encounter.id, "active_task_count": active_task_count}
@@ -45,7 +51,7 @@ def complete_encounter(encounter: Encounter, user: User) -> None:
     encounter.save()
 
     cancelled_task_count = 0
-    for task in active_tasks:
+    for task in authorized_active_tasks:
         if task.active:
             cancel_task(task)
             cancelled_task_count += 1
