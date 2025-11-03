@@ -60,8 +60,11 @@ user has permission to add new patients to this organization".
 
 #### Views
 
-We can secure views by using our own `authorize_objects` decorator. This function extracts the object id
-from the params, retrieves the object, checks whether the user has the permissions you specified, and then
+Django Guardian provides us some view decorators, but these **should not** be used as they can introduce
+information leaks, can be awkward to use on complex views, and make redundant db lookups.
+
+Instead we can secure views by using our own `authorize_objects` decorator. This function extracts the object
+id from the params, retrieves the object, checks whether the user has the permissions you specified, and then
 injects the authorized object back into the view for use.
 
 If the requesting user is not authorized, the decorator throws a 404.
@@ -75,8 +78,17 @@ def patient_edit(request: AuthenticatedHttpRequest, organization: Organization, 
     ...
 ```
 
-Django Guardian also provides us some view decorators, but these **should not** be used as they can introduce
-information leaks, can be awkward to use on complex views, and make redundant db lookups.
+By default, the variable that gets injected into the view uses the name of the model (ie.
+`Model._meta.model_name`). In some cases this is not always desired and can be overriden by passing a fourth
+argument to the `ObjPerm` instance. For example:
+
+```py
+@authorize_objects([
+    ObjPerm(Patient, "patient_id", ["view_patient", "change_patient"], "custom_var_name"),
+])
+def patient_edit(request: AuthenticatedHttpRequest, custom_var_name: Patient) -> HttpResponse:
+    ...
+```
 
 #### has_perm method
 
@@ -92,10 +104,20 @@ Guardian provides a powerful helper called `get_objects_for_user` which allows u
 on a user's permissions.
 
 ```py
-provider_encounters: QuerySet = get_objects_for_user(request.user, "core.view_encounter")
+provider_encounters: QuerySet = get_objects_for_user(request.user, "view_encounter", Encounter)
 ```
 
 `get_objects_for_user` returns a queryset that can be further filtered based on your needs.
+
+
+### Omitting a view from permissions checks
+
+The `test_all_views_permissioned` test in `sandwich/core/permissioned_views_test.py` checks our routes to
+ensure they are secured with the `@authorize_objects` decorator. However, not all views use the decorator to
+enforce permissions or are simply exempt from permission checks.
+
+To allow a view to go unpermissioned, add its route to the `allowed_unpermissioned_routes` array.
+
 
 ## Resources
 
