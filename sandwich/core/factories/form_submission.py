@@ -3,17 +3,17 @@ from factory.django import DjangoModelFactory
 
 from sandwich.core.factories.form import FormFactory
 from sandwich.core.factories.task import TaskFactory
-from sandwich.core.models.submission import Submission
-from sandwich.core.models.submission import SubmissionStatus
+from sandwich.core.models.form_submission import FormSubmission
+from sandwich.core.models.form_submission import FormSubmissionStatus
 
 
-class SubmissionFactory(DjangoModelFactory[Submission]):
+class FormSubmissionFactory(DjangoModelFactory[FormSubmission]):
     class Meta:
-        model = Submission
+        model = FormSubmission
 
     form = factory.SubFactory(FormFactory)
     task = factory.SubFactory(TaskFactory)
     patient = factory.SelfAttribute("task.patient")
-    status = SubmissionStatus.DRAFT
+    status = FormSubmissionStatus.DRAFT
     data = factory.LazyFunction(dict)
     metadata = factory.LazyFunction(dict)

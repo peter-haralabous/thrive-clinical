@@ -8,6 +8,7 @@ from .encounter import Encounter
 from .entity import Entity
 from .fact import Fact
 from .form import Form
+from .form_submission import FormSubmission
 from .formio_submission import FormioSubmission
 from .invitation import Invitation
 from .list_preference import ListViewPreference
@@ -18,7 +19,6 @@ from .patient import Patient
 from .predicate import Predicate
 from .provenance import Provenance
 from .role import Role
-from .submission import Submission
 from .task import Task
 from .template import Template
 
@@ -33,6 +33,7 @@ __all__ = [
     "Entity",
     "Fact",
     "Form",
+    "FormSubmission",
     "FormioSubmission",
     "Invitation",
     "ListViewPreference",
@@ -43,7 +44,6 @@ __all__ = [
     "PreferenceScope",
     "Provenance",
     "Role",
-    "Submission",
     "Task",
     "Template",
 ]

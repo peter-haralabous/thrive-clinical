@@ -9,12 +9,12 @@ from sandwich.core.models.patient import Patient
 from sandwich.core.models.task import Task
 
 
-class SubmissionStatus(models.TextChoices):
+class FormSubmissionStatus(models.TextChoices):
     DRAFT = "draft", _("Draft")
     COMPLETED = "completed", _("Completed")
 
 
-class Submission(BaseModel):
+class FormSubmission(BaseModel):
     """
     Stores a patient's data for a specific form, linking it to an assigned task.
     """
@@ -26,8 +26,8 @@ class Submission(BaseModel):
         Task, on_delete=models.SET_NULL, null=True, blank=True, help_text="The specific task this submission is for"
     )
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, help_text="The patient this form submission is for")
-    status: models.Field[SubmissionStatus, SubmissionStatus] = EnumField(
-        SubmissionStatus, help_text="current state of submission"
+    status: models.Field[FormSubmissionStatus, FormSubmissionStatus] = EnumField(
+        FormSubmissionStatus, help_text="current state of submission"
     )
     form_version = models.ForeignKey(
         "core.FormEvent",
@@ -42,7 +42,7 @@ class Submission(BaseModel):
     submitted_at = models.DateTimeField(null=True)
 
     def submit(self):
-        if self.status == SubmissionStatus.DRAFT:
-            self.status = SubmissionStatus.COMPLETED
+        if self.status == FormSubmissionStatus.DRAFT:
+            self.status = FormSubmissionStatus.COMPLETED
             self.submitted_at = timezone.now()
             self.save()
