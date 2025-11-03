@@ -203,7 +203,9 @@ def patient_edit(request: AuthenticatedHttpRequest, organization: Organization, 
 
 
 @login_required
-@authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization", "create_encounter"])])
+@authorize_objects(
+    [ObjPerm(Organization, "organization_id", ["view_organization", "create_encounter", "create_patient"])]
+)
 def patient_add(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
     logger.info(
         "Accessing provider patient add", extra={"user_id": request.user.id, "organization_id": organization.id}

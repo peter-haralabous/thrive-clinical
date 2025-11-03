@@ -120,6 +120,7 @@ def test_patient_add_deny_access_missing_perms(user: User, organization: Organiz
 
     # Has `create_encounter` but not `create_patient`
     assign_perm("create_encounter", user, organization)
+    assign_perm("view_organization", user, organization)
 
     client = Client()
     client.force_login(user)
