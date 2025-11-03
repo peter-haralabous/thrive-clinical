@@ -1,0 +1,70 @@
+{% load lucide %}
+{% load crispy_forms_tags %}
+
+<div class="relative">
+  <input type="checkbox"
+         id="encounter-details-modal-{{ encounter.id }}"
+         class="peer hidden" />
+  <div class="fixed right-0 top-0 h-full w-full max-w-2xl bg-base-100 border-l border-base-200 flex flex-col pointer-events-auto z-[9999] transition-transform duration-300 translate-x-full peer-checked:translate-x-0">
+    <!-- Top bar: section label and close -->
+    <div class="flex items-center justify-between px-6 pt-6 pb-2 border-b border-base-200">
+      <div class="flex items-center gap-2 text-base-content/70">
+        {% lucide "clipboard-list" class="size-5" %}
+        <span class="font-medium">Encounter Details</span>
+      </div>
+      <label for="encounter-details-modal-{{ encounter.id }}"
+             class="btn btn-sm btn-circle btn-ghost text-xl">{% lucide "x" class="size-5" %}</label>
+    </div>
+    <!-- Encounter info row -->
+    <div class="flex items-center justify-between px-6 pt-4 pb-0">
+      <!--Encounter type placeholder-->
+      <h2 class="font-bold text-2xl">Follow up</h2>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'providers:encounter' organization_id=organization.id encounter_id=encounter.id %}"
+           class="btn btn-outline btn-sm flex items-center gap-2">{% lucide "info" class="size-4" %} View full</a>
+        <div class="dropdown dropdown-end">
+          <button tabindex="0" class="btn btn-ghost btn-sm rounded-full cursor-pointer">
+            {% lucide "ellipsis-vertical" class="size-4" %}
+          </button>
+          <ul tabindex="0"
+              class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2">
+            <!-- Other actions to be added here -->
+            <li>
+              <a href="#">Other Action</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="text-sm text-base-content/70 flex flex-wrap gap-6 mt-2 px-6 pb-2">
+      <span class="flex items-center gap-1">{% lucide "calendar" class="size-4" %} {{ encounter.created_at }}</span>
+      <span class="flex items-center gap-1">{% lucide "calendar-check" class="size-4" %} {{ encounter.ended_at|default:"—" }}</span>
+      <span class="flex items-center gap-1">{% lucide "activity" class="size-4" %} {{ encounter.get_status_display }}</span>
+    </div>
+    <!-- Patient Details Card -->
+    <div class="rounded-2xl border border-base-200 bg-base-100 p-6 m-6 flex flex-col gap-4">
+      <div class="font-bold text-2xl">{{ encounter.patient.last_name }}, {{ encounter.patient.first_name }}</div>
+      <div class="flex flex-col md:flex-row gap-8 justify-between">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 text-base-content/70 mb-1">
+            {% lucide "calendar" class="size-5" %}<span class="font-medium">Date of Birth</span>
+          </div>
+          <div class="text-base">{{ encounter.patient.date_of_birth }}</div>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 text-base-content/70 mb-1">
+            {% lucide "info" class="size-5" %}<span class="font-medium">Email</span>
+          </div>
+          <div class="text-base">{{ encounter.patient.email|default:"—" }}</div>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2 text-base-content/70 mb-1">
+            {% lucide "id-card" class="size-5" %}<span class="font-medium">PHN #</span>
+          </div>
+          <div class="text-base">{{ encounter.patient.phn|default:"—" }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="flex-1 overflow-y-auto p-6"></div>
+  </div>
+</div>

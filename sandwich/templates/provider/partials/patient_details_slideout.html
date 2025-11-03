@@ -1,0 +1,42 @@
+{% load lucide %}
+{% load crispy_forms_tags %}
+
+<div class="relative">
+  <input type="checkbox"
+         id="patient-details-modal-{{ encounter.id }}"
+         class="peer hidden" />
+  <div class="fixed right-0 top-0 h-full w-full max-w-2xl bg-base-100 border-l border-base-200 flex flex-col pointer-events-auto z-[9999] transition-transform duration-300 translate-x-full peer-checked:translate-x-0">
+    <div class="flex items-center justify-between px-6 pt-6 pb-2 border-b border-base-200">
+      <div class="flex items-center gap-2 text-base-content/70">
+        {% lucide "clipboard-list" class="size-5" %}
+        <span class="font-medium">My Worklist</span>
+      </div>
+      <label for="patient-details-modal-{{ encounter.id }}"
+             class="btn btn-sm btn-circle btn-ghost text-xl">{% lucide "x" class="size-5" %}</label>
+    </div>
+    <div class="flex items-center justify-between px-6 pt-4 pb-0">
+      <h2 class="font-bold text-2xl">{{ encounter.patient.last_name }}, {{ encounter.patient.first_name }}</h2>
+      <div class="flex items-center gap-2">
+        <a href="{% url 'providers:patient' organization_id=encounter.organization.id patient_id=encounter.patient.id %}"
+           class="btn btn-outline btn-sm flex items-center gap-2">{% lucide "user" class="size-4" %} View patient</a>
+        <div class="dropdown dropdown-end">
+          <button tabindex="0" class="btn btn-ghost btn-sm rounded-full cursor-pointer">
+            {% lucide "ellipsis-vertical" class="size-4" %}
+          </button>
+          <ul tabindex="0"
+              class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-40 mt-2">
+            <!-- Other actions to be added here -->
+            <li>
+              <a href="#">Other Action</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="text-sm text-base-content/70 flex flex-wrap gap-6 mt-2 px-6 pb-2">
+      <span class="flex items-center gap-1">{% lucide "calendar" class="size-4" %} {{ encounter.patient.date_of_birth }}</span>
+      <span class="flex items-center gap-1">{% lucide "id-card" class="size-4" %} {{ encounter.patient.phn }}</span>
+      <span class="flex items-center gap-1">{% lucide "info" class="size-4" %} {{ encounter.patient.email|default:"—" }}</span>
+    </div>
+  </div>
+</div>
