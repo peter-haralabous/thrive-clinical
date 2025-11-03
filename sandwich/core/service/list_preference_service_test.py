@@ -1,11 +1,15 @@
 """Unit tests for list preference model and service."""
 
+from uuid import uuid4
+
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError
+from django.test import RequestFactory
 
 from sandwich.core.factories.organization import OrganizationFactory
 from sandwich.core.models import CustomAttribute
+from sandwich.core.models import CustomAttributeEnum
 from sandwich.core.models import ListViewPreference
 from sandwich.core.models import ListViewType
 from sandwich.core.models import PreferenceScope
@@ -16,8 +20,11 @@ from sandwich.core.service.list_preference_service import get_available_columns
 from sandwich.core.service.list_preference_service import get_default_columns
 from sandwich.core.service.list_preference_service import get_default_sort
 from sandwich.core.service.list_preference_service import get_list_view_preference
+from sandwich.core.service.list_preference_service import parse_filters_from_request
 from sandwich.core.service.list_preference_service import reset_list_view_preference
+from sandwich.core.service.list_preference_service import save_filters_to_preference
 from sandwich.core.service.list_preference_service import save_list_view_preference
+from sandwich.core.service.list_preference_service import validate_custom_attribute_filter
 from sandwich.core.service.list_preference_service import validate_sort_field
 from sandwich.users.factories import UserFactory
 
@@ -503,3 +510,230 @@ class TestCustomAttributeColumns:
         assert validate_sort_field(f"-{attr.id}", ListViewType.ENCOUNTER_LIST, org)
         assert validate_sort_field("patient__first_name", ListViewType.ENCOUNTER_LIST, org)
         assert not validate_sort_field("nonexistent_field", ListViewType.ENCOUNTER_LIST, org)
+
+
+@pytest.mark.django_db
+class TestFilterValidation:
+    """Test custom attribute filter validation."""
+
+    def test_validate_enum_filter_valid_values(self):
+        org = OrganizationFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Priority",
+            data_type=CustomAttribute.DataType.ENUM,
+        )
+        CustomAttributeEnum.objects.create(attribute=attr, label="High", value="high")
+        CustomAttributeEnum.objects.create(attribute=attr, label="Low", value="low")
+
+        filter_config = {"type": "enum", "values": ["high", "low"]}
+        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+
+        assert len(errors) == 0
+
+    def test_validate_enum_filter_invalid_values(self):
+        org = OrganizationFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Priority",
+            data_type=CustomAttribute.DataType.ENUM,
+        )
+        CustomAttributeEnum.objects.create(attribute=attr, label="High", value="high")
+
+        filter_config = {"type": "enum", "values": ["high", "invalid_value"]}
+        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+
+        assert "values" in errors
+        assert "invalid_value" in errors["values"]
+
+    def test_validate_date_filter_valid_range(self):
+        org = OrganizationFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Follow-up Date",
+            data_type=CustomAttribute.DataType.DATE,
+        )
+
+        filter_config = {"type": "date", "operator": "range", "start": "2024-01-01", "end": "2024-12-31"}
+        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+
+        assert len(errors) == 0
+
+    def test_validate_date_filter_invalid_range(self):
+        org = OrganizationFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Follow-up Date",
+            data_type=CustomAttribute.DataType.DATE,
+        )
+
+        filter_config = {"type": "date", "operator": "range", "start": "2024-12-31", "end": "2024-01-01"}
+        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+
+        assert "range" in errors
+
+    def test_validate_filter_wrong_content_type(self):
+        org = OrganizationFactory.create()
+        encounter_ct = ContentType.objects.get_for_model(Encounter)
+        patient_ct = ContentType.objects.get_for_model(Patient)
+
+        # Attribute is for Patient
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=patient_ct,
+            name="Patient Field",
+            data_type=CustomAttribute.DataType.ENUM,
+        )
+
+        filter_config = {"type": "enum", "values": ["value1"]}
+        errors = validate_custom_attribute_filter(attr.id, filter_config, org, encounter_ct)
+
+        assert "content_type" in errors
+
+    def test_validate_filter_nonexistent_attribute(self):
+        org = OrganizationFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        fake_id = uuid4()
+        filter_config = {"type": "enum", "values": ["value1"]}
+        errors = validate_custom_attribute_filter(fake_id, filter_config, org, content_type)
+
+        assert "attribute" in errors
+
+
+@pytest.mark.django_db
+class TestFilterPersistence:
+    """Test saving and loading filters from preferences."""
+
+    def test_save_filters_to_user_preference(self):
+        user = UserFactory.create()
+        org = OrganizationFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Priority",
+            data_type=CustomAttribute.DataType.ENUM,
+        )
+
+        CustomAttributeEnum.objects.create(attribute=attr, label="High", value="high")
+
+        pref = ListViewPreference.objects.create(
+            user=user,
+            organization=org,
+            list_type=ListViewType.ENCOUNTER_LIST,
+            scope=PreferenceScope.USER,
+            visible_columns=["patient__first_name"],
+        )
+
+        filters = {"custom_attributes": {str(attr.id): {"type": "enum", "values": ["high"]}}, "model_fields": {}}
+
+        updated_pref = save_filters_to_preference(pref, filters)
+
+        assert updated_pref.saved_filters == filters
+        assert str(attr.id) in updated_pref.saved_filters["custom_attributes"]
+
+    def test_save_filters_to_org_preference(self):
+        org = OrganizationFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Priority",
+            data_type=CustomAttribute.DataType.ENUM,
+        )
+
+        CustomAttributeEnum.objects.create(attribute=attr, label="High", value="high")
+
+        pref = ListViewPreference.objects.create(
+            user=None,
+            organization=org,
+            list_type=ListViewType.ENCOUNTER_LIST,
+            scope=PreferenceScope.ORGANIZATION,
+            visible_columns=["patient__first_name"],
+        )
+
+        filters = {"custom_attributes": {str(attr.id): {"type": "enum", "values": ["high"]}}, "model_fields": {}}
+
+        updated_pref = save_filters_to_preference(pref, filters)
+
+        assert updated_pref.saved_filters == filters
+
+    def test_parse_filters_from_request_with_saved(self):
+        org = OrganizationFactory.create()
+        user = UserFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Priority",
+            data_type=CustomAttribute.DataType.ENUM,
+        )
+
+        saved_filters = {"custom_attributes": {str(attr.id): {"values": ["high"]}}, "model_fields": {}}
+
+        pref = ListViewPreference.objects.create(
+            user=user,
+            organization=org,
+            list_type=ListViewType.ENCOUNTER_LIST,
+            scope=PreferenceScope.USER,
+            visible_columns=["patient__first_name"],
+            saved_filters=saved_filters,
+        )
+
+        factory = RequestFactory()
+        request = factory.get("/")
+
+        filters = parse_filters_from_request(request, pref)
+
+        assert str(attr.id) in filters["custom_attributes"]
+        assert filters["custom_attributes"][str(attr.id)]["values"] == ["high"]
+
+    def test_parse_filters_request_overrides_saved(self):
+        org = OrganizationFactory.create()
+        user = UserFactory.create()
+        content_type = ContentType.objects.get_for_model(Encounter)
+
+        attr = CustomAttribute.objects.create(
+            organization=org,
+            content_type=content_type,
+            name="Priority",
+            data_type=CustomAttribute.DataType.ENUM,
+        )
+
+        saved_filters = {"custom_attributes": {str(attr.id): {"values": ["high"]}}, "model_fields": {}}
+
+        pref = ListViewPreference.objects.create(
+            user=user,
+            organization=org,
+            list_type=ListViewType.ENCOUNTER_LIST,
+            scope=PreferenceScope.USER,
+            visible_columns=["patient__first_name"],
+            saved_filters=saved_filters,
+        )
+
+        factory = RequestFactory()
+        attr_id_underscore = str(attr.id).replace("-", "_")
+        request = factory.get(f"/?filter_attr_{attr_id_underscore}=low,medium")
+
+        filters = parse_filters_from_request(request, pref)
+
+        assert str(attr.id) in filters["custom_attributes"]
+        assert "low" in filters["custom_attributes"][str(attr.id)]["values"]
+        assert "medium" in filters["custom_attributes"][str(attr.id)]["values"]
+        assert "high" not in filters["custom_attributes"][str(attr.id)]["values"]

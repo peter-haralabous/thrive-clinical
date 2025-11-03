@@ -1,13 +1,16 @@
 """Service for managing list view preferences."""
 
 import logging
+from datetime import date
 from typing import Any
 from uuid import UUID
 
 from django.contrib.contenttypes.models import ContentType
+from django.http import HttpRequest
 from guardian.shortcuts import assign_perm
 
 from sandwich.core.models import CustomAttribute
+from sandwich.core.models import CustomAttributeEnum
 from sandwich.core.models import ListViewPreference
 from sandwich.core.models import ListViewType
 from sandwich.core.models import Organization
@@ -415,3 +418,283 @@ def get_available_columns(
         return base_columns + custom_columns
 
     return base_columns
+
+
+def _validate_enum_filter_values(
+    attribute: CustomAttribute,
+    filter_config: dict[str, Any],
+) -> dict[str, str]:
+    """Validate enum filter values against the attribute's allowed enum values."""
+    errors = {}
+    values = filter_config.get("values", [])
+
+    if not isinstance(values, list):
+        errors["values"] = "Enum filter values must be a list"
+    elif values:
+        valid_values = set(
+            CustomAttributeEnum.objects.filter(attribute=attribute, value__in=values).values_list("value", flat=True)
+        )
+        invalid_values = [v for v in values if v not in valid_values]
+        if invalid_values:
+            errors["values"] = f"Invalid enum values: {', '.join(invalid_values)}"
+
+    return errors
+
+
+def _validate_date_value(value: Any, field_name: str = "value") -> dict[str, str]:
+    """Validate a single date value, returning errors if invalid."""
+    errors = {}
+    if value:
+        try:
+            date.fromisoformat(value) if isinstance(value, str) else value
+        except (ValueError, TypeError):
+            errors[field_name] = f"Invalid date format for {field_name}"
+    return errors
+
+
+def _validate_date_range(start: Any, end: Any) -> dict[str, str]:
+    """Validate date range values, checking format and logical ordering."""
+    errors = {}
+
+    if start:
+        errors.update(_validate_date_value(start, "start"))
+
+    if end:
+        errors.update(_validate_date_value(end, "end"))
+
+    # Only check range logic if both dates are valid
+    if not errors and start and end:
+        start_date = date.fromisoformat(start) if isinstance(start, str) else start
+        end_date = date.fromisoformat(end) if isinstance(end, str) else end
+        if start_date > end_date:
+            errors["range"] = "Start date must be before or equal to end date"
+
+    return errors
+
+
+def _validate_date_filter(filter_config: dict[str, Any]) -> dict[str, str]:
+    """Validate date filter configuration based on operator type."""
+    errors = {}
+    operator = filter_config.get("operator", "exact")
+
+    if operator not in ("exact", "gte", "lte", "range"):
+        errors["operator"] = f"Invalid date operator: {operator}"
+        return errors
+
+    if operator == "range":
+        start = filter_config.get("start")
+        end = filter_config.get("end")
+        errors.update(_validate_date_range(start, end))
+    else:
+        value = filter_config.get("value")
+        errors.update(_validate_date_value(value))
+
+    return errors
+
+
+def validate_custom_attribute_filter(
+    attribute_id: UUID,
+    filter_config: dict[str, Any],
+    organization: Organization,
+    content_type: ContentType,
+) -> dict[str, str]:
+    """Validate a custom attribute filter configuration, returning dict of errors (empty if valid)."""
+    errors = {}
+
+    try:
+        attribute = CustomAttribute.objects.get(id=attribute_id, organization=organization)
+    except CustomAttribute.DoesNotExist:
+        errors["attribute"] = f"Custom attribute {attribute_id} not found in organization"
+        return errors
+
+    if attribute.content_type_id != content_type.id:
+        errors["content_type"] = (
+            f"Attribute content_type ({attribute.content_type.model}) does not match expected ({content_type.model})"
+        )
+        return errors
+
+    if attribute.data_type == CustomAttribute.DataType.ENUM:
+        errors.update(_validate_enum_filter_values(attribute, filter_config))
+    elif attribute.data_type == CustomAttribute.DataType.DATE:
+        errors.update(_validate_date_filter(filter_config))
+
+    logger.debug(
+        "Validated custom attribute filter",
+        extra={
+            "attribute_id": str(attribute_id),
+            "is_valid": len(errors) == 0,
+            "errors": errors,
+        },
+    )
+
+    return errors
+
+
+def _parse_filter_key(key: str) -> tuple[str, str | None]:
+    """
+    Parse a filter key to extract UUID part and optional suffix.
+
+    Returns:
+        Tuple of (uuid_part, suffix) where suffix is 'start', 'end', or None
+    """
+    remainder = key[len("filter_attr_") :]
+
+    if remainder.endswith("_start"):
+        return remainder[: -len("_start")], "start"
+    if remainder.endswith("_end"):
+        return remainder[: -len("_end")], "end"
+    return remainder, None
+
+
+def _parse_attribute_uuid(uuid_part: str) -> UUID | None:
+    """Parse UUID from filter key, returning None if invalid."""
+    try:
+        return UUID(uuid_part.replace("_", "-"))
+    except (ValueError, AttributeError):
+        return None
+
+
+def _apply_range_filter(
+    filters: dict[str, Any],
+    attr_id_str: str,
+    suffix: str,
+    value: str | None,
+) -> None:
+    """Apply a range filter (start or end) to the filters dictionary."""
+    if attr_id_str not in filters["custom_attributes"]:
+        filters["custom_attributes"][attr_id_str] = {}
+
+    filters["custom_attributes"][attr_id_str]["operator"] = "range"
+    filters["custom_attributes"][attr_id_str][suffix] = value
+
+
+def _apply_values_filter(
+    filters: dict[str, Any],
+    attr_id_str: str,
+    value: str,
+) -> None:
+    """Apply a comma-separated values filter to the filters dictionary."""
+    values = [v.strip() for v in value.split(",") if v.strip()]
+    if values:
+        if attr_id_str not in filters["custom_attributes"]:
+            filters["custom_attributes"][attr_id_str] = {}
+        filters["custom_attributes"][attr_id_str]["values"] = values
+
+
+def _process_custom_attribute_filter(
+    key: str,
+    request: HttpRequest,
+    filters: dict[str, Any],
+) -> None:
+    """Process a single custom attribute filter from request parameters."""
+    uuid_part, suffix = _parse_filter_key(key)
+    attr_id = _parse_attribute_uuid(uuid_part)
+
+    if attr_id is None:
+        logger.warning(
+            "Invalid attribute UUID in request filter",
+            extra={"key": key, "uuid_part": uuid_part},
+        )
+        return
+
+    attr_id_str = str(attr_id)
+    value = request.GET.get(key)
+
+    if suffix in ("start", "end"):
+        _apply_range_filter(filters, attr_id_str, suffix, value)
+    elif value:
+        _apply_values_filter(filters, attr_id_str, value)
+
+
+def parse_filters_from_request(
+    request: HttpRequest,
+    preference: ListViewPreference,
+) -> dict[str, Any]:
+    """Extract and merge filters from request and saved preference (request params override saved)."""
+    filters = preference.saved_filters.copy() if preference.saved_filters else {}
+
+    if "custom_attributes" not in filters:
+        filters["custom_attributes"] = {}
+    if "model_fields" not in filters:
+        filters["model_fields"] = {}
+
+    for key in request.GET:
+        if key.startswith("filter_attr_"):
+            _process_custom_attribute_filter(key, request, filters)
+
+    logger.debug(
+        "Parsed filters from request",
+        extra={
+            "num_custom_filters": len(filters.get("custom_attributes", {})),
+            "num_model_filters": len(filters.get("model_fields", {})),
+            "has_request_overrides": any(key.startswith("filter_") for key in request.GET),
+        },
+    )
+
+    return filters
+
+
+def _validate_and_clean_custom_attribute_filters(
+    filters: dict[str, Any],
+    organization: Organization,
+    content_type: ContentType,
+) -> None:
+    """
+    Validate custom attribute filters and remove invalid ones in-place.
+
+    Modifies the filters dictionary by removing filters with invalid UUIDs or validation errors.
+    """
+    custom_attr_filters = filters.get("custom_attributes", {})
+    invalid_keys = []
+
+    for attr_id_str, filter_config in custom_attr_filters.items():
+        try:
+            attr_id = UUID(attr_id_str)
+            errors = validate_custom_attribute_filter(attr_id, filter_config, organization, content_type)
+            if errors:
+                logger.warning(
+                    "Invalid filter not saved",
+                    extra={
+                        "attribute_id": attr_id_str,
+                        "errors": errors,
+                    },
+                )
+                invalid_keys.append(attr_id_str)
+        except (ValueError, AttributeError):
+            logger.warning(
+                "Invalid attribute UUID, removing filter",
+                extra={"attribute_id_str": attr_id_str},
+            )
+            invalid_keys.append(attr_id_str)
+
+    for key in invalid_keys:
+        del filters["custom_attributes"][key]
+
+
+def save_filters_to_preference(
+    preference: ListViewPreference,
+    filters: dict[str, Any],
+) -> ListViewPreference:
+    """Save filters to a ListViewPreference instance, validating before saving."""
+    organization = preference.organization
+    list_type = ListViewType(preference.list_type)
+    content_type = _get_list_type_content_type(list_type)
+
+    if content_type:
+        _validate_and_clean_custom_attribute_filters(filters, organization, content_type)
+
+    preference.saved_filters = filters
+
+    if preference.pk:
+        preference.save(update_fields=["saved_filters", "updated_at"])
+        logger.info(
+            "Saved filters to preference",
+            extra={
+                "preference_id": preference.pk,
+                "num_custom_filters": len(filters.get("custom_attributes", {})),
+            },
+        )
+    else:
+        logger.debug("Filters updated on unsaved preference instance")
+
+    return preference
