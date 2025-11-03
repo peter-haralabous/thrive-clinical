@@ -26,21 +26,17 @@ from sandwich.core.service.list_preference_service import save_filters_to_prefer
 from sandwich.core.service.list_preference_service import save_list_view_preference
 from sandwich.core.service.list_preference_service import validate_custom_attribute_filter
 from sandwich.core.service.list_preference_service import validate_sort_field
-from sandwich.users.factories import UserFactory
 
 
 @pytest.mark.django_db
 class TestListViewPreferenceModel:
     """Test the ListViewPreference model constraints and behavior."""
 
-    def test_create_user_preference(self):
+    def test_create_user_preference(self, user, organization):
         """User can create a preference for a list type."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
-
         pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
             visible_columns=["patient__first_name", "patient__email"],
@@ -49,20 +45,18 @@ class TestListViewPreferenceModel:
         )
 
         assert pref.user == user
-        assert pref.organization == org
+        assert pref.organization == organization
         assert pref.list_type == ListViewType.ENCOUNTER_LIST
         assert pref.scope == PreferenceScope.USER
         assert len(pref.visible_columns) == 2
         assert pref.items_per_page == 50
 
-    def test_user_preference_unique_constraint(self):
+    def test_user_preference_unique_constraint(self, user, organization):
         """User can only have one preference per list type in an organization."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
         )
@@ -70,17 +64,16 @@ class TestListViewPreferenceModel:
         with pytest.raises(IntegrityError):
             ListViewPreference.objects.create(
                 user=user,
-                organization=org,
+                organization=organization,
                 list_type=ListViewType.ENCOUNTER_LIST,
                 scope=PreferenceScope.USER,
             )
 
-    def test_org_preference_unique_constraint(self):
+    def test_org_preference_unique_constraint(self, organization):
         """Organization can only have one default preference per list type."""
-        org = OrganizationFactory.create()
 
         ListViewPreference.objects.create(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.ORGANIZATION,
             user=None,
@@ -88,20 +81,18 @@ class TestListViewPreferenceModel:
 
         with pytest.raises(IntegrityError):
             ListViewPreference.objects.create(
-                organization=org,
+                organization=organization,
                 list_type=ListViewType.ENCOUNTER_LIST,
                 scope=PreferenceScope.ORGANIZATION,
                 user=None,
             )
 
-    def test_user_can_have_different_preferences_for_different_lists(self):
+    def test_user_can_have_different_preferences_for_different_lists(self, user, organization):
         """User can have different preferences for encounter_list and patient_list."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         encounter_pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
             visible_columns=["patient__first_name"],
@@ -109,7 +100,7 @@ class TestListViewPreferenceModel:
 
         patient_pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.PATIENT_LIST,
             scope=PreferenceScope.USER,
             visible_columns=["first_name", "email"],
@@ -118,27 +109,24 @@ class TestListViewPreferenceModel:
         assert encounter_pref.id != patient_pref.id
         assert encounter_pref.visible_columns != patient_pref.visible_columns
 
-    def test_scope_user_consistency_constraint(self):
+    def test_scope_user_consistency_constraint(self, organization):
         """User-scoped preference must have a user, org-scoped must not."""
-        org = OrganizationFactory.create()
 
         # This should fail - USER scope without user
         with pytest.raises(IntegrityError):
             ListViewPreference.objects.create(
-                organization=org,
+                organization=organization,
                 list_type=ListViewType.ENCOUNTER_LIST,
                 scope=PreferenceScope.USER,
                 user=None,
             )
 
-    def test_str_representation(self):
+    def test_str_representation(self, user, organization):
         """Test __str__ method for both scopes."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         user_pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
         )
@@ -146,12 +134,12 @@ class TestListViewPreferenceModel:
         assert ListViewType.ENCOUNTER_LIST.value in str(user_pref)
 
         org_pref = ListViewPreference.objects.create(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.PATIENT_LIST,
             scope=PreferenceScope.ORGANIZATION,
             user=None,
         )
-        assert str(org) in str(org_pref)
+        assert str(organization) in str(org_pref)
         assert "org default" in str(org_pref)
 
 
@@ -159,59 +147,53 @@ class TestListViewPreferenceModel:
 class TestListPreferenceService:
     """Test the list preference service functions."""
 
-    def test_get_preference_returns_defaults_when_no_preferences_exist(self):
+    def test_get_preference_returns_defaults_when_no_preferences_exist(self, user, organization):
         """When no preferences exist, return unsaved preference with hardcoded defaults."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
-        ListViewPreference.objects.filter(organization=org).delete()
+        ListViewPreference.objects.filter(organization=organization).delete()
 
-        pref = get_list_view_preference(user, org, ListViewType.ENCOUNTER_LIST)
+        pref = get_list_view_preference(user, organization, ListViewType.ENCOUNTER_LIST)
 
         assert pref is not None
         assert pref.visible_columns == get_default_columns(ListViewType.ENCOUNTER_LIST)
         assert pref.default_sort == get_default_sort(ListViewType.ENCOUNTER_LIST)
         assert pref.items_per_page == 25
 
-    def test_get_preference_returns_user_preference_when_exists(self):
+    def test_get_preference_returns_user_preference_when_exists(self, user, organization):
         """User preference is returned when it exists."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         user_pref = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             user=user,
             visible_columns=["patient__first_name"],
         )
 
-        pref = get_list_view_preference(user, org, ListViewType.ENCOUNTER_LIST)
+        pref = get_list_view_preference(user, organization, ListViewType.ENCOUNTER_LIST)
 
         assert pref is not None
         assert pref.id == user_pref.id
         assert pref.scope == PreferenceScope.USER
 
-    def test_preference_inheritance(self):
+    def test_preference_inheritance(self, user, organization):
         """User preferences override organization defaults."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         # Create org default
         org_pref = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             visible_columns=["patient__first_name", "patient__email"],
             items_per_page=10,
         )
 
         # User should get org default
-        pref = get_list_view_preference(user, org, ListViewType.ENCOUNTER_LIST)
+        pref = get_list_view_preference(user, organization, ListViewType.ENCOUNTER_LIST)
         assert pref is not None
         assert pref.id == org_pref.id
         assert pref.items_per_page == 10
 
         # Create user preference
         user_pref = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             user=user,
             visible_columns=["patient__first_name"],
@@ -219,18 +201,16 @@ class TestListPreferenceService:
         )
 
         # User should now get their own preference
-        pref = get_list_view_preference(user, org, ListViewType.ENCOUNTER_LIST)
+        pref = get_list_view_preference(user, organization, ListViewType.ENCOUNTER_LIST)
         assert pref is not None
         assert pref.id == user_pref.id
         assert pref.items_per_page == 50
 
-    def test_save_user_preference_creates_new_preference(self):
+    def test_save_user_preference_creates_new_preference(self, user, organization):
         """save_list_view_preference creates a new user preference."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         pref = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             user=user,
             visible_columns=["patient__first_name", "patient__email"],
@@ -239,19 +219,17 @@ class TestListPreferenceService:
         )
 
         assert pref.user == user
-        assert pref.organization == org
+        assert pref.organization == organization
         assert len(pref.visible_columns) == 2
         assert pref.default_sort == "-created_at"
         assert pref.items_per_page == 100
 
-    def test_save_user_preference_updates_existing(self):
+    def test_save_user_preference_updates_existing(self, user, organization):
         """save_list_view_preference updates existing user preference."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         # Create initial preference
         pref1 = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             user=user,
             visible_columns=["patient__first_name"],
@@ -260,7 +238,7 @@ class TestListPreferenceService:
 
         # Update it
         pref2 = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             user=user,
             visible_columns=["patient__first_name", "patient__email", "created_at"],
@@ -274,34 +252,31 @@ class TestListPreferenceService:
 
         # Should only be one preference in DB
         count = ListViewPreference.objects.filter(
-            user=user, organization=org, list_type=ListViewType.ENCOUNTER_LIST
+            user=user, organization=organization, list_type=ListViewType.ENCOUNTER_LIST
         ).count()
         assert count == 1
 
-    def test_save_organization_default(self):
+    def test_save_organization_default(self, organization):
         """save_list_view_preference creates org preference."""
-        org = OrganizationFactory.create()
 
         pref = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             visible_columns=["patient__first_name", "patient__email"],
             default_sort="-updated_at",
         )
 
-        assert pref.organization == org
+        assert pref.organization == organization
         assert pref.user is None
         assert pref.scope == PreferenceScope.ORGANIZATION
         assert len(pref.visible_columns) == 2
 
-    def test_reset_user_preference(self):
+    def test_reset_user_preference(self, user, organization):
         """reset_list_view_preference deletes user preference causing fallback."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
 
         # Create user preference
         save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             user=user,
             visible_columns=["patient__first_name"],
@@ -309,21 +284,21 @@ class TestListPreferenceService:
 
         # Create org default
         org_pref = save_list_view_preference(
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             visible_columns=["patient__first_name", "patient__email"],
         )
 
         # User should get their preference
-        pref = get_list_view_preference(user, org, ListViewType.ENCOUNTER_LIST)
+        pref = get_list_view_preference(user, organization, ListViewType.ENCOUNTER_LIST)
         assert pref is not None
         assert pref.scope == PreferenceScope.USER
 
         # Reset user preference
-        reset_list_view_preference(organization=org, list_type=ListViewType.ENCOUNTER_LIST, user=user)
+        reset_list_view_preference(organization=organization, list_type=ListViewType.ENCOUNTER_LIST, user=user)
 
         # User should now get org default
-        pref = get_list_view_preference(user, org, ListViewType.ENCOUNTER_LIST)
+        pref = get_list_view_preference(user, organization, ListViewType.ENCOUNTER_LIST)
         assert pref is not None
         assert pref.id == org_pref.id
         assert pref.scope == PreferenceScope.ORGANIZATION
@@ -358,29 +333,26 @@ class TestListPreferenceService:
         assert len(patient_cols) > 0
         assert all("value" in col and "label" in col for col in patient_cols)
 
-    def test_inactive_preferences_not_returned(self):
+    def test_inactive_preferences_not_returned(self, user, organization):
         """Deleted (previously inactive) preferences fall back to defaults."""
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
-        ListViewPreference.objects.filter(organization=org).delete()
+        ListViewPreference.objects.filter(organization=organization).delete()
 
         # Simulate previously inactive preference by creating then deleting
         temp_pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
         )
         temp_pref.delete()
 
-        pref = get_list_view_preference(user, org, ListViewType.ENCOUNTER_LIST)
+        pref = get_list_view_preference(user, organization, ListViewType.ENCOUNTER_LIST)
         assert pref is not None
         # Preference falls back to defaults regardless of persistence state
         assert pref.visible_columns == get_default_columns(ListViewType.ENCOUNTER_LIST)
 
-    def test_different_orgs_have_separate_preferences(self):
+    def test_different_orgs_have_separate_preferences(self, user):
         """User preferences are scoped per organization."""
-        user = UserFactory.create()
         org1 = OrganizationFactory.create()
         org2 = OrganizationFactory.create()
 
@@ -407,24 +379,23 @@ class TestListPreferenceService:
 
 @pytest.mark.django_db
 class TestCustomAttributeColumns:
-    def test_get_custom_attribute_columns_for_encounter(self):
-        org = OrganizationFactory.create()
+    def test_get_custom_attribute_columns_for_encounter(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr1 = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
         )
         attr2 = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Follow-up Date",
             data_type=CustomAttribute.DataType.DATE,
         )
 
-        columns = _get_custom_attribute_columns(ListViewType.ENCOUNTER_LIST, org)
+        columns = _get_custom_attribute_columns(ListViewType.ENCOUNTER_LIST, organization)
 
         assert len(columns) == 2
         # Find columns by ID since order is alphabetical by name
@@ -444,12 +415,11 @@ class TestCustomAttributeColumns:
         assert "Priority" in labels
         assert "Follow-up Date" in labels
 
-    def test_get_available_columns_includes_custom_attributes_when_org_provided(self):
-        org = OrganizationFactory.create()
+    def test_get_available_columns_includes_custom_attributes_when_org_provided(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Custom Field",
             data_type=CustomAttribute.DataType.ENUM,
@@ -460,20 +430,19 @@ class TestCustomAttributeColumns:
         assert all(not col.get("is_custom") for col in columns_without_org)
 
         # With organization
-        columns_with_org = get_available_columns(ListViewType.ENCOUNTER_LIST, org)
+        columns_with_org = get_available_columns(ListViewType.ENCOUNTER_LIST, organization)
         assert len(columns_with_org) > len(columns_without_org)
         custom_cols = [col for col in columns_with_org if col.get("is_custom")]
         assert len(custom_cols) == 1
         assert custom_cols[0]["label"] == "Custom Field"
 
-    def test_custom_attributes_filtered_by_content_type(self):
-        org = OrganizationFactory.create()
+    def test_custom_attributes_filtered_by_content_type(self, organization):
         encounter_ct = ContentType.objects.get_for_model(Encounter)
         patient_ct = ContentType.objects.get_for_model(Patient)
 
         # Create attribute for encounters
         CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=encounter_ct,
             name="Encounter Field",
             data_type=CustomAttribute.DataType.ENUM,
@@ -481,47 +450,45 @@ class TestCustomAttributeColumns:
 
         # Create attribute for patients
         CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=patient_ct,
             name="Patient Field",
             data_type=CustomAttribute.DataType.ENUM,
         )
 
-        encounter_columns = _get_custom_attribute_columns(ListViewType.ENCOUNTER_LIST, org)
-        patient_columns = _get_custom_attribute_columns(ListViewType.PATIENT_LIST, org)
+        encounter_columns = _get_custom_attribute_columns(ListViewType.ENCOUNTER_LIST, organization)
+        patient_columns = _get_custom_attribute_columns(ListViewType.PATIENT_LIST, organization)
 
         assert len(encounter_columns) == 1
         assert encounter_columns[0]["label"] == "Encounter Field"
         assert len(patient_columns) == 1
         assert patient_columns[0]["label"] == "Patient Field"
 
-    def test_validate_sort_field_accepts_custom_attributes(self):
-        org = OrganizationFactory.create()
+    def test_validate_sort_field_accepts_custom_attributes(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
         )
 
-        assert validate_sort_field(str(attr.id), ListViewType.ENCOUNTER_LIST, org)
-        assert validate_sort_field(f"-{attr.id}", ListViewType.ENCOUNTER_LIST, org)
-        assert validate_sort_field("patient__first_name", ListViewType.ENCOUNTER_LIST, org)
-        assert not validate_sort_field("nonexistent_field", ListViewType.ENCOUNTER_LIST, org)
+        assert validate_sort_field(str(attr.id), ListViewType.ENCOUNTER_LIST, organization)
+        assert validate_sort_field(f"-{attr.id}", ListViewType.ENCOUNTER_LIST, organization)
+        assert validate_sort_field("patient__first_name", ListViewType.ENCOUNTER_LIST, organization)
+        assert not validate_sort_field("nonexistent_field", ListViewType.ENCOUNTER_LIST, organization)
 
 
 @pytest.mark.django_db
 class TestFilterValidation:
     """Test custom attribute filter validation."""
 
-    def test_validate_enum_filter_valid_values(self):
-        org = OrganizationFactory.create()
+    def test_validate_enum_filter_valid_values(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -530,16 +497,15 @@ class TestFilterValidation:
         CustomAttributeEnum.objects.create(attribute=attr, label="Low", value="low")
 
         filter_config = {"type": "enum", "values": ["high", "low"]}
-        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+        errors = validate_custom_attribute_filter(attr.id, filter_config, organization, content_type)
 
         assert len(errors) == 0
 
-    def test_validate_enum_filter_invalid_values(self):
-        org = OrganizationFactory.create()
+    def test_validate_enum_filter_invalid_values(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -547,68 +513,64 @@ class TestFilterValidation:
         CustomAttributeEnum.objects.create(attribute=attr, label="High", value="high")
 
         filter_config = {"type": "enum", "values": ["high", "invalid_value"]}
-        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+        errors = validate_custom_attribute_filter(attr.id, filter_config, organization, content_type)
 
         assert "values" in errors
         assert "invalid_value" in errors["values"]
 
-    def test_validate_date_filter_valid_range(self):
-        org = OrganizationFactory.create()
+    def test_validate_date_filter_valid_range(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Follow-up Date",
             data_type=CustomAttribute.DataType.DATE,
         )
 
         filter_config = {"type": "date", "operator": "range", "start": "2024-01-01", "end": "2024-12-31"}
-        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+        errors = validate_custom_attribute_filter(attr.id, filter_config, organization, content_type)
 
         assert len(errors) == 0
 
-    def test_validate_date_filter_invalid_range(self):
-        org = OrganizationFactory.create()
+    def test_validate_date_filter_invalid_range(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Follow-up Date",
             data_type=CustomAttribute.DataType.DATE,
         )
 
         filter_config = {"type": "date", "operator": "range", "start": "2024-12-31", "end": "2024-01-01"}
-        errors = validate_custom_attribute_filter(attr.id, filter_config, org, content_type)
+        errors = validate_custom_attribute_filter(attr.id, filter_config, organization, content_type)
 
         assert "range" in errors
 
-    def test_validate_filter_wrong_content_type(self):
-        org = OrganizationFactory.create()
+    def test_validate_filter_wrong_content_type(self, organization):
         encounter_ct = ContentType.objects.get_for_model(Encounter)
         patient_ct = ContentType.objects.get_for_model(Patient)
 
         # Attribute is for Patient
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=patient_ct,
             name="Patient Field",
             data_type=CustomAttribute.DataType.ENUM,
         )
 
         filter_config = {"type": "enum", "values": ["value1"]}
-        errors = validate_custom_attribute_filter(attr.id, filter_config, org, encounter_ct)
+        errors = validate_custom_attribute_filter(attr.id, filter_config, organization, encounter_ct)
 
         assert "content_type" in errors
 
-    def test_validate_filter_nonexistent_attribute(self):
-        org = OrganizationFactory.create()
+    def test_validate_filter_nonexistent_attribute(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         fake_id = uuid4()
         filter_config = {"type": "enum", "values": ["value1"]}
-        errors = validate_custom_attribute_filter(fake_id, filter_config, org, content_type)
+        errors = validate_custom_attribute_filter(fake_id, filter_config, organization, content_type)
 
         assert "attribute" in errors
 
@@ -617,13 +579,11 @@ class TestFilterValidation:
 class TestFilterPersistence:
     """Test saving and loading filters from preferences."""
 
-    def test_save_filters_to_user_preference(self):
-        user = UserFactory.create()
-        org = OrganizationFactory.create()
+    def test_save_filters_to_user_preference(self, user, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -633,7 +593,7 @@ class TestFilterPersistence:
 
         pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
             visible_columns=["patient__first_name"],
@@ -646,12 +606,11 @@ class TestFilterPersistence:
         assert updated_pref.saved_filters == filters
         assert str(attr.id) in updated_pref.saved_filters["custom_attributes"]
 
-    def test_save_filters_to_org_preference(self):
-        org = OrganizationFactory.create()
+    def test_save_filters_to_org_preference(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -661,7 +620,7 @@ class TestFilterPersistence:
 
         pref = ListViewPreference.objects.create(
             user=None,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.ORGANIZATION,
             visible_columns=["patient__first_name"],
@@ -673,13 +632,11 @@ class TestFilterPersistence:
 
         assert updated_pref.saved_filters == filters
 
-    def test_parse_filters_from_request_with_saved(self):
-        org = OrganizationFactory.create()
-        user = UserFactory.create()
+    def test_parse_filters_from_request_with_saved(self, user, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -689,7 +646,7 @@ class TestFilterPersistence:
 
         pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
             visible_columns=["patient__first_name"],
@@ -704,13 +661,11 @@ class TestFilterPersistence:
         assert str(attr.id) in filters["custom_attributes"]
         assert filters["custom_attributes"][str(attr.id)]["values"] == ["high"]
 
-    def test_parse_filters_request_overrides_saved(self):
-        org = OrganizationFactory.create()
-        user = UserFactory.create()
+    def test_parse_filters_request_overrides_saved(self, user, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -720,7 +675,7 @@ class TestFilterPersistence:
 
         pref = ListViewPreference.objects.create(
             user=user,
-            organization=org,
+            organization=organization,
             list_type=ListViewType.ENCOUNTER_LIST,
             scope=PreferenceScope.USER,
             visible_columns=["patient__first_name"],

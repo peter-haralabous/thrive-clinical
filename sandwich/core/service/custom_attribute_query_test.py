@@ -4,8 +4,6 @@ from uuid import UUID
 import pytest
 from django.contrib.contenttypes.models import ContentType
 
-from sandwich.core.factories.organization import OrganizationFactory
-from sandwich.core.factories.patient import PatientFactory
 from sandwich.core.models import CustomAttribute
 from sandwich.core.models import CustomAttributeEnum
 from sandwich.core.models import CustomAttributeValue
@@ -42,19 +40,11 @@ class TestCustomAttributeQueryHelpers:
 
 @pytest.mark.django_db
 class TestAnnotateCustomAttributes:
-    def test_annotate_multiple_attributes(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
-        encounter = Encounter.objects.create(
-            organization=org,
-            patient=patient,
-            status=EncounterStatus.IN_PROGRESS,
-        )
-
+    def test_annotate_multiple_attributes(self, organization, encounter):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -72,7 +62,7 @@ class TestAnnotateCustomAttributes:
         )
 
         followup_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Follow-up Date",
             data_type=CustomAttribute.DataType.DATE,
@@ -88,7 +78,7 @@ class TestAnnotateCustomAttributes:
         annotated = annotate_custom_attributes(
             encounters,
             [str(priority_attr.id), str(followup_attr.id)],
-            org,
+            organization,
             content_type,
         )
 
@@ -103,34 +93,25 @@ class TestAnnotateCustomAttributes:
         assert getattr(result, priority_annotation) == "High"
         assert getattr(result, followup_annotation) == date(2025, 12, 31)
 
-    def test_annotate_no_custom_columns(self):
-        org = OrganizationFactory.create()
+    def test_annotate_no_custom_columns(self, organization):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         encounters = Encounter.objects.all()
         annotated = annotate_custom_attributes(
             encounters,
             ["patient__first_name", "created_at"],  # No custom attributes
-            org,
+            organization,
             content_type,
         )
 
         assert list(encounters) == list(annotated)
 
-    def test_annotate_handles_missing_values(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
-        encounter = Encounter.objects.create(
-            organization=org,
-            patient=patient,
-            status=EncounterStatus.IN_PROGRESS,
-        )
-
+    def test_annotate_handles_missing_values(self, organization, encounter):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         # Create custom attribute but don't set a value
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -141,7 +122,7 @@ class TestAnnotateCustomAttributes:
         annotated = annotate_custom_attributes(
             encounters,
             [str(priority_attr.id)],
-            org,
+            organization,
             content_type,
         )
 
@@ -155,14 +136,11 @@ class TestAnnotateCustomAttributes:
 
 @pytest.mark.django_db
 class TestApplySortWithCustomAttributes:
-    def test_sort_by_enum_attribute_ascending(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
-
+    def test_sort_by_enum_attribute_ascending(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -171,8 +149,12 @@ class TestApplySortWithCustomAttributes:
         high = CustomAttributeEnum.objects.create(attribute=priority_attr, label="High", value="high")
         low = CustomAttributeEnum.objects.create(attribute=priority_attr, label="Low", value="low")
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter2 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter2 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
 
         CustomAttributeValue.objects.create(
             attribute=priority_attr,
@@ -187,11 +169,11 @@ class TestApplySortWithCustomAttributes:
             value_enum=high,
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         sorted_encounters = apply_sort_with_custom_attributes(
             encounters,
             str(priority_attr.id),  # Ascending
-            org,
+            organization,
             content_type,
         )
 
@@ -202,14 +184,11 @@ class TestApplySortWithCustomAttributes:
         assert getattr(results[0], annotation_name) == "High"
         assert getattr(results[1], annotation_name) == "Low"
 
-    def test_sort_by_enum_attribute_descending(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
-
+    def test_sort_by_enum_attribute_descending(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -218,8 +197,12 @@ class TestApplySortWithCustomAttributes:
         high = CustomAttributeEnum.objects.create(attribute=priority_attr, label="High", value="high")
         low = CustomAttributeEnum.objects.create(attribute=priority_attr, label="Low", value="low")
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter2 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter2 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
 
         CustomAttributeValue.objects.create(
             attribute=priority_attr,
@@ -234,11 +217,11 @@ class TestApplySortWithCustomAttributes:
             value_enum=high,
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         sorted_encounters = apply_sort_with_custom_attributes(
             encounters,
             f"-{priority_attr.id}",
-            org,
+            organization,
             content_type,
         )
 
@@ -248,20 +231,17 @@ class TestApplySortWithCustomAttributes:
         assert getattr(results[0], annotation_name) == "Low"
         assert getattr(results[1], annotation_name) == "High"
 
-    def test_sort_by_model_field(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
-
-        Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+    def test_sort_by_model_field(self, organization, patient):
+        Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
 
         content_type = ContentType.objects.get_for_model(Encounter)
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         sorted_encounters = apply_sort_with_custom_attributes(
             encounters,
             "-created_at",  # Standard field
-            org,
+            organization,
             content_type,
         )
 
@@ -272,13 +252,11 @@ class TestApplySortWithCustomAttributes:
 
 @pytest.mark.django_db
 class TestApplyFiltersWithCustomAttributes:
-    def test_filter_by_single_enum_attribute(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_filter_by_single_enum_attribute(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -286,9 +264,13 @@ class TestApplyFiltersWithCustomAttributes:
         high = CustomAttributeEnum.objects.create(attribute=priority_attr, label="High", value="high")
         low = CustomAttributeEnum.objects.create(attribute=priority_attr, label="Low", value="low")
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter2 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter2 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
 
         CustomAttributeValue.objects.create(
             attribute=priority_attr,
@@ -303,7 +285,7 @@ class TestApplyFiltersWithCustomAttributes:
             value_enum=low,
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         filters = {
             "custom_attributes": {
                 str(priority_attr.id): {
@@ -313,19 +295,17 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         assert len(results) == 1
         assert results[0].id == encounter1.id
 
-    def test_filter_by_multi_value_enum_attribute(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_filter_by_multi_value_enum_attribute(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         tags_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Tags",
             data_type=CustomAttribute.DataType.ENUM,
@@ -335,9 +315,13 @@ class TestApplyFiltersWithCustomAttributes:
         followup = CustomAttributeEnum.objects.create(attribute=tags_attr, label="Follow-up", value="followup")
         routine = CustomAttributeEnum.objects.create(attribute=tags_attr, label="Routine", value="routine")
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter2 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter2 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
 
         # encounter1: urgent, followup
         CustomAttributeValue.objects.create(
@@ -352,7 +336,7 @@ class TestApplyFiltersWithCustomAttributes:
             attribute=tags_attr, content_type=content_type, object_id=encounter2.id, value_enum=routine
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         filters = {
             "custom_attributes": {
                 str(tags_attr.id): {
@@ -362,28 +346,32 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         # Should match encounter1 (has urgent or followup)
         assert len(results) == 1
         assert results[0].id == encounter1.id
 
-    def test_filter_by_date_range(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_filter_by_date_range(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         followup_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Follow-up Date",
             data_type=CustomAttribute.DataType.DATE,
         )
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter2 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter3 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter2 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter3 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
 
         CustomAttributeValue.objects.create(
             attribute=followup_attr,
@@ -404,7 +392,7 @@ class TestApplyFiltersWithCustomAttributes:
             value_date=date(2024, 12, 15),
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         filters = {
             "custom_attributes": {
                 str(followup_attr.id): {
@@ -416,26 +404,28 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         assert len(results) == 1
         assert results[0].id == encounter2.id
 
-    def test_filter_by_date_exact(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_filter_by_date_exact(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         followup_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Follow-up Date",
             data_type=CustomAttribute.DataType.DATE,
         )
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter2 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter2 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
 
         target_date = date(2024, 6, 15)
         CustomAttributeValue.objects.create(
@@ -451,7 +441,7 @@ class TestApplyFiltersWithCustomAttributes:
             value_date=date(2024, 7, 15),
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         filters = {
             "custom_attributes": {
                 str(followup_attr.id): {
@@ -462,19 +452,17 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         assert len(results) == 1
         assert results[0].id == encounter1.id
 
-    def test_multiple_filters_combined(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_multiple_filters_combined(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
@@ -483,15 +471,21 @@ class TestApplyFiltersWithCustomAttributes:
         low = CustomAttributeEnum.objects.create(attribute=priority_attr, label="Low", value="low")
 
         followup_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Follow-up Date",
             data_type=CustomAttribute.DataType.DATE,
         )
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter2 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        encounter3 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter2 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        encounter3 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
 
         # encounter1: high priority, date in June
         CustomAttributeValue.objects.create(
@@ -517,7 +511,7 @@ class TestApplyFiltersWithCustomAttributes:
             attribute=followup_attr, content_type=content_type, object_id=encounter3.id, value_date=date(2024, 6, 20)
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         filters = {
             "custom_attributes": {
                 str(priority_attr.id): {
@@ -533,34 +527,34 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         # Should only match encounter1 (high priority AND June date)
         assert len(results) == 1
         assert results[0].id == encounter1.id
 
-    def test_filter_with_null_values(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_filter_with_null_values(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
         )
         high = CustomAttributeEnum.objects.create(attribute=priority_attr, label="High", value="high")
 
-        encounter1 = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        encounter1 = Encounter.objects.create(
+            organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS
+        )
+        Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
 
         CustomAttributeValue.objects.create(
             attribute=priority_attr, content_type=content_type, object_id=encounter1.id, value_enum=high
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         filters = {
             "custom_attributes": {
                 str(priority_attr.id): {
@@ -571,31 +565,28 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         # Should match both encounters (high priority OR null)
         assert len(results) == 2
 
-    def test_filter_on_hidden_column_annotates_dynamically(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_filter_on_hidden_column_annotates_dynamically(self, organization, patient, encounter):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
         )
         high = CustomAttributeEnum.objects.create(attribute=priority_attr, label="High", value="high")
 
-        encounter = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
         CustomAttributeValue.objects.create(
             attribute=priority_attr, content_type=content_type, object_id=encounter.id, value_enum=high
         )
 
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         assert not hasattr(encounters.first(), _get_annotation_field_name(priority_attr.id))
 
         filters = {
@@ -607,31 +598,28 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         assert len(results) == 1
 
-    def test_filter_on_visible_column_reuses_annotation(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_filter_on_visible_column_reuses_annotation(self, organization, patient, encounter):
         content_type = ContentType.objects.get_for_model(Encounter)
 
         priority_attr = CustomAttribute.objects.create(
-            organization=org,
+            organization=organization,
             content_type=content_type,
             name="Priority",
             data_type=CustomAttribute.DataType.ENUM,
         )
         high = CustomAttributeEnum.objects.create(attribute=priority_attr, label="High", value="high")
 
-        encounter = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
         CustomAttributeValue.objects.create(
             attribute=priority_attr, content_type=content_type, object_id=encounter.id, value_enum=high
         )
 
-        encounters = Encounter.objects.filter(organization=org)
-        encounters = annotate_custom_attributes(encounters, [str(priority_attr.id)], org, content_type)
+        encounters = Encounter.objects.filter(organization=organization)
+        encounters = annotate_custom_attributes(encounters, [str(priority_attr.id)], organization, content_type)
 
         filters = {
             "custom_attributes": {
@@ -642,32 +630,26 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         assert len(results) == 1
 
-    def test_empty_filter_returns_unmodified_queryset(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_empty_filter_returns_unmodified_queryset(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
 
-        Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-        Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
+        Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
 
-        encounters = Encounter.objects.filter(organization=org)
-        filtered = apply_filters_with_custom_attributes(encounters, {}, org, content_type)
+        encounters = Encounter.objects.filter(organization=organization)
+        filtered = apply_filters_with_custom_attributes(encounters, {}, organization, content_type)
 
         assert list(encounters) == list(filtered)
 
-    def test_invalid_attribute_uuid_skipped_with_warning(self):
-        org = OrganizationFactory.create()
-        patient = PatientFactory.create(organization=org)
+    def test_invalid_attribute_uuid_skipped_with_warning(self, organization, encounter):
         content_type = ContentType.objects.get_for_model(Encounter)
 
-        encounter = Encounter.objects.create(organization=org, patient=patient, status=EncounterStatus.IN_PROGRESS)
-
-        encounters = Encounter.objects.filter(organization=org)
+        encounters = Encounter.objects.filter(organization=organization)
         filters = {
             "custom_attributes": {
                 "550e8400-e29b-41d4-a716-446655440000": {
@@ -677,7 +659,7 @@ class TestApplyFiltersWithCustomAttributes:
             }
         }
 
-        filtered = apply_filters_with_custom_attributes(encounters, filters, org, content_type)
+        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered)
 
         assert len(results) == 1
