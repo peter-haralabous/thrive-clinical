@@ -60,6 +60,7 @@ LOCALE_PATHS = [str(BASE_DIR / "locale")]
 # To configure the Procrastinate app, need the db connection string.
 DATABASE_URL = env.str("DATABASE_URL", default="postgres://sandwich:sandwich@localhost:5432/sandwich")
 DATABASES = {"default": env.db_url_config(DATABASE_URL)}
+DATABASES["default"]["CONN_MAX_AGE"] = env.int("DJANGO_CONN_MAX_AGE", default=60)
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
