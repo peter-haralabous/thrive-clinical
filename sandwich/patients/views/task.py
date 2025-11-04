@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
+from django.urls import reverse
 
 from sandwich.core.decorators import surveyjs_csp
 from sandwich.core.models.task import Task
@@ -41,9 +42,13 @@ def task(request: AuthenticatedHttpRequest, patient_id: int, task: Task) -> Http
     )
 
     form_schema = task.form_version.schema if task.form_version else {}
+    submit_url = request.build_absolute_uri(
+        reverse("patients:api-1.0.0:submit_form", kwargs={"task_id": str(task.id)})
+    )
 
     context = {
         "form_schema": form_schema,
+        "submit_url": submit_url,
         "read_only": read_only,
     } | _patient_context(request, patient)
     return render(request, "patient/form.html", context=context)

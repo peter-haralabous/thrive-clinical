@@ -6,6 +6,8 @@ from django.test import Client
 from django.urls import reverse
 
 from sandwich.core.factories.fact import FactFactory
+from sandwich.core.factories.form import FormFactory
+from sandwich.core.factories.task import TaskFactory
 from sandwich.core.models import Document
 from sandwich.core.models import Entity
 from sandwich.core.models.entity import EntityType
@@ -37,6 +39,7 @@ EXCLUDED_URL_NAMES = {
     "api-1.0.0:get_formio_form_submission",
     "api-1.0.0:list_formio_form_submissions",
     "api-1.0.0:submit_formio_form",
+    "api-1.0.0:submit_form",
     "api-1.0.0:update_formio_form_submission_with_id",
     "api-1.0.0:update_formio_form_submission_without_id",
 }
@@ -70,6 +73,13 @@ def test_patient_http_get_urls_return_status_200(db, user, url, patient) -> None
             predicate=predicate_for_predicate_name(PredicateName.HAS_SYMPTOM),
             object=Entity.objects.create(type=EntityType.OBSERVATION),
         ).pk
+
+    if ":task_id>" in url.pattern or "<task_id>" in url.pattern:
+        # create a small form and a task for this patient so the task-based
+        # endpoints resolve and return 200
+        form = FormFactory.create(name="URL Test Form", schema={"elements": []}, organization=patient.organization)
+        task = TaskFactory.create(patient=patient, form_version=form.events.last())
+        kwargs["task_id"] = task.pk
 
     response = client.get(reverse("patients:" + url.name, kwargs=kwargs))
     assert response.status_code == HTTPStatus.OK

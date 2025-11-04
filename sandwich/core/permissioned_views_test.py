@@ -75,6 +75,8 @@ def test_all_views_permissioned() -> None:
         "patients/api/formio/<name>",
         "patients/api/formio/<name>/submission",
         "patients/api/formio/<name>/submission/<submission_id>",
+        "patients/api/form/<task_id>",
+        "patients/api/form/<task_id>/submit",
     }
 
     urls = get_all_urls(get_resolver().url_patterns)
