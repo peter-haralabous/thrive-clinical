@@ -1,16 +1,15 @@
 import logging
-from uuid import UUID
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 
 from sandwich.core.decorators import surveyjs_csp
+from sandwich.core.models.organization import Organization
+from sandwich.core.models.patient import Patient
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import terminal_task_status
-from sandwich.core.service.organization_service import get_provider_organizations
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -20,14 +19,17 @@ logger = logging.getLogger(__name__)
 
 @surveyjs_csp
 @login_required
-@authorize_objects([ObjPerm(Task, "task_id", ["view_task"])])
-def task(request: AuthenticatedHttpRequest, organization_id: UUID, patient_id: UUID, task: Task) -> HttpResponse:
+@authorize_objects(
+    [
+        ObjPerm(Task, "task_id", ["view_task"]),
+        ObjPerm(Organization, "organization_id", ["view_organization"]),
+        ObjPerm(Patient, "patient_id", ["view_patient"]),
+    ]
+)
+def task(request: AuthenticatedHttpRequest, organization: Organization, patient: Patient, task: Task) -> HttpResponse:
     logger.info(
-        "Accessing patient task", extra={"user_id": request.user.id, "patient_id": patient_id, "task_id": task.id}
+        "Accessing patient task", extra={"user_id": request.user.id, "patient_id": patient.id, "task_id": task.id}
     )
-
-    organization = get_object_or_404(get_provider_organizations(request.user), id=organization_id)
-    patient = get_object_or_404(organization.patient_set, id=patient_id)
 
     # NOTE-NG: we're using the task ID here as the form name
     # patients don't have permission to load arbitrary forms
@@ -36,7 +38,7 @@ def task(request: AuthenticatedHttpRequest, organization_id: UUID, patient_id: U
         "Task form configuration",
         extra={
             "user_id": request.user.id,
-            "patient_id": patient_id,
+            "patient_id": patient.id,
             "task_id": task.id,
             "task_status": task.status.value,
             "read_only": read_only,
@@ -56,7 +58,7 @@ def task(request: AuthenticatedHttpRequest, organization_id: UUID, patient_id: U
             "Using existing form submission",
             extra={
                 "user_id": request.user.id,
-                "patient_id": patient_id,
+                "patient_id": patient.id,
                 "task_id": task.id,
                 "submission_id": task.formio_submission.id,
             },
@@ -66,7 +68,7 @@ def task(request: AuthenticatedHttpRequest, organization_id: UUID, patient_id: U
             reverse("patients:api-1.0.0:get_formio_form", kwargs={"name": str(task.id)})
         )
         logger.debug(
-            "Using new form", extra={"user_id": request.user.id, "patient_id": patient_id, "task_id": task.id}
+            "Using new form", extra={"user_id": request.user.id, "patient_id": patient.id, "task_id": task.id}
         )
 
     formio_user = {"_id": request.user.id}

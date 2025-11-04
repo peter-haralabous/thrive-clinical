@@ -2,11 +2,11 @@ import logging
 
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 
 from sandwich.core.decorators import surveyjs_csp
+from sandwich.core.models.patient import Patient
 from sandwich.core.models.task import Task
 from sandwich.core.models.task import terminal_task_status
 from sandwich.core.service.permissions_service import ObjPerm
@@ -19,13 +19,16 @@ logger = logging.getLogger(__name__)
 
 @surveyjs_csp
 @login_required
-@authorize_objects([ObjPerm(Task, "task_id", ["view_task"])])
-def task(request: AuthenticatedHttpRequest, patient_id: int, task: Task) -> HttpResponse:
+@authorize_objects(
+    [
+        ObjPerm(Task, "task_id", ["view_task"]),
+        ObjPerm(Patient, "patient_id", ["view_patient"]),
+    ]
+)
+def task(request: AuthenticatedHttpRequest, patient: Patient, task: Task) -> HttpResponse:
     logger.info(
-        "Accessing patient task", extra={"user_id": request.user.id, "patient_id": patient_id, "task_id": task.id}
+        "Accessing patient task", extra={"user_id": request.user.id, "patient_id": patient.id, "task_id": task.id}
     )
-
-    patient = get_object_or_404(request.user.patient_set, id=patient_id)
 
     # NOTE-NG: we're using the task ID here as the form name
     # patients don't have permission to load arbitrary forms
@@ -34,7 +37,7 @@ def task(request: AuthenticatedHttpRequest, patient_id: int, task: Task) -> Http
         "Task form configuration",
         extra={
             "user_id": request.user.id,
-            "patient_id": patient_id,
+            "patient_id": patient.id,
             "task_id": task.id,
             "task_status": task.status.value,
             "read_only": read_only,
