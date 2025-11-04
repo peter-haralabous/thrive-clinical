@@ -141,4 +141,22 @@ describe('SurveyForm custom element', () => {
     document.body.removeChild(el);
     document.body.removeChild(script);
   });
+
+  it('reads data-* attributes on connectedCallback', async () => {
+    const el = new SurveyForm();
+    el.setAttribute('data-submit-url', '/submit-url');
+    el.setAttribute('data-complete-url', '/done');
+    el.setAttribute('data-csrf-token', 'tok-123');
+    document.body.appendChild(el);
+
+    el.connectedCallback();
+    await new Promise((r) => setTimeout(r, 0));
+
+    // Private fields are accessible via casting in tests
+    expect((el as any)._submitUrl).toBe('/submit-url');
+    expect((el as any)._completeUrl).toBe('/done');
+    expect((el as any)._csrfToken).toBe('tok-123');
+
+    document.body.removeChild(el);
+  });
 });

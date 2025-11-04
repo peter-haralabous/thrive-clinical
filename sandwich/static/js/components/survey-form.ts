@@ -6,6 +6,9 @@ type SurveyJson = Record<string, unknown> | Array<unknown>;
 
 export class SurveyForm extends LitElement {
   private _containerId = `survey-form-${Math.random().toString(36).slice(2, 9)}-container`;
+  private _completeUrl: string | null = null; // URL to go to after completion
+  private _submitUrl: string | null = null; // URL to submit form data to
+  private _csrfToken: string | null = null; // CSRF token for secure submissions
 
   createRenderRoot(): HTMLElement {
     return this as unknown as HTMLElement;
@@ -44,6 +47,10 @@ export class SurveyForm extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+    this._completeUrl = this.getAttribute('data-complete-url');
+    this._submitUrl = this.getAttribute('data-submit-url');
+    this._csrfToken = this.getAttribute('data-csrf-token');
+
     this.updateComplete.then(() => void this._initFromSchemaId());
   }
 
@@ -121,12 +128,55 @@ export class SurveyForm extends LitElement {
     // TODO(JL): create and set a Thrive specific theme
     model.applyTheme(LayeredLightPanelless);
 
+    const hasSubmit = !!this._submitUrl;
+    if (hasSubmit) {
+      let isCompleting = false;
+      // Use onCompleting instead of onComplete to handle async submission
+      // and control when the completed page is shown.
+      model.onCompleting.add((sender, options) => {
+        if (!this._submitUrl) return;
+        if (isCompleting) return; // Prevent re-entrance
+
+        options.allow = false;
+        fetch(this._submitUrl, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': this._csrfToken || '',
+          },
+          body: JSON.stringify(sender.data),
+        })
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error(
+                `Form submission failed with status ${response.status}`,
+              );
+            }
+            // Successfully submitted
+            sender.completedHtml = `<div>Form successfully submitted. <a href="${this._completeUrl}">Go back</a>.</div>`;
+            isCompleting = true; // Mark as completing to avoid re-entrance
+            sender.doComplete();
+          })
+          .catch((error) => {
+            isCompleting = false;
+            console.error('Error submitting form:', error);
+            sender.notify('Form submission failed. Please try again.', 'error');
+          });
+      });
+    } else {
+      model.showCompleteButton = false;
+    }
+
     // Render the survey into the target element
     model.render(targetEl);
 
     return model;
   }
 
+  /**
+   * Create a container to use for rendering, load schema from script and initialize survey-js
+   */
   private _initFromSchemaId(): void {
     const script = this._findSchemaScriptById();
     if (!this.id)
