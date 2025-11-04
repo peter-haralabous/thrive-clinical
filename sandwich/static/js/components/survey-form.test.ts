@@ -227,4 +227,43 @@ describe('SurveyForm custom element', () => {
     // Check that fetch was NOT called a second time
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it('autosaves draft on value change', async () => {
+    const el = new SurveyForm();
+    el.setAttribute('data-save-draft-url', '/save-draft');
+    el.setAttribute('data-csrf-token', 'tok-123');
+    document.body.appendChild(el);
+
+    const fetchSpy = vi.fn().mockResolvedValue({ ok: true });
+    vi.stubGlobal('fetch', fetchSpy);
+
+    // Allow element to render
+    await el.updateComplete;
+
+    // Make debounce immediate for test speed
+    (el as any)._draftSaveInterval = 0;
+
+    const surveyModel = el.initSurvey({
+      elements: [{ type: 'text', name: 'yourName' }],
+    });
+
+    // Trigger a value change which should schedule a debounced save
+    surveyModel.setValue('yourName', 'Alice');
+
+    // Wait a tick for the setTimeout to run
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+    expect(fetchSpy).toHaveBeenCalledWith('/save-draft', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': 'tok-123',
+      },
+      body: JSON.stringify(surveyModel.data),
+    });
+
+    document.body.removeChild(el);
+  });
 });

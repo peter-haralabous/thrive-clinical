@@ -48,10 +48,14 @@ def task(request: AuthenticatedHttpRequest, patient: Patient, task: Task) -> Htt
     submit_url = request.build_absolute_uri(
         reverse("patients:api-1.0.0:submit_form", kwargs={"task_id": str(task.id)})
     )
+    save_draft_url = request.build_absolute_uri(
+        reverse("patients:api-1.0.0:save_draft_form", kwargs={"task_id": str(task.id)})
+    )
 
     context = {
         "form_schema": form_schema,
         "submit_url": submit_url,
+        "save_draft_url": save_draft_url,
         "read_only": read_only,
     } | _patient_context(request, patient)
     return render(request, "patient/form.html", context=context)

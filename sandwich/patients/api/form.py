@@ -68,3 +68,16 @@ def submit_form(request: AuthenticatedHttpRequest, task_id: uuid.UUID, payload: 
     except Exception as e:
         logger.exception("Error submitting form: {e}")
         raise HttpError(500, "An unexpected error occured.") from e
+
+
+@router.post("/{task_id}/save_draft", auth=require_login)
+def save_draft_form(request: AuthenticatedHttpRequest, task_id: uuid.UUID, payload: Annotated[dict, ninja.Body(...)]):
+    task = cast("Task", get_authorized_object_or_404(request.user, ["view_task", "complete_task"], Task, id=task_id))
+    # raise ninja.errors.HttpError(400, "Fake error for testing purposes")
+
+    # TODO: get_or_create form submission record in database
+    logger.info(
+        "Form draft saved",
+        extra={"user_id": request.user.id, "task_id": task.id, "payload": payload},
+    )
+    return {"status": "success", "message": "Form draft saved successfully."}

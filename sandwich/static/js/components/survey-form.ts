@@ -8,7 +8,11 @@ export class SurveyForm extends LitElement {
   private _containerId = `survey-form-${Math.random().toString(36).slice(2, 9)}-container`;
   private _completeUrl: string | null = null; // URL to go to after completion
   private _submitUrl: string | null = null; // URL to submit form data to
+  private _saveDraftUrl: string | null = null; // URL to save draft data to
   private _csrfToken: string | null = null; // CSRF token for secure submissions
+
+  private _draftSaveTimer: number | undefined;
+  private _draftSaveInterval = 2000;
 
   createRenderRoot(): HTMLElement {
     return this as unknown as HTMLElement;
@@ -57,6 +61,7 @@ export class SurveyForm extends LitElement {
     super.connectedCallback();
     this._completeUrl = this.getAttribute('data-complete-url');
     this._submitUrl = this.getAttribute('data-submit-url');
+    this._saveDraftUrl = this.getAttribute('data-save-draft-url');
     this._csrfToken = this.getAttribute('data-csrf-token');
 
     this.updateComplete.then(() => void this._initFromSchemaId());
@@ -137,7 +142,7 @@ export class SurveyForm extends LitElement {
     model.applyTheme(LayeredLightPanelless);
     model.readOnly = this.isReadOnly();
 
-    const hasSubmit = !!this._submitUrl;
+    const hasSubmit = !!this._submitUrl && !this.isReadOnly();
     if (hasSubmit) {
       let isCompleting = false;
       // Use onCompleting instead of onComplete to handle async submission
@@ -177,10 +182,65 @@ export class SurveyForm extends LitElement {
       model.showCompleteButton = false;
     }
 
+    const hasDraftSave = !!this._saveDraftUrl && !this.isReadOnly();
+    if (hasDraftSave) {
+      const saveDraftHandler = (sender: Model) => {
+        if (!this._saveDraftUrl) return;
+        this._scheduleDraftSave(sender, { ...(sender.data || {}) } as Record<
+          string,
+          unknown
+        >);
+      };
+      model.onValueChanged.add(saveDraftHandler);
+      model.onCurrentPageChanged.add(saveDraftHandler);
+      model.onPageVisibleChanged.add(saveDraftHandler);
+    }
+
     // Render the survey into the target element
     model.render(targetEl);
 
     return model;
+  }
+
+  /**
+   * Perform the network draft save.
+   */
+  private _doDraftSave(model: Model, data: Record<string, unknown>): void {
+    if (!this._saveDraftUrl) return;
+    fetch(this._saveDraftUrl, {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': this._csrfToken || '',
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(`Draft save failed with status ${response.status}`);
+        model.notify('Draft saved.', 'info');
+      })
+      .catch((error) => {
+        console.error('Error saving draft:', error);
+        model.notify('Unable to save draft.', 'warning');
+      });
+  }
+
+  /**
+   * Schedule a draft save via a tiny debounce attached to the instance.
+   */
+  private _scheduleDraftSave(
+    model: Model,
+    data: Record<string, unknown>,
+  ): void {
+    if (this._draftSaveTimer) {
+      return;
+    }
+    this._draftSaveTimer = setTimeout(
+      () => this._doDraftSave(model, data),
+      this._draftSaveInterval,
+    ) as unknown as number;
   }
 
   /**
