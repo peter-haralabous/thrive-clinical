@@ -3,6 +3,7 @@ import logging
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -35,7 +36,12 @@ def patient_details(request: AuthenticatedHttpRequest, patient: Patient) -> Http
         "documents": documents,
         "facts": categorized_facts_for_patient(patient),
     } | _patient_context(request, patient=patient)
-    return render(request, "patient/patient_details.html", context)
+
+    template = "patient/patient_details.html"
+    if settings.FEATURE_PATIENT_CHATTY_APP:
+        template = "patient/chatty/app.html"
+
+    return render(request, template, context)
 
 
 class FactEditModalForm(forms.ModelForm[Fact]):

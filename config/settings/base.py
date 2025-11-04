@@ -461,3 +461,5 @@ EVENTSTREAM_REDIS = {
     "ssl": env.bool("REDIS_SSL", default=False),
 }
 EVENTSTREAM_CHANNELMANAGER_CLASS = "sandwich.core.eventstream.ChannelManager"
+
+FEATURE_PATIENT_CHATTY_APP = env.bool("FEATURE_PATIENT_CHATTY_APP", default=False)
