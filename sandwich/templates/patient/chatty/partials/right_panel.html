@@ -2,24 +2,14 @@
 
 {% load lucide %}
 
-{% block panel_id %}
-  right-panel
-{% endblock panel_id %}
-{% block collapsed_panel_id %}
-  right-panel-collapsed
-{% endblock collapsed_panel_id %}
-{% block collapse_btn_id %}
-  collapse-right-btn
-{% endblock collapse_btn_id %}
-{% block header_icon %}
-  {% lucide "layout-grid" class="size-6" %}
-{% endblock header_icon %}
-{% block header_title %}
-  Feed
-{% endblock header_title %}
-{% block collapse_icon %}
-  {% lucide "panel-right-close" class="size-6" %}
-{% endblock collapse_icon %}
+{# djlint:off #}
+{% block panel_id %}right-panel{% endblock panel_id %}
+{% block collapsed_panel_id %}right-panel-collapsed{% endblock collapsed_panel_id %}
+{% block collapse_btn_id %}collapse-right-btn{% endblock collapse_btn_id %}
+{% block header_icon %}{% lucide "layout-grid" class="size-6" %}{% endblock header_icon %}
+{% block header_title %}Feed{% endblock header_title %}
+{% block collapse_icon %}{% lucide "panel-right-close" class="size-6" %}{% endblock collapse_icon %}
+{# djlint:on #}
 {% block panel_content %}
   <div class="flex-1 overflow-y-auto p-4">
     <p class="text-center text-base-content/60">Right panel content stub</p>

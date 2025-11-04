@@ -2,24 +2,14 @@
 
 {% load lucide %}
 
-{% block panel_id %}
-  left-panel
-{% endblock panel_id %}
-{% block collapsed_panel_id %}
-  left-panel-collapsed
-{% endblock collapsed_panel_id %}
-{% block collapse_btn_id %}
-  collapse-left-btn
-{% endblock collapse_btn_id %}
-{% block header_icon %}
-  {% lucide "heart-pulse" class="size-6" %}
-{% endblock header_icon %}
-{% block header_title %}
-  Health Records
-{% endblock header_title %}
-{% block collapse_icon %}
-  {% lucide "panel-left-close" class="size-6" %}
-{% endblock collapse_icon %}
+{# djlint:off #}
+{% block panel_id %}left-panel{% endblock panel_id %}
+{% block collapsed_panel_id %}left-panel-collapsed{% endblock collapsed_panel_id %}
+{% block collapse_btn_id %}collapse-left-btn{% endblock collapse_btn_id %}
+{% block header_icon %}{% lucide "heart-pulse" class="size-6" %}{% endblock header_icon %}
+{% block header_title %}Health Records{% endblock header_title %}
+{% block collapse_icon %}{% lucide "panel-left-close" class="size-6" %}{% endblock collapse_icon %}
+{# djlint:on #}
 {% block panel_content %}
   <div class="p-4 border-b">
     <label class="input input-bordered flex items-center gap-2">
