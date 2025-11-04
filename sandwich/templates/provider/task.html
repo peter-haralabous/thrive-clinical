@@ -16,7 +16,7 @@
   <div class="container mx-auto">
     {{ form_schema | json_script:"form_schema" }}
     <survey-form data-schema-id="form_schema"
-    {% if read_only %}read-only{% endif %}
+    {% if read_only %}readonly{% endif %}
     />
   </div>
 {% endblock content %}

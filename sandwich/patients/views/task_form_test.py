@@ -3,10 +3,12 @@ import urllib.parse
 import pytest
 from django.urls import reverse
 from playwright.sync_api import Page
+from playwright.sync_api import expect
 
 from sandwich.core.factories.form import FormFactory
 from sandwich.core.factories.task import TaskFactory
 from sandwich.core.models.patient import Patient
+from sandwich.core.models.task import TaskStatus
 
 
 @pytest.mark.e2e
@@ -85,3 +87,20 @@ def test_task_form_submit_shows_success(live_server, page: Page, patient: Patien
     body = request.post_data
     assert body is not None
     assert "yourName" in (body or ""), "Submission payload should contain the question name"
+
+
+@pytest.mark.e2e
+def test_task_form_component_renders_read_only(live_server, page: Page, patient: Patient, auth_cookies: None):
+    schema = {"elements": [{"type": "text", "name": "yourName", "title": "What is your name?"}]}
+    form = FormFactory.create(name="E2E Test Form", schema=schema, organization=patient.organization)
+    task = TaskFactory.create(patient=patient, form_version=form.events.last(), status=TaskStatus.COMPLETED)
+
+    task_url_path = reverse("patients:task", kwargs={"patient_id": patient.id, "task_id": task.id})
+    url = f"{live_server.url}{task_url_path}"
+    page.goto(url)
+
+    page.wait_for_selector("survey-form [data-survey-container][data-survey-rendered]", timeout=5000)
+
+    name_input = page.get_by_label("What is your name?")
+    assert name_input is not None
+    expect(name_input).to_have_attribute("readonly", "")

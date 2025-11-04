@@ -15,7 +15,7 @@ export class SurveyForm extends LitElement {
   }
 
   isReadOnly(): boolean {
-    const readOnly = this.getAttribute('read-only');
+    const readOnly = this.getAttribute('readonly');
     if (readOnly != null) {
       return true;
     }
