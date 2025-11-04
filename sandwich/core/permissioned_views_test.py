@@ -63,9 +63,10 @@ def test_all_views_permissioned() -> None:
         # These views are permissioned but not using the decorator
         "patients/document/<uuid:document_id>",
         "patients/immunization/<uuid:immunization_id>",
+        "patients/practitioner/<uuid:practitioner_id>",
     }
 
-    # This list acts as a registery of unpermissioned views. Remove entries
+    # This list acts as a registry of unpermissioned views. Remove entries
     # from this list when they are properly permissioned.
     unpermissioned_routes = {
         "providers/organization/<uuid:organization_id>/preferences/<str:list_type>/settings",

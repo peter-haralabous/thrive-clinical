@@ -17,6 +17,7 @@ from .list_preference import ListViewType
 from .list_preference import PreferenceScope
 from .organization import Organization
 from .patient import Patient
+from .practitioner import Practitioner
 from .predicate import Predicate
 from .provenance import Provenance
 from .role import Role
@@ -42,6 +43,7 @@ __all__ = [
     "ListViewType",
     "Organization",
     "Patient",
+    "Practitioner",
     "Predicate",
     "PreferenceScope",
     "Provenance",

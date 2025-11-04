@@ -9,6 +9,7 @@
   <div id="form-modal"></div>
   <h2 id="health-records" class="mb-4">My Health Records</h2>
   {% include "patient/partials/personal_information.html" with patient=patient %}
-  {% include "patient/partials/records_immunizations.html" %}
   {% include "patient/partials/records_documents.html" %}
+  {% include "patient/partials/records_immunizations.html" %}
+  {% include "patient/partials/records_practitioners.html" %}
 {% endblock content %}

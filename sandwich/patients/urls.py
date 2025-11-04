@@ -16,6 +16,7 @@ from .views.patient.edit import patient_edit
 from .views.patient.health_records import health_records
 from .views.patient.health_records import health_records_add
 from .views.patient.health_records import immunization_edit
+from .views.patient.health_records import practitioner_edit
 from .views.task import task
 
 app_name = "patients"
@@ -36,6 +37,7 @@ urlpatterns = [
     path("patient/<uuid:patient_id>/document/<uuid:document_id>/delete/", document_delete, name="document_delete"),
     path("document/<uuid:document_id>", document_download, name="document_download"),
     path("immunization/<uuid:immunization_id>", immunization_edit, name="immunization"),
+    path("practitioner/<uuid:practitioner_id>", practitioner_edit, name="practitioner"),
     path("api/", api.urls, name="api"),
     path("get_phn_validation/", get_phn_validation, name="get_phn_validation"),
     path("fact/<uuid:fact_id>/edit", fact_edit, name="fact_edit"),

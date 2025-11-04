@@ -5,6 +5,7 @@ from sandwich.core.models import Encounter
 from sandwich.core.models import FormioSubmission
 from sandwich.core.models import Immunization
 from sandwich.core.models import Invitation
+from sandwich.core.models import Practitioner
 from sandwich.core.models import Task
 
 # For some reason ruff wants a redundant alias
@@ -19,5 +20,5 @@ from .predicate import PredicateAdmin as PredicateAdmin
 from .template import TemplateAdmin as TemplateAdmin
 
 admin.site.register(
-    [Document, Encounter, FormioSubmission, Immunization, Invitation, Task],
+    [Document, Encounter, FormioSubmission, Immunization, Invitation, Practitioner, Task],
 )

@@ -4,6 +4,7 @@ from django.urls import reverse
 from sandwich.core.factories.patient import PatientFactory
 from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
+from sandwich.core.models import Practitioner
 from sandwich.users.models import User
 
 
@@ -47,3 +48,41 @@ def test_immunization_not_accessible_to_other_patients(client: Client, user: Use
 
     response = client.get(reverse("patients:immunization", kwargs={"immunization_id": immunization.pk}))
     assert response.status_code == 404
+
+
+def test_add_update_and_remove_practitioner(client: Client, user: User, patient: Patient):
+    client.force_login(user)
+
+    # get the "add" form
+    response = client.get(
+        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "practitioner"})
+    )
+    assert response.status_code == 200
+
+    # submit the "add" form
+    response = client.post(
+        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "practitioner"}),
+        data={
+            "name": "Dr. Jekyll",
+        },
+    )
+    assert response.status_code == 302  # redirects back to list view
+    practitioner = Practitioner.objects.get(patient=patient)
+    assert practitioner.name == "Dr. Jekyll"
+
+    # view the created record
+    response = client.get(reverse("patients:practitioner", kwargs={"practitioner_id": practitioner.pk}))
+    assert response.status_code == 200
+
+    # update the created record
+    response = client.post(
+        reverse("patients:practitioner", kwargs={"practitioner_id": practitioner.pk}), data={"name": "Mr. Hyde"}
+    )
+    assert response.status_code == 302  # redirects back to list view
+    practitioner.refresh_from_db()
+    assert practitioner.name == "Mr. Hyde"
+
+    # delete the created record
+    response = client.delete(reverse("patients:practitioner", kwargs={"practitioner_id": practitioner.pk}))
+    assert response.status_code == 302  # redirects back to list view
+    assert not Practitioner.objects.filter(patient=patient).exists()

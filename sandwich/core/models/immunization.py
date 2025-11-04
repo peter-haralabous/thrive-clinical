@@ -19,6 +19,7 @@ class Immunization(HealthRecord):
 
     name = models.CharField(max_length=255)
 
+    # If we want to store more structured data:
     # # this is Immunization.vaccineCode.coding[0].display in FHIR
     # vaccine_display = models.CharField(max_length=255, blank=True)
     # # this is Immunization.vaccineCode.coding[0].code in FHIR

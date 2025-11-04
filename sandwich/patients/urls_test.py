@@ -11,6 +11,7 @@ from sandwich.core.factories.task import TaskFactory
 from sandwich.core.models import Document
 from sandwich.core.models import Entity
 from sandwich.core.models import Immunization
+from sandwich.core.models import Practitioner
 from sandwich.core.models.entity import EntityType
 from sandwich.core.models.predicate import PredicateName
 from sandwich.core.service.entity_service import entity_for_patient
@@ -82,6 +83,12 @@ def test_patient_http_get_urls_return_status_200(db, user, url, patient) -> None
             patient=patient,
             name="test",
             date="2022-01-01",
+        ).pk
+
+    if ":practitioner_id>" in url.pattern:
+        kwargs["practitioner_id"] = Practitioner.objects.create(
+            patient=patient,
+            name="Dr. Chris Brendlinger",
         ).pk
 
     if ":task_id>" in url.pattern or "<task_id>" in url.pattern:
