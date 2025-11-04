@@ -12,7 +12,6 @@ def test_assign_default_form_permissions_owner(organization: Organization) -> No
     assign_organization_role(organization, RoleName.OWNER, owner)
     form = FormFactory.create(organization=organization)
     assert owner.has_perm("view_form", form) is True
-    assert owner.has_perm("view_form", form) is True
     assert owner.has_perm("change_form", form) is True
     assert owner.has_perm("delete_form", form) is True
 
