@@ -8,15 +8,15 @@
   <ul tabindex="0"
       class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
     <li>
-      <label for="patient-details-modal-{{ encounter.id }}" class="cursor-pointer">
+      <a href="{% url 'providers:patient' organization_id=organization.id patient_id=encounter.patient.id %}">
         {% lucide "user" class="size-4" %} Patient Details
-      </label>
+      </a>
     </li>
     <li>
-      <label for="encounter-details-modal-{{ encounter.id }}"
-             class="cursor-pointer">{% lucide "file-text" class="size-4" %} Encounter Details</label>
+      <a href="{% url 'providers:encounter' organization_id=organization.id encounter_id=encounter.id %}">
+        {% lucide "file-text" class="size-4" %} Encounter Details
+      </a>
     </li>
   </ul>
 </div>
-{% include 'provider/partials/patient_details_slideout.html' %}
 {% include 'provider/partials/encounter_details_slideout.html' %}
