@@ -3,6 +3,7 @@ import logging
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import render
+from guardian.shortcuts import get_objects_for_user
 
 from sandwich.core.models import Form
 from sandwich.core.models import Organization
@@ -34,10 +35,11 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form list",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    forms = Form.objects.filter(organization=organization).order_by("name")
+    organization_forms = Form.objects.filter(organization=organization).order_by("name")
+    authorized_org_forms = get_objects_for_user(request.user, ["view_form"], organization_forms)
 
     page = request.GET.get("page", 1)
-    paginator = Paginator(forms, 25)
+    paginator = Paginator(authorized_org_forms, 25)
     forms_page = paginator.get_page(page)
 
     return render(request, "provider/form_list.html", {"organization": organization, "forms": forms_page})
