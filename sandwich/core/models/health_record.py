@@ -1,16 +1,19 @@
 from django.core.exceptions import ValidationError
 from django.db import models
 
+from sandwich.core.mixins.versioning import VersionMixin
 from sandwich.core.models.abstract import BaseModel
 
 
-class HealthRecord(BaseModel):
+class HealthRecord(VersionMixin, BaseModel):
     """
     All records that show up in the PHR have some common fields.
 
     1. They are associated with a patient.
     2. They may be associated with an encounter (if provider-uploaded).
     3. They track where they came from (provenance)
+
+    Subclasses must have the @pghistory.track decorator.
     """
 
     patient = models.ForeignKey("core.Patient", on_delete=models.CASCADE)

@@ -1,4 +1,7 @@
 import logging
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 from uuid import UUID
 
 from crispy_forms.helper import FormHelper
@@ -11,6 +14,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
@@ -21,6 +25,7 @@ from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.validators.date_time import not_in_future
 from sandwich.patients.views.patient import _patient_context
+from sandwich.users.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +115,50 @@ def health_records_add(request: AuthenticatedHttpRequest, patient: Patient, reco
     return render(request, "patient/health_records_add.html", context)
 
 
+@dataclass
+class HistoryEvent:
+    label: str
+    date: datetime
+    actor: str
+
+    def get_label_display(self):
+        if self.label == "insert":
+            return _("Added")
+        if self.label == "update":
+            return _("Updated")
+        if self.label == "delete":
+            return _("Deleted")
+        return self.label.replace("_", " ").title()
+
+    @staticmethod
+    def _actor_label(current_user: User, metadata: dict[str, Any]):
+        # TODO-NG: make sure that AI-driven changes are correctly attributed
+        user_id = metadata.get("user")
+        if user_id is None:
+            return _("Unknown")
+        if user_id == current_user.id:
+            return current_user.email
+        # TODO-NG: Figure out our permissions story here. We shouldn't leak user email addresses, but we do need
+        #          to give the user *some* information about who's been updating their records.
+        return _("User %s") % user_id
+
+    @classmethod
+    def from_event(cls, current_user: User, event):
+        metadata = event.pgh_context.metadata if event.pgh_context else {}
+        return cls(
+            label=event.pgh_label,
+            date=event.pgh_created_at,
+            actor=cls._actor_label(current_user, metadata),
+        )
+
+
+def _history_events(instance: HealthRecord, user: User) -> list[HistoryEvent]:
+    return [
+        HistoryEvent.from_event(user, event)
+        for event in instance.events.prefetch_related("pgh_context").order_by("-pgh_created_at")
+    ]
+
+
 def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, instance: HealthRecord):
     patient = instance.patient
     if not request.user.has_perms(["view_patient", "change_patient"], instance.patient):
@@ -136,6 +185,7 @@ def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, inst
         "record_type": record_type,
         "record_type_name": form_class.Meta.model._meta.verbose_name,  # noqa: SLF001
         "form": form,
+        "history": _history_events(instance, request.user),
     } | _patient_context(request, patient=patient)
     return render(request, "patient/health_records_edit.html", context)
 

@@ -5,4 +5,16 @@
 {% block content %}
   <h2>Edit {{ record_type_name }}</h2>
   {% crispy form %}
+  <h3 class="mt-8">History</h3>
+  <table class="table">
+    <tbody>
+      {% for event in history %}
+        <tr>
+          <td>{{ event.get_label_display }}</td>
+          <td>{{ event.actor }}</td>
+          <td>{{ event.date }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock content %}
