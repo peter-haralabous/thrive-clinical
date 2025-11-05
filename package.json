@@ -19,6 +19,8 @@
     "@popperjs/core": "^2.10.2",
     "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/typography": "^0.5.16",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
     "@types/jsdom": "^27",
     "@types/sortablejs": "^1.15.8",
     "@vitest/ui": "^4.0.4",

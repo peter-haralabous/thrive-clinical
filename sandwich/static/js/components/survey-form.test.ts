@@ -1,18 +1,51 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { getByLabelText } from '@testing-library/dom';
+import '@testing-library/jest-dom/vitest';
 
 import { SurveyForm } from './survey-form';
+import '../survey';
 
-describe('SurveyForm custom element', () => {
-  // Note: tests asserting survey-core internals / render calls rely
-  // on E2E Playwright tests elsewhere since they depend on browser
-  // behavior.
+/** Loads the schema script element */
+function loadSchemaScript(schema: Record<string, unknown>): HTMLScriptElement {
+  // Init script containing schema
+  const script = document.createElement('script');
+  script.type = 'application/json';
+  script.id = 'form_schema';
+  script.textContent = JSON.stringify(schema);
+  document.body.appendChild(script);
 
+  return script;
+}
+
+function loadSurveyComponent(
+  schemaId: string = 'form_schema',
+  attributes?: Record<string, string>,
+): HTMLElement {
+  const formComponent = document.createElement('survey-form');
+
+  formComponent.setAttribute('data-schema-id', schemaId);
+  if (attributes) {
+    for (const [attr, value] of Object.entries(attributes)) {
+      formComponent.setAttribute(attr, value);
+    }
+  }
+
+  document.body.appendChild(formComponent);
+  return formComponent;
+}
+
+describe('SurveyForm custom element internals', () => {
+  // Note: tests asserting survey-core internals, not render concerns
   beforeEach(() => {
     // Ensure custom element isn't registered between tests
     if (!customElements.get('survey-form')) {
       // Register the element for jsdom tests. This is idempotent across runs.
       customElements.define('survey-form', SurveyForm as any);
     }
+  });
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.clearAllMocks();
   });
 
   it('shows friendly error when JSON invalid', async () => {
@@ -265,5 +298,30 @@ describe('SurveyForm custom element', () => {
     });
 
     document.body.removeChild(el);
+  });
+});
+
+describe('Survey form renders', () => {
+  beforeEach(() => {
+    // Ensure custom element isn't registered between tests
+    if (!customElements.get('survey-form')) {
+      // Register the element for jsdom tests. This is idempotent across runs.
+      customElements.define('survey-form', SurveyForm as any);
+    }
+  });
+  afterEach(() => {
+    document.body.innerHTML = '';
+  });
+  it('render', async () => {
+    const script = loadSchemaScript({
+      title: 'Test Survey',
+      elements: [{ name: 'Name', type: 'text' }],
+    });
+    loadSurveyComponent(script.id);
+
+    await vi.waitFor(() => {
+      const input = getByLabelText(document.body, 'Name');
+      return expect(input).toBeInTheDocument();
+    });
   });
 });
