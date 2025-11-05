@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { getByLabelText } from '@testing-library/dom';
+import { getByLabelText, getByText } from '@testing-library/dom';
+import { userEvent } from '@testing-library/user-event';
 import '@testing-library/jest-dom/vitest';
 
 import { SurveyForm } from './survey-form';
@@ -131,7 +132,7 @@ describe('SurveyForm custom element internals', () => {
     await vi.waitFor(() => expect(renderSpy).toHaveBeenCalled());
   });
 
-  it('reads data-* attributes on connectedCallback', async () => {
+  it('reads data-* attributes', async () => {
     const el = loadSurveyComponent(undefined, {
       'data-submit-url': '/submit-url',
       'data-complete-url': '/done',
@@ -271,15 +272,36 @@ describe('Survey form renders', () => {
   });
 
   it('renders', async () => {
+    const user = userEvent.setup();
+
     const script = loadSchemaScript({
       title: 'Test Survey',
       elements: [{ name: 'Name', type: 'text' }],
     });
     loadSurveyComponent(script.id);
 
-    await vi.waitFor(() => {
-      const input = getByLabelText(document.body, 'Name');
-      return expect(input).toBeInTheDocument();
+    await vi.waitFor(() => getByText(document.body, 'Test Survey'));
+    const input = getByLabelText(document.body, 'Name');
+    expect(input).toBeInTheDocument();
+    await user.type(input, 'test');
+    expect(input).toHaveValue('test');
+  });
+
+  it('renders in read only mode', async () => {
+    const user = userEvent.setup();
+
+    const script = loadSchemaScript({
+      title: 'Test Survey',
+      elements: [{ name: 'Name', type: 'text' }],
     });
+    loadSurveyComponent(script.id, { readonly: '' });
+
+    await vi.waitFor(() => getByText(document.body, 'Test Survey'));
+
+    const input = getByLabelText(document.body, 'Name');
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveAttribute('readonly');
+    await user.type(input, 'test');
+    expect(input).toHaveValue('');
   });
 });
