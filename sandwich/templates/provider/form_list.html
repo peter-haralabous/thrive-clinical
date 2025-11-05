@@ -9,8 +9,20 @@
          class="btn btn-ghost btn-circle mr-2">{% lucide "arrow-left" class="w-5 h-5" %}</a>
       <h1>Form Templates</h1>
     </div>
-    {# TODO: link to builder #}
-    <a href="#" class="btn btn-primary" disabled>New form</a>
+    <button id="new-form-button" class="btn btn-primary">
+      {% lucide "plus" class="w-5 h-5" %}
+      New form
+    </button>
   </div>
   <div id="form_table_container">{% include "provider/partials/form_list_table.html" %}</div>
+  {% include "provider/partials/new_form_modal.html" %}
 {% endblock content %}
+{% block inline_javascript %}
+  <script nonce="{{ request.csp_nonce }}">
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('new-form-button').addEventListener('click', function() {
+        document.getElementById('new-form-modal').showModal();
+      });
+    });
+  </script>
+{% endblock inline_javascript %}
