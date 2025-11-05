@@ -67,3 +67,15 @@ def form_details(request: AuthenticatedHttpRequest, organization: Organization, 
     return render(
         request, "provider/form_details.html", {"organization": organization, "form": form, "forms": form_versions}
     )
+
+
+# TODO: Add create_form permissions check.
+@login_required
+@authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization"])])
+def form_builder(request: AuthenticatedHttpRequest, organization: Organization):
+    """Provider view to create a new form template manually."""
+    logger.info(
+        "Accessing organization form builder page",
+        extra={"user_id": request.user.id, "organization_id": organization.id},
+    )
+    return render(request, "provider/form_builder.html", {"organization": organization})
