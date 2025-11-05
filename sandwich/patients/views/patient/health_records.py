@@ -127,9 +127,12 @@ class HistoryEvent:
 
     @staticmethod
     def _actor_label(current_user: User, metadata: dict[str, Any]):
-        # TODO-NG: make sure that AI-driven changes are correctly attributed
         user_id = metadata.get("user")
         if user_id is None:
+            # which model was used is useful internally but shouldn't be shown to the user
+            llm = metadata.get("llm")
+            if llm:
+                return _("Thrive AI Assistant")
             return _("Unknown")
         if user_id == current_user.id:
             return current_user.email

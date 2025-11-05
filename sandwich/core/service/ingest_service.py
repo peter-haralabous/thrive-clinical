@@ -7,6 +7,7 @@ from procrastinate.contrib.django import app
 
 from sandwich.core.models import Document
 from sandwich.core.service.ingest.extract_pdf import extract_facts_from_pdf
+from sandwich.core.service.ingest.extract_records import extract_records
 from sandwich.core.service.ingest.extract_text import extract_facts_from_text
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
@@ -14,10 +15,10 @@ from sandwich.core.service.llm import get_llm
 logger = logging.getLogger(__name__)
 
 
-# this task is no longer in use. remove it once all jobs have drained from the production database.
 @app.task
-def extract_facts_from_pdf_job(document_id: str, llm_name: str = ModelName.CLAUDE_SONNET_4_5):
-    extract_facts_from_document_job(document_id, llm_name)
+def process_document_job(document_id: str):
+    extract_facts_from_document_job.defer(document_id=document_id)
+    extract_records_from_document_job.defer(document_id=document_id)
 
 
 @app.task
@@ -47,6 +48,19 @@ def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.
 
     send_ingest_progress(
         patient.id, text=f"Extracted {len(triples)} facts from {document.original_filename}", done=True
+    )
+
+
+@app.task
+def extract_records_from_document_job(document_id: str):
+    document = Document.objects.get(id=document_id)
+    patient = document.patient
+    send_ingest_progress(patient.id, text=f"Processing {document.original_filename}...")
+
+    records = extract_records(document)
+
+    send_ingest_progress(
+        patient.id, text=f"Extracted {len(records)} records from {document.original_filename}", done=True
     )
 
 
