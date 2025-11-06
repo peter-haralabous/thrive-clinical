@@ -99,6 +99,11 @@ class Encounter(BaseModel):
 
     objects = EncounterManager()
 
+    class Meta:
+        indexes = [
+            models.Index(fields=["organization", "status"], name="core_encounter_org_status_idx"),
+        ]
+
     @property
     def name(self):
         return f"Encounter {self.id}"
