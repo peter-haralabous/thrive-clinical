@@ -47,6 +47,7 @@ from sandwich.core.service.task_service import send_task_added_email
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.util.http import validate_sort
 from sandwich.core.validators.date_of_birth import valid_date_of_birth
+from sandwich.providers.forms.task import AddTaskForm
 
 logger = logging.getLogger(__name__)
 
@@ -414,25 +415,6 @@ def patient_archive(request: AuthenticatedHttpRequest, organization: Organizatio
 
     messages.add_message(request, messages.SUCCESS, "Patient archived successfully.")
     return HttpResponseRedirect(reverse("providers:patient_list", kwargs={"organization_id": organization.id}))
-
-
-class AddTaskForm(forms.Form):
-    def __init__(self, *args, available_forms: list[dict[str, str]], form_action: str, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-
-        choices = [("", "Please select a form")]
-        choices.extend([(form["id"], form["name"]) for form in available_forms])
-        self.fields["selected_form"] = forms.ChoiceField(
-            choices=choices,
-            widget=forms.Select(attrs={"class": "select select-bordered w-full"}),
-            label="Select a form",
-            required=True,
-        )
-        self.helper = FormHelper()
-        self.helper.add_input(Submit("submit", "Assign task", css_class="btn-primary"))
-
-        if form_action:
-            self.helper.form_action = form_action
 
 
 @login_required
