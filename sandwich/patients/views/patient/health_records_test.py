@@ -1,3 +1,5 @@
+from typing import cast
+
 from django.test import Client
 from django.urls import reverse
 
@@ -5,6 +7,8 @@ from sandwich.core.factories.patient import PatientFactory
 from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
+from sandwich.patients.views.patient.health_records import HistoryEvent
+from sandwich.patients.views.patient.health_records import _history_events
 from sandwich.users.models import User
 
 
@@ -86,3 +90,28 @@ def test_add_update_and_remove_practitioner(client: Client, user: User, patient:
     response = client.delete(reverse("patients:practitioner", kwargs={"practitioner_id": practitioner.pk}))
     assert response.status_code == 302  # redirects back to list view
     assert not Practitioner.objects.filter(patient=patient).exists()
+
+
+def test_one_history_entry(user: User, patient: Patient):
+    practitioner = Practitioner.objects.create(patient=patient, name="Doctor")
+
+    assert practitioner.get_total_versions() == 1
+    history = _history_events(practitioner, user, limit=1)
+    assert len(history) == 1
+    assert cast("HistoryEvent", history[0]).label == "insert"
+
+
+def test_many_history_entries(user: User, patient: Patient):
+    practitioner = Practitioner.objects.create(patient=patient, name="Doctor")
+
+    for i in range(1, 100):
+        practitioner.name = f"Doctor {i}"
+        practitioner.save()
+
+    assert practitioner.get_total_versions() == 100
+    history = _history_events(practitioner, user, limit=3)
+    assert len(history) == 4
+    assert cast("HistoryEvent", history[0]).label == "update"
+    assert cast("HistoryEvent", history[1]).label == "update"
+    assert str(history[2]) == "97 more..."
+    assert cast("HistoryEvent", history[3]).label == "insert"

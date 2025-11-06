@@ -164,11 +164,26 @@ class HistoryEvent:
         )
 
 
-def _history_events(instance: HealthRecord, user: User) -> list[HistoryEvent]:
-    return [
-        HistoryEvent.from_event(user, event)
-        for event in instance.events.prefetch_related("pgh_context").order_by("-pgh_created_at")
-    ]
+@dataclass
+class MoreHistoryEvents:
+    count: int
+
+    def __str__(self):
+        return f"{self.count} more..."
+
+
+def _history_events(instance: HealthRecord, user: User, limit: int = 10) -> list[HistoryEvent | MoreHistoryEvents]:
+    events = instance.events.prefetch_related("pgh_context").order_by("-pgh_created_at")[: limit + 1]
+    if len(events) > limit:
+        total = instance.get_total_versions()
+        return [
+            *[HistoryEvent.from_event(user, event) for event in events[: limit - 1]],
+            MoreHistoryEvents(total - limit),
+            HistoryEvent.from_event(
+                user, instance.events.prefetch_related("pgh_context").order_by("pgh_created_at").first()
+            ),
+        ]
+    return [HistoryEvent.from_event(user, event) for event in events]
 
 
 def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, instance: HealthRecord):
