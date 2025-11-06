@@ -33,6 +33,10 @@ SURVEYJS_FONT_SRC = (
 SURVEYJS_CSP = {
     "style-src-attr": UNSAFE_INLINE,
     "font-src": SURVEYJS_FONT_SRC,
+    # Survey Creator needs this for inline styles (hash or unsafe-inline)
+    "style-src-elem": [
+        "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
+    ],
 }
 
 

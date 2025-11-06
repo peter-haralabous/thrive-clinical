@@ -9,6 +9,8 @@
     "lucide": "^0.548.0",
     "sortablejs": "^1.15.6",
     "survey-core": "2.3.12",
+    "survey-creator-core": "2.3.12",
+    "survey-creator-js": "2.3.12",
     "survey-js-ui": "^2.3.12"
   },
   "devDependencies": {

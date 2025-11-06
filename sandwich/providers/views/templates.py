@@ -5,6 +5,7 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 from guardian.shortcuts import get_objects_for_user
 
+from sandwich.core.decorators import surveyjs_csp
 from sandwich.core.models import Form
 from sandwich.core.models import Organization
 from sandwich.core.service.permissions_service import ObjPerm
@@ -60,6 +61,7 @@ def form_details(request: AuthenticatedHttpRequest, organization: Organization, 
 
 
 # TODO: Add create_form permissions check.
+@surveyjs_csp
 @login_required
 @authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization"])])
 def form_builder(request: AuthenticatedHttpRequest, organization: Organization):

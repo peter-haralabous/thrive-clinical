@@ -1,7 +1,22 @@
 {% extends "users/base.html" %}
 
 {% load lucide %}
+{% load render_bundle from webpack_loader %}
 
+{% block extra_head %}
+  {{ block.super }}
+  {% comment %}
+    Survey Creator also requires SurveyJS Form Library resources,
+    and a script with predefined theme configurations (if you are going to use Theme Editor).
+    Link them before the Survey Creator resources.
+    TODO: wire up Theme Editor and themes later
+    https://surveyjs.io/survey-creator/documentation/theme-editor
+  {% endcomment %}
+  {% render_bundle 'survey' 'css' %}
+  {% render_bundle 'survey' 'js' %}
+  {% render_bundle 'creator' 'js' %}
+  {% render_bundle 'creator' 'css' %}
+{% endblock extra_head %}
 {% block content %}
   <div class="flex items-center justify-between mb-4">
     <div class="flex items-center">
@@ -11,5 +26,5 @@
     </div>
     <button id="new-form-button" class="btn btn-primary cursor-default">Create form</button>
   </div>
-  {# TODO: Add form builder #}
+  <div id="form-builder-container"></div>
 {% endblock content %}

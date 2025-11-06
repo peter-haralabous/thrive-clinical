@@ -5936,6 +5936,8 @@ __metadata:
     postcss-loader: "npm:^8.0.0"
     sortablejs: "npm:^1.15.6"
     survey-core: "npm:2.3.12"
+    survey-creator-core: "npm:2.3.12"
+    survey-creator-js: "npm:2.3.12"
     survey-js-ui: "npm:^2.3.12"
     tailwindcss: "npm:^4.1.13"
     typescript: "npm:^5.9.2"
@@ -6401,6 +6403,36 @@ __metadata:
   version: 2.3.12
   resolution: "survey-core@npm:2.3.12"
   checksum: 10c0/071da33f2d0e4b8be9f2e661eec8a115291925ec32b36263452f75765ab3682ebb09dd73c3642d9700a799bf1285f5931a70a2a0668c03b921e55a244a1b3bb9
+  languageName: node
+  linkType: hard
+
+"survey-creator-core@npm:2.3.12":
+  version: 2.3.12
+  resolution: "survey-creator-core@npm:2.3.12"
+  peerDependencies:
+    ace-builds: ^1.4.12
+    survey-core: 2.3.12
+  peerDependenciesMeta:
+    ace-builds:
+      optional: true
+  checksum: 10c0/59ddc5e7fb5cc51ee20f6c3b4ab8dd65ce98617468f4de81b0f8a034200ec7086ad8a2b35d8b7f9b1d51b5652661fdac9644f425c0c802d0624bb792869f0a84
+  languageName: node
+  linkType: hard
+
+"survey-creator-js@npm:2.3.12":
+  version: 2.3.12
+  resolution: "survey-creator-js@npm:2.3.12"
+  peerDependencies:
+    "@types/react": "*"
+    "@types/react-dom": "*"
+    ace-builds: ^1.4.12
+    survey-core: 2.3.12
+    survey-creator-core: 2.3.12
+    survey-js-ui: 2.3.12
+  peerDependenciesMeta:
+    ace-builds:
+      optional: true
+  checksum: 10c0/fa1c4cb2c92104d727146011bcb29b5c5d08c66fb76846070d718ebac8721d57122ce39dd752c750a85ef96be3da6bc0247cd6b9e89f86e3e9bc07d250c52b81
   languageName: node
   linkType: hard
 
