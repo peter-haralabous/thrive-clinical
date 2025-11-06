@@ -13,6 +13,7 @@ from .views.patient.details import fact_edit
 from .views.patient.details import patient_details
 from .views.patient.edit import get_phn_validation
 from .views.patient.edit import patient_edit
+from .views.patient.health_records import document_edit
 from .views.patient.health_records import health_records
 from .views.patient.health_records import health_records_add
 from .views.patient.health_records import immunization_edit
@@ -35,7 +36,8 @@ urlpatterns = [
     path("patient/<uuid:patient_id>/task/<uuid:task_id>", task, name="task"),
     path("patient/<uuid:patient_id>/document/upload", document_upload_and_extract, name="document_upload_and_extract"),
     path("patient/<uuid:patient_id>/document/<uuid:document_id>/delete/", document_delete, name="document_delete"),
-    path("document/<uuid:document_id>", document_download, name="document_download"),
+    path("document/<uuid:document_id>", document_edit, name="document"),
+    path("document/<uuid:document_id>/download", document_download, name="document_download"),
     path("immunization/<uuid:immunization_id>", immunization_edit, name="immunization"),
     path("practitioner/<uuid:practitioner_id>", practitioner_edit, name="practitioner"),
     path("api/", api.urls, name="api"),

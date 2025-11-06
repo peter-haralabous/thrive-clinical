@@ -16,6 +16,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from sandwich.core.models import Document
 from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
@@ -82,11 +83,20 @@ class PractitionerForm(HealthRecordForm[Practitioner]):
         fields = ("name",)
 
 
+class DocumentForm(HealthRecordForm[Document]):
+    class Meta:
+        model = Document
+        fields = ("original_filename", "content_type", "size", "date", "category")
+        read_only_fields = ("original_filename", "content_type", "size")
+
+
 def _form_class(record_type: str):
     if record_type == "immunization":
         return ImmunizationForm
     if record_type == "practitioner":
         return PractitionerForm
+    if record_type == "document":
+        return DocumentForm
     raise Http404(f"Unknown form class: {record_type}")
 
 
@@ -198,3 +208,9 @@ def immunization_edit(request: AuthenticatedHttpRequest, immunization_id: UUID):
 def practitioner_edit(request: AuthenticatedHttpRequest, practitioner_id: UUID):
     instance = get_object_or_404(Practitioner, id=practitioner_id)
     return _generic_edit_view("practitioner", request, instance)
+
+
+@login_required
+def document_edit(request: AuthenticatedHttpRequest, document_id: UUID):
+    instance = get_object_or_404(Document, id=document_id)
+    return _generic_edit_view("document", request, instance)

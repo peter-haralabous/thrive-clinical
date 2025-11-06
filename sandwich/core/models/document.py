@@ -1,5 +1,7 @@
 import pghistory
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+from django_enum import EnumField
 from private_storage.fields import PrivateFileField
 
 from sandwich.core.models.health_record import HealthRecord
@@ -12,6 +14,17 @@ class DocumentManager(models.Manager["Document"]):
         document = super().create(**kwargs)
         assign_default_document_permissions(document)
         return document
+
+
+class DocumentCategory(models.TextChoices):
+    LAB_RESULTS = "lab_results", _("Lab Results")
+    HEALTH_VISITS = "health_visits", _("Health Visits")
+    HOSPITAL_VISITS = "hospital_visits", _("Hospital Visits")
+    IMMUNIZATIONS = "immunizations", _("Immunizations")
+    PRESCRIPTIONS = "prescriptions", _("Prescriptions")
+    MY_NOTES = "my_notes", _("My Notes")
+    FAMILY_HISTORY = "family_history", _("Family History")
+    OTHER = "other", _("Other")
 
 
 @pghistory.track()
@@ -36,5 +49,11 @@ class Document(HealthRecord):
     content_type = models.CharField(max_length=255, blank=True)
     size = models.BigIntegerField(null=True, blank=True)
     original_filename = models.CharField(max_length=255, blank=True)
+
+    # metadata extracted from the file's content
+    date = models.DateField(null=True, blank=True)
+    category: models.Field[DocumentCategory, DocumentCategory] = EnumField(
+        DocumentCategory, default=DocumentCategory.OTHER
+    )
 
     objects = DocumentManager()

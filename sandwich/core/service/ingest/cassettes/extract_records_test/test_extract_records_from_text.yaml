@@ -5,32 +5,37 @@ interactions:
         "source": {"bytes": "UGF0aWVudCByZWNlaXZlZCBhIHBvbGlvIGltbXVuaXphdGlvbiBvbiAyMDAwLTAxLTAxLg=="},
         "format": "txt"}}, {"text": "Extract medical records from the above clinical
         document."}]}], "system": [{"text": "You are a helpful assistant that extracts
-        medical records from clinical documents."}], "inferenceConfig": {}, "toolConfig":
-        {"tools": [{"toolSpec": {"name": "RecordsResponse", "description": "RecordsResponse",
-        "inputSchema": {"json": {"properties": {"immunizations": {"items": {"properties":
+        medical records from clinical documents."}], "inferenceConfig": {"temperature":
+        0.0}, "toolConfig": {"tools": [{"toolSpec": {"name": "RecordsResponse", "description":
+        "RecordsResponse", "inputSchema": {"json": {"properties": {"document_category":
+        {"anyOf": [{"enum": ["lab_results", "health_visits", "hospital_visits", "immunizations",
+        "prescriptions", "my_notes", "family_history", "other"], "title": "DocumentCategory",
+        "type": "string"}, {"type": "null"}]}, "document_date": {"anyOf": [{"format":
+        "date", "type": "string"}, {"type": "null"}]}, "immunizations": {"items": {"properties":
         {"name": {"type": "string"}, "date": {"format": "date", "type": "string"}},
         "required": ["name", "date"], "type": "object"}, "type": "array"}, "practitioners":
         {"items": {"properties": {"name": {"type": "string"}}, "required": ["name"],
-        "type": "object"}, "type": "array"}}, "required": ["immunizations", "practitioners"],
-        "type": "object"}}}}], "toolChoice": {"tool": {"name": "RecordsResponse"}}}}'
+        "type": "object"}, "type": "array"}}, "required": ["document_category", "document_date",
+        "immunizations", "practitioners"], "type": "object"}}}}], "toolChoice": {"tool":
+        {"name": "RecordsResponse"}}}}'
       headers:
         Content-Length:
-          - '979'
+          - '1356'
         Content-Type:
           - !!binary |
             YXBwbGljYXRpb24vanNvbg==
         User-Agent:
           - !!binary |
             Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjIgbWQvcHlpbXBsI0NQeXRob24gbS9aLGIs
-            RCBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
+            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjIgbWQvcHlpbXBsI0NQeXRob24gbS9ELFos
+            YiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
             cms6bGFuZ2NoYWluLWF3cw==
         X-Amz-Date:
           - !!binary |
-            MjAyNTExMDVUMjIxMDA5Wg==
+            MjAyNTExMDZUMTYxMTE1Wg==
         amz-sdk-invocation-id:
           - !!binary |
-            MTVlMjA5OTAtMDRkZC00YWM2LWE5ZjEtYjU0MWNkNGQ2NWE0
+            Zjk0N2NkMjUtYjdmYy00YzcyLWI4ZmItY2IwZDBlZWQzN2Qz
         amz-sdk-request:
           - !!binary |
             YXR0ZW1wdD0x
@@ -38,18 +43,18 @@ interactions:
       uri: https://bedrock-runtime.ca-central-1.amazonaws.com/model/global.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse
     response:
       body:
-        string: '{"metrics":{"latencyMs":3692},"output":{"message":{"content":[{"toolUse":{"input":{"immunizations":[{"name":"polio","date":"2000-01-01"}],"practitioners":[]},"name":"RecordsResponse","toolUseId":"tooluse_KPEOFGESQta6GYhUlWINNw","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":829,"outputTokens":70,"serverToolUsage":{},"totalTokens":899}}'
+        string: '{"metrics":{"latencyMs":3177},"output":{"message":{"content":[{"toolUse":{"input":{"document_category":"immunizations","document_date":"2000-01-01","immunizations":[{"name":"polio","date":"2000-01-01"}],"practitioners":[]},"name":"RecordsResponse","toolUseId":"tooluse_mgDS8VVXToe7Bz6FDj16nw","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":941,"outputTokens":114,"serverToolUsage":{},"totalTokens":1055}}'
       headers:
         Connection:
           - keep-alive
         Content-Length:
-          - '489'
+          - '556'
         Content-Type:
           - application/json
         Date:
-          - Wed, 05 Nov 2025 22:10:13 GMT
+          - Thu, 06 Nov 2025 16:11:18 GMT
         x-amzn-RequestId:
-          - 603858ca-a2e3-4ae4-b11c-60462c360c4d
+          - ea26e27d-6cdd-433d-86ac-1bdf3663639e
       status:
         code: 200
         message: OK

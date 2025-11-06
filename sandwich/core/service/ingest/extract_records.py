@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import cast
 
 import pghistory
@@ -8,8 +9,11 @@ from langchain_core.messages import SystemMessage
 from sandwich.core.models import Document
 from sandwich.core.models import Immunization
 from sandwich.core.models import Practitioner
+from sandwich.core.models.document import DocumentCategory
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_claude_sonnet_4_5
+
+logger = logging.getLogger(__name__)
 
 
 class ImmunizationRecord(pydantic.BaseModel):
@@ -22,11 +26,31 @@ class PractitionerRecord(pydantic.BaseModel):
 
 
 class RecordsResponse(pydantic.BaseModel):
+    document_category: DocumentCategory | None
+    """The type of document. Infer from the title or content."""
+
+    document_date: datetime.date | None
+    """The primary date of the document (e.g., visit date, report date, or when the document was generated)."""
+
     immunizations: list[ImmunizationRecord]
     practitioners: list[PractitionerRecord]
 
     def __len__(self):
         return len(self.immunizations) + len(self.practitioners)
+
+    def update_document(self, document: Document) -> bool:
+        changed = False
+        if self.document_category and self.document_category != document.category:
+            logger.debug("Updating document category", extra={"category": self.document_category})
+            document.category = self.document_category
+            changed = True
+        if self.document_date is not None and self.document_date != document.date:
+            logger.debug("Updating document date")  # extra={"date": self.document_date} breaks logging!
+            document.date = self.document_date
+            changed = True
+        if changed:
+            document.unattested = True
+        return changed
 
 
 content_type_to_format = {
@@ -60,7 +84,7 @@ def _to_document_block(document: Document) -> dict:
 
 
 def _extract_records(document: Document) -> RecordsResponse:
-    llm = get_claude_sonnet_4_5()
+    llm = get_claude_sonnet_4_5(temperature=0.0)
     return cast(
         "RecordsResponse",
         llm.with_structured_output(RecordsResponse).invoke(
@@ -97,6 +121,9 @@ def _save_records(document: Document, records: RecordsResponse) -> None:
             Practitioner.objects.get_or_create(
                 patient=document.patient, name=practitioner_data.name, defaults={"unattested": True}
             )
+
+        if records.update_document(document):
+            document.save()
 
 
 def extract_records(document: Document) -> RecordsResponse:

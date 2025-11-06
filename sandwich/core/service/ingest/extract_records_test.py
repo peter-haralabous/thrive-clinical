@@ -7,13 +7,14 @@ from django.core.files.uploadedfile import UploadedFile
 from sandwich.core.models import Document
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
+from sandwich.core.models.document import DocumentCategory
 from sandwich.core.service.ingest.extract_records import extract_records
 
 
 def _document_from_file(patient: Patient, file: UploadedFile) -> Document:
     assert file.name is not None
     assert file.content_type is not None
-    return Document(
+    return Document.objects.create(
         patient=patient, file=file, original_filename=file.name, content_type=file.content_type, size=file.size
     )
 
@@ -27,6 +28,10 @@ def test_extract_records_from_text(patient: Patient):
     assert len(records) == 1  # no other records
 
     assert patient.immunization_set.count() == 1
+    immunization = patient.immunization_set.first()
+    assert immunization is not None
+    assert immunization.unattested is True
+    assert str(immunization.date) == "2000-01-01"
 
 
 @pytest.mark.vcr
@@ -34,14 +39,16 @@ def test_extract_records_from_pdf(patient: Patient):
     dr_susan = Practitioner.objects.create(patient=patient, name="Dr. Susan Albright")
 
     file = SimpleUploadedFile(
-        name="uploaded.pdf", content=Path("sandwich/core/fixtures/mock_health_data.pdf").read_bytes()
+        name="uploaded.pdf",
+        content=Path("sandwich/core/fixtures/mock_health_data.pdf").read_bytes(),
+        content_type="application/pdf",
     )
     document = _document_from_file(patient, file)
     records = extract_records(document)
-    assert len(records.immunizations) == 3
-    assert len(records.practitioners) == 2  # this is an error -- one of the doctors is the patient's spouse
+    assert len(records.immunizations) == 2
+    assert len(records.practitioners) == 1
 
-    assert patient.immunization_set.count() == 3
+    assert patient.immunization_set.count() == 2
 
     # created records should be marked as llm-generated
     immunization = patient.immunization_set.first()
@@ -53,6 +60,10 @@ def test_extract_records_from_pdf(patient: Patient):
     }
 
     # the pre-existing practitioner shouldn't be duplicated
-    assert patient.practitioner_set.count() == 2
+    assert patient.practitioner_set.count() == 1
     assert dr_susan.get_total_versions() == 1
     assert dr_susan.unattested is False
+
+    assert str(document.date) == "2025-09-16"
+    assert document.category == DocumentCategory.HEALTH_VISITS
+    assert document.unattested is True
