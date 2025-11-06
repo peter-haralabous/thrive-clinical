@@ -311,6 +311,59 @@ describe('SurveyForm custom element internals', () => {
 
     document.body.removeChild(el);
   });
+
+  it('debounces draft saves for quick successive changes (only final save)', async () => {
+    const el = new SurveyForm();
+    el.setAttribute('data-save-draft-url', '/save-draft');
+    el.setAttribute('data-csrf-token', 'tok-123');
+    document.body.appendChild(el);
+
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: (_: string) => 'application/json' },
+      json: async () => ({}),
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+
+    // Allow element to render
+    await el.updateComplete;
+
+    const surveyModel = el.initSurvey({
+      elements: [{ type: 'text', name: 'yourName', title: 'Your name' }],
+    });
+
+    // Wait until the survey is rendered so we can interact with the real input
+    await vi.waitUntil(() => el.querySelector('[data-survey-rendered]'));
+
+    // Use user-event to type into the actual input and then blur, matching browser
+    const user = userEvent.setup();
+    const input = getByLabelText(
+      document.body,
+      'Your name',
+    ) as HTMLInputElement;
+    expect(input).not.toBeNull();
+
+    // Simulate quick typing of two characters, then blur the field
+    await user.type(input, 'A');
+    await user.type(input, 'B');
+    input.blur();
+
+    // Wait for debounce/timers to run and ensure only one save happened
+    await vi.waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
+
+    // Ensure the call used the latest data (both keystrokes)
+    expect(fetchSpy).toHaveBeenCalledWith(
+      '/save-draft',
+      expect.objectContaining({
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: expect.any(Object),
+        body: JSON.stringify(surveyModel.data),
+      }),
+    );
+
+    document.body.removeChild(el);
+  });
 });
 
 describe('Survey form renders', () => {
