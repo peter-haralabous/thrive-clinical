@@ -24,16 +24,16 @@
             <th>{% sortable_column col.label col.value %}</th>
           {% endif %}
         {% endfor %}
-        <th class="w-px">
+        <th class="w-px text-right">
           <button hx-get="{% url 'providers:list_preference_settings' organization_id=organization.id list_type='encounter_list' %}"
                   hx-target="#preference-modal-container"
                   class="btn btn-xs btn-ghost gap-1"
                   title="{% trans 'Customize list preferences' %}"
                   aria-label="{% trans 'List Settings' %}"
                   data-test="list-settings-button"
-                  id="list-settings-button">{% lucide "settings" class="size-3" %}</button>
+                  id="list-settings-button">{% lucide "settings" class="size-4" %}</button>
         </th>
-        <th></th>
+        <th class="w-px text-right"></th>
       </tr>
     </thead>
     <tbody>
@@ -64,8 +64,7 @@
               {% endwith %}
             {% endif %}
           {% endfor %}
-          <td></td>
-          <td>{% include "provider/partials/encounter_action_menu.html" with encounter=encounter %}</td>
+          <td class="w-px text-right">{% include "provider/partials/encounter_action_menu.html" with encounter=encounter %}</td>
         </tr>
       {% empty %}
         <tr>
