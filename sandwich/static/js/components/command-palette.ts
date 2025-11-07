@@ -79,12 +79,24 @@ class CommandPalette extends LitElement {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+    }
+    li a .result-icon-left {
+      width: 16px;
+      height: 16px;
+      color: #666;
+      flex-shrink: 0;
     }
     li a .result-content {
       flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     li a .result-title {
       font-weight: 500;
+    }
+    li a .result-title:not(:last-child) {
       margin-bottom: 4px;
     }
     li a .result-subtitle {
@@ -97,12 +109,12 @@ class CommandPalette extends LitElement {
       height: 16px;
       color: #999;
       flex-shrink: 0;
-      margin-left: 8px;
     }
     li a.selected .result-subtitle {
       color: rgba(255, 255, 255, 0.8);
     }
-    li a.selected .result-icon {
+    li a.selected .result-icon,
+    li a.selected .result-icon-left {
       color: rgba(255, 255, 255, 0.7);
     }
   `;
@@ -159,6 +171,9 @@ class CommandPalette extends LitElement {
       this.context = this._defaultContext;
       this.title = this._defaultTitle;
       this.placeholder = this._defaultPlaceholder;
+      this._searchInput.value = ''; // Reset search query
+      this.resultsHTML = ''; // Clear results
+      this.selectedIndex = 0; // Reset selection
     }
     if (
       changedProperties.has('resultsHTML') ||
