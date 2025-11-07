@@ -20,7 +20,12 @@ class FormSubmission(BaseModel):
     """
 
     task = models.OneToOneField(
-        Task, on_delete=models.SET_NULL, null=True, blank=True, help_text="The specific task this submission is for"
+        Task,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="form_submission",
+        help_text="The specific task this submission is for",
     )
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, help_text="The patient this form submission is for")
     status: models.Field[FormSubmissionStatus, FormSubmissionStatus] = EnumField(
