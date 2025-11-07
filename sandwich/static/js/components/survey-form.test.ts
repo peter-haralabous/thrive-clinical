@@ -7,7 +7,7 @@ import { SurveyForm } from './survey-form';
 import '../survey';
 
 /** Loads the schema script element */
-function loadSchemaScript(schema: Record<string, unknown>): HTMLScriptElement {
+function loadSchemaScript(schema?: Record<string, unknown>): HTMLScriptElement {
   // Init script containing schema
   const script = document.createElement('script');
   script.type = 'application/json';
@@ -18,17 +18,28 @@ function loadSchemaScript(schema: Record<string, unknown>): HTMLScriptElement {
   return script;
 }
 
-function loadSurveyComponent(
-  schemaId: string = 'form_schema',
-  attributes?: Record<string, string>,
-): SurveyForm {
+function loadInitialDataScript(
+  initialData: Record<string, unknown>,
+): HTMLScriptElement {
+  const script = document.createElement('script');
+  script.type = 'application/json';
+  script.id = 'initial_data';
+  script.textContent = JSON.stringify(initialData);
+  document.body.appendChild(script);
+
+  return script;
+}
+
+function loadSurveyComponent(attributes?: Record<string, string>): SurveyForm {
   const formComponent = document.createElement('survey-form') as SurveyForm;
 
-  formComponent.setAttribute('data-schema-id', schemaId);
-  if (attributes) {
-    for (const [attr, value] of Object.entries(attributes)) {
-      formComponent.setAttribute(attr, value);
-    }
+  const withDefaultAttributes = {
+    'data-schema-id': 'form_schema',
+    'data-initial-data-id': 'initial_data',
+    ...attributes,
+  };
+  for (const [attr, value] of Object.entries(withDefaultAttributes)) {
+    formComponent.setAttribute(attr, value);
   }
 
   document.body.appendChild(formComponent);
@@ -54,7 +65,7 @@ describe('SurveyForm custom element internals', () => {
     const script = loadSchemaScript({});
     script.textContent = '{invalid-json}';
     document.body.appendChild(script);
-    const el = loadSurveyComponent(script.id);
+    const el = loadSurveyComponent();
 
     // Container was created and the error box shows the message
     await vi.waitFor(() => el.querySelector('[data-survey-container]'));
@@ -98,7 +109,7 @@ describe('SurveyForm custom element internals', () => {
 
   it('throws when the internal container element is missing', async () => {
     const script = loadSchemaScript({ title: 'x' });
-    const el = loadSurveyComponent(script.id);
+    const el = loadSurveyComponent();
 
     await vi.waitFor(() => el.querySelector('[data-survey-container]'));
 
@@ -127,13 +138,13 @@ describe('SurveyForm custom element internals', () => {
       'render',
     );
     const script = loadSchemaScript({ title: 'Test Survey' });
-    const el = loadSurveyComponent(script.id);
+    const el = loadSurveyComponent();
 
     await vi.waitFor(() => expect(renderSpy).toHaveBeenCalled());
   });
 
   it('reads data-* attributes', async () => {
-    const el = loadSurveyComponent(undefined, {
+    const el = loadSurveyComponent({
       'data-submit-url': '/submit-url',
       'data-complete-url': '/done',
       'data-csrf-token': 'tok-123',
@@ -147,7 +158,7 @@ describe('SurveyForm custom element internals', () => {
 
   it('calls fetch with the correct data on submit', async () => {
     const script = loadSchemaScript({ title: 'Test' });
-    const survey = loadSurveyComponent(script.id, {
+    const survey = loadSurveyComponent({
       'data-submit-url': '/submit-url',
       'data-complete-url': '/done',
       'data-csrf-token': 'tok-123',
@@ -192,7 +203,7 @@ describe('SurveyForm custom element internals', () => {
 
   it('does not re-submit a form that is already completed', async () => {
     const script = loadSchemaScript({ title: 'Test' });
-    const survey = loadSurveyComponent(script.id, {
+    const survey = loadSurveyComponent({
       'data-submit-url': '/submit-url',
       'data-complete-url': '/done',
       'data-csrf-token': 'tok-123',
@@ -229,7 +240,7 @@ describe('SurveyForm custom element internals', () => {
 
   it('does not run draft save while submit is in progress', async () => {
     const script = loadSchemaScript({ title: 'Test' });
-    const survey = loadSurveyComponent(script.id, {
+    const survey = loadSurveyComponent({
       'data-submit-url': '/submit-url',
       'data-save-draft-url': '/save-draft',
       'data-csrf-token': 'tok-123',
@@ -381,11 +392,11 @@ describe('Survey form renders', () => {
   it('renders', async () => {
     const user = userEvent.setup();
 
-    const script = loadSchemaScript({
+    loadSchemaScript({
       title: 'Test Survey',
       elements: [{ name: 'Name', type: 'text' }],
     });
-    loadSurveyComponent(script.id);
+    loadSurveyComponent();
 
     await vi.waitFor(() => getByText(document.body, 'Test Survey'));
     const input = getByLabelText(document.body, 'Name');
@@ -397,11 +408,11 @@ describe('Survey form renders', () => {
   it('renders in read only mode', async () => {
     const user = userEvent.setup();
 
-    const script = loadSchemaScript({
+    loadSchemaScript({
       title: 'Test Survey',
       elements: [{ name: 'Name', type: 'text' }],
     });
-    loadSurveyComponent(script.id, { readonly: '' });
+    loadSurveyComponent({ readonly: '' });
 
     await vi.waitFor(() => getByText(document.body, 'Test Survey'));
 
@@ -410,5 +421,37 @@ describe('Survey form renders', () => {
     expect(input).toHaveAttribute('readonly');
     await user.type(input, 'test');
     expect(input).toHaveValue('');
+  });
+
+  it('renders with initial data', async () => {
+    loadSchemaScript({
+      title: 'Test Survey',
+      elements: [{ name: 'name', title: 'Name', type: 'text' }],
+    });
+    loadInitialDataScript({ name: 'Tad Cooper' });
+    loadSurveyComponent();
+
+    await vi.waitFor(() => getByText(document.body, 'Test Survey'));
+
+    const input = getByLabelText(document.body, 'Name');
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveValue('Tad Cooper');
+  });
+
+  it('errors on malformed data', async () => {
+    loadSchemaScript({
+      title: 'Test Survey',
+      elements: [{ name: 'name', title: 'Name', type: 'text' }],
+    });
+    const dataEl = loadInitialDataScript({});
+    // Override initial data to invalid JSON
+    dataEl.innerText = 'invalid_JSON';
+    loadSurveyComponent();
+
+    await vi.waitFor(() => getByText(document.body, 'Test Survey'));
+
+    await vi.waitFor(() =>
+      getByText(document.body, 'Failed to load initial data: data invalid.'),
+    );
   });
 });
