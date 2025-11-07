@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from django.contrib.contenttypes.models import ContentType
 from django.test import Client
+from django.test.utils import override_settings
 from django.urls import reverse
 
 from sandwich.core.factories.patient import PatientFactory
@@ -46,6 +47,7 @@ def test_no_stale_exclusions():
     assert EXCLUDED_URL_NAMES.issubset({url.name for url in get_provider_urls()})
 
 
+@override_settings(FEATURE_PROVIDER_FORM_BUILDER=True)
 @pytest.mark.parametrize("url", get_provider_urls(), ids=lambda url: url.name)
 def test_provider_http_get_urls_return_status_200(db, user, organization, url) -> None:
     if url.name in EXCLUDED_URL_NAMES:

@@ -5,10 +5,12 @@
 {% block content %}
   <div class="flex items-center justify-between mb-4">
     <h1>Form Templates</h1>
-    <button id="new-form-button" class="btn btn-primary">
-      {% lucide "plus" class="w-5 h-5" %}
-      New form
-    </button>
+    {% if form_builder_enabled %}
+      <button id="new-form-button" class="btn btn-primary">
+        {% lucide "plus" class="w-5 h-5" %}
+        New form
+      </button>
+    {% endif %}
   </div>
   <div id="form_table_container">{% include "provider/partials/form_list_table.html" %}</div>
   {% include "provider/partials/new_form_modal.html" %}
@@ -16,9 +18,12 @@
 {% block inline_javascript %}
   <script nonce="{{ request.csp_nonce }}">
     window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('new-form-button').addEventListener('click', function() {
-        document.getElementById('new-form-modal').showModal();
-      });
+      const newFormButton = document.getElementById('new-form-button');
+      if (newFormButton) {
+        newFormButton.addEventListener('click', function() {
+          document.getElementById('new-form-modal').showModal();
+        });
+      }
     });
   </script>
 {% endblock inline_javascript %}

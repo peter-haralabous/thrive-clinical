@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.test import Client
+from django.test.utils import override_settings
 from django.urls import reverse
 from guardian.shortcuts import remove_perm
 
@@ -93,6 +94,7 @@ def test_form_builder_deny_staff_access(client: Client, provider: User, organiza
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
+@override_settings(FEATURE_PROVIDER_FORM_BUILDER=True)
 def test_form_builder(client: Client, owner: User, organization: Organization) -> None:
     client.force_login(owner)
     url = reverse("providers:form_builder", kwargs={"organization_id": organization.id})

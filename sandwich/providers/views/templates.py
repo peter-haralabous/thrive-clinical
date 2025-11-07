@@ -1,7 +1,9 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.shortcuts import redirect
 from django.shortcuts import render
 from guardian.shortcuts import get_objects_for_user
 
@@ -33,7 +35,15 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
     paginator = Paginator(authorized_org_forms, 25)
     forms_page = paginator.get_page(page)
 
-    return render(request, "provider/form_list.html", {"organization": organization, "forms": forms_page})
+    return render(
+        request,
+        "provider/form_list.html",
+        {
+            "organization": organization,
+            "forms": forms_page,
+            "form_builder_enabled": settings.FEATURE_PROVIDER_FORM_BUILDER,
+        },
+    )
 
 
 @login_required
@@ -65,6 +75,13 @@ def form_details(request: AuthenticatedHttpRequest, organization: Organization, 
 @authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization", "create_form"])])
 def form_builder(request: AuthenticatedHttpRequest, organization: Organization):
     """Provider view to create a new form template manually."""
+    if not settings.FEATURE_PROVIDER_FORM_BUILDER:
+        logger.info(
+            "Form builder feature is disabled, redirecting to form list",
+            extra={"user_id": request.user.id, "organization_id": organization.id},
+        )
+        return redirect("providers:form_templates_list", organization_id=organization.id)
+
     logger.info(
         "Accessing organization form builder page",
         extra={"user_id": request.user.id, "organization_id": organization.id},
