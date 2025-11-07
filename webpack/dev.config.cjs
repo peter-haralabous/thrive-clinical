@@ -10,6 +10,9 @@ module.exports = merge(commonConfig, {
       {
         context: ['/'],
         target: 'http://0.0.0.0:8000',
+        onProxyReq: (proxyReq, req, res) => {
+          res.on('close', () => proxyReq.destroy());
+        },
       },
     ],
     client: {
