@@ -29,7 +29,9 @@ logger = logging.getLogger(__name__)
 def patient_details(request: AuthenticatedHttpRequest, patient: Patient) -> HttpResponse:
     if settings.FEATURE_PATIENT_CHATTY_APP:
         template = "patient/chatty/app.html"
-        records_count = patient.immunization_set.count() + patient.practitioner_set.count()
+        records_count = (
+            patient.immunization_set.count() + patient.practitioner_set.count() + patient.condition_set.count()
+        )
         repository_count = patient.document_set.count()
         context = {
             "records_count": records_count,

@@ -1,5 +1,6 @@
 import pghistory
 from django.db import models
+from django.urls import reverse
 
 from sandwich.core.models.health_record import HealthRecord
 
@@ -26,3 +27,9 @@ class Immunization(HealthRecord):
     # vaccine_code = models.CharField(max_length=255, blank=True)
     # # this is Immunization.protocolApplied.targetDisease in FHIR
     # target_disease = models.CharField(max_length=255, blank=True)
+
+    def get_absolute_url(self):
+        return reverse("patients:immunization", kwargs={"immunization_id": self.id})
+
+    def __str__(self):
+        return f"{self.name} ({self.date})"

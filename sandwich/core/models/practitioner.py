@@ -1,5 +1,6 @@
 import pghistory
 from django.db import models
+from django.urls import reverse
 
 from sandwich.core.models.health_record import HealthRecord
 
@@ -30,3 +31,9 @@ class Practitioner(HealthRecord):
     """
 
     name = models.CharField(max_length=255)
+
+    def get_absolute_url(self):
+        return reverse("patients:practitioner", kwargs={"practitioner_id": self.id})
+
+    def __str__(self) -> str:
+        return self.name

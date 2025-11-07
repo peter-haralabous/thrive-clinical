@@ -8,6 +8,7 @@ from django.urls import reverse
 from sandwich.core.factories.fact import FactFactory
 from sandwich.core.factories.form import FormFactory
 from sandwich.core.factories.task import TaskFactory
+from sandwich.core.models import Condition
 from sandwich.core.models import Document
 from sandwich.core.models import Entity
 from sandwich.core.models import Immunization
@@ -64,6 +65,9 @@ def test_patient_http_get_urls_return_status_200(db, user, url, patient) -> None
 
     if ":patient_id>" in url.pattern:
         kwargs["patient_id"] = patient.pk
+
+    if ":condition_id>" in url.pattern:
+        kwargs["condition_id"] = Condition.objects.create(patient=patient).pk
 
     if ":document_id>" in url.pattern:
         kwargs["document_id"] = Document.objects.create(

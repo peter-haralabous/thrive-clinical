@@ -4,9 +4,11 @@ from django.test import Client
 from django.urls import reverse
 
 from sandwich.core.factories.patient import PatientFactory
+from sandwich.core.models import Condition
 from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
+from sandwich.core.models.condition import ConditionStatus
 from sandwich.patients.views.patient.health_records import HistoryEvent
 from sandwich.patients.views.patient.health_records import _history_events
 from sandwich.users.models import User
@@ -90,6 +92,29 @@ def test_add_update_and_remove_practitioner(client: Client, user: User, patient:
     response = client.delete(reverse("patients:practitioner", kwargs={"practitioner_id": practitioner.pk}))
     assert response.status_code == 302  # redirects back to list view
     assert not Practitioner.objects.filter(patient=patient).exists()
+
+
+def test_add_condition(client: Client, user: User, patient: Patient):
+    client.force_login(user)
+
+    # get the "add" form
+    response = client.get(
+        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "condition"})
+    )
+    assert response.status_code == 200
+
+    # submit the "add" form
+    response = client.post(
+        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "condition"}),
+        data={
+            "name": "Cancer",
+            "status": "remission",
+        },
+    )
+    assert response.status_code == 302  # redirects back to list view
+    condition = Condition.objects.get(patient=patient)
+    assert condition.name == "Cancer"
+    assert condition.status == ConditionStatus.REMISSION
 
 
 def test_one_history_entry(user: User, patient: Patient):

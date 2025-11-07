@@ -16,6 +16,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
+from sandwich.core.models import Condition
 from sandwich.core.models import Document
 from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
@@ -41,6 +42,13 @@ class NavItem:
     count: int | None = None
 
 
+RECORD_TYPES = {
+    "condition": (Condition, "heart"),
+    "immunization": (Immunization, "syringe"),
+    "practitioner": (Practitioner, "contact"),
+}
+
+
 @login_required
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient"])])
 def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_type: str | None = None):
@@ -50,45 +58,41 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
         items = [
             NavItem(
                 link=reverse(
-                    "patients:patient_records", kwargs={"patient_id": patient.id, "record_type": "immunization"}
+                    "patients:patient_records",
+                    kwargs={"patient_id": patient.id, "record_type": model._meta.model_name},  # noqa: SLF001
                 ),
-                label="Immunizations",
-                icon="syringe",
-                count=patient.immunization_set.count(),
-            ),
+                label=str(model._meta.verbose_name_plural).capitalize(),  # noqa: SLF001
+                icon=icon,
+                # TODO: load counts for all record types in a single query
+                count=model.objects.filter(patient=patient).count(),  # type: ignore[attr-defined]
+            )
+            for model, icon in RECORD_TYPES.values()
+        ]
+    elif record_type not in RECORD_TYPES:
+        raise Http404(f"Unknown record type: {record_type}")
+    else:
+        model, icon = RECORD_TYPES[record_type]
+        left_panel_title = str(model._meta.verbose_name_plural).capitalize()  # noqa: SLF001
+        left_panel_back_link = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
+        items = [
+            NavItem(
+                link=record.get_absolute_url(),
+                label=str(record),
+                icon=icon,
+            )
+            # FIXME: need to page this list
+            for record in model.objects.filter(patient=patient).all()  # type: ignore[attr-defined]
+        ]
+        items.insert(
+            0,
             NavItem(
                 link=reverse(
-                    "patients:patient_records", kwargs={"patient_id": patient.id, "record_type": "practitioner"}
+                    "patients:health_records_add", kwargs={"patient_id": patient.id, "record_type": record_type}
                 ),
-                label="Practitioners",
-                icon="contact",
-                count=patient.practitioner_set.count(),
+                label="Add New",
+                icon="plus",
             ),
-        ]
-    else:
-        left_panel_back_link = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
-        if record_type == "immunization":
-            left_panel_title = "Immunizations"
-            items = [
-                NavItem(
-                    link=reverse("patients:immunization", kwargs={"immunization_id": i.id}),
-                    label=f"{i.name} ({i.date.strftime('%Y-%m-%d')})",
-                    icon="file",
-                )
-                for i in patient.immunization_set.all()
-            ]
-        elif record_type == "practitioner":
-            left_panel_title = "Practitioners"
-            items = [
-                NavItem(
-                    link=reverse("patients:practitioner", kwargs={"practitioner_id": p.id}),
-                    label=f"{p.name})",
-                    icon="file",
-                )
-                for p in patient.practitioner_set.all()
-            ]
-        else:
-            raise Http404(f"Unknown record type: {record_type}")
+        )
 
     context = {
         "left_panel_title": left_panel_title,
@@ -119,10 +123,9 @@ def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, cate
         left_panel_title = str(category.label)
         left_panel_back_link = reverse("patients:patient_repository", kwargs={"patient_id": patient.id})
         items = [
-            NavItem(
-                link=reverse("patients:document", kwargs={"document_id": d.id}), label=d.original_filename, icon="file"
-            )
-            for d in patient.document_set.filter(category=category)
+            NavItem(link=record.get_absolute_url(), label=str(record), icon="file")
+            # FIXME: need to page this list
+            for record in patient.document_set.filter(category=category)
         ]
 
     context = {
@@ -153,6 +156,23 @@ class HealthRecordForm[M: HealthRecord](forms.ModelForm[M]):
         return instance
 
 
+class ConditionForm(HealthRecordForm[Condition]):
+    class Meta:
+        model = Condition
+        fields = ("name", "status", "onset", "abatement")
+
+
+class DocumentForm(HealthRecordForm[Document]):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        for field in ("original_filename", "content_type", "size"):
+            self.fields[field].disabled = True
+
+    class Meta:
+        model = Document
+        fields = ("original_filename", "content_type", "size", "date", "category")
+
+
 class ImmunizationForm(HealthRecordForm[Immunization]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -169,24 +189,15 @@ class PractitionerForm(HealthRecordForm[Practitioner]):
         fields = ("name",)
 
 
-class DocumentForm(HealthRecordForm[Document]):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        for field in ("original_filename", "content_type", "size"):
-            self.fields[field].disabled = True
-
-    class Meta:
-        model = Document
-        fields = ("original_filename", "content_type", "size", "date", "category")
-
-
 def _form_class(record_type: str):
+    if record_type == "condition":
+        return ConditionForm
+    if record_type == "document":
+        return DocumentForm
     if record_type == "immunization":
         return ImmunizationForm
     if record_type == "practitioner":
         return PractitionerForm
-    if record_type == "document":
-        return DocumentForm
     raise Http404(f"Unknown form class: {record_type}")
 
 
@@ -304,6 +315,18 @@ def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, inst
 
 
 @login_required
+def condition_edit(request: AuthenticatedHttpRequest, condition_id: UUID):
+    instance = get_object_or_404(Condition, id=condition_id)
+    return _generic_edit_view("condition", request, instance)
+
+
+@login_required
+def document_edit(request: AuthenticatedHttpRequest, document_id: UUID):
+    instance = get_object_or_404(Document, id=document_id)
+    return _generic_edit_view("document", request, instance)
+
+
+@login_required
 def immunization_edit(request: AuthenticatedHttpRequest, immunization_id: UUID):
     instance = get_object_or_404(Immunization, id=immunization_id)
     return _generic_edit_view("immunization", request, instance)
@@ -313,9 +336,3 @@ def immunization_edit(request: AuthenticatedHttpRequest, immunization_id: UUID):
 def practitioner_edit(request: AuthenticatedHttpRequest, practitioner_id: UUID):
     instance = get_object_or_404(Practitioner, id=practitioner_id)
     return _generic_edit_view("practitioner", request, instance)
-
-
-@login_required
-def document_edit(request: AuthenticatedHttpRequest, document_id: UUID):
-    instance = get_object_or_404(Document, id=document_id)
-    return _generic_edit_view("document", request, instance)

@@ -1,5 +1,6 @@
 import pghistory
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_enum import EnumField
 from private_storage.fields import PrivateFileField
@@ -57,3 +58,9 @@ class Document(HealthRecord):
     )
 
     objects = DocumentManager()
+
+    def get_absolute_url(self):
+        return reverse("patients:document", kwargs={"document_id": self.id})
+
+    def __str__(self):
+        return self.original_filename

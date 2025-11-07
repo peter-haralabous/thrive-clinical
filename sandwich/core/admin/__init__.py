@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from sandwich.core.models import Condition
 from sandwich.core.models import Document
 from sandwich.core.models import Encounter
 from sandwich.core.models import FormioSubmission
@@ -20,5 +21,5 @@ from .predicate import PredicateAdmin as PredicateAdmin
 from .template import TemplateAdmin as TemplateAdmin
 
 admin.site.register(
-    [Document, Encounter, FormioSubmission, Immunization, Invitation, Practitioner, Task],
+    [Condition, Document, Encounter, FormioSubmission, Immunization, Invitation, Practitioner, Task],
 )

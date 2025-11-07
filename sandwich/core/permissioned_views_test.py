@@ -61,6 +61,7 @@ def test_all_views_permissioned() -> None:
         "providers/organization/add",
         "patients/invite/<str:token>/accept",
         # These views are permissioned but not using the decorator
+        "patients/condition/<uuid:condition_id>",
         "patients/document/<uuid:document_id>",
         "patients/document/<uuid:document_id>/download",
         "patients/immunization/<uuid:immunization_id>",

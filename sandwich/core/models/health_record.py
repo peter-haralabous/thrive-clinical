@@ -1,3 +1,5 @@
+from abc import abstractmethod
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -33,3 +35,6 @@ class HealthRecord(VersionMixin, BaseModel):
 
     class Meta:
         abstract = True
+
+    @abstractmethod
+    def get_absolute_url(self) -> str: ...
