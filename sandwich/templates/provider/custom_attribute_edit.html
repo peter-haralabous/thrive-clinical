@@ -7,7 +7,7 @@
     <h1>Custom Fields</h1>
   </div>
   <form method="post" id="custom-attribute-form">
-    {% csrf_token %} {% crispy form %}
+    {% crispy form %}
     <div id="enum-fields-container">
       {% if show_enum_fields %}
         {% include
