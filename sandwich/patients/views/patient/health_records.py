@@ -2,6 +2,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
+from typing import cast
 from uuid import UUID
 
 from crispy_forms.helper import FormHelper
@@ -23,6 +24,8 @@ from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
 from sandwich.core.models.document import DocumentCategory
 from sandwich.core.models.health_record import HealthRecord
+from sandwich.core.service.health_record_service import get_document_count_by_category
+from sandwich.core.service.health_record_service import get_health_record_count_by_type
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -53,6 +56,7 @@ RECORD_TYPES = {
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient"])])
 def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_type: str | None = None):
     if record_type is None:
+        counts = get_health_record_count_by_type(patient)
         left_panel_title = "Records"
         left_panel_back_link = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
         items = [
@@ -63,8 +67,7 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
                 ),
                 label=str(model._meta.verbose_name_plural).capitalize(),  # noqa: SLF001
                 icon=icon,
-                # TODO: load counts for all record types in a single query
-                count=model.objects.filter(patient=patient).count(),  # type: ignore[attr-defined]
+                count=counts.get(cast("str", model._meta.model_name), 0),  # noqa: SLF001
             )
             for model, icon in RECORD_TYPES.values()
         ]
@@ -106,15 +109,15 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient"])])
 def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, category: str | None = None):
     if category is None:
+        counts = get_document_count_by_category(patient)
         left_panel_title = "Repository"
         left_panel_back_link = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
-        # TODO: make a single query for counts by category
         items = [
             NavItem(
                 link=reverse("patients:patient_repository", kwargs={"patient_id": patient.id, "category": value}),
                 label=str(label),
                 icon="folder",
-                count=patient.document_set.filter(category=value).count(),
+                count=counts.get(value, 0),
             )
             for (value, label) in DocumentCategory.choices
         ]

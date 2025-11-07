@@ -13,6 +13,7 @@ from django.utils.html import format_html
 
 from sandwich.core.models import Fact
 from sandwich.core.models import Patient
+from sandwich.core.service.health_record_service import get_total_health_record_count
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -29,9 +30,7 @@ logger = logging.getLogger(__name__)
 def patient_details(request: AuthenticatedHttpRequest, patient: Patient) -> HttpResponse:
     if settings.FEATURE_PATIENT_CHATTY_APP:
         template = "patient/chatty/app.html"
-        records_count = (
-            patient.immunization_set.count() + patient.practitioner_set.count() + patient.condition_set.count()
-        )
+        records_count = get_total_health_record_count(patient)
         repository_count = patient.document_set.count()
         context = {
             "records_count": records_count,
