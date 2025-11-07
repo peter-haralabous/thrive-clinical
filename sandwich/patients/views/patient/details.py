@@ -36,6 +36,7 @@ def patient_details(request: AuthenticatedHttpRequest, patient: Patient) -> Http
             "records_count": records_count,
             "repository_count": repository_count,
         } | _chat_context(request, patient=patient)
+
     else:
         template = "patient/patient_details.html"
         # TODO-NG: page & sort these lists

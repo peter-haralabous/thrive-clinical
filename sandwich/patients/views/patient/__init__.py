@@ -16,7 +16,7 @@ def _patient_context(request: AuthenticatedHttpRequest, patient: Patient | None 
 
 def _chat_context(request: AuthenticatedHttpRequest, patient: Patient) -> dict[str, Any]:
     """Fetch additional template context required for chat context"""
+    chat_thread = f"{request.user.pk}-{patient.pk}"
     return _patient_context(request, patient=patient) | {
-        "chat_form": ChatForm(user=request.user),
-        # TODO: feed items
+        "chat_form": ChatForm(user=request.user, initial={"patient": patient, "thread": chat_thread}),
     }
