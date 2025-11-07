@@ -211,6 +211,15 @@
           block: 'start'
         })
 
+        // attach any event listeners for assistant buttons
+        const assistantButtons = chatMessages.querySelectorAll('.assistant-button');
+        assistantButtons.forEach(button => {
+          if (button.dataset.action === "prompt") {
+            button.addEventListener('click', () => {
+              chatInputSet(button.dataset.value);
+            });
+          }
+        });
       });
 
       function addAssistantSkeleton() {
