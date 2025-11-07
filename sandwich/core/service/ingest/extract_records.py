@@ -6,14 +6,23 @@ import pghistory
 import pydantic
 from langchain_core.messages import SystemMessage
 
+from sandwich.core.models import Condition
 from sandwich.core.models import Document
 from sandwich.core.models import Immunization
 from sandwich.core.models import Practitioner
+from sandwich.core.models.condition import ConditionStatus
 from sandwich.core.models.document import DocumentCategory
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_claude_sonnet_4_5
 
 logger = logging.getLogger(__name__)
+
+
+class ConditionRecord(pydantic.BaseModel):
+    name: str
+    status: ConditionStatus | None
+    onset: datetime.date | None
+    abatement: datetime.date | None
 
 
 class ImmunizationRecord(pydantic.BaseModel):
@@ -32,11 +41,12 @@ class RecordsResponse(pydantic.BaseModel):
     document_date: datetime.date | None
     """The primary date of the document (e.g., visit date, report date, or when the document was generated)."""
 
+    conditions: list[ConditionRecord]
     immunizations: list[ImmunizationRecord]
     practitioners: list[PractitionerRecord]
 
     def __len__(self):
-        return len(self.immunizations) + len(self.practitioners)
+        return len(self.immunizations) + len(self.practitioners) + len(self.conditions)
 
     def update_document(self, document: Document) -> bool:
         changed = False
@@ -109,6 +119,19 @@ def _extract_records(document: Document) -> RecordsResponse:
 
 def _save_records(document: Document, records: RecordsResponse) -> None:
     with pghistory.context(llm=ModelName.CLAUDE_SONNET_4_5, document=document.id):
+        for condition_data in records.conditions:
+            # TODO: update onset/abatement dates if the record already exists
+            Condition.objects.get_or_create(
+                patient=document.patient,
+                name=condition_data.name,
+                defaults={
+                    "status": condition_data.status,
+                    "onset": condition_data.onset,
+                    "abatement": condition_data.abatement,
+                    "unattested": True,
+                },
+            )
+
         for immunization_data in records.immunizations:
             Immunization.objects.get_or_create(
                 patient=document.patient,

@@ -11,31 +11,38 @@ interactions:
         {"anyOf": [{"enum": ["lab_results", "health_visits", "hospital_visits", "immunizations",
         "prescriptions", "my_notes", "family_history", "other"], "title": "DocumentCategory",
         "type": "string"}, {"type": "null"}]}, "document_date": {"anyOf": [{"format":
-        "date", "type": "string"}, {"type": "null"}]}, "immunizations": {"items": {"properties":
-        {"name": {"type": "string"}, "date": {"format": "date", "type": "string"}},
-        "required": ["name", "date"], "type": "object"}, "type": "array"}, "practitioners":
-        {"items": {"properties": {"name": {"type": "string"}}, "required": ["name"],
-        "type": "object"}, "type": "array"}}, "required": ["document_category", "document_date",
+        "date", "type": "string"}, {"type": "null"}]}, "conditions": {"items": {"properties":
+        {"name": {"type": "string"}, "status": {"anyOf": [{"description": "https://hl7.org/fhir/R5/valueset-condition-clinical.html",
+        "enum": ["active", "recurrence", "relapse", "inactive", "remission", "resolved",
+        "unknown"], "title": "ConditionStatus", "type": "string"}, {"type": "null"}]},
+        "onset": {"anyOf": [{"format": "date", "type": "string"}, {"type": "null"}]},
+        "abatement": {"anyOf": [{"format": "date", "type": "string"}, {"type": "null"}]}},
+        "required": ["name", "status", "onset", "abatement"], "type": "object"}, "type":
+        "array"}, "immunizations": {"items": {"properties": {"name": {"type": "string"},
+        "date": {"format": "date", "type": "string"}}, "required": ["name", "date"],
+        "type": "object"}, "type": "array"}, "practitioners": {"items": {"properties":
+        {"name": {"type": "string"}}, "required": ["name"], "type": "object"}, "type":
+        "array"}}, "required": ["document_category", "document_date", "conditions",
         "immunizations", "practitioners"], "type": "object"}}}}], "toolChoice": {"tool":
         {"name": "RecordsResponse"}}}}'
       headers:
         Content-Length:
-          - '118192'
+          - '118783'
         Content-Type:
           - !!binary |
             YXBwbGljYXRpb24vanNvbg==
         User-Agent:
           - !!binary |
             Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjIgbWQvcHlpbXBsI0NQeXRob24gbS9ELFos
-            YiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
+            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjIgbWQvcHlpbXBsI0NQeXRob24gbS9iLEQs
+            WiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
             cms6bGFuZ2NoYWluLWF3cw==
         X-Amz-Date:
           - !!binary |
-            MjAyNTExMDZUMTYxMTE5Wg==
+            MjAyNTExMDdUMjE0NzEwWg==
         amz-sdk-invocation-id:
           - !!binary |
-            YjI1MGRmOTItNGVhZi00MWNmLWJlMzYtMmRmOTJkZDk5NDI0
+            Yjc3N2NmYjItYWQxOS00NDdmLTg1ZDktZjY3OGU0YzRkZmMw
         amz-sdk-request:
           - !!binary |
             YXR0ZW1wdD0x
@@ -44,20 +51,21 @@ interactions:
     response:
       body:
         string:
-          '{"metrics":{"latencyMs":3457},"output":{"message":{"content":[{"toolUse":{"input":{"document_category":"health_visits","document_date":"2025-09-16","immunizations":[{"name":"Tetanus
+          '{"metrics":{"latencyMs":4584},"output":{"message":{"content":[{"toolUse":{"input":{"document_category":"health_visits","document_date":"2025-09-12","conditions":[{"name":"Hypertension","status":"active","onset":"2019-01-01","abatement":null},{"name":"Gastroesophageal
+          Reflux Disease (GERD)","status":"active","onset":"2021-01-01","abatement":null}],"immunizations":[{"name":"Tetanus
           (Tdap)","date":"2022-01-01"},{"name":"Influenza","date":"2024-10-01"}],"practitioners":[{"name":"Dr.
-          Susan Albright"}]},"name":"RecordsResponse","toolUseId":"tooluse_gZYPemGFRRejUouJQ5Cysw","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":2042,"outputTokens":159,"serverToolUsage":{},"totalTokens":2201}}'
+          Susan Albright"}]},"name":"RecordsResponse","toolUseId":"tooluse_G1zR87WrTVmjUJyqHx7Lhw","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":2242,"outputTokens":303,"serverToolUsage":{},"totalTokens":2545}}'
       headers:
         Connection:
           - keep-alive
         Content-Length:
-          - '636'
+          - '837'
         Content-Type:
           - application/json
         Date:
-          - Thu, 06 Nov 2025 16:11:23 GMT
+          - Fri, 07 Nov 2025 21:47:16 GMT
         x-amzn-RequestId:
-          - b7444a94-cbb1-42b6-82ee-80844e83dcf3
+          - 897c9186-d000-419a-aa0e-6346da03978e
       status:
         code: 200
         message: OK

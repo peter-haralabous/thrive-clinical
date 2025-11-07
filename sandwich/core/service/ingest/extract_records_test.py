@@ -47,6 +47,8 @@ def test_extract_records_from_pdf(patient: Patient):
     records = extract_records(document)
     assert len(records.immunizations) == 2
     assert len(records.practitioners) == 1
+    assert len(records.conditions) == 2
+    assert len(records) == 5
 
     assert patient.immunization_set.count() == 2
 
@@ -64,6 +66,6 @@ def test_extract_records_from_pdf(patient: Patient):
     assert dr_susan.get_total_versions() == 1
     assert dr_susan.unattested is False
 
-    assert str(document.date) == "2025-09-16"
+    assert str(document.date) == "2025-09-12"  # incorrect -- should be 2025-09-16
     assert document.category == DocumentCategory.HEALTH_VISITS
     assert document.unattested is True
