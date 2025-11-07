@@ -13,6 +13,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
+from slugify import slugify
 
 from sandwich.core.models.custom_attribute import CustomAttribute
 from sandwich.core.models.custom_attribute import CustomAttributeEnum
@@ -127,15 +128,16 @@ class CustomAttributeEnumForm(forms.ModelForm[CustomAttributeEnum]):
         self.fields["value"].required = False
         self.fields["color_code"].required = False
 
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     label = cleaned_data.get("label")
+    def clean(self):
+        cleaned_data = super().clean()
+        if cleaned_data is not None:
+            label = cleaned_data.get("label")
 
-    #     # Auto-generate value from label if not provided
-    #     if label and not cleaned_data.get("value"):
-    #         cleaned_data["value"] = slugify(label)
+            # Auto-generate value from label if not provided
+            if label is not None and not cleaned_data.get("value"):
+                cleaned_data["value"] = slugify(label)
 
-    #     return cleaned_data
+        return cleaned_data
 
 
 CustomAttributeEnumFormSet = forms.inlineformset_factory(
