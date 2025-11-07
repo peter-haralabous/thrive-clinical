@@ -32,6 +32,14 @@ class CommandPalette extends LitElement {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
       overflow: hidden;
     }
+    .palette-title {
+      padding: 12px 16px;
+      font-size: 0.9em;
+      font-weight: 600;
+      color: #666;
+      background: #f8f9fa;
+      border-bottom: 1px solid #eee;
+    }
     .palette-input {
       width: 100%;
       padding: 16px;
@@ -66,11 +74,46 @@ class CommandPalette extends LitElement {
       background-color: #007bff;
       color: white;
     }
+    /* Additional styles for rich content */
+    li a > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    li a .result-content {
+      flex: 1;
+    }
+    li a .result-title {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    li a .result-subtitle {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 2px;
+    }
+    li a .result-icon {
+      width: 16px;
+      height: 16px;
+      color: #999;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+    li a.selected .result-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+    }
+    li a.selected .result-icon {
+      color: rgba(255, 255, 255, 0.7);
+    }
   `;
 
   // --- REACTIVE PROPERTIES ---
   // Use decorators to declare properties. When these change, the component re-renders.
   @property({ type: String, attribute: 'search-url' }) accessor searchUrl = '';
+  @property({ type: String, attribute: 'context' }) accessor context = '';
+  @property({ type: String, attribute: 'title' }) accessor title = '';
+  @property({ type: String, attribute: 'placeholder' })
+  accessor placeholder = 'Type a command or search...';
   @state() accessor isOpen = false;
   @state() accessor selectedIndex = -1;
   @state() accessor resultsHTML = '';
@@ -81,10 +124,20 @@ class CommandPalette extends LitElement {
 
   // --- PRIVATE FIELDS ---
   debounceTimer: number | undefined;
+  // Store default values to reset to
+  private _defaultSearchUrl = '';
+  private _defaultContext = '';
+  private _defaultTitle = '';
+  private _defaultPlaceholder = 'Type a command or search...';
 
   // --- LIFECYCLE & EVENT LISTENERS ---
   connectedCallback() {
     super.connectedCallback();
+    // Save initial values
+    this._defaultSearchUrl = this.searchUrl;
+    this._defaultContext = this.context;
+    this._defaultTitle = this.title;
+    this._defaultPlaceholder = this.placeholder;
     document.addEventListener('keydown', this._handleGlobalKeydown);
   }
 
@@ -100,6 +153,13 @@ class CommandPalette extends LitElement {
       this._searchInput.focus();
       this._performSearch(); // Perform initial search
     }
+    // If the palette was just closed, reset to default context
+    if (changedProperties.has('isOpen') && !this.isOpen) {
+      this.searchUrl = this._defaultSearchUrl;
+      this.context = this._defaultContext;
+      this.title = this._defaultTitle;
+      this.placeholder = this._defaultPlaceholder;
+    }
     if (
       changedProperties.has('resultsHTML') ||
       changedProperties.has('selectedIndex')
@@ -110,9 +170,13 @@ class CommandPalette extends LitElement {
 
   // --- METHODS ---
   async _performSearch(query = '') {
-    const url = `${this.searchUrl}?q=${encodeURIComponent(query)}`;
+    const url = new URL(this.searchUrl, window.location.origin);
+    url.searchParams.set('q', query);
+    if (this.context) {
+      url.searchParams.set('context', this.context);
+    }
     try {
-      const response = await fetch(url);
+      const response = await fetch(url.toString());
       this.resultsHTML = await response.text();
       this.selectedIndex = 0;
     } catch (error) {
@@ -157,12 +221,64 @@ class CommandPalette extends LitElement {
         e.preventDefault();
         const selectedLink = results[this.selectedIndex]?.querySelector('a');
         if (selectedLink) {
-          window.location.href = selectedLink.href;
-          this.isOpen = false;
+          this._handleLinkClick(selectedLink as HTMLAnchorElement);
         }
         break;
     }
   }
+
+  _handleLinkClick(link: HTMLAnchorElement) {
+    // Check if this link has HTMX attributes
+    const hxGet = link.getAttribute('hx-get');
+    const hxTarget = link.getAttribute('hx-target');
+    const hxSwap = link.getAttribute('hx-swap');
+
+    if (hxGet && hxTarget) {
+      // Handle HTMX request manually
+      const targetEl = document.querySelector(hxTarget);
+      if (targetEl) {
+        fetch(hxGet)
+          .then((response) => response.text())
+          .then((html) => {
+            // Safe: HTML comes from our Django backend, which escapes all output by default.
+            // The hxGet URL is controlled by our templates, not user input.
+            if (hxSwap === 'innerHTML') {
+              targetEl.innerHTML = html;
+            } else {
+              targetEl.outerHTML = html;
+            }
+
+            const modal = targetEl.querySelector('dialog');
+            if (modal && typeof modal.showModal === 'function') {
+              modal.showModal();
+            }
+
+            document.body.dispatchEvent(
+              new CustomEvent('htmx:afterSwap', {
+                detail: { target: targetEl },
+              }),
+            );
+          })
+          .catch((error) => {
+            console.error('Error loading content:', error);
+          });
+      }
+      this.isOpen = false;
+    } else {
+      // Regular navigation
+      window.location.href = link.getAttribute('href') || '#';
+      this.isOpen = false;
+    }
+  }
+
+  _onResultClick = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    const link = target.closest('a') as HTMLAnchorElement;
+    if (link) {
+      e.preventDefault();
+      this._handleLinkClick(link);
+    }
+  };
 
   // This is the only manual DOM manipulation we need, as the items are raw HTML
   _updateSelectedClass() {
@@ -185,15 +301,18 @@ class CommandPalette extends LitElement {
         }}
       >
         <div class="palette">
+          ${this.title
+            ? html`<div class="palette-title">${this.title}</div>`
+            : ''}
           <input
             class="palette-input"
             type="text"
-            placeholder="Type a command or search..."
+            placeholder="${this.placeholder}"
             @input=${this._onInput}
             @keydown=${this._onKeydown}
           />
           <div class="palette-results">
-            <ul>
+            <ul @click=${this._onResultClick}>
               ${unsafeHTML(this.resultsHTML)}
             </ul>
           </div>

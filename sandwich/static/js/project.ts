@@ -1,7 +1,6 @@
 import '../css/project.css';
 import './components/command-palette';
 import './components/message-alert';
-import './modules/encounter-create';
 import './components/sortable-columns';
 import { initializeDatadog } from './lib/datadog';
 

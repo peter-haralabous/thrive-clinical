@@ -7,6 +7,7 @@
   {% if organization %}
     <command-palette search-url="{% url 'providers:search' organization_id=organization.id %}">
   </command-palette>
+  <div id="modal-container"></div>
 {% endif %}
 {% endblock modal %}
 {% block title %}

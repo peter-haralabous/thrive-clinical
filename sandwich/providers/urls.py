@@ -6,6 +6,7 @@ from .views.custom_attribute import custom_attribute_edit
 from .views.custom_attribute import custom_attribute_list
 from .views.encounter import encounter_create
 from .views.encounter import encounter_create_search
+from .views.encounter import encounter_create_select_patient
 from .views.encounter import encounter_details
 from .views.encounter import encounter_list
 from .views.home import home
@@ -63,6 +64,11 @@ urlpatterns = [
         "organization/<uuid:organization_id>/encounter/create/search",
         encounter_create_search,
         name="encounter_create_search",
+    ),
+    path(
+        "organization/<uuid:organization_id>/encounter/create/select-patient/<uuid:patient_id>",
+        encounter_create_select_patient,
+        name="encounter_create_select_patient",
     ),
     path("organization/<uuid:organization_id>/encounter/create", encounter_create, name="encounter_create"),
     path("organization/<uuid:organization_id>/encounter/<uuid:encounter_id>", encounter_details, name="encounter"),

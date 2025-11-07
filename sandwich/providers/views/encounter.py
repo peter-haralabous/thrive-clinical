@@ -11,7 +11,6 @@ from django.db.models import Exists
 from django.db.models import OuterRef
 from django.http import HttpResponse
 from django.http.response import HttpResponseRedirect
-from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
 from guardian.shortcuts import get_objects_for_user
@@ -197,61 +196,80 @@ def encounter_list(request: AuthenticatedHttpRequest, organization: Organization
 
 
 @login_required
+@authorize_objects(
+    [
+        ObjPerm(Organization, "organization_id", ["view_organization", "create_encounter"]),
+        ObjPerm(Patient, "patient_id", ["view_patient"]),
+    ]
+)
+def encounter_create_select_patient(
+    request: AuthenticatedHttpRequest, organization: Organization, patient: Patient
+) -> HttpResponse:
+    """HTMX endpoint for selecting a patient during encounter creation.
+
+    Returns a modal dialog with patient information and encounter creation form.
+    """
+    form = EncounterCreateForm(organization, initial={"patient": patient})
+    # Set the form action to the encounter_create URL
+    form.helper.form_action = reverse(
+        "providers:encounter_create",
+        kwargs={"organization_id": organization.id},
+    )
+    context = {
+        "organization": organization,
+        "patient": patient,
+        "form": form,
+    }
+    return render(request, "provider/partials/selected_patient_display.html", context)
+
+
+@login_required
 @authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization", "create_encounter"])])
 def encounter_create(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
-    """View for creating a new encounter."""
-    if request.method == "POST":
-        form = EncounterCreateForm(organization, request.POST)
-        if form.is_valid():
-            encounter = form.save()
-            # Assign default permissions to the new encounter
-            # form.save() does not call the create method of the
-            # underlying model so we need to explictly call
-            # assign_default_encounter_perms
-            assign_default_encounter_perms(encounter)
-            logger.info(
-                "Encounter created successfully",
-                extra={
-                    "user_id": request.user.id,
-                    "organization_id": organization.id,
-                    "patient_id": encounter.patient.id,
-                    "encounter_id": encounter.id,
-                },
-            )
-            messages.add_message(request, messages.SUCCESS, "Encounter created successfully.")
-            return HttpResponseRedirect(
-                reverse(
-                    "providers:encounter",
-                    kwargs={
-                        "encounter_id": encounter.id,
-                        "organization_id": organization.id,
-                    },
-                )
-            )
-        logger.warning(
-            "Invalid encounter creation form",
+    """Handle POST requests for creating a new encounter from the modal form."""
+    if request.method != "POST":
+        # This view only handles POST requests now. Redirect to encounter list.
+        return HttpResponseRedirect(reverse("providers:encounter_list", kwargs={"organization_id": organization.id}))
+
+    form = EncounterCreateForm(organization, request.POST)
+    if form.is_valid():
+        encounter = form.save()
+        # Assign default permissions to the new encounter
+        # form.save() does not call the create method of the
+        # underlying model so we need to explictly call
+        # assign_default_encounter_perms
+        assign_default_encounter_perms(encounter)
+        logger.info(
+            "Encounter created successfully",
             extra={
                 "user_id": request.user.id,
                 "organization_id": organization.id,
-                "form_errors": list(form.errors.keys()),
+                "patient_id": encounter.patient.id,
+                "encounter_id": encounter.id,
             },
         )
-    else:
-        # Preselect patient if patient_id is provided in query string
-        initial = {}
-        patient = None
-        if patient_id := request.GET.get("patient_id"):
-            patient = get_object_or_404(organization.patient_set, id=patient_id)
-            initial["patient"] = patient
-        form = EncounterCreateForm(organization, initial=initial)
-
-    context = {
-        "organization": organization,
-        "form": form,
-        "patient": patient if patient_id else None,
-    }
-
-    return render(request, "provider/encounter_create.html", context)
+        messages.add_message(request, messages.SUCCESS, "Encounter created successfully.")
+        return HttpResponseRedirect(
+            reverse(
+                "providers:encounter",
+                kwargs={
+                    "encounter_id": encounter.id,
+                    "organization_id": organization.id,
+                },
+            )
+        )
+    logger.warning(
+        "Invalid encounter creation form",
+        extra={
+            "user_id": request.user.id,
+            "organization_id": organization.id,
+            "form_errors": list(form.errors.keys()),
+        },
+    )
+    # If form is invalid, redirect back to encounter list
+    # (In practice, this shouldn't happen as the form is pre-validated in the modal)
+    messages.add_message(request, messages.ERROR, "Failed to create encounter. Please try again.")
+    return HttpResponseRedirect(reverse("providers:encounter_list", kwargs={"organization_id": organization.id}))
 
 
 # NOTE-WH: The following patient search is only searching for patients within
@@ -260,8 +278,13 @@ def encounter_create(request: AuthenticatedHttpRequest, organization: Organizati
 @login_required
 @authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization", "create_encounter"])])
 def encounter_create_search(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
-    """HTMX endpoint for searching patients when creating an encounter."""
+    """HTMX endpoint for searching patients when creating an encounter.
+
+    This view supports both traditional search results and command palette context.
+    When context=encounter_create is passed, results include HTMX attributes to open the modal.
+    """
     query = request.GET.get("q", "").strip()
+    context_param = request.GET.get("context", "").strip()
     page_size = int(request.GET.get("limit", "10"))
     page = request.GET.get("page", 1)
 
@@ -283,6 +306,7 @@ def encounter_create_search(request: AuthenticatedHttpRequest, organization: Org
             "organization_id": organization.id,
             "query_length": len(query),
             "total_results": paginator.count,
+            "context": context_param,
         },
     )
 
@@ -292,5 +316,6 @@ def encounter_create_search(request: AuthenticatedHttpRequest, organization: Org
         "patients": patients_page,
         "query": query,
         "organization": organization,
+        "context": context_param,
     }
     return render(request, "provider/partials/encounter_create_search_results.html", context)
