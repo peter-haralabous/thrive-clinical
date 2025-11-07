@@ -10,10 +10,10 @@ from django.template import Engine
 from django.template.base import Origin
 from django.template.loaders.base import Loader
 from django.utils import translation
-from markdown_it import MarkdownIt
 
 from sandwich.core.models import Organization
 from sandwich.core.models import Template
+from sandwich.core.service.markdown_service import markdown_to_html
 from sandwich.core.types import HtmlStr
 
 type ContextDict = dict[str, Any]
@@ -103,7 +103,7 @@ def render(  # noqa: PLR0913
         loaders=[(TemplateLoader, {"organization": organization, "language": language}), *loaders],
     )
     markdown_str = engine.render_to_string(template_name=template_name, context=context)
-    return MarkdownIt().render(markdown_str) if as_markdown else markdown_str
+    return markdown_to_html(markdown_str, preset="commonmark") if as_markdown else markdown_str
 
 
 def render_template(template: Template, **kwargs: Any) -> HtmlStr:
