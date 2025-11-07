@@ -36,6 +36,10 @@
         if (!input.name.includes("DELETE")) input.value = "";
       });
 
+      const oldCsrfInput = templateForm.querySelector("input[name='csrfmiddlewaretoken']")
+      const newCsrfInput = newForm.querySelector("input[name='csrfmiddlewaretoken']");
+      newCsrfInput.value = oldCsrfInput.value;
+
       formset.appendChild(newForm);
       totalForms.value = formCount + 1;
     });
