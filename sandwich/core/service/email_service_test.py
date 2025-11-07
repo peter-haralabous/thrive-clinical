@@ -1,3 +1,4 @@
+from typing import Any
 from unittest import mock
 
 import pytest
@@ -233,3 +234,20 @@ def test_handle_tracking_updates_invitation_if_one_exists(patient: Patient) -> N
     # Verify the Invitation record was updated to FAILED
     invitation.refresh_from_db()
     assert invitation.status == InvitationStatus.FAILED
+
+
+@pytest.mark.django_db
+def test_handle_tracking_event_message_id_does_not_exist(caplog: Any) -> None:
+    """Test that handle_tracking doesn't throw a 500 error when email not found."""
+    mock_event = mock.Mock()
+    mock_event.event_type = EventType.DELIVERED
+    mock_event.message_id = "test-message-id-123"
+
+    handle_tracking(sender=None, event=mock_event, esp_name="Amazon SES")
+
+    expected_log_messages = [
+        "Received email tracking event",
+        "Unhandled tracking event: Email record not found for tracking event",
+    ]
+    # This should not raise an exception (previously would throw Email.DoesNotExist)
+    assert caplog.messages == expected_log_messages

@@ -101,11 +101,23 @@ def record_email_delivery(
 # emails locally do not go though SES or anymail
 @receiver(tracking)
 def handle_tracking(sender, event, esp_name, **kwargs):
-    logger.info("Received email tracking event")
+    logger.info("Received email tracking event", extra={"esp_name": esp_name, "message_id": event.message_id})
     if esp_name == "Amazon SES":
+        try:
+            email = Email.objects.get(message_id=event.message_id)
+            logger.info(
+                "Retrieved corresponding email record for tracking event",
+                extra={"esp_name": esp_name, "message_id": event.message_id, "email_id": email.id},
+            )
+        except Email.DoesNotExist:
+            logger.warning(
+                "Unhandled tracking event: Email record not found for tracking event",
+                extra={"esp_name": esp_name, "message_id": event.message_id, "event_type": event.event_type},
+            )
+            return
+
         if event.event_type == EventType.BOUNCED:
             logger.warning("Email bounced", extra={"reason": event.reject_reason, "message_id": event.message_id})
-            email = Email.objects.get(message_id=event.message_id)
             email.status = EmailStatus.BOUNCED
             email.save(update_fields=["status"])
             invitation = Invitation.objects.get(id=email.invitation.id) if email.invitation else None
@@ -114,13 +126,13 @@ def handle_tracking(sender, event, esp_name, **kwargs):
                 invitation.status = InvitationStatus.FAILED
                 invitation.save(update_fields=["status"])
         elif event.event_type == EventType.DELIVERED:
-            email = Email.objects.get(message_id=event.message_id)
             email.status = EmailStatus.DELIVERED
             email.save(update_fields=["status"])
         elif event.event_type == EventType.COMPLAINED:
-            email = Email.objects.get(message_id=event.message_id)
             email.status = EmailStatus.COMPLAINED
             email.save(update_fields=["status"])
         else:
-            logger.info("Unhandled tracking event", extra={"event": event.event_type})
-    logger.info("Finished processing email tracking event")
+            logger.info("Unhandled tracking event", extra={"event": event.event_type, "message_id": event.message_id})
+    logger.info(
+        "Finished processing email tracking event", extra={"esp_name": esp_name, "message_id": event.message_id}
+    )
