@@ -16,12 +16,16 @@
       {% for event in history %}
         {% if event.count %}
           <tr>
-            <td colspan="3" class="text-center text-secondary">{{ event }}</td>
+            <td colspan="2" class="text-center text-secondary">{{ event }}</td>
           </tr>
         {% else %}
           <tr>
-            <td>{{ event.get_label_display }}</td>
-            <td>{{ event.actor }}</td>
+            <td>
+              {{ event.get_label_display }} by {{ event.actor }}
+              {% if event.document %}
+                based on <a class="link" href="{{ event.document.get_absolute_url }}">{{ event.document }}</a>
+              {% endif %}
+            </td>
             <td>{{ event.date }}</td>
           </tr>
         {% endif %}

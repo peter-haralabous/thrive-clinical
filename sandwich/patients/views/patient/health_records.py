@@ -229,6 +229,7 @@ class HistoryEvent:
     label: str
     date: datetime
     actor: str
+    document: Document | None
 
     def get_label_display(self):
         if self.label == "insert":
@@ -257,10 +258,13 @@ class HistoryEvent:
     @classmethod
     def from_event(cls, current_user: User, event):
         metadata = event.pgh_context.metadata if event.pgh_context else {}
+        document_id = metadata.get("document")
+        document = Document.objects.filter(id=document_id).first() if document_id else None
         return cls(
             label=event.pgh_label,
             date=event.pgh_created_at,
             actor=cls._actor_label(current_user, metadata),
+            document=document,
         )
 
 
