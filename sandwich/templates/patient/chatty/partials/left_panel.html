@@ -40,10 +40,14 @@
   </div>
   <nav class="menu flex-1 p-4 space-y-1">
     <li>
-      <a class="tooltip tooltip-right" data-tip="Records">{% lucide "heart-pulse" class="size-5 bg-studio-video-bg" %}</a>
+      <a class="tooltip tooltip-right"
+         data-tip="Records"
+         href="{% url "patients:patient_records" patient_id=patient.id %}">{% lucide "heart-pulse" class="size-5 bg-studio-video-bg" %}</a>
     </li>
     <li>
-      <a class="tooltip tooltip-right" data-tip="Repository">{% lucide "folder" class="size-5" %}</a>
+      <a class="tooltip tooltip-right"
+         data-tip="Repository"
+         href="{% url "patients:patient_repository" patient_id=patient.id %}">{% lucide "folder" class="size-5" %}</a>
     </li>
   </nav>
 {% endblock collapsed_panel_content %}
