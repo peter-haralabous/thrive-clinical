@@ -56,6 +56,6 @@ def load_snapshot(
 
 def purge_thread(thread_id: str) -> None:
     """Hard delete stored checkpoints for a given thread id"""
-    Checkpoints.objects.filter(thread_id=thread_id).delete()  # type: ignore[attr-defined]
-    CheckpointWrites.objects.filter(thread_id=thread_id).delete()  # type: ignore[attr-defined]
-    CheckpointBlobs.objects.filter(thread_id=thread_id).delete()  # type: ignore[attr-defined]
+    Checkpoints.objects.filter(thread_id=thread_id).delete()
+    CheckpointWrites.objects.filter(thread_id=thread_id).delete()
+    CheckpointBlobs.objects.filter(thread_id=thread_id).delete()

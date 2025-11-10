@@ -23,4 +23,4 @@ def test_load_snapshot(conversation_thread_id: str) -> None:
     assert snapshot.config["configurable"]["checkpoint_id"] is not None
     assert len(snapshot.values["messages"]) == 2  # user + assistant
 
-    assert Checkpoints.objects.get(checkpoint_id=snapshot.config["configurable"]["checkpoint_id"]) is not None  # type: ignore[attr-defined]
+    assert Checkpoints.objects.get(checkpoint_id=snapshot.config["configurable"]["checkpoint_id"]) is not None
