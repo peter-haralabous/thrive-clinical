@@ -1,92 +1,85 @@
-{% extends "base_top_nav.html" %}
+{% extends "base.html" %}
 
 {% load crispy_forms_tags %}
 {% load lucide %}
 
-{% block topnav %}
-  {% comment %} Your existing topnav include {% endcomment %}
-  {% include 'patient/chatty/partials/topnav.html' %}
-{% endblock topnav %}
-{% block content %}
-  {# the sse-swap here is misleading -- the messages themselves have hx-swap-oob set to their actual target #}
-  <div sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
-       sse-swap="ingest_progress"></div>
-  <form id="global-upload-form"
-        method="post"
-        action="{% url 'patients:document_upload_and_extract' patient_id=patient.id %}"
-        hx-post="{% url 'patients:document_upload_and_extract' patient_id=patient.id %}"
-        hx-encoding="multipart/form-data"
-        class="hidden">
-    <input type="file" name="file" accept="application/pdf, text/plain" multiple />
-    {% csrf_token %}
-  </form>
-  <div id="global-upload-hover"
-       class="fixed inset-2 rounded-xl pointer-events-none z-50 border-4 border-dashed border-transparent transition-all">
-  </div>
-  {# pb-16 is an approximation of #mobile-nav's height. #}
-  <div class="flex flex-row flex-1 gap-2 h-full pb-16 lg:pb-0">
-    {% comment %} Left Panel {% endcomment %}
-    <div id="mobile-records-view" class="w-full lg:w-auto lg:contents">
-      {% block left_panel %}
-        {% include 'patient/chatty/partials/left_panel.html' %}
-      {% endblock left_panel %}
-    </div>
-    {% comment %} Center Panel {% endcomment %}
-    <div id="mobile-chat-view"
-         class="w-full lg:w-auto lg:flex-1 flex flex-col h-full bg-base-100 rounded-xl border border-base-300">
-      <header class="navbar bg-base-100 border-b rounded-t-xl">
-        <div class="flex-none pl-2">{% lucide "sparkles" class="size-6" %}</div>
-        <div class="flex-1 px-2">
-          <span class="font-semibold text-lg">Assistant</span>
-        </div>
-      </header>
-      <main id="chat-messages" class="flex-1 overflow-y-auto p-4">
-        <template id="user-message-template" class="hidden">
-          {% include "patient/chatty/partials/user_message.html" %}
-        </template>
-        {% for message in chat_messages %}{{ message }}{% endfor %}
-      </main>
-      <footer class="p-4 bg-base-100 border-t border-base-300 rounded-b-xl flex justify-center">
-        <div class="w-full max-w-4xl">
-          <div class="relative">{% crispy chat_form %}</div>
-          <div class="flex justify-between items-center mt-2 px-2">
-            <div class="flex gap-2">
-              <button class="btn btn-ghost btn-sm btn-circle">{% lucide "paperclip" class="size-5" %}</button>
-              <button class="btn btn-ghost btn-sm btn-circle">{% lucide "share" class="size-5" %}</button>
+{% block body %}
+  <div class="grid grid-rows-[auto_1fr_auto] h-screen">
+    {% include 'patient/chatty/partials/topnav.html' %}
+    <div class="overflow-hidden"
+         sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
+         sse-swap="ingest_progress">
+      <div class="flex flex-row gap-2 p-1 lg:p-6 h-full">
+        {# Left Panel #}
+        {% block left_panel %}
+          {% include 'patient/chatty/partials/left_panel.html' %}
+        {% endblock left_panel %}
+        {# Center Panel #}
+        <div id="mobile-chat-view"
+             class="w-full lg:w-auto lg:flex-1 flex flex-col h-full bg-base-100 rounded-xl border border-base-300">
+          <header class="navbar bg-base-100 border-b rounded-t-xl">
+            <div class="flex-none pl-2">{% lucide "sparkles" class="size-6" %}</div>
+            <div class="flex-1 px-2">
+              <span class="font-semibold text-lg">Assistant</span>
             </div>
-            <p class="text-xs text-base-content/50">
-              HealthConnect can make mistakes. Double check with a health professional you trust.
-            </p>
-          </div>
+          </header>
+          <main id="chat-messages" class="flex-1 overflow-y-auto h-full p-4">
+            <template id="user-message-template" class="hidden">
+              {% include "patient/chatty/partials/user_message.html" %}
+            </template>
+            {% for message in chat_messages %}{{ message }}{% endfor %}
+          </main>
+          <footer class="p-4 bg-base-100 border-t border-base-300 rounded-b-xl flex justify-center">
+            <div class="w-full max-w-4xl">
+              <div class="relative">{% crispy chat_form %}</div>
+              <div class="flex justify-between items-center mt-2 px-2">
+                <div class="flex gap-2">
+                  <button class="btn btn-ghost btn-sm btn-circle">{% lucide "paperclip" class="size-5" %}</button>
+                  <button class="btn btn-ghost btn-sm btn-circle">{% lucide "share" class="size-5" %}</button>
+                </div>
+                <p class="text-xs text-base-content/50">
+                  HealthConnect can make mistakes. Double check with a health professional you trust.
+                </p>
+              </div>
+            </div>
+          </footer>
         </div>
-      </footer>
+        {# Right Panel #}
+        {% include 'patient/chatty/partials/right_panel.html' %}
+      </div>
     </div>
-    <div id="mobile-feed-view" class="w-full lg:w-auto lg:contents">
-      {% include 'patient/chatty/partials/right_panel.html' %}
+    {# Mobile Navigation #}
+    <nav id="mobile-nav"
+         class="lg:hidden bg-base-100 border-t border-base-300 flex justify-around shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+      <button data-view="records"
+              class="mobile-nav-item flex flex-col items-center justify-center flex-1 py-2 transition-colors text-base-content/60 hover:text-primary">
+        <div class="relative">{% lucide "heart-pulse" class="size-6" %}</div>
+        <span class="text-xs font-medium mt-1">Records</span>
+      </button>
+      <button data-view="chat"
+              class="mobile-nav-item flex flex-col items-center justify-center flex-1 py-2 transition-colors text-primary">
+        <div class="relative">{% lucide "sparkles" class="size-6" %}</div>
+        <span class="text-xs font-bold mt-1">Assistant</span>
+      </button>
+      <button data-view="feed"
+              class="mobile-nav-item flex flex-col items-center justify-center flex-1 py-2 transition-colors text-base-content/60 hover:text-primary">
+        <div class="relative">{% lucide "layout-grid" class="size-6" %}</div>
+        <span class="text-xs font-medium mt-1">Feed</span>
+      </button>
+    </nav>
+    <form id="global-upload-form"
+          method="post"
+          action="{% url 'patients:document_upload_and_extract' patient_id=patient.id %}"
+          hx-post="{% url 'patients:document_upload_and_extract' patient_id=patient.id %}"
+          hx-encoding="multipart/form-data"
+          class="hidden">
+      <input type="file" name="file" accept="application/pdf, text/plain" multiple />
+      {% csrf_token %}
+    </form>
+    <div id="global-upload-hover"
+         class="fixed inset-2 rounded-xl pointer-events-none z-50 border-4 border-dashed border-transparent transition-all">
     </div>
   </div>
-  {% comment %} Mobile Navigation {% endcomment %}
-  <nav id="mobile-nav"
-       class="lg:hidden fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 flex justify-around shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
-    <button data-view="records"
-            class="mobile-nav-item flex flex-col items-center justify-center flex-1 py-2 transition-colors text-base-content/60 hover:text-primary">
-      <div class="relative">
-        {% lucide "heart-pulse" class="size-6" %}
-        {# <span class="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-content text-xs font-semibold"></span> #}
-      </div>
-      <span class="text-xs font-medium mt-1">Records</span>
-    </button>
-    <button data-view="chat"
-            class="mobile-nav-item flex flex-col items-center justify-center flex-1 py-2 transition-colors text-primary">
-      <div class="relative">{% lucide "sparkles" class="size-6" %}</div>
-      <span class="text-xs font-bold mt-1">Assistant</span>
-    </button>
-    <button data-view="feed"
-            class="mobile-nav-item flex flex-col items-center justify-center flex-1 py-2 transition-colors text-base-content/60 hover:text-primary">
-      <div class="relative">{% lucide "layout-grid" class="size-6" %}</div>
-      <span class="text-xs font-medium mt-1">Feed</span>
-    </button>
-  </nav>
   <script nonce="{{ request.csp_nonce }}">
     // Wait for the document to be ready
     document.addEventListener('DOMContentLoaded', () => {
@@ -101,9 +94,9 @@
       // Mobile navigation
       const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
       const mobileViews = {
-        records: document.getElementById('mobile-records-view'),
+        records: document.getElementById('left-panel'),
         chat: document.getElementById('mobile-chat-view'),
-        feed: document.getElementById('mobile-feed-view'),
+        feed: document.getElementById('right-panel'),
       };
 
       function setActiveView(viewName) {
@@ -256,4 +249,4 @@
       chatMessages.scrollTop = chatMessages.scrollHeight;
     });
   </script>
-{% endblock content %}
+{% endblock body %}
