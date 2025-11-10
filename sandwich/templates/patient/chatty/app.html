@@ -98,26 +98,6 @@
       const chatUserMessageTemplate = chatPanel.querySelector('#user-message-template');
       const chatSubmit = chatPanel.querySelector('#button-id-submit');
 
-      function toggleHidden(el) {
-        if (el.classList.contains('hidden')) {
-          el.classList.remove('hidden');
-        } else {
-          el.classList.add('hidden');
-        }
-      }
-
-      // the button itself is added and removed by htmx, so we add the listeners at the page level
-      document.addEventListener("click", (event) => {
-        if (event.target.closest("#expand-left-btn") || event.target.closest("#collapse-left-btn")) {
-          Array.from(document.getElementById('left-panel').children).forEach(toggleHidden);
-          event.preventDefault();
-        }
-        if (event.target.closest("#expand-right-btn") || event.target.closest("#collapse-right-btn")) {
-          Array.from(document.getElementById('right-panel').children).forEach(toggleHidden);
-          event.preventDefault();
-        }
-      })
-
       // Mobile navigation
       const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
       const mobileViews = {

@@ -2,6 +2,7 @@ import '../css/project.css';
 import './components/command-palette';
 import './components/message-alert';
 import './components/sortable-columns';
+import './components/toggle-container';
 import { initializeDatadog } from './lib/datadog';
 
 /* Project specific Javascript goes here. */

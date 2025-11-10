@@ -1,7 +1,8 @@
 import { LitElement, html, css, type PropertyValues } from 'lit';
-import { property, query, state } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
+@customElement('command-palette')
 class CommandPalette extends LitElement {
   // --- STYLES ---
   // Scoped CSS is a first-class citizen in Lit.
@@ -344,5 +345,3 @@ class CommandPalette extends LitElement {
     `;
   }
 }
-
-customElements.define('command-palette', CommandPalette);

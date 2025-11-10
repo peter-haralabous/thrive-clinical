@@ -2,6 +2,7 @@
 
 <div id="{% block panel_id %}{% endblock panel_id %}"
      class="w-full lg:w-auto lg:flex-shrink-0">
+  <toggle-container>
   {# Expanded Panel #}
   <div class="flex flex-col w-full lg:w-72 bg-base-100 h-full rounded-xl border border-base-300">
     <header class="navbar bg-base-100 border-b rounded-t-xl">
@@ -16,11 +17,10 @@
         </span>
       </div>
       <div class="flex-none hidden lg:block">
-        <button id="{% block collapse_btn_id %}{% endblock collapse_btn_id %}"
-                class="btn btn-square btn-ghost">
-          {% block collapse_icon %}
-          {% endblock collapse_icon %}
-        </button>
+        <toggle-button class="btn btn-square btn-ghost">
+        {% block collapse_icon %}
+        {% endblock collapse_icon %}
+        </toggle-button>
       </div>
     </header>
     {% block panel_content %}
@@ -31,4 +31,5 @@
     {% block collapsed_panel_content %}
     {% endblock collapsed_panel_content %}
   </div>
+  </toggle-container>
 </div>
