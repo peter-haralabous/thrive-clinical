@@ -3,6 +3,5 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-  <h2>Add {{ record_type_name }}</h2>
-  {% crispy form %}
+  {% include "patient/partials/health_record_add.html" %}
 {% endblock content %}

@@ -1,9 +1,9 @@
 {% load lucide %}
 
-<div class="w-full lg:w-auto lg:flex-shrink-0">
+<div id="{% block panel_id %}{% endblock panel_id %}"
+     class="w-full lg:w-auto lg:flex-shrink-0">
   {# Expanded Panel #}
-  <div id="{% block panel_id %}{% endblock panel_id %}"
-       class="flex flex-col w-full lg:w-72 bg-base-100 h-full rounded-xl border border-base-300">
+  <div class="flex flex-col w-full lg:w-72 bg-base-100 h-full rounded-xl border border-base-300">
     <header class="navbar bg-base-100 border-b rounded-t-xl">
       <div class="flex-none">
         {% block header_icon %}
@@ -27,8 +27,7 @@
     {% endblock panel_content %}
   </div>
   {# Collapsed Panel #}
-  <div id="{% block collapsed_panel_id %}{% endblock collapsed_panel_id %}"
-       class="hidden flex-col w-16 bg-base-100 h-full border border-base-300 rounded-xl justify-between items-center">
+  <div class="hidden flex flex-col w-16 bg-base-100 h-full border border-base-300 rounded-xl justify-between items-center">
     {% block collapsed_panel_content %}
     {% endblock collapsed_panel_content %}
   </div>

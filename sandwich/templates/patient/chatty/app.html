@@ -92,55 +92,31 @@
     document.addEventListener('DOMContentLoaded', () => {
 
       // Get all the elements
-      const leftPanel = document.getElementById('left-panel');
-      const leftPanelCollapsed = document.getElementById('left-panel-collapsed');
-      const collapseLeftBtn = document.getElementById('collapse-left-btn');
-      const expandLeftBtn = document.getElementById('expand-left-btn');
-
       const chatPanel = document.getElementById('mobile-chat-view');
       const chatMessages = chatPanel.querySelector('#chat-messages');
       const chatInput = chatPanel.querySelector("textarea");
       const chatUserMessageTemplate = chatPanel.querySelector('#user-message-template');
       const chatSubmit = chatPanel.querySelector('#button-id-submit');
 
-      const rightPanel = document.getElementById('right-panel');
-      const rightPanelCollapsed = document.getElementById('right-panel-collapsed');
-      const collapseRightBtn = document.getElementById('collapse-right-btn');
-      const expandRightBtn = document.getElementById('expand-right-btn');
-
-      // Left Panel Listeners
-      if (collapseLeftBtn) {
-        collapseLeftBtn.addEventListener('click', () => {
-          leftPanel.classList.add('hidden');
-          leftPanelCollapsed.classList.remove('hidden');
-          leftPanelCollapsed.classList.add('flex');
-        });
+      function toggleHidden(el) {
+        if (el.classList.contains('hidden')) {
+          el.classList.remove('hidden');
+        } else {
+          el.classList.add('hidden');
+        }
       }
 
-      if (expandLeftBtn) {
-        expandLeftBtn.addEventListener('click', () => {
-          leftPanel.classList.remove('hidden');
-          leftPanelCollapsed.classList.add('hidden');
-          leftPanelCollapsed.classList.remove('flex');
-        });
-      }
-
-      // Right Panel Listeners
-      if (collapseRightBtn) {
-        collapseRightBtn.addEventListener('click', () => {
-          rightPanel.classList.add('hidden');
-          rightPanelCollapsed.classList.remove('hidden');
-          rightPanelCollapsed.classList.add('flex');
-        });
-      }
-
-      if (expandRightBtn) {
-        expandRightBtn.addEventListener('click', () => {
-          rightPanel.classList.remove('hidden');
-          rightPanelCollapsed.classList.add('hidden');
-          rightPanelCollapsed.classList.remove('flex');
-        });
-      }
+      // the button itself is added and removed by htmx, so we add the listeners at the page level
+      document.addEventListener("click", (event) => {
+        if (event.target.closest("#expand-left-btn") || event.target.closest("#collapse-left-btn")) {
+          Array.from(document.getElementById('left-panel').children).forEach(toggleHidden);
+          event.preventDefault();
+        }
+        if (event.target.closest("#expand-right-btn") || event.target.closest("#collapse-right-btn")) {
+          Array.from(document.getElementById('right-panel').children).forEach(toggleHidden);
+          event.preventDefault();
+        }
+      })
 
       // Mobile navigation
       const mobileNavItems = document.querySelectorAll('.mobile-nav-item');

@@ -3,7 +3,7 @@
 {% load lucide %}
 
 {# djlint:off #}
-{% block header_icon %}<a href="{{ left_panel_back_link }}" class="btn btn-circle btn-ghost">{% lucide "arrow-left" class="size-6" %}</a>{% endblock header_icon %}
+{% block header_icon %}<a href="{{ left_panel_back_link }}" hx-get="{{ left_panel_back_link }}" hx-target="#left-panel" hx-swap="outerHTML" hx-push-url="true" class="btn btn-circle btn-ghost">{% lucide "arrow-left" class="size-6" %}</a>{% endblock header_icon %}
 {% block header_title %}{{ left_panel_title }}{% endblock header_title %}
 {# djlint:on #}
 {% block panel_content %}
@@ -11,6 +11,8 @@
     {% for item in left_panel_items %}
       <li>
         <a href="{{ item.link }}"
+           {% if item.target == "left_panel" %}hx-get="{{ item.link }}" hx-target="#left-panel" hx-swap="outerHTML" hx-push-url="true" {% endif %}
+           {% if item.target == "modal" %}hx-get="{{ item.link }}" hx-target="body" hx-swap="beforeend" hx-push-url="true" {% endif %}
            class="flex items-center p-3 rounded-lg hover:bg-base-300/50 gap-4">
           {% lucide item.icon class="size-5" %}
           <span class="flex-1">{{ item.label }}</span>

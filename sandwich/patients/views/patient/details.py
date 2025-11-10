@@ -25,18 +25,24 @@ from sandwich.patients.views.patient import _patient_context
 logger = logging.getLogger(__name__)
 
 
+def _chatty_patient_details_context(request: AuthenticatedHttpRequest, patient: Patient):
+    records_count = get_total_health_record_count(patient)
+    repository_count = patient.document_set.count()
+    return {
+        "records_count": records_count,
+        "repository_count": repository_count,
+    } | _chat_context(request, patient=patient)
+
+
 @login_required
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient"])])
 def patient_details(request: AuthenticatedHttpRequest, patient: Patient) -> HttpResponse:
     if settings.FEATURE_PATIENT_CHATTY_APP:
         template = "patient/chatty/app.html"
-        records_count = get_total_health_record_count(patient)
-        repository_count = patient.document_set.count()
-        context = {
-            "records_count": records_count,
-            "repository_count": repository_count,
-        } | _chat_context(request, patient=patient)
+        context = _chatty_patient_details_context(request, patient)
 
+        if request.headers.get("HX-Target") == "left-panel":
+            template = "patient/chatty/partials/left_panel.html"
     else:
         template = "patient/patient_details.html"
         # TODO-NG: page & sort these lists

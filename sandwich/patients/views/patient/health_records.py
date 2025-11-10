@@ -2,12 +2,14 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
+from typing import Literal
 from typing import cast
 from uuid import UUID
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.http import HttpResponse
@@ -32,6 +34,7 @@ from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.validators.date_time import not_in_future
 from sandwich.patients.views.patient import _chat_context
 from sandwich.patients.views.patient import _patient_context
+from sandwich.patients.views.patient.details import _chatty_patient_details_context
 from sandwich.users.models import User
 
 logger = logging.getLogger(__name__)
@@ -43,6 +46,7 @@ class NavItem:
     label: str
     icon: str
     count: int | None = None
+    target: Literal["left_panel", "modal"] | None = None
 
 
 RECORD_TYPES = {
@@ -68,6 +72,7 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
                 label=str(model._meta.verbose_name_plural).capitalize(),  # noqa: SLF001
                 icon=icon,
                 count=counts.get(cast("str", model._meta.model_name), 0),  # noqa: SLF001
+                target="left_panel",
             )
             for model, icon in RECORD_TYPES.values()
         ]
@@ -76,12 +81,13 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
     else:
         model, icon = RECORD_TYPES[record_type]
         left_panel_title = str(model._meta.verbose_name_plural).capitalize()  # noqa: SLF001
-        left_panel_back_link = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
+        left_panel_back_link = reverse("patients:patient_records", kwargs={"patient_id": patient.id})
         items = [
             NavItem(
                 link=record.get_absolute_url(),
                 label=str(record),
                 icon=icon,
+                target="modal",
             )
             # FIXME: need to page this list
             for record in model.objects.filter(patient=patient).all()  # type: ignore[attr-defined]
@@ -94,15 +100,21 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
                 ),
                 label="Add New",
                 icon="plus",
+                target="modal",
             ),
         )
 
     context = {
+        "patient": patient,
         "left_panel_title": left_panel_title,
         "left_panel_back_link": left_panel_back_link,
         "left_panel_items": items,
-    } | _chat_context(request, patient=patient)
-    return render(request, "patient/patient_records.html", context)
+    }
+    if request.headers.get("HX-Target") == "left-panel":
+        return render(request, "patient/chatty/partials/left_panel_records.html", context)
+
+    context |= _chat_context(request, patient=patient)
+    return render(request, "patient/chatty/records.html", context)
 
 
 @login_required
@@ -118,6 +130,7 @@ def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, cate
                 label=str(label),
                 icon="folder",
                 count=counts.get(value, 0),
+                target="left_panel",
             )
             for (value, label) in DocumentCategory.choices
         ]
@@ -126,17 +139,22 @@ def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, cate
         left_panel_title = str(category.label)
         left_panel_back_link = reverse("patients:patient_repository", kwargs={"patient_id": patient.id})
         items = [
-            NavItem(link=record.get_absolute_url(), label=str(record), icon="file")
+            NavItem(link=record.get_absolute_url(), label=str(record), icon="file", target="modal")
             # FIXME: need to page this list
             for record in patient.document_set.filter(category=category)
         ]
 
     context = {
+        "patient": patient,
         "left_panel_title": left_panel_title,
         "left_panel_back_link": left_panel_back_link,
         "left_panel_items": items,
-    } | _chat_context(request, patient=patient)
-    return render(request, "patient/patient_records.html", context)
+    }
+    if request.headers.get("HX-Target") == "left-panel":
+        return render(request, "patient/chatty/partials/left_panel_records.html", context)
+
+    context |= _chat_context(request, patient=patient)
+    return render(request, "patient/chatty/records.html", context)
 
 
 class HealthRecordForm[M: HealthRecord](forms.ModelForm[M]):
@@ -220,7 +238,19 @@ def health_records_add(request: AuthenticatedHttpRequest, patient: Patient, reco
         "record_type": record_type,
         "record_type_name": form_class.Meta.model._meta.verbose_name,  # noqa: SLF001
         "form": form,
-    } | _patient_context(request, patient=patient)
+    }
+
+    if settings.FEATURE_PATIENT_CHATTY_APP:
+        if request.headers.get("HX-Request") == "true":
+            # only render the modal; leave the rest of the page as-is
+            return render(request, "patient/partials/health_record_add_modal.html", context)
+
+        # NOTE: we don't know what state the page was in before the modal was opened; assume it was just the
+        #       patient details homepage
+        context |= _chatty_patient_details_context(request, patient)
+        return render(request, "patient/chatty/records_add.html", context)
+
+    context |= _patient_context(request, patient=patient)
     return render(request, "patient/health_records_add.html", context)
 
 
@@ -317,7 +347,19 @@ def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, inst
         "record_type_name": form_class.Meta.model._meta.verbose_name,  # noqa: SLF001
         "form": form,
         "history": _history_events(instance, request.user),
-    } | _patient_context(request, patient=patient)
+    }
+
+    if settings.FEATURE_PATIENT_CHATTY_APP:
+        if request.headers.get("HX-Request") == "true":
+            # only render the modal; leave the rest of the page as-is
+            return render(request, "patient/partials/health_record_edit_modal.html", context)
+
+        # NOTE: we don't know what state the page was in before the modal was opened; assume it was just the
+        #       patient details homepage
+        context |= _chatty_patient_details_context(request, patient)
+        return render(request, "patient/chatty/records_edit.html", context)
+
+    context |= _patient_context(request, patient=patient)
     return render(request, "patient/health_records_edit.html", context)
 
 
