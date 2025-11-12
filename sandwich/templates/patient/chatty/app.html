@@ -6,9 +6,10 @@
 {% block body %}
   <div class="grid grid-rows-[auto_1fr_auto] h-screen">
     {% include 'patient/chatty/partials/topnav.html' %}
-    <div class="overflow-hidden"
-         sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
-         sse-swap="ingest_progress">
+    <div class="overflow-hidden">
+      {# the sse-swap here is misleading; ingest_progress messages include a hx-swap-oob with their real target #}
+      <div sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
+           sse-swap="ingest_progress"></div>
       <div class="flex flex-row gap-2 p-1 lg:p-6 h-full">
         {# Left Panel #}
         {% block left_panel %}
@@ -69,6 +70,7 @@
           action="{% url 'patients:document_upload_and_extract' patient_id=patient.id %}"
           hx-post="{% url 'patients:document_upload_and_extract' patient_id=patient.id %}"
           hx-encoding="multipart/form-data"
+          hx-swap="none"
           class="hidden">
       <input type="file" name="file" accept="application/pdf, text/plain" multiple />
       {% csrf_token %}

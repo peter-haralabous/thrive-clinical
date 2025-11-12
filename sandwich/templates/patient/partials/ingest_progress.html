@@ -1,7 +1,7 @@
 {% load lucide %}
 
 {# TODO: append & remove any previous messages for *this document*, not all messages #}
-<div hx-swap-oob="innerHTML:#messages">
+<div id="messages" hx-swap-oob="innerHTML">
   {% if done %}
     <message-alert tags="info" closeable>
     {% lucide "check" class="size-5" slot="icon" %}
