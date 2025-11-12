@@ -27,7 +27,7 @@ def test_submit_form_success(user: User, encounter: Encounter, patient: Patient)
     task = TaskFactory.create(encounter=encounter, patient=patient)
 
     payload = {"q1": "Final Answer"}
-    url = reverse("patients:api-1.0.0:submit_form", kwargs={"task_id": task.id})
+    url = reverse("patients:patients-api:submit_form", kwargs={"task_id": task.id})
 
     frozen_time = timezone.now()
     with freeze_time(frozen_time):
@@ -53,7 +53,7 @@ def test_submit_form_no_permission(user: User, encounter: Encounter, patient: Pa
 
     payload = {"q1": "Final Answer"}
     remove_perm("complete_task", patient.user, task)
-    url = reverse("patients:api-1.0.0:submit_form", kwargs={"task_id": task.id})
+    url = reverse("patients:patients-api:submit_form", kwargs={"task_id": task.id})
 
     response = client.post(url, data=payload, content_type="application/json")
 
@@ -78,7 +78,7 @@ def test_submit_form_already_completed(user: User, encounter: Encounter, patient
     )
 
     payload = {"q1": "Trying to submit"}
-    url = reverse("patients:api-1.0.0:submit_form", kwargs={"task_id": task.id})
+    url = reverse("patients:patients-api:submit_form", kwargs={"task_id": task.id})
 
     response = client.post(url, data=payload, content_type="application/json")
 
@@ -97,7 +97,7 @@ def test_save_draft_form_creates_new_draft(user: User, encounter: Encounter, pat
     task = TaskFactory.create(encounter=encounter, patient=patient)
 
     payload = {"q1": "Draft Answer"}
-    url = reverse("patients:api-1.0.0:save_draft_form", kwargs={"task_id": task.id})
+    url = reverse("patients:patients-api:save_draft_form", kwargs={"task_id": task.id})
 
     response = client.post(url, data=payload, content_type="application/json")
 
@@ -128,7 +128,7 @@ def test_save_draft_form_success_updates_existing_draft(user: User, encounter: E
     )
 
     payload = {"q1": "New Draft Answer", "q2": "Added Q2"}
-    url = reverse("patients:api-1.0.0:save_draft_form", kwargs={"task_id": task.id})
+    url = reverse("patients:patients-api:save_draft_form", kwargs={"task_id": task.id})
 
     response = client.post(url, data=payload, content_type="application/json")
 
@@ -153,7 +153,7 @@ def test_save_draft_form_no_permission(user: User, encounter: Encounter, patient
     remove_perm("complete_task", patient.user, task)
 
     payload = {"q1": "Draft Answer"}
-    url = reverse("patients:api-1.0.0:save_draft_form", kwargs={"task_id": task.id})
+    url = reverse("patients:patients-api:save_draft_form", kwargs={"task_id": task.id})
 
     response = client.post(url, data=payload, content_type="application/json")
 
@@ -179,7 +179,7 @@ def test_save_draft_form_on_completed_submission(user: User, encounter: Encounte
     )
 
     payload = {"q1": "Trying to overwrite completed draft"}
-    url = reverse("patients:api-1.0.0:save_draft_form", kwargs={"task_id": task.id})
+    url = reverse("patients:patients-api:save_draft_form", kwargs={"task_id": task.id})
 
     response = client.post(url, data=payload, content_type="application/json")
 

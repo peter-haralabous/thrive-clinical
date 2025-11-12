@@ -48,10 +48,10 @@ def task(request: AuthenticatedHttpRequest, organization: Organization, patient:
 
     form_schema = task.form_version.schema if task.form_version else {}
     submit_url = request.build_absolute_uri(
-        reverse("patients:api-1.0.0:submit_form", kwargs={"task_id": str(task.id)})
+        reverse("patients:patients-api:submit_form", kwargs={"task_id": str(task.id)})
     )
     save_draft_url = request.build_absolute_uri(
-        reverse("patients:api-1.0.0:save_draft_form", kwargs={"task_id": str(task.id)})
+        reverse("patients:patients-api:save_draft_form", kwargs={"task_id": str(task.id)})
     )
     initial_data: dict[str, Any] | None = None
     form_submission = task.get_form_submission()

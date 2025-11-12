@@ -36,7 +36,7 @@ class ConsentMiddleware:
         "anymail",
         "debug_toolbar",
         "http_response",
-        "patients:api-1.0.0",
+        "patients:patients-api",
         "static",
     }
 
