@@ -15,8 +15,8 @@
           <h4 class="font-bold">Selected Patient</h4>
           <h4 class="font-semibold">{{ patient.last_name }}, {{ patient.first_name }}</h4>
           <p class="text-md">
-            DOB: {{ patient.date_of_birth|date:"M d, Y"|default:"None" }} • PHN:
-            {{ patient.phn|default:"None" }}
+            DOB: {{ patient.date_of_birth|date:"M d, Y"|default:"—" }} • PHN:
+            {{ patient.phn|default:"—" }}
           </p>
         </div>
       </div>
