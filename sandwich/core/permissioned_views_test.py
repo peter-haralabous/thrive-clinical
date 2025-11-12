@@ -71,6 +71,7 @@ def test_all_views_permissioned() -> None:
         "patients/immunization/<uuid:immunization_id>",
         "patients/practitioner/<uuid:practitioner_id>",
         "providers/api/form/organization/<organization_id>/create",
+        "providers/api/form/organization/<organization_id>/form/<form_id>/edit",
     }
 
     # This list acts as a registry of unpermissioned views. Remove entries
