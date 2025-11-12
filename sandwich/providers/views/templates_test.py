@@ -89,7 +89,7 @@ def test_form_details_patient_deny_access(client: Client, patient: Patient, orga
 
 def test_form_builder_deny_staff_access(client: Client, provider: User, organization: Organization) -> None:
     client.force_login(provider)
-    url = reverse("providers:form_builder", kwargs={"organization_id": organization.id})
+    url = reverse("providers:form_template_builder", kwargs={"organization_id": organization.id})
     response = client.get(url)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
@@ -97,6 +97,6 @@ def test_form_builder_deny_staff_access(client: Client, provider: User, organiza
 @override_settings(FEATURE_PROVIDER_FORM_BUILDER=True)
 def test_form_builder(client: Client, owner: User, organization: Organization) -> None:
     client.force_login(owner)
-    url = reverse("providers:form_builder", kwargs={"organization_id": organization.id})
+    url = reverse("providers:form_template_builder", kwargs={"organization_id": organization.id})
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK

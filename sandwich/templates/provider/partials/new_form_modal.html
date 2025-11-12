@@ -8,7 +8,7 @@
     </form>
     <h3>Create a New Form</h3>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-      <a href="{% url "providers:form_builder" organization_id=organization.id %}"
+      <a href="{% url "providers:form_template_builder" organization_id=organization.id %}"
          class="card bg-base-200 hover:bg-primary/10 hover:border-primary border-2 border-dashed border-base-300 transition-all text-center p-6">
         {% lucide "pencil" class="w-10 h-10 mx-auto text-primary" %}
         <h3 class="font-bold text-lg mt-3">Create Manually</h3>

@@ -64,12 +64,14 @@ urlpatterns = [
         custom_attribute_archive,
         name="custom_attribute_archive",
     ),
-    # url must contain 'templates' for provider sidenav active link highlighting to work.
+    # name must contain 'template' for provider sidenav active link highlighting to work.
     path("organization/<uuid:organization_id>/templates/forms", form_list, name="form_templates_list"),
     path("organization/<uuid:organization_id>/templates/form/<uuid:form_id>", form_details, name="form_template"),
-    path("organization/<uuid:organization_id>/templates/form/<uuid:form_id>/edit", form_edit, name="form_edit"),
+    path(
+        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/edit", form_edit, name="form_template_edit"
+    ),
     path("organization/<uuid:organization_id>/templates/form/file_upload", form_file_upload, name="form_file_upload"),
-    path("organization/<uuid:organization_id>/templates/forms/builder", form_builder, name="form_builder"),
+    path("organization/<uuid:organization_id>/templates/forms/builder", form_builder, name="form_template_builder"),
     path("organization/<uuid:organization_id>/encounters", encounter_list, name="encounter_list"),
     path(
         "organization/<uuid:organization_id>/encounter/create/search",
