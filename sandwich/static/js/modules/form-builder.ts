@@ -22,7 +22,7 @@ function saveSurveyJson(
   saveNo: number,
   callback: (saveNo: number, success: boolean) => void,
 ) {
-  if (typeof url !== 'string') {
+  if (!url) {
     console.error('Save URL missing.');
     callback(saveNo, false);
     return;
