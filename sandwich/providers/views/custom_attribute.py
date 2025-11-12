@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.forms import BaseInlineFormSet
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
@@ -150,6 +151,55 @@ CustomAttributeEnumFormSet = forms.inlineformset_factory(
 )
 
 
+def validate_custom_enum(
+    request: AuthenticatedHttpRequest,
+    organization: Organization,
+    form: CustomAttributeForm,
+    formset: BaseInlineFormSet[CustomAttributeEnum, CustomAttribute, CustomAttributeEnumForm],
+):
+    # Validate formset only if ENUM type
+    input_type = form.cleaned_data["input_type"]
+    requires_enums = input_type in ("select", "multi_select")
+
+    if requires_enums:
+        if formset.is_valid():
+            # Check at least one enum value
+            valid_forms = [f for f in formset if f.cleaned_data and not f.cleaned_data.get("DELETE")]
+            if not valid_forms:
+                form.add_error(
+                    "input_type",
+                    "At least one option is required for Select/Multi-Select types. Please add options below.",
+                )
+                context = {
+                    "organization": organization,
+                    "form": form,
+                    "formset": formset,
+                    "show_enum_fields": True,
+                }
+                return render(request, "provider/custom_attribute_edit.html", context)
+        else:
+            context = {
+                "organization": organization,
+                "form": form,
+                "formset": formset,
+                "show_enum_fields": True,
+            }
+            return render(request, "provider/custom_attribute_edit.html", context)
+
+    # Save everything in transaction
+    with transaction.atomic():
+        instance = form.save()
+
+        if requires_enums:
+            formset.instance = instance
+            formset.save()
+
+    messages.success(request, "Custom attribute created successfully.")
+    return HttpResponseRedirect(
+        reverse("providers:custom_attribute_list", kwargs={"organization_id": organization.id})
+    )
+
+
 @login_required
 @authorize_objects([ObjPerm(Organization, "organization_id", ["change_organization", "view_organization"])])
 def custom_attribute_add(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
@@ -166,47 +216,7 @@ def custom_attribute_add(request: AuthenticatedHttpRequest, organization: Organi
         requires_enums = input_type in ("select", "multi_select")
 
         if form.is_valid():
-            # Validate formset only if ENUM type
-            input_type = form.cleaned_data["input_type"]
-            requires_enums = input_type in ("select", "multi_select")
-
-            if requires_enums:
-                if formset.is_valid():
-                    # Check at least one enum value
-                    valid_forms = [f for f in formset if f.cleaned_data and not f.cleaned_data.get("DELETE")]
-                    if not valid_forms:
-                        form.add_error(
-                            "input_type",
-                            "At least one option is required for Select/Multi-Select types. Please add options below.",
-                        )
-                        context = {
-                            "organization": organization,
-                            "form": form,
-                            "formset": formset,
-                            "show_enum_fields": True,
-                        }
-                        return render(request, "provider/custom_attribute_edit.html", context)
-                else:
-                    context = {
-                        "organization": organization,
-                        "form": form,
-                        "formset": formset,
-                        "show_enum_fields": True,
-                    }
-                    return render(request, "provider/custom_attribute_edit.html", context)
-
-            # Save everything in transaction
-            with transaction.atomic():
-                instance = form.save()
-
-                if requires_enums:
-                    formset.instance = instance
-                    formset.save()
-
-            messages.success(request, "Custom attribute created successfully.")
-            return HttpResponseRedirect(
-                reverse("providers:custom_attribute_list", kwargs={"organization_id": organization.id})
-            )
+            return validate_custom_enum(request, organization, form, formset)
 
         messages.error(request, "Error while creating custom attribute")
         context = {
