@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 from django.test import Client
 from django.urls import reverse
@@ -35,7 +37,7 @@ def test_submit_form_success(user: User, encounter: Encounter, patient: Patient)
     with freeze_time(frozen_time):
         response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert (submission := FormSubmission.objects.get(task=task, patient=task.patient))
     assert submission.data == {"q1": "Final Answer"}
     assert submission.status == FormSubmissionStatus.COMPLETED
@@ -59,7 +61,7 @@ def test_submit_form_no_permission(user: User, encounter: Encounter, patient: Pa
 
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.django_db
@@ -84,7 +86,7 @@ def test_submit_form_already_completed(user: User, encounter: Encounter, patient
 
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 400
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json()["detail"] == "This form has already been submitted"
 
 
@@ -103,7 +105,7 @@ def test_save_draft_form_creates_new_draft(user: User, encounter: Encounter, pat
 
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert (submission := FormSubmission.objects.get(task=task, patient=task.patient))
     assert submission.data == {"q1": "Draft Answer"}
     assert submission.status == FormSubmissionStatus.DRAFT
@@ -134,7 +136,7 @@ def test_save_draft_form_success_updates_existing_draft(user: User, encounter: E
 
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
     submission.refresh_from_db()
     assert submission.data == {"q1": "New Draft Answer", "q2": "Added Q2"}
@@ -159,7 +161,7 @@ def test_save_draft_form_no_permission(user: User, encounter: Encounter, patient
 
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 404
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 @pytest.mark.django_db
@@ -185,7 +187,7 @@ def test_save_draft_form_on_completed_submission(user: User, encounter: Encounte
 
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 400
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json()["detail"] == "This form has already been submitted"
 
 
@@ -200,7 +202,7 @@ def test_provider_form_create(client: Client, owner: User, organization: Organiz
 
     created_form = orgs_forms.first()
     assert created_form is not None
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json()["form_id"] == str(created_form.id)
     assert response.json()["message"] == "Form created successfully"
 
@@ -212,7 +214,7 @@ def test_provider_form_create_validation(client: Client, owner: User, organizati
     url = reverse("patients:api-1.0.0:provider_form_create", kwargs={"organization_id": organization.id})
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 400
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json()["detail"] == "Form must include a title: 'General' section missing 'Survey title'"
 
 
@@ -225,5 +227,5 @@ def test_provider_form_create_duplicate_form_name(client: Client, owner: User, o
     url = reverse("patients:api-1.0.0:provider_form_create", kwargs={"organization_id": organization.id})
     response = client.post(url, data=payload, content_type="application/json")
 
-    assert response.status_code == 400
+    assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json()["detail"] == "Form with same title already exists. Please choose a different title."
