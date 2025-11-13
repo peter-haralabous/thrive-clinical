@@ -41,7 +41,6 @@ class CustomAttributeForm(forms.ModelForm[CustomAttribute]):
         ],
         widget=forms.Select(
             attrs={
-                "class": "form-select",
                 "hx-get": "",  # Set dynamically in __init__
                 "hx-target": "#enum-fields-container",
                 "hx-trigger": "change",
