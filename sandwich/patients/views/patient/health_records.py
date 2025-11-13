@@ -243,16 +243,13 @@ def show_updated_list_of_records(
 ) -> HttpResponse:
     """after adding, updating, or deleting a record, show the updated list that record was a member of"""
 
-    if settings.FEATURE_PATIENT_CHATTY_APP:
-        if record_type == "document":
-            url = reverse(
-                "patients:patient_repository",
-                kwargs={"patient_id": patient.id, "category": cast("Document", instance).category},
-            )
-        else:
-            url = reverse("patients:patient_records", kwargs={"patient_id": patient.id, "record_type": record_type})
+    if record_type == "document":
+        url = reverse(
+            "patients:patient_repository",
+            kwargs={"patient_id": patient.id, "category": cast("Document", instance).category},
+        )
     else:
-        url = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
+        url = reverse("patients:patient_records", kwargs={"patient_id": patient.id, "record_type": record_type})
 
     # htmx ignores 302 responses, so we need to redirect the browser ourselves
     if request.headers.get("HX-Request"):
