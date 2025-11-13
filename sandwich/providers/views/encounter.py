@@ -1,7 +1,6 @@
 import logging
 from typing import TYPE_CHECKING
 from typing import Any
-from typing import TypedDict
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -44,22 +43,15 @@ from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.util.http import validate_sort
+from sandwich.providers.forms.inline_edit import FormContext
 from sandwich.providers.forms.inline_edit import InlineEditForm
+from sandwich.providers.forms.inline_edit import create_inline_edit_form
 from sandwich.providers.views.list_view_state import maybe_redirect_with_saved_filters
 
 if TYPE_CHECKING:
     from uuid import UUID
 
 logger = logging.getLogger(__name__)
-
-
-class FormContext(TypedDict):
-    """Type definition for inline edit form context."""
-
-    choices: list[tuple[str, str]]
-    current_value: str | None
-    field_type: str
-    field_label: str
 
 
 class EncounterCreateForm(forms.ModelForm[Encounter]):
@@ -618,11 +610,9 @@ def encounter_edit_field(
     cell_id = f"encounter-{encounter.id}-{field_name}"
 
     if request.method == "GET":
-        form = InlineEditForm(
-            field_type=form_context["field_type"],
+        form = create_inline_edit_form(
+            form_context=form_context,
             field_name=field_name,
-            choices=form_context["choices"],
-            current_value=form_context["current_value"],
             form_action=form_action,
             hx_target=f"#{cell_id}",
         )
@@ -641,14 +631,12 @@ def encounter_edit_field(
         return render(request, "provider/partials/inline_edit_form.html", context)
 
     # POST request - update field
-    form = InlineEditForm(
-        request.POST,
-        field_type=form_context["field_type"],
+    form = create_inline_edit_form(
+        form_context=form_context,
         field_name=field_name,
-        choices=form_context["choices"],
-        current_value=form_context["current_value"],
         form_action=form_action,
         hx_target=cell_id,
+        data=request.POST,
     )
 
     if not form.is_valid():
@@ -705,13 +693,7 @@ def _render_form_with_errors(
 ) -> HttpResponse:
     """Render the inline edit form with error messages."""
     display_value = _get_field_display_value(encounter, field_name, organization)
-    field_type = form.fields["value"].widget.__class__.__name__.lower().replace("widget", "").replace("input", "")
-    if "select" in field_type or isinstance(form.fields["value"].widget, forms.Select):
-        field_type = "select"
-    elif isinstance(form.fields["value"].widget, forms.DateInput):
-        field_type = "date"
-    else:
-        field_type = "text"
+    field_type = form.field_type
 
     context = {
         "encounter": encounter,
