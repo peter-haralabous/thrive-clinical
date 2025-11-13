@@ -173,9 +173,9 @@
 
       function addAssistantSkeleton() {
         const skeleton = document.createElement('div');
-        skeleton.classList.add('assistant-message', 'ml-5', 'assistant-skeleton');
+        skeleton.classList.add('assistant-message', 'chat', 'chat-start', 'my-1', 'assistant-skeleton');
         skeleton.innerHTML = `
-            <div class="assistant-message-content p-4 border rounded-lg bg-base-100 text-primary">
+            <div class="assistant-message-content chat-bubble p-4 border rounded-lg bg-base-100 text-primary">
               <div class="animate-pulse">
                 <div class="h-4 bg-base-300 rounded w-3/4 mb-2"></div>
                 <div class="h-4 bg-base-300 rounded w-5/6 mb-2"></div>
