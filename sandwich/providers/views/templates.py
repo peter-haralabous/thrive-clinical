@@ -99,7 +99,7 @@ def form_edit(request: AuthenticatedHttpRequest, organization: Organization, for
         "Accessing organization form edit page",
         extra={"user_id": request.user.id, "organization_id": organization.id, "form_id": form.id},
     )
-    url = reverse("providers:providers-api:edit_form", kwargs={"organization_id": organization.id, "form_id": form.id})
+    url = reverse("providers:providers-api:save_form", kwargs={"organization_id": organization.id})
     success_redirect_url = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
     return render(
         request,
@@ -124,7 +124,7 @@ def form_builder(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form builder page",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    url = reverse("providers:providers-api:create_form", kwargs={"organization_id": organization.id})
+    url = reverse("providers:providers-api:save_form", kwargs={"organization_id": organization.id})
     success_redirect_url = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
     return render(
         request,

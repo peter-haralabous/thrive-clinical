@@ -10,17 +10,13 @@ const ENVIRONMENT = JSON.parse(
 /**
  * Save the survey JSON to the given URL via POST.
  * https://surveyjs.io/survey-creator/documentation/get-started-html-css-javascript#save-and-load-survey-model-schemas
- *
- * @param url
- * @param json
- * @param saveNo
- * @param callback
  */
 function saveSurveyJson(
   url: string | null | undefined,
   json: object,
   saveNo: number,
   callback: (saveNo: number, success: boolean) => void,
+  formId: string | undefined,
 ) {
   if (!url) {
     console.error('Save URL missing.');
@@ -46,7 +42,10 @@ function saveSurveyJson(
   fetch(url, {
     method: 'POST',
     headers,
-    body: JSON.stringify(json),
+    body: JSON.stringify({
+      schema: json,
+      form_id: formId ?? null,
+    }),
   })
     .then((response) => {
       if (response.ok) {
@@ -76,6 +75,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const creator = new SurveyCreator(creatorOptions);
 
   // Configure save function with creator.
+  const formId =
+    document
+      .getElementById('form-builder-container')
+      ?.getAttribute('data-form-id') ?? undefined;
   const saveFormUrl = document
     .getElementById('form-builder-container')
     ?.getAttribute('data-form-save-url');
@@ -83,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saveNo: number,
     callback: (saveNo: number, success: boolean) => void,
   ) => {
-    saveSurveyJson(saveFormUrl, creator.JSON, saveNo, callback);
+    saveSurveyJson(saveFormUrl, creator.JSON, saveNo, callback, formId);
   };
 
   (window as any).SurveyCreator = creator;

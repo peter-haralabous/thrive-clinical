@@ -52,8 +52,7 @@ EXCLUDED_URL_NAMES = {
     "providers-api:api-root",
     "providers-api:openapi-json",
     "providers-api:openapi-view",
-    "providers-api:create_form",
-    "providers-api:edit_form",
+    "providers-api:save_form",
 }
 
 
