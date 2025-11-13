@@ -7,6 +7,7 @@ from django.utils import timezone
 from django_enum import EnumField
 
 from sandwich.core.models.abstract import BaseModel
+from sandwich.core.models.organization import VerificationType
 
 
 class InvitationStatus(models.TextChoices):
@@ -51,6 +52,11 @@ class Invitation(BaseModel):
     verification_attempts = models.PositiveIntegerField(default=0, help_text="number of failed verification attempts")
 
     objects = InvitationManager()
+
+    @property
+    def verification_type(self) -> VerificationType:
+        organization = self.patient.organization if self.patient else None
+        return organization.verification_type if organization else VerificationType.NONE
 
     def increment_verification_attempts(self) -> None:
         """Increment verification attempts and update status if limit exceeded."""

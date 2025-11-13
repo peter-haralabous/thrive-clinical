@@ -14,6 +14,7 @@ from django.utils import timezone
 
 from sandwich.core.models.invitation import Invitation
 from sandwich.core.models.invitation import InvitationStatus
+from sandwich.core.models.organization import VerificationType
 from sandwich.core.service.invitation_service import accept_patient_invitation
 
 logger = logging.getLogger(__name__)
@@ -22,10 +23,28 @@ logger = logging.getLogger(__name__)
 class InvitationAcceptForm(forms.Form):
     accepted = forms.BooleanField(required=True, label="I accept the invitation")
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, invitation: Invitation, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+        self._invitation = invitation
         self.helper = FormHelper()
         self.helper.add_input(Submit("submit", "Submit"))
+
+
+class DateOfBirthInvitationAcceptForm(InvitationAcceptForm):
+    date_of_birth = forms.DateField(required=True, label="Date of birth")
+
+    def clean_date_of_birth(self):
+        date_of_birth = self.cleaned_data["date_of_birth"]
+        if date_of_birth != self._invitation.patient.date_of_birth:
+            self._invitation.increment_verification_attempts()
+            raise forms.ValidationError("Incorrect date of birth.")
+        return date_of_birth
+
+
+INVITATION_ACCEPT_FORMS = {
+    VerificationType.NONE: InvitationAcceptForm,
+    VerificationType.DATE_OF_BIRTH: DateOfBirthInvitationAcceptForm,
+}
 
 
 @login_not_required
@@ -57,11 +76,13 @@ def accept_invite(request: HttpRequest, token: str) -> HttpResponse:
         )
         return render(request, "patient/accept_invite_public.html", context={"invitation": invitation})
 
+    form_class = INVITATION_ACCEPT_FORMS[invitation.verification_type]
+
     if request.method == "POST":
         logger.info(
             "Processing invitation acceptance form", extra={"invitation_id": invitation.id, "user_id": request.user.id}
         )
-        form = InvitationAcceptForm(request.POST)
+        form = form_class(request.POST, invitation=invitation)
         if form.is_valid():
             logger.info(
                 "Accepting patient invitation",
@@ -96,7 +117,7 @@ def accept_invite(request: HttpRequest, token: str) -> HttpResponse:
         logger.debug(
             "Rendering invitation acceptance form", extra={"invitation_id": invitation.id, "user_id": request.user.id}
         )
-        form = InvitationAcceptForm()
+        form = form_class(invitation=invitation)
 
     context = {"invitation": invitation, "form": form}
     return render(request, "patient/accept_invite.html", context)

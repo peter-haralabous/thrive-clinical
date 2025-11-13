@@ -35,12 +35,36 @@ def test_accept_invite_with_organization(user: User, organization: Organization)
     client = Client()
     client.force_login(user)
 
-    res = client.post(reverse("patients:accept_invite", kwargs={"token": invitation.token}), data={"accepted": True})
+    res = client.post(
+        reverse("patients:accept_invite", kwargs={"token": invitation.token}),
+        data={"accepted": True, "date_of_birth": patient.date_of_birth},
+    )
 
     assert res.status_code == 302
     assert res.url == reverse("patients:patient_details", kwargs={"patient_id": patient.id})  # type:ignore [attr-defined]
     organization_patient_group = organization.get_role(RoleName.PATIENT).group
     assert user.groups.get(name=organization_patient_group.name)
+
+
+@pytest.mark.django_db
+def test_accept_invite_with_organization_limited_attempts(user: User, organization: Organization) -> None:
+    patient = PatientFactory.create(organization=organization)
+    invitation = InvitationFactory.create(patient=patient)
+    client = Client()
+    client.force_login(user)
+
+    for _ in range(3):
+        res = client.post(
+            reverse("patients:accept_invite", kwargs={"token": invitation.token}),
+            data={"accepted": True, "date_of_birth": "1200-01-01"},
+        )
+        assert res.status_code == 200  # rendered form validation error
+
+    res = client.post(
+        reverse("patients:accept_invite", kwargs={"token": invitation.token}),
+        data={"accepted": True, "date_of_birth": "1200-01-01"},
+    )
+    assert res.status_code == 404  # invitation is no longer accessible
 
 
 @pytest.mark.django_db
@@ -56,7 +80,10 @@ def test_accept_invite_with_provider_created_patient(provider: User, user: User,
     client = Client()
     client.force_login(user)
 
-    res = client.post(reverse("patients:accept_invite", kwargs={"token": invitation.token}), data={"accepted": True})
+    res = client.post(
+        reverse("patients:accept_invite", kwargs={"token": invitation.token}),
+        data={"accepted": True, "date_of_birth": patient.date_of_birth},
+    )
 
     assert res.status_code == 302
     assert res.url == reverse("patients:patient_details", kwargs={"patient_id": patient.id})  # type:ignore [attr-defined]
