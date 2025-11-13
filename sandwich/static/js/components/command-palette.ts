@@ -250,38 +250,15 @@ class CommandPalette extends LitElement {
     const hxSwap = link.getAttribute('hx-swap');
 
     if (hxGet && hxTarget) {
-      // Handle HTMX request manually
-      const targetEl = document.querySelector(hxTarget);
-      if (targetEl) {
-        fetch(hxGet)
-          .then((response) => response.text())
-          .then((html) => {
-            // Safe: HTML comes from our Django backend, which escapes all output by default.
-            // The hxGet URL is controlled by our templates, not user input.
-            if (hxSwap === 'innerHTML') {
-              targetEl.innerHTML = html;
-            } else {
-              targetEl.outerHTML = html;
-            }
-
-            (window as any).htmx?.process(targetEl);
-
-            // The manually swapped html cannot execute scripts, so we need to handle modals here
-            const modal = targetEl.querySelector('dialog');
-            if (modal && typeof modal.showModal === 'function') {
-              modal.showModal();
-            }
-
-            document.body.dispatchEvent(
-              new CustomEvent('htmx:afterSwap', {
-                detail: { target: targetEl },
-              }),
-            );
-          })
-          .catch((error) => {
-            console.error('Error loading content:', error);
-          });
-      }
+      // Use htmx.ajax to handle the request and swap; modal logic is now handled globally
+      (window as any).htmx
+        ?.ajax('GET', hxGet, {
+          target: hxTarget,
+          swap: hxSwap,
+        })
+        .catch((error: any) => {
+          console.error('Error loading content:', error);
+        });
       this.isOpen = false;
     } else {
       // Regular navigation
