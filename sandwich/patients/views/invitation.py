@@ -31,7 +31,9 @@ class InvitationAcceptForm(forms.Form):
 
 
 class DateOfBirthInvitationAcceptForm(InvitationAcceptForm):
-    date_of_birth = forms.DateField(required=True, label="Date of birth")
+    date_of_birth = forms.DateField(
+        required=True, label="Date of birth", widget=forms.DateInput(attrs={"type": "date"})
+    )
 
     def clean_date_of_birth(self):
         date_of_birth = self.cleaned_data["date_of_birth"]
