@@ -1,13 +1,19 @@
 import logging
+from http import HTTPStatus
 
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit
+from django import forms
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.http import HttpResponseBadRequest
-from django.http import JsonResponse
+from django.core.validators import FileExtensionValidator
+from django.http import HttpResponse
+from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_GET
-from django.views.decorators.http import require_POST
 from guardian.shortcuts import get_objects_for_user
 
 from sandwich.core.decorators import surveyjs_csp
@@ -18,6 +24,27 @@ from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
 logger = logging.getLogger(__name__)
+
+
+class UploadReferenceForm(forms.Form):
+    file = forms.FileField(
+        required=True,
+        label="Upload File",
+        help_text="Upload a file to generate a form schema.",
+        widget=forms.FileInput(attrs={"accept": "application/pdf, text/csv"}),
+        validators=[FileExtensionValidator(allowed_extensions=["pdf", "csv"])],
+    )
+    description = forms.CharField(
+        required=False,
+        label="Description",
+        widget=forms.Textarea(attrs={"placeholder": "e.g., This is a pre-operative patient intake form..."}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.attrs = {"hx-target": "#generate-form-modal", "hx-swap": "outerHTML"}
+        self.helper.add_input(Submit("upload", "Upload"))
 
 
 @require_GET
@@ -45,6 +72,7 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         {
             "organization": organization,
             "forms": forms_page,
+            "ai_form_generation_enabled": settings.FEATURE_PROVIDER_AI_FORM_GENERATION,
         },
     )
 
@@ -117,39 +145,41 @@ def form_builder(request: AuthenticatedHttpRequest, organization: Organization):
 
 
 @login_required
-@require_POST
 @authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization", "create_form"])])
 def form_file_upload(request: AuthenticatedHttpRequest, organization: Organization):
     """Provider API endpoint to upload a file and generate a form schema."""
-    file = request.FILES.get("file")
-    if not file:
-        return HttpResponseBadRequest("No file uploaded")
 
-    # For now return a simple hardcoded schema as a demo/stub.
-    schema = {
-        "title": "Sir Galahad the Pure",
-        "pages": [
-            {
-                "name": "page1",
-                "elements": [{"type": "text", "name": "q1", "title": "What is your favourite colour?"}],
-            }
-        ],
-    }
+    if request.method == "POST":
+        upload_reference_form = UploadReferenceForm(request.POST, request.FILES)
+        form_post_url = reverse("providers:form_file_upload", kwargs={"organization_id": organization.id})
+        upload_reference_form.helper.form_action = form_post_url
+        upload_reference_form.helper.attrs = {**upload_reference_form.helper.attrs, "hx-post": form_post_url}
 
-    if file.content_type == "application/pdf":
-        # TODO(JL): Integrate with LLM to extract schema from PDF content.
-        schema["title"] = f"{schema['title']} (from PDF)"
-    if file.content_type == "text/csv":
-        # TODO(JL): Integrate with LLM to extract schema from CSV content.
-        schema["title"] = f"{schema['title']} (from CSV)"
+        if upload_reference_form.is_valid():
+            messages.add_message(request, messages.SUCCESS, "Form upload successful, processing document.")
+            reference_file = upload_reference_form.cleaned_data["file"]
 
-    # form_name = str(schema.get("title", "Untitled Form"))
-    # form = Form.objects.create(
-    #     organization=organization,
-    #     name=form_name,
-    #     schema=schema,
-    # )
+            form_title = reference_file.name.split(".")[0]
+            # TODO(MM): Process form with AI
+            # Stubbed sample form
+            Form.objects.create(
+                name=form_title,
+                schema={"title": form_title},
+                organization=organization,
+                reference_file=reference_file,
+            )
 
-    # Return raw JSON so the existing #form_schema content can
-    # be updated via HTMX.
-    return JsonResponse(schema)
+            res = HttpResponse(status=HTTPStatus.OK)
+            res["HX-Redirect"] = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
+            return res
+    else:
+        upload_reference_form = UploadReferenceForm()
+        form_post_url = reverse("providers:form_file_upload", kwargs={"organization_id": organization.id})
+        upload_reference_form.helper.form_action = form_post_url
+        upload_reference_form.helper.attrs = {**upload_reference_form.helper.attrs, "hx-post": form_post_url}
+
+    if request.headers.get("HX-Request") == "true":
+        return render(request, "provider/partials/generate_form_modal.html", {"form": upload_reference_form})
+    # When the request isn't coming from htmx (refreshes and direct routing)
+    # redirect to parent page.
+    return redirect(reverse("providers:form_templates_list", kwargs={"organization_id": organization.id}))
