@@ -1,14 +1,19 @@
+import contextlib
+
 from django.conf import settings
 from django.db import migrations
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.store.postgres import PostgresStore
+from psycopg.errors import UniqueViolation
 
 
 def install_postgres_checkpoint_saver(apps, schema_editor):
     with (
         PostgresSaver.from_conn_string(settings.DATABASE_URL) as checkpointer,
         PostgresStore.from_conn_string(settings.DATABASE_URL) as store,
+        contextlib.suppress(UniqueViolation),
     ):
+        # Tables might already exist from parallel test worker.
         checkpointer.setup()
         store.setup()
 
