@@ -1,6 +1,5 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
-import { globalStyles } from './styles';
 
 /**
  * Inline edit field component that handles both select and date inputs.
@@ -8,8 +7,6 @@ import { globalStyles } from './styles';
  */
 @customElement('inline-edit-field')
 export class InlineEditField extends LitElement {
-  static styles = [globalStyles];
-
   @property({ type: String, attribute: 'field-type' }) accessor fieldType = '';
 
   private form: HTMLFormElement | null = null;

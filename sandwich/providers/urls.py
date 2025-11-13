@@ -12,7 +12,6 @@ from .views.encounter import encounter_create_select_patient
 from .views.encounter import encounter_details
 from .views.encounter import encounter_edit_field
 from .views.encounter import encounter_list
-from .views.encounter import encounter_update_field
 from .views.home import home
 from .views.home import organization_home
 from .views.list_filters import apply_filter
@@ -99,11 +98,6 @@ urlpatterns = [
         "organization/<uuid:organization_id>/encounter/<uuid:encounter_id>/edit/<str:field_name>",
         encounter_edit_field,
         name="encounter_edit_field",
-    ),
-    path(
-        "organization/<uuid:organization_id>/encounter/<uuid:encounter_id>/update/<str:field_name>",
-        encounter_update_field,
-        name="encounter_update_field",
     ),
     path("organization/<uuid:organization_id>/patient/<uuid:patient_id>", patient_details, name="patient"),
     path("organization/<uuid:organization_id>/patient/<uuid:patient_id>/edit", patient_edit, name="patient_edit"),

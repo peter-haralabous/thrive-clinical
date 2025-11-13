@@ -324,7 +324,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -354,7 +354,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -385,7 +385,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -423,7 +423,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -450,7 +450,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -481,7 +481,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -505,7 +505,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -525,7 +525,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -552,7 +552,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -572,7 +572,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -597,7 +597,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(user_without_change_perm)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -622,7 +622,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -645,7 +645,7 @@ class TestEncounterUpdateField:
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -663,12 +663,12 @@ class TestEncounterUpdateField:
         assert f'id="{expected_cell_id}"' in content
 
     @pytest.mark.django_db
-    def test_requires_post_method(self, provider: User, organization: Organization, encounter: Encounter) -> None:
-        """Returns 400 for non-POST requests."""
+    def test_get_returns_edit_form(self, provider: User, organization: Organization, encounter: Encounter) -> None:
+        """GET request returns the edit form."""
         client = Client()
         client.force_login(provider)
         url = reverse(
-            "providers:encounter_update_field",
+            "providers:encounter_edit_field",
             kwargs={
                 "organization_id": organization.id,
                 "encounter_id": encounter.id,
@@ -678,7 +678,9 @@ class TestEncounterUpdateField:
 
         response = client.get(url)
 
-        assert response.status_code == 400
+        assert response.status_code == 200
+        content = response.content.decode()
+        assert 'name="value"' in content
 
 
 class TestInlineEditHelperFunctions:

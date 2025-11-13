@@ -601,118 +601,13 @@ def _build_edit_form_context(encounter: Encounter, field_name: str, organization
 def encounter_edit_field(
     request: AuthenticatedHttpRequest, organization: Organization, encounter: Encounter, field_name: str
 ) -> HttpResponse:
-    """GET endpoint to fetch the edit form for a specific encounter field."""
+    """Handle GET/POST for editing a specific encounter field inline."""
     form_context = _build_edit_form_context(encounter, field_name, organization)
     if not form_context:
         return HttpResponseBadRequest("Invalid field name")
 
     form_action = reverse(
-        "providers:encounter_update_field",
-        kwargs={
-            "organization_id": organization.id,
-            "encounter_id": encounter.id,
-            "field_name": field_name,
-        },
-    )
-
-    hx_target = f"#encounter-{encounter.id}-{field_name}"
-
-    form = InlineEditForm(
-        field_type=form_context["field_type"],
-        field_name=field_name,
-        choices=form_context["choices"],
-        current_value=form_context["current_value"],
-        form_action=form_action,
-        hx_target=hx_target,
-    )
-
-    display_value = _get_field_display_value(encounter, field_name, organization)
-
-    context = {
-        "encounter": encounter,
-        "organization": organization,
-        "field_name": field_name,
-        "form": form,
-        "field_type": form_context["field_type"],
-        "display_value": display_value,
-    }
-
-    return render(request, "provider/partials/inline_edit_form.html", context)
-
-
-def _render_form_with_errors(
-    request: AuthenticatedHttpRequest,
-    encounter: Encounter,
-    organization: Organization,
-    field_name: str,
-    form: InlineEditForm,
-) -> HttpResponse:
-    """Render the inline edit form with error messages."""
-    display_value = _get_field_display_value(encounter, field_name, organization)
-    field_type = form.fields["value"].widget.__class__.__name__.lower().replace("widget", "").replace("input", "")
-    if "select" in field_type or isinstance(form.fields["value"].widget, forms.Select):
-        field_type = "select"
-    elif isinstance(form.fields["value"].widget, forms.DateInput):
-        field_type = "date"
-    else:
-        field_type = "text"
-
-    context = {
-        "encounter": encounter,
-        "organization": organization,
-        "field_name": field_name,
-        "form": form,
-        "field_type": field_type,
-        "display_value": display_value,
-        "errors": form.errors.get("value", ["Invalid value"])[0] if form.errors else None,
-    }
-    return HttpResponseBadRequest(render(request, "provider/partials/inline_edit_form.html", context).content)
-
-
-def _handle_field_update(
-    encounter: Encounter,
-    field_name: str,
-    new_value: str,
-    organization: Organization,
-    form: InlineEditForm,
-) -> bool:
-    """Update the specified field. Returns True if successful, False otherwise."""
-    if field_name in ["status", "is_active"]:
-        if not _update_model_field(encounter, field_name, new_value):
-            form.add_error("value", f"Invalid {field_name} value")
-            return False
-        return True
-
-    # Try custom attribute
-    attribute = _get_custom_attribute(field_name, organization)
-    if not attribute:
-        return False
-    if not update_custom_attribute(encounter, attribute, new_value):
-        form.add_error("value", f"Invalid {attribute.data_type} value")
-        return False
-    return True
-
-
-@login_required
-@authorize_objects(
-    [
-        ObjPerm(Organization, "organization_id", ["view_organization"]),
-        ObjPerm(Encounter, "encounter_id", ["view_encounter", "change_encounter"]),
-    ]
-)
-def encounter_update_field(
-    request: AuthenticatedHttpRequest, organization: Organization, encounter: Encounter, field_name: str
-) -> HttpResponse:
-    """POST endpoint to update a specific encounter field."""
-    if request.method != "POST":
-        return HttpResponseBadRequest("Only POST allowed")
-
-    form_context = _build_edit_form_context(encounter, field_name, organization)
-    if not form_context:
-        return HttpResponseBadRequest("Invalid field name")
-
-    form_action = reverse(
-        "providers:encounter_update_field",
+        "providers:encounter_edit_field",
         kwargs={
             "organization_id": organization.id,
             "encounter_id": encounter.id,
@@ -722,6 +617,30 @@ def encounter_update_field(
 
     cell_id = f"encounter-{encounter.id}-{field_name}"
 
+    if request.method == "GET":
+        form = InlineEditForm(
+            field_type=form_context["field_type"],
+            field_name=field_name,
+            choices=form_context["choices"],
+            current_value=form_context["current_value"],
+            form_action=form_action,
+            hx_target=f"#{cell_id}",
+        )
+
+        display_value = _get_field_display_value(encounter, field_name, organization)
+
+        context = {
+            "encounter": encounter,
+            "organization": organization,
+            "field_name": field_name,
+            "form": form,
+            "field_type": form_context["field_type"],
+            "display_value": display_value,
+        }
+
+        return render(request, "provider/partials/inline_edit_form.html", context)
+
+    # POST request - update field
     form = InlineEditForm(
         request.POST,
         field_type=form_context["field_type"],
@@ -775,6 +694,58 @@ def encounter_update_field(
     )
 
     return render(request, "provider/partials/inline_edit_display.html", context)
+
+
+def _render_form_with_errors(
+    request: AuthenticatedHttpRequest,
+    encounter: Encounter,
+    organization: Organization,
+    field_name: str,
+    form: InlineEditForm,
+) -> HttpResponse:
+    """Render the inline edit form with error messages."""
+    display_value = _get_field_display_value(encounter, field_name, organization)
+    field_type = form.fields["value"].widget.__class__.__name__.lower().replace("widget", "").replace("input", "")
+    if "select" in field_type or isinstance(form.fields["value"].widget, forms.Select):
+        field_type = "select"
+    elif isinstance(form.fields["value"].widget, forms.DateInput):
+        field_type = "date"
+    else:
+        field_type = "text"
+
+    context = {
+        "encounter": encounter,
+        "organization": organization,
+        "field_name": field_name,
+        "form": form,
+        "field_type": field_type,
+        "display_value": display_value,
+        "errors": form.errors.get("value", ["Invalid value"])[0] if form.errors else None,
+    }
+    return HttpResponseBadRequest(render(request, "provider/partials/inline_edit_form.html", context).content)
+
+
+def _handle_field_update(
+    encounter: Encounter,
+    field_name: str,
+    new_value: str,
+    organization: Organization,
+    form: InlineEditForm,
+) -> bool:
+    """Update the specified field. Returns True if successful, False otherwise."""
+    if field_name in ["status", "is_active"]:
+        if not _update_model_field(encounter, field_name, new_value):
+            form.add_error("value", f"Invalid {field_name} value")
+            return False
+        return True
+
+    attribute = _get_custom_attribute(field_name, organization)
+    if not attribute:
+        return False
+    if not update_custom_attribute(encounter, attribute, new_value):
+        form.add_error("value", f"Invalid {attribute.data_type} value")
+        return False
+    return True
 
 
 def _update_model_field(encounter: Encounter, field_name: str, new_value: str) -> bool:
