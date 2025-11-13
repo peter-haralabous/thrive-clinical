@@ -10,15 +10,21 @@
   <ul class="p-2">
     {% for item in left_panel_items %}
       <li>
-        <a href="{{ item.link }}"
-           {% if item.target == "left_panel" %}hx-get="{{ item.link }}" hx-target="#left-panel" hx-swap="outerHTML" hx-push-url="true" {% endif %}
-           {% if item.target == "modal" %}hx-get="{{ item.link }}" hx-target="body" hx-swap="beforeend" hx-push-url="true" {% endif %}
-           class="flex items-center p-3 rounded-lg hover:bg-base-300/50 gap-4">
-          {% lucide item.icon class="size-5" %}
-          <span class="flex-1">{{ item.label }}</span>
-          {% if item.count is not None %}<span class="text-secondary">{{ item.count }}</span>{% endif %}
-        </a>
-      </li>
+        {% if item.type == "nav-group" %}
+          <h3 class="p-2 text-sm font-semibold text-base-content/70">{{ item.label }}</h3>
+        {% else %}
+          <a href="{{ item.link }}"
+             {% if item.target == "left_panel" %}hx-get="{{ item.link }}" hx-target="#left-panel" hx-swap="outerHTML" hx-push-url="true" {% endif %}
+             {% if item.target == "modal" %}hx-get="{{ item.link }}" hx-target="body" hx-swap="beforeend" hx-push-url="true" {% endif %}
+             class="flex items-center p-3 rounded-lg hover:bg-base-300/50 gap-4">
+            {% if item.icon %}
+              {% lucide item.icon class="size-5" %}
+            {% endif %}
+            <span class="flex-1">{{ item.label }}</span>
+            {% if item.count is not None %}<span class="text-secondary">{{ item.count }}</span>{% endif %}
+          </a>
+        </li>
+      {% endif %}
     {% empty %}
       <li>
         <p class="p-2 text-center text-base-content/60">Nothing here</p>

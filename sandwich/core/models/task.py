@@ -32,8 +32,12 @@ class TaskStatus(models.TextChoices):
     ENTERED_IN_ERROR = "entered-in-error", _("Entered in Error")
 
 
+TERMINAL_TASK_STATUSES = [TaskStatus.CANCELLED, TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.ENTERED_IN_ERROR]
+ACTIVE_TASK_STATUSES = [s for s in TaskStatus if s not in TERMINAL_TASK_STATUSES]
+
+
 def terminal_task_status(status: TaskStatus) -> bool:
-    return status in [TaskStatus.CANCELLED, TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.ENTERED_IN_ERROR]
+    return status in TERMINAL_TASK_STATUSES
 
 
 class TaskManager(models.Manager["Task"]):

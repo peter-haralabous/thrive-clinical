@@ -26,6 +26,7 @@ from sandwich.core.models import Practitioner
 from sandwich.core.models import Task
 from sandwich.core.models.document import DocumentCategory
 from sandwich.core.models.health_record import HealthRecord
+from sandwich.core.models.task import ACTIVE_TASK_STATUSES
 from sandwich.core.service.health_record_service import get_document_count_by_category
 from sandwich.core.service.health_record_service import get_health_record_count_by_type
 from sandwich.core.service.permissions_service import ObjPerm
@@ -41,11 +42,20 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class NavItem:
+    type = "nav-item"
+
     link: str
     label: str
     icon: str
     count: int | None = None
     target: Literal["left_panel", "modal"] | None = None
+
+
+@dataclass
+class NavGroup:
+    type = "nav-group"
+
+    label: str
 
 
 RECORD_TYPES = {
@@ -159,7 +169,7 @@ def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, cate
 @login_required
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient"])])
 def patient_tasks(request: AuthenticatedHttpRequest, patient: Patient):
-    left_panel_title = "Forms"
+    left_panel_title = "To Do"
     left_panel_back_link = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
 
     def task_icon(task: Task) -> str:
@@ -167,11 +177,23 @@ def patient_tasks(request: AuthenticatedHttpRequest, patient: Patient):
             return "clipboard"
         return "clipboard-check"
 
-    items = [
+    active_items = [
         NavItem(link=task.get_absolute_url(), label=task.name, icon=task_icon(task))
         # FIXME: need to page this list
-        for task in patient.task_set.all()
+        for task in patient.task_set.filter(status__in=ACTIVE_TASK_STATUSES)
     ]
+    completed_items = [
+        NavItem(link=task.get_absolute_url(), label=task.name, icon=task_icon(task))
+        # FIXME: need to page this list
+        for task in patient.task_set.exclude(status__in=ACTIVE_TASK_STATUSES)
+    ]
+    items: list[NavItem | NavGroup] = []
+    if active_items:
+        items.append(NavGroup(label="Pending"))
+        items.extend(active_items)
+    if completed_items:
+        items.append(NavGroup(label="Completed"))
+        items.extend(completed_items)
     context = {
         "patient": patient,
         "left_panel_title": left_panel_title,
