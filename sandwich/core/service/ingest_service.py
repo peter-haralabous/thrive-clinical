@@ -1,15 +1,17 @@
 import logging
-from uuid import UUID
 
 from django.template import loader
-from django_eventstream import send_event
 
 from sandwich.core.models import Document
+from sandwich.core.models import Patient
 from sandwich.core.service.ingest.extract_pdf import extract_facts_from_pdf
 from sandwich.core.service.ingest.extract_records import extract_records
 from sandwich.core.service.ingest.extract_text import extract_facts_from_text
 from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
+from sandwich.core.service.sse_service import EventType
+from sandwich.core.service.sse_service import sse_patient_channel
+from sandwich.core.service.sse_service import sse_send
 from sandwich.core.util.procrastinate import define_task
 
 logger = logging.getLogger(__name__)
@@ -26,7 +28,7 @@ def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.
     document = Document.objects.get(id=document_id)
     patient = document.patient
     llm_client = get_llm(ModelName(llm_name))
-    send_ingest_progress(patient.id, text=f"Processing {document.original_filename}...")
+    send_ingest_progress(patient, text=f"Processing {document.original_filename}...")
 
     try:
         with document.file.open("rb") as f:
@@ -46,26 +48,24 @@ def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.
         )
         triples = []
 
-    send_ingest_progress(
-        patient.id, text=f"Extracted {len(triples)} facts from {document.original_filename}", done=True
-    )
+    send_ingest_progress(patient, text=f"Extracted {len(triples)} facts from {document.original_filename}", done=True)
 
 
 @define_task
 def extract_records_from_document_job(document_id: str):
     document = Document.objects.get(id=document_id)
     patient = document.patient
-    send_ingest_progress(patient.id, text=f"Processing {document.original_filename}...")
+    send_ingest_progress(patient, text=f"Processing {document.original_filename}...")
 
     records = extract_records(document)
 
     send_ingest_progress(
-        patient.id, text=f"Extracted {len(records)} records from {document.original_filename}", done=True
+        patient, text=f"Extracted {len(records)} records from {document.original_filename}", done=True
     )
 
 
-def send_ingest_progress(patient_id: UUID, *, text: str, done=False):
-    logger.debug("Sending patient message", extra={"patient_id": patient_id})
+def send_ingest_progress(patient: Patient, *, text: str, done=False):
+    logger.debug("Sending patient message", extra={"patient_id": str(patient.id)})
     context = {"text": text, "done": done}
     content = loader.render_to_string("patient/partials/ingest_progress.html", context)
-    send_event(f"patient/{patient_id}", "ingest_progress", content, json_encode=False)
+    sse_send(sse_patient_channel(patient), EventType.INGEST_PROGRESS, content)
