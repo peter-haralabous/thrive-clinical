@@ -53,6 +53,27 @@ def date_attribute(organization: Organization) -> CustomAttribute:
 
 
 @pytest.fixture
+def multi_enum_attribute(organization: Organization) -> CustomAttribute:
+    """Create a multi-valued custom ENUM attribute for encounters."""
+    return CustomAttribute.objects.create(
+        organization=organization,
+        content_type=ContentType.objects.get_for_model(Encounter),
+        name="Tags",
+        data_type=CustomAttribute.DataType.ENUM,
+        is_multi=True,
+    )
+
+
+@pytest.fixture
+def multi_enum_values(multi_enum_attribute: CustomAttribute) -> dict[str, CustomAttributeEnum]:
+    """Create enum values for the multi-valued enum attribute."""
+    urgent = CustomAttributeEnum.objects.create(attribute=multi_enum_attribute, label="Urgent", value="urgent")
+    followup = CustomAttributeEnum.objects.create(attribute=multi_enum_attribute, label="Follow-up", value="followup")
+    review = CustomAttributeEnum.objects.create(attribute=multi_enum_attribute, label="Review", value="review")
+    return {"urgent": urgent, "followup": followup, "review": review}
+
+
+@pytest.fixture
 def user_without_change_perm(organization: Organization) -> User:
     """Create a user with view but not change permissions."""
     user = UserFactory.create(consents=ConsentMiddleware.required_policies)
@@ -662,6 +683,35 @@ class TestInlineEditHelperFunctions:
         assert display == "—"
 
     @pytest.mark.django_db
+    def test_get_field_display_value_for_multi_valued_enum_attribute(
+        self,
+        encounter: Encounter,
+        organization: Organization,
+        multi_enum_attribute: CustomAttribute,
+        multi_enum_values,
+    ) -> None:
+        """Test _get_field_display_value for multi-valued custom enum attributes."""
+        # Set multiple values
+        encounter.attributes.create(attribute=multi_enum_attribute, value_enum=multi_enum_values["urgent"])
+        encounter.attributes.create(attribute=multi_enum_attribute, value_enum=multi_enum_values["review"])
+
+        display = _get_field_display_value(encounter, str(multi_enum_attribute.id), organization)
+
+        # Should return comma-separated list
+        assert "Urgent" in display
+        assert "Review" in display
+        assert ", " in display
+
+    @pytest.mark.django_db
+    def test_get_field_display_value_returns_placeholder_for_unset_multi_valued_attribute(
+        self, encounter: Encounter, organization: Organization, multi_enum_attribute: CustomAttribute
+    ) -> None:
+        """Test _get_field_display_value returns placeholder when multi-valued attribute has no values."""
+        display = _get_field_display_value(encounter, str(multi_enum_attribute.id), organization)
+
+        assert display == "—"
+
+    @pytest.mark.django_db
     def test_build_edit_form_context_for_status(self, encounter: Encounter, organization: Organization) -> None:
         """Test _build_edit_form_context for status field."""
         context = _build_edit_form_context(encounter, "status", organization)
@@ -708,6 +758,33 @@ class TestInlineEditHelperFunctions:
         assert context["field_label"] == "Due Date"
         assert context["current_value"] == "2024-12-25"
         assert context["choices"] == []
+
+    @pytest.mark.django_db
+    def test_build_edit_form_context_for_multi_valued_enum(
+        self,
+        encounter: Encounter,
+        organization: Organization,
+        multi_enum_attribute: CustomAttribute,
+        multi_enum_values,
+    ) -> None:
+        """Test _build_edit_form_context for multi-valued custom enum attribute."""
+        # Set multiple values
+        encounter.attributes.create(attribute=multi_enum_attribute, value_enum=multi_enum_values["urgent"])
+        encounter.attributes.create(attribute=multi_enum_attribute, value_enum=multi_enum_values["followup"])
+
+        context = _build_edit_form_context(encounter, str(multi_enum_attribute.id), organization)
+
+        assert context is not None
+        assert context["field_type"] == "multi-select"
+        assert context["field_label"] == "Tags"
+        # Should return list of selected IDs
+        assert isinstance(context["current_value"], list)
+        assert str(multi_enum_values["urgent"].id) in context["current_value"]
+        assert str(multi_enum_values["followup"].id) in context["current_value"]
+        assert str(multi_enum_values["review"].id) not in context["current_value"]
+        choices = context["choices"]
+        assert isinstance(choices, list)
+        assert len(choices) == 3
 
     @pytest.mark.django_db
     def test_build_edit_form_context_returns_none_for_invalid_field(

@@ -1,5 +1,6 @@
 import { LitElement, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
+import Choices from 'choices.js';
 
 interface FieldHandler {
   setup(signal: AbortSignal): void;
@@ -144,6 +145,131 @@ class SelectFieldHandler extends BaseFieldHandler<HTMLSelectElement> {
   }
 }
 
+class MultiSelectFieldHandler implements FieldHandler {
+  private readonly element: HTMLSelectElement;
+  private readonly originalValue: string;
+  private readonly onSubmit: () => void;
+  private readonly onCancel: () => void;
+  private readonly onValueChange: (changed: boolean) => void;
+  private choicesInstance: Choices | null = null;
+
+  constructor(
+    element: HTMLSelectElement,
+    onSubmit: () => void,
+    onCancel: () => void,
+    onValueChange: (changed: boolean) => void,
+  ) {
+    this.element = element;
+    this.originalValue = this.getValue();
+    this.onSubmit = onSubmit;
+    this.onCancel = onCancel;
+    this.onValueChange = onValueChange;
+  }
+
+  setup(signal: AbortSignal): void {
+    this.choicesInstance =
+      (this.element as any).choices ||
+      new Choices(this.element, {
+        removeItemButton: true,
+        searchEnabled: true,
+        shouldSort: false,
+        itemSelectText: '',
+      });
+
+    // Auto-open dropdown after Choices is fully initialized
+    requestAnimationFrame(() => this?.choicesInstance?.showDropdown());
+
+    this.element.addEventListener('change', this.handleChange, { signal });
+
+    this.choicesInstance?.input.element.addEventListener(
+      'keydown',
+      this.handleKeydown,
+      { signal },
+    );
+
+    document.addEventListener('click', this.handleClickOutside, {
+      signal,
+      capture: true,
+    });
+  }
+
+  cleanup(): void {
+    if (this.choicesInstance) {
+      this.choicesInstance.destroy();
+      this.choicesInstance = null;
+    }
+  }
+
+  private getValue(): string {
+    const selected = Array.from(this.element.selectedOptions).map(
+      (option) => option.value,
+    );
+    return selected.join(',');
+  }
+
+  private setValue(value: string): void {
+    const values = value ? value.split(',') : [];
+
+    if (this.choicesInstance) {
+      this.choicesInstance.removeActiveItems();
+      this.choicesInstance.setChoiceByValue(values);
+    } else {
+      Array.from(this.element.options).forEach((option) => {
+        option.selected = values.includes(option.value);
+      });
+    }
+  }
+
+  private readonly handleChange = (): void => {
+    const currentValue = this.getValue();
+    if (currentValue !== this.originalValue) {
+      this.onValueChange(true);
+    }
+  };
+
+  private readonly handleClickOutside = (e: MouseEvent): void => {
+    const target = e.target as Node;
+    const choicesWrapper = this.element.closest('.choices');
+
+    if (choicesWrapper && !choicesWrapper.contains(target)) {
+      this.handleBlur();
+    }
+  };
+
+  private handleBlur(): void {
+    requestAnimationFrame(() => {
+      if (this.getValue() !== this.originalValue) {
+        this.onSubmit();
+      } else {
+        this.onCancel();
+      }
+    });
+  }
+
+  private readonly handleKeydown = (e: KeyboardEvent): void => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+
+      this.setValue(this.originalValue);
+      this.onValueChange(false);
+
+      requestAnimationFrame(() => {
+        this.onCancel();
+      });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+
+      if (this.getValue() !== this.originalValue) {
+        this.onValueChange(true);
+        requestAnimationFrame(() => {
+          this.onSubmit();
+        });
+      }
+    }
+  };
+}
+
 class DateFieldHandler extends BaseFieldHandler<HTMLInputElement> {
   private lastKeyPressed: string | null = null;
 
@@ -237,7 +363,6 @@ export class InlineEditField extends LitElement {
 
   disconnectedCallback(): void {
     super.disconnectedCallback();
-    this.fieldHandler?.cleanup();
     this.abortController?.abort();
   }
 
@@ -277,11 +402,21 @@ export class InlineEditField extends LitElement {
       this.changeHandled = changed;
     };
 
-    if (this.fieldType === 'select' || this.fieldType === 'multi-select') {
+    if (this.fieldType === 'select') {
       const select = this.form?.querySelector('select');
       if (select instanceof HTMLSelectElement) {
         return new SelectFieldHandler(
           select,
+          onSubmit,
+          onCancel,
+          onValueChange,
+        );
+      }
+    } else if (this.fieldType === 'multi-select') {
+      const multiSelect = this.form?.querySelector('select[multiple]');
+      if (multiSelect instanceof HTMLSelectElement) {
+        return new MultiSelectFieldHandler(
+          multiSelect,
           onSubmit,
           onCancel,
           onValueChange,

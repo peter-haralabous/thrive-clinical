@@ -426,6 +426,17 @@ def _get_custom_attribute_value_display(
     encounter: Encounter, attribute: CustomAttribute, content_type: ContentType
 ) -> str:
     """Get display value for a custom attribute."""
+    if attribute.data_type == CustomAttribute.DataType.ENUM and attribute.is_multi:
+        attr_values = CustomAttributeValue.objects.filter(
+            attribute=attribute,
+            content_type=content_type,
+            object_id=encounter.id,
+        )
+        if attr_values.exists():
+            labels = [av.value_enum.label for av in attr_values if av.value_enum]
+            return ", ".join(labels) if labels else "—"
+        return "—"
+
     try:
         attr_value = CustomAttributeValue.objects.get(
             attribute=attribute,
@@ -485,22 +496,34 @@ def _build_custom_attribute_form_context(encounter: Encounter, attribute: Custom
     """
     field_label = attribute.name
     content_type = ContentType.objects.get_for_model(Encounter)
+    current_value: str | list[str] | None
+    choices: list[tuple[str, str]]
+    field_type: str
 
     if attribute.data_type == CustomAttribute.DataType.ENUM:
         enum_set = getattr(attribute, "customattributeenum_set", None)
         choices = [(str(enum.id), str(enum.label)) for enum in enum_set.all()] if enum_set else []
-        field_type = "select"
 
-        try:
-            attr_value = CustomAttributeValue.objects.get(
+        field_type = "multi-select" if attribute.is_multi else "select"
+
+        if attribute.is_multi:
+            attr_values = CustomAttributeValue.objects.filter(
                 attribute=attribute,
                 content_type=content_type,
                 object_id=encounter.id,
             )
-            value_enum_id = getattr(attr_value, "value_enum_id", None)
-            current_value = str(value_enum_id) if value_enum_id else None
-        except CustomAttributeValue.DoesNotExist:
-            current_value = None
+            current_value = [str(val.value_enum.id) for val in attr_values if val.value_enum]
+        else:
+            try:
+                attr_value = CustomAttributeValue.objects.get(
+                    attribute=attribute,
+                    content_type=content_type,
+                    object_id=encounter.id,
+                )
+                value_enum_id = getattr(attr_value, "value_enum_id", None)
+                current_value = str(value_enum_id) if value_enum_id else None
+            except CustomAttributeValue.DoesNotExist:
+                current_value = None
 
     elif attribute.data_type == CustomAttribute.DataType.DATE:
         choices = []
@@ -518,12 +541,13 @@ def _build_custom_attribute_form_context(encounter: Encounter, attribute: Custom
     else:
         return None
 
-    return {
-        "choices": choices,
-        "current_value": current_value,
-        "field_type": field_type,
-        "field_label": field_label,
-    }
+    # TypedDict constructor helps mypy narrow types correctly
+    return FormContext(
+        choices=choices,
+        current_value=current_value,
+        field_type=field_type,
+        field_label=field_label,
+    )
 
 
 def _build_edit_form_context(encounter: Encounter, field_name: str, organization: Organization) -> FormContext | None:
@@ -620,10 +644,16 @@ def encounter_edit_field(
         return _render_form_with_errors(request, encounter, organization, field_name, form)
 
     new_value = form.cleaned_data.get("value", "")
-    if isinstance(new_value, str):
-        new_value = new_value.strip()
 
-    if not _handle_field_update(encounter, field_name, str(new_value), organization, form):
+    processed_value: str | list[str]
+    if isinstance(new_value, list):
+        processed_value = new_value
+    elif isinstance(new_value, str):
+        processed_value = new_value.strip()
+    else:  # Fallback - convert to string
+        processed_value = str(new_value) if new_value else ""
+
+    if not _handle_field_update(encounter, field_name, processed_value, organization, form):
         return _render_form_with_errors(request, encounter, organization, field_name, form)
 
     logger.info(
@@ -687,12 +717,15 @@ def _render_form_with_errors(
 def _handle_field_update(
     encounter: Encounter,
     field_name: str,
-    new_value: str,
+    new_value: str | list[str],
     organization: Organization,
     form: InlineEditForm,
 ) -> bool:
     """Update the specified field. Returns True if successful, False otherwise."""
     if field_name == "status":
+        if isinstance(new_value, list):
+            form.add_error("value", f"{field_name} must be a single value")
+            return False
         if not _update_model_field(encounter, field_name, new_value):
             form.add_error("value", f"Invalid {field_name} value")
             return False

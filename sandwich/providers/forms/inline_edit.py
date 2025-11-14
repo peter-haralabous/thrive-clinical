@@ -5,6 +5,8 @@ from crispy_forms.layout import Div
 from crispy_forms.layout import Layout
 from django import forms
 
+from sandwich.core.widgets import MultiSelectWidget
+
 
 class InlineEditForm(forms.Form):
     """Base form for inline editing of encounter fields."""
@@ -93,13 +95,12 @@ class InlineEditMultiSelectForm(InlineEditForm):
         self.fields["value"] = forms.MultipleChoiceField(
             choices=choices,
             required=False,
-            widget=forms.SelectMultiple(
+            widget=MultiSelectWidget(
+                choices=choices,
                 attrs={
-                    "class": "select select-sm select-bordered inline-edit-select w-full",
                     "autofocus": True,
-                    "aria-label": field_name,
-                    "size": "5",
-                }
+                    "label": field_name,
+                },
             ),
         )
         if current_value:
@@ -139,7 +140,7 @@ class FormContext(TypedDict):
     """Type definition for inline edit form context."""
 
     choices: list[tuple[str, str]]
-    current_value: str | None
+    current_value: str | list[str] | None
     field_type: str
     field_label: str
 
@@ -157,11 +158,13 @@ def create_inline_edit_form(
     current_value = form_context["current_value"]
 
     if field_type == "select":
+        # For select fields, current_value should be a string or None
+        single_value = current_value if isinstance(current_value, str) or current_value is None else None
         return InlineEditSelectForm(
             data,
             field_name=field_name,
             form_action=form_action,
-            current_value=current_value,
+            current_value=single_value,
             choices=choices,
             hx_target=hx_target,
         )
@@ -176,11 +179,12 @@ def create_inline_edit_form(
             hx_target=hx_target,
         )
     if field_type == "date":
+        date_value = current_value if isinstance(current_value, str) or current_value is None else None
         return InlineEditDateForm(
             data,
             field_name=field_name,
             form_action=form_action,
-            current_value=current_value,
+            current_value=date_value,
             hx_target=hx_target,
         )
     return InlineEditForm(

@@ -340,15 +340,19 @@ def test_inline_edit_status_field_updates_display(
     # Wait for HTMX to swap the cell content with the form
     page.wait_for_timeout(500)
 
-    # Wait for the form to appear in the row (the cell was replaced by HTMX)
-    select = row.locator("select[name='value']")
-    select.wait_for(state="visible", timeout=5000)
+    # Wait for the Choices.js dropdown to appear within the inline-edit-field
+    inline_edit = row.locator("inline-edit-field")
+    inline_edit.wait_for(state="attached", timeout=3000)
 
-    select.select_option(EncounterStatus.COMPLETED.value)
+    choices_container = inline_edit.locator(".choices")
+    choices_container.wait_for(state="visible", timeout=5000)
+
+    dropdown_item = choices_container.locator(".choices__item--choice", has_text="Completed")
+    dropdown_item.wait_for(state="visible", timeout=2000)
+    dropdown_item.click()
 
     # Wait for HTMX to process the form submission and the display to update
-    # The select should disappear after submission
-    select.wait_for(state="hidden", timeout=3000)
+    choices_container.wait_for(state="hidden", timeout=3000)
 
     # Verify the display was updated - look in the same row again
     updated_cell = row.locator("td").filter(has_text="Completed").or_(row.locator("td").filter(has_text="COMPLETED"))
@@ -417,22 +421,26 @@ def test_inline_edit_can_be_cancelled_with_escape(
     # Wait for HTMX to swap the cell content with the form
     page.wait_for_timeout(500)
 
-    # Wait for the form to appear in the row (the cell was replaced by HTMX)
-    select = row.locator("select[name='value']")
-    select.wait_for(state="visible", timeout=5000)
+    # Wait for the Choices.js dropdown to appear within the inline-edit-field
+    inline_edit = row.locator("inline-edit-field")
+    inline_edit.wait_for(state="attached", timeout=3000)
 
-    select.press("Escape")
+    choices_container = inline_edit.locator(".choices")
+    choices_container.wait_for(state="visible", timeout=5000)
 
-    select.wait_for(state="hidden", timeout=3000)
+    # Press Escape on the Choices container to cancel
+    choices_container.press("Escape")
 
-    # Verify the display is back to original value
+    # After pressing Escape, the entire cell should be swapped back to display mode by HTMX
+    # Wait for the choices container to be hidden/removed as the cell reverts to display mode
+    page.wait_for_timeout(500)
+
+    # Verify the display is back to original value - find it in the row again
     cancelled_cell = (
         row.locator("td").filter(has_text="In Progress").or_(row.locator("td").filter(has_text="IN_PROGRESS"))
     ).first
+    cancelled_cell.wait_for(state="visible", timeout=2000)
     assert cancelled_cell.is_visible(), "Status cell should show 'In Progress' after cancelling"
-    cancelled_text = cancelled_cell.text_content()
-    assert cancelled_text is not None
-    assert "In Progress" in cancelled_text or "IN_PROGRESS" in cancelled_text
 
     encounter.refresh_from_db()
     assert encounter.status == EncounterStatus.IN_PROGRESS
@@ -440,7 +448,7 @@ def test_inline_edit_can_be_cancelled_with_escape(
 
 @pytest.mark.e2e
 @pytest.mark.django_db
-def test_inline_edit_custom_enum_updates_display(
+def test_inline_edit_custom_enum_updates_display(  # noqa: PLR0915
     live_server, page: Page, provider: User, organization: Organization, encounter: Encounter
 ) -> None:
     """Test that inline editing a custom enum attribute updates the display with the correct label."""
@@ -528,15 +536,23 @@ def test_inline_edit_custom_enum_updates_display(
     # Wait for HTMX to swap the cell content with the form
     page.wait_for_timeout(500)
 
-    # Wait for the form to appear in the row (the cell was replaced by HTMX)
-    select = row.locator("select[name='value']")
-    select.wait_for(state="visible", timeout=5000)
+    # Wait for the Choices.js dropdown to appear within the inline-edit-field
+    inline_edit = row.locator("inline-edit-field")
+    inline_edit.wait_for(state="attached", timeout=3000)
 
-    select.select_option(str(high_priority.id))
+    choices_container = inline_edit.locator(".choices")
+    choices_container.wait_for(state="visible", timeout=5000)
 
+    # Click on the dropdown option for High priority
+    # Choices.js shows options as items in a dropdown list
+    dropdown_item = choices_container.locator(".choices__item--choice", has_text="High")
+    dropdown_item.wait_for(state="visible", timeout=2000)
+    dropdown_item.click()
+
+    choices_container.wait_for(state="hidden", timeout=3000)
     # Wait for HTMX to process the form submission and the display to update
-    # The select should disappear after submission
-    select.wait_for(state="hidden", timeout=3000)
+    # The choices container should disappear after submission
+    choices_container.wait_for(state="hidden", timeout=3000)
 
     # Verify the display was updated to show "High" (the label, not "high" the value)
     updated_cell = row.locator("td").filter(has_text="High").first
