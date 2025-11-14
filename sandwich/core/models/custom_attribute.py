@@ -42,7 +42,7 @@ class CustomAttributeEnum(BaseModel):
 class CustomAttributeValue(BaseModel):
     """Holds the value for a CustomAttribute for a given entity instance."""
 
-    attribute = models.ForeignKey(CustomAttribute, on_delete=models.PROTECT)
+    attribute = models.ForeignKey(CustomAttribute, on_delete=models.CASCADE)
 
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.UUIDField()

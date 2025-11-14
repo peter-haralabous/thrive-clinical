@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 
 class DeleteConfirmationForm(forms.Form):
     confirmation = forms.CharField(
-        max_length=6, label="", widget=forms.TextInput(attrs={"placeholder": "Type 'DELETE' to confirm"})
+        max_length=6,
+        label="",
+        widget=forms.TextInput(attrs={"placeholder": "Type 'DELETE' to confirm", "autofocus": True}),
     )
 
     def __init__(self, *args, **kwargs) -> None:
