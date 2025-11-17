@@ -1,4 +1,4 @@
-# Copilot Instructions for sandwich
+# Agent Instructions for sandwich
 
 This repository is a Django web application built with HTMX and Tailwind CSS for creating healthcare-related forms and workflows.
 
