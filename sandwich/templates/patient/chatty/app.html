@@ -10,15 +10,23 @@
       {# The sse-swap here is misleading; messages include a hx-swap-oob with their real target #}
       <div sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
            sse-swap="assistant_message,assistant_thinking,user_message,ingest_progress"></div>
-      <div class="flex flex-row gap-2 p-1 lg:p-6 h-full">
+      <div id="modal-container"></div>
+      <div id="panels-container"
+           data-active-view="chat"
+           class="flex flex-row gap-0 lg:p-6 h-full overflow-x-hidden">
         {# Left Panel #}
         {% block left_panel %}
           {% include 'patient/chatty/partials/left_panel.html' %}
         {% endblock left_panel %}
+        {# Left Resize Handle #}
+        <div id="left-resize-handle"
+             class="hidden lg:flex items-center justify-center w-2 cursor-col-resize hover:bg-primary/20 transition-colors group">
+          <div class="h-12 w-1 bg-base-300 group-hover:bg-primary transition-colors"></div>
+        </div>
         {# Center Panel #}
         <div id="mobile-chat-view"
-             class="w-full lg:w-auto lg:flex-1 flex flex-col h-full bg-base-100 rounded-xl border border-base-300">
-          <header class="navbar bg-base-100 border-b rounded-t-xl">
+             class="flex-1 lg:flex-1 flex flex-col h-full bg-base-100 rounded-none lg:rounded-xl border-0 lg:border lg:border-base-300">
+          <header class="navbar bg-base-100 border-b-0 lg:border-b rounded-none lg:rounded-t-xl">
             <div class="flex-none pl-2">{% lucide "sparkles" class="size-6" %}</div>
             <div class="flex-1 px-2">
               <span class="font-semibold text-lg">Assistant</span>
@@ -33,6 +41,11 @@
           <footer class="p-4 bg-base-100 border-t border-base-300 rounded-b-xl flex flex-col items-center">
             {% include 'patient/chatty/partials/chat_form.html' %}
           </footer>
+        </div>
+        {# Right Resize Handle #}
+        <div id="right-resize-handle"
+             class="hidden lg:flex items-center justify-center w-2 cursor-col-resize hover:bg-primary/20 transition-colors group">
+          <div class="h-12 w-1 bg-base-300 group-hover:bg-primary transition-colors"></div>
         </div>
         {# Right Panel #}
         {% include 'patient/chatty/partials/right_panel.html' %}
@@ -77,10 +90,19 @@
 
       // Get all the elements
       const chatPanel = document.getElementById('mobile-chat-view');
+
+      // Guard: Only run this code on the chatty page where these elements exist
+      if (!chatPanel) {
+        return;
+      }
+
       const chatMessages = chatPanel.querySelector('#chat-messages');
       const chatInput = chatPanel.querySelector("textarea");
       const chatAttach = document.getElementById('chat-attach');
       const chatUserMessageTemplate = chatPanel.querySelector('#user-message-template');
+
+      // Constants
+      const MOBILE_BREAKPOINT = 1024; // Tailwind's lg breakpoint
 
       // Mobile navigation
       const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
@@ -90,14 +112,70 @@
         feed: document.getElementById('right-panel'),
       };
 
+      // Track which panel was last active/focused
+      let lastActivePanel = 'chat'; // Default to chat view
+
+      // Add focus tracking to all panels
+      function attachPanelListeners() {
+        Object.entries(mobileViews).forEach(([viewName, panel]) => {
+          if (panel) {
+            panel.addEventListener('click', () => {
+              lastActivePanel = viewName;
+            });
+            panel.addEventListener('focusin', () => {
+              lastActivePanel = viewName;
+            });
+          }
+        });
+      }
+
+      attachPanelListeners();
+
+      /**
+       * Sets the active view on mobile and updates navigation UI
+       * @param {string} viewName - One of 'records', 'chat', or 'feed'
+       */
       function setActiveView(viewName) {
-        // Update view visibility
-        Object.values(mobileViews).forEach(view => view.classList.add('hidden'));
-        if (mobileViews[viewName]) {
-          mobileViews[viewName].classList.remove('hidden');
+        lastActivePanel = viewName;
+
+        const container = document.getElementById('panels-container');
+        if (!container) {
+          console.error('panels-container not found');
+          return;
+        }
+        container.setAttribute('data-active-view', viewName);
+
+        // On mobile, hide all panels except the active one
+        if (window.innerWidth < MOBILE_BREAKPOINT) {
+          const leftPanel = document.getElementById('left-panel');
+          const chatPanel = document.getElementById('mobile-chat-view');
+          const rightPanel = document.getElementById('right-panel');
+
+          // Hide all panels first
+          [leftPanel, chatPanel, rightPanel].forEach(panel => {
+            if (panel) {
+              panel.classList.add('hidden');
+              panel.classList.remove('flex', 'flex-1', 'w-full');
+            }
+          });
+
+          // Show only the active panel
+          let activePanel = null;
+          if (viewName === 'records') {
+            activePanel = leftPanel;
+          } else if (viewName === 'chat') {
+            activePanel = chatPanel;
+          } else if (viewName === 'feed') {
+            activePanel = rightPanel;
+          }
+
+          if (activePanel) {
+            activePanel.classList.remove('hidden');
+            activePanel.classList.add('flex', 'flex-1', 'w-full');
+          }
         }
 
-        // Update nav item styles
+        // Update mobile navigation item styles
         mobileNavItems.forEach(item => {
           const itemView = item.dataset.view;
           const label = item.querySelector('span');
@@ -113,23 +191,55 @@
         });
       }
 
+      /**
+       * Handles responsive layout changes between mobile and desktop
+       */
       function handleResize() {
-        if (window.innerWidth < 1024) {
-          // Find the active view from the nav bar or default to 'chat'
-          const activeItem = document.querySelector('.mobile-nav-item.text-primary');
-          const activeView = activeItem ? activeItem.dataset.view : 'chat';
-          setActiveView(activeView);
+        if (window.innerWidth < MOBILE_BREAKPOINT) {
+          // Mobile: detect which panel to show based on URL or last active panel
+          let viewToShow = lastActivePanel;
+
+          // When switching from desktop to mobile, infer view from current URL
+          const path = window.location.pathname;
+          if (path.includes('/records') || path.includes('/repository')) {
+            viewToShow = 'records';
+          } else if (path.includes('/feed')) {
+            viewToShow = 'feed';
+          } else {
+            viewToShow = lastActivePanel || 'chat';
+          }
+
+          setActiveView(viewToShow);
         } else {
-          // On desktop, show all views
-          Object.values(mobileViews).forEach(view => view.classList.remove('hidden'));
+          // Desktop: show all panels side-by-side
+          const leftPanel = document.getElementById('left-panel');
+          const chatPanel = document.getElementById('mobile-chat-view');
+          const rightPanel = document.getElementById('right-panel');
+
+          [leftPanel, chatPanel, rightPanel].forEach(panel => {
+            if (panel) {
+              panel.classList.remove('hidden', 'w-full');
+              panel.classList.add('flex');
+            }
+          });
         }
+
+        applyPanelWidths();
       }
 
-      mobileNavItems.forEach(item => {
-        item.addEventListener('click', () => {
+      // Attach click handlers to mobile navigation items
+      mobileNavItems.forEach((item) => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           setActiveView(item.dataset.view);
         });
       });
+
+      // Initialize the active view on page load for mobile
+      if (window.innerWidth < MOBILE_BREAKPOINT) {
+        setActiveView(lastActivePanel);
+      }
 
       // Define handlers for chat form
       // this would be hx-on, but our CSP blocks that
@@ -191,6 +301,231 @@
       window.addEventListener('resize', handleResize);
       handleResize(); // Call on initial load
       chatMessages.scrollTop = chatMessages.scrollHeight;
+
+      // ===== Panel Resizing =====
+      let isResizing = false;
+      let currentHandle = null;
+      let startX = 0;
+      let startWidth = 0;
+
+      function getExpandedPanel(panelId) {
+        const container = document.getElementById(panelId);
+        if (!container) return null;
+        return container.querySelector('.panel-expanded');
+      }
+
+      function isPanelCollapsed(panelId) {
+        const expandedPanel = getExpandedPanel(panelId);
+        return !expandedPanel || expandedPanel.classList.contains('hidden');
+      }
+
+      function updateResizeHandleVisibility() {
+        const leftResizeHandle = document.getElementById('left-resize-handle');
+        const rightResizeHandle = document.getElementById('right-resize-handle');
+
+        // Keep left resize handle as spacer if left panel is collapsed
+        if (leftResizeHandle) {
+          if (isPanelCollapsed('left-panel')) {
+            leftResizeHandle.classList.add('!pointer-events-none', 'opacity-0');
+          } else {
+            leftResizeHandle.classList.remove('!pointer-events-none', 'opacity-0');
+          }
+        }
+
+        // Keep right resize handle as spacer if right panel is collapsed
+        if (rightResizeHandle) {
+          if (isPanelCollapsed('right-panel')) {
+            rightResizeHandle.classList.add('!pointer-events-none', 'opacity-0');
+          } else {
+            rightResizeHandle.classList.remove('!pointer-events-none', 'opacity-0');
+          }
+        }
+      }
+
+      function applyPanelWidths() {
+        const leftPanelExpanded = getExpandedPanel('left-panel');
+        const rightPanelExpanded = getExpandedPanel('right-panel');
+        const centerPanelExpanded = document.querySelector('#mobile-chat-view');
+
+        // Only apply saved widths on desktop
+        if (window.innerWidth >= 1024) {
+          // Load saved widths from localStorage or use defaults
+          const savedLeftWidth = localStorage.getItem('leftPanelWidth') || '320px';
+          const savedRightWidth = localStorage.getItem('rightPanelWidth') || '384px';
+
+          // Only apply width if the expanded panel is visible (not collapsed)
+          if (leftPanelExpanded && !leftPanelExpanded.classList.contains('hidden')) {
+            leftPanelExpanded.style.width = savedLeftWidth;
+          }
+          if (rightPanelExpanded && !rightPanelExpanded.classList.contains('hidden')) {
+            rightPanelExpanded.style.width = savedRightWidth;
+          }
+        } else {
+          // On mobile, ONLY clear inline width styles - don't touch visibility
+          // Visibility is managed by setActiveView()
+          if (leftPanelExpanded) {
+            leftPanelExpanded.style.width = '';
+          }
+          if (rightPanelExpanded) {
+            rightPanelExpanded.style.width = '';
+          }
+          if (centerPanelExpanded) {
+            centerPanelExpanded.style.width = '';
+          }
+        }
+
+        // Update resize handle visibility based on collapse state
+        updateResizeHandleVisibility();
+      }
+
+      function startResize(e, handleId) {
+        const panelId = handleId === 'left-resize-handle' ? 'left-panel' : 'right-panel';
+        const panel = getExpandedPanel(panelId);
+
+        if (!panel || panel.classList.contains('hidden')) return;
+
+        isResizing = true;
+        currentHandle = handleId;
+        startX = e.clientX;
+        startWidth = parseInt(window.getComputedStyle(panel).width);
+        document.body.style.cursor = 'col-resize';
+        document.body.style.userSelect = 'none';
+        e.preventDefault();
+      }
+
+      function resize(e) {
+        if (!isResizing) return;
+
+        const panelId = currentHandle === 'left-resize-handle' ? 'left-panel' : 'right-panel';
+        const panel = getExpandedPanel(panelId);
+
+        if (!panel || panel.classList.contains('hidden')) return;
+
+        const dx = currentHandle === 'left-resize-handle' ? (e.clientX - startX) : (startX - e.clientX);
+        const newWidth = Math.max(240, Math.min(1200, startWidth + dx)); // Min 240px, Max 1200px
+
+        panel.style.width = newWidth + 'px';
+      }
+
+      function stopResize() {
+        if (!isResizing) return;
+
+        isResizing = false;
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+
+        // Save widths to localStorage
+        const leftPanelExpanded = getExpandedPanel('left-panel');
+        const rightPanelExpanded = getExpandedPanel('right-panel');
+
+        if (leftPanelExpanded && leftPanelExpanded.style.width) {
+          localStorage.setItem('leftPanelWidth', leftPanelExpanded.style.width);
+        }
+        if (rightPanelExpanded && rightPanelExpanded.style.width) {
+          localStorage.setItem('rightPanelWidth', rightPanelExpanded.style.width);
+        }
+
+        currentHandle = null;
+      }
+
+      function setupResizeHandles() {
+        const leftResizeHandle = document.getElementById('left-resize-handle');
+        const rightResizeHandle = document.getElementById('right-resize-handle');
+
+        // Remove old listeners by cloning (this removes all event listeners)
+        if (leftResizeHandle) {
+          const newLeftHandle = leftResizeHandle.cloneNode(true);
+          leftResizeHandle.parentNode.replaceChild(newLeftHandle, leftResizeHandle);
+          newLeftHandle.addEventListener('mousedown', (e) => startResize(e, 'left-resize-handle'));
+        }
+
+        if (rightResizeHandle) {
+          const newRightHandle = rightResizeHandle.cloneNode(true);
+          rightResizeHandle.parentNode.replaceChild(newRightHandle, rightResizeHandle);
+          newRightHandle.addEventListener('mousedown', (e) => startResize(e, 'right-resize-handle'));
+        }
+      }
+
+      // Initial setup
+      applyPanelWidths();
+      setupResizeHandles();
+
+      // Global mouse move and up events
+      document.addEventListener('mousemove', resize);
+      document.addEventListener('mouseup', stopResize);
+
+      // Reapply widths after HTMX swaps
+      document.body.addEventListener('htmx:afterSwap', function(event) {
+        // Check if this was an outerHTML swap of one of our panels
+        // Note: event.detail.xhr may be undefined for history restores or cached swaps
+        const swapType = (event.detail.xhr?.getResponseHeader('HX-Reswap')) ||
+          event.detail.elt.getAttribute('hx-swap') || 'innerHTML';
+
+        if (swapType === 'outerHTML') {
+          // Re-query the panel elements since they were replaced
+          mobileViews.records = document.getElementById('left-panel');
+          mobileViews.chat = document.getElementById('mobile-chat-view');
+          mobileViews.feed = document.getElementById('right-panel');
+
+          // Re-attach listeners to the new elements
+          attachPanelListeners();
+        }
+
+        // Apply panel widths after a small delay
+        setTimeout(() => {
+          applyPanelWidths();
+        }, 0);
+      });
+
+      /**
+       * Re-apply mobile view state after HTMX content swaps
+       * This ensures panels stay in correct visibility state after dynamic updates
+       */
+      document.body.addEventListener('htmx:afterSettle', function(event) {
+        if (!event.detail || !event.detail.target) {
+          return;
+        }
+
+        const swapTarget = event.detail.target;
+
+        // Re-apply visibility in mobile mode after content swaps
+        // innerHTML swaps can replace elements and remove our visibility classes
+        if (window.innerWidth < MOBILE_BREAKPOINT) {
+          const targetId = swapTarget.id || '';
+
+          // Determine which panel was affected by the swap
+          let swappedPanel = null;
+          if (targetId === 'left-panel' || (swapTarget.closest && swapTarget.closest('#left-panel'))) {
+            swappedPanel = 'records';
+          } else if (targetId === 'mobile-chat-view' || (swapTarget.closest && swapTarget.closest('#mobile-chat-view'))) {
+            swappedPanel = 'chat';
+          } else if (targetId === 'right-panel' || (swapTarget.closest && swapTarget.closest('#right-panel'))) {
+            swappedPanel = 'feed';
+          } else if (targetId === 'modal-container' || (swapTarget.closest && swapTarget.closest('#modal-container'))) {
+            // Modal opened/closed - re-apply active view to ensure correct visibility
+            requestAnimationFrame(() => {
+              setActiveView(lastActivePanel);
+            });
+            return;
+          }
+
+          // Re-apply if the swapped panel matches the active panel or is unknown
+          if (swappedPanel === lastActivePanel || swappedPanel === null) {
+            // Use requestAnimationFrame to ensure DOM is fully rendered before applying classes
+            requestAnimationFrame(() => {
+              setActiveView(lastActivePanel);
+            });
+          }
+        }
+      });
+
+      // Update resize handle visibility when panels are toggled
+      document.body.addEventListener('toggle-children', function(event) {
+        setTimeout(() => {
+          updateResizeHandleVisibility();
+        }, 0);
+      });
+
     });
   </script>
 {% endblock body %}

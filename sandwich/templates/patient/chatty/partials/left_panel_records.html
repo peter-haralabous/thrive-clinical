@@ -3,7 +3,7 @@
 {% load lucide %}
 
 {# djlint:off #}
-{% block header_icon %}<a href="{{ left_panel_back_link }}" hx-get="{{ left_panel_back_link }}" hx-target="#left-panel" hx-swap="outerHTML" hx-push-url="true" class="btn btn-circle btn-ghost">{% lucide "arrow-left" class="size-6" %}</a>{% endblock header_icon %}
+{% block header_icon %}{% if clear_modal %}<div id="modal-container" hx-swap-oob="innerHTML"></div>{% endif %}<a href="{{ left_panel_back_link }}" hx-get="{{ left_panel_back_link }}" hx-target="#left-panel" hx-swap="outerHTML" hx-push-url="true" class="btn btn-circle btn-ghost">{% lucide "arrow-left" class="size-6" %}</a>{% endblock header_icon %}
 {% block header_title %}{{ left_panel_title }}{% endblock header_title %}
 {# djlint:on #}
 {% block panel_content %}
@@ -15,7 +15,7 @@
         {% else %}
           <a href="{{ item.link }}"
              {% if item.target == "left_panel" %}hx-get="{{ item.link }}" hx-target="#left-panel" hx-swap="outerHTML" hx-push-url="true" {% endif %}
-             {% if item.target == "modal" %}hx-get="{{ item.link }}" hx-target="body" hx-swap="beforeend" hx-push-url="true" {% endif %}
+             {% if item.target == "modal" %}hx-get="{{ item.link }}" hx-target="#modal-container" hx-swap="innerHTML"{% endif %}
              class="flex items-center p-3 rounded-lg hover:bg-base-300/50 gap-4">
             {% if item.icon %}
               {% lucide item.icon class="size-5" %}
