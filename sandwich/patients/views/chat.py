@@ -3,6 +3,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from crispy_forms.helper import FormHelper
+from crispy_forms.layout import HTML
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.db.models import QuerySet
@@ -12,7 +13,6 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 from guardian.shortcuts import get_objects_for_user
 
-from sandwich.core.inputs import RoundIconButton
 from sandwich.core.models import Patient
 from sandwich.core.service.agent_service.config import configure
 from sandwich.core.service.chat_service.chat import receive_chat_message
@@ -41,16 +41,21 @@ class ChatForm(forms.Form):
     def __init__(self, *args, user: User, **kwargs):
         self._user = user
         super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
+        self.helper = FormHelper(self)
         self.helper.form_method = "post"
         self.helper.form_action = reverse("patients:chat")
         self.helper.attrs = {
             "hx-post": reverse("patients:chat"),
-            "hx-disabled-elt": "find input, find textarea",
+            "hx-disabled-elt": "find button, find textarea",
             "hx-swap": "none",
         }
         self.helper.form_show_labels = False
-        self.helper.add_input(RoundIconButton(icon="arrow-up", type="submit"))
+        assert self.helper.layout is not None, "layout should not be None"
+        self.helper.layout.append(
+            HTML(
+                '{% load lucide %}<button type="submit" class="btn btn-primary btn-circle absolute bottom-2.5 right-2.5 z-100">{% lucide "arrow-up" %}</button>'  # noqa: E501
+            )
+        )
         self.fields["patient"].queryset = self._patient_queryset()  # type: ignore[attr-defined]
 
     def _patient_queryset(self) -> QuerySet[Patient]:
