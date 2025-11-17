@@ -240,8 +240,8 @@ def test_delete_custom_attribute_wrong_confirmation(
     data = {"confirmation": "delete"}  # lowercase, should fail
     res = client.post(url, data)
 
-    # Should redirect back with error
-    assert res.status_code == HTTPStatus.FOUND
+    # Should render the archive page with modal open (200), not redirect
+    assert res.status_code == HTTPStatus.OK
 
     # Attribute should NOT be deleted
     assert CustomAttribute.objects.filter(id=attribute.id).exists()

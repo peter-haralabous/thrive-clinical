@@ -361,9 +361,11 @@ def custom_attribute_archive(
             extra={"user_id": request.user.id, "attribute_id": attribute_id},
         )
         messages.error(request, "Invalid confirmation. Please type 'DELETE' to confirm.")
-        return HttpResponseRedirect(
-            reverse("providers:custom_attribute_list", kwargs={"organization_id": organization.id})
-        )
+        # Rerender the full page with the modal open
+        modal_context = {"form": form, "attribute": attribute, "organization": organization}
+        context = _get_custom_attribute_list_context(request, organization)
+        context.update(modal_context)
+        return render(request, "provider/custom_attribute_archive.html", context)
 
     # GET request - render the modal
     form = DeleteConfirmationForm(
@@ -376,7 +378,7 @@ def custom_attribute_archive(
 
     # If it's an HTMX request, render the modal partial
     if request.headers.get("HX-Request"):
-        return render(request, "provider/partials/custom_attribute_delete_modal.html", modal_context)
+        return render(request, "provider/partials/custom_attribute_archive_modal.html", modal_context)
 
     # Otherwise (direct URL access or page refresh), render the full list page with the modal
     context = _get_custom_attribute_list_context(request, organization)

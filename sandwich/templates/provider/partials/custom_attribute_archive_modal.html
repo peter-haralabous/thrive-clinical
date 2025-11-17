@@ -24,6 +24,6 @@
   const modal = document.getElementById('delete-custom-attribute-{{ attribute.id }}');
   modal.showModal();
   modal.addEventListener('close', () => {
-    window.history.back();
+    window.location.replace("{% url 'providers:custom_attribute_list' organization_id=organization.id %}");
   });
 </script>
