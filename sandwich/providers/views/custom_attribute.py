@@ -125,6 +125,11 @@ class CustomAttributeEnumForm(forms.ModelForm[CustomAttributeEnum]):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.helper.form_show_labels = True
+
+        self.fields["label"].label = "Label"
+        self.fields["value"].label = "Value"
+        self.fields["color_code"].label = "Color code"
 
         self.fields["value"].required = False
         self.fields["color_code"].required = False
