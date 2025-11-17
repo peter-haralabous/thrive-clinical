@@ -17,6 +17,7 @@ from django import forms
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
@@ -266,7 +267,10 @@ class FilterFieldSelectForm(forms.Form):
         helper.form_method = "post"
 
         header_html = f'<h4 class="text-sm font-medium mb-2">{_("Select Field")}</h4>'
-        radios_html = self._build_radio_buttons_html(choices)
+        radios_html = render_to_string(
+            "provider/partials/filter_field_radio_buttons.html",
+            {"choices": choices},
+        )
         cancel_html = f'<form method="dialog"><button class="btn">{_("Cancel")}</button></form>'
 
         helper.layout = Layout(
@@ -279,27 +283,6 @@ class FilterFieldSelectForm(forms.Form):
             ),
         )
         return helper
-
-    def _build_radio_buttons_html(self, choices: list[tuple[str, str]]) -> str:
-        """Build HTML for radio button group."""
-        container_open = '<div class="filter flex-wrap gap-2 items-center" id="field-filter-button-group">'
-        reset_label = str(_("Reset field selection"))
-        reset_button = (
-            '<button type="button" class="btn btn-square btn-sm filter-reset" '
-            f'aria-label="{reset_label}" id="field-filter-reset">\u00d7</button>'
-        )
-        parts = [container_open, reset_button]
-
-        for value, label in choices:
-            radio_input = (
-                '<input class="btn btn-sm field-radio-item" type="radio" '
-                f'name="field_id" value="{value}" aria-label="{label}" '
-                f'data-label="{label}" data-value="{value}" required>'
-            )
-            parts.append(radio_input)
-
-        parts.append("</div>")
-        return "".join(parts)
 
 
 class DateFilterForm(forms.Form):
