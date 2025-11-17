@@ -1,7 +1,7 @@
-from crispy_forms.layout import Button
+from crispy_forms.layout import Submit
 
 
-class RoundIconButton(Button):
+class RoundIconButton(Submit):
     def __init__(
         self,
         icon: str,

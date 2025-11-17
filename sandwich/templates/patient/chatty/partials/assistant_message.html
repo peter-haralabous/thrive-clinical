@@ -24,10 +24,6 @@
   {% if message_id != "assistant-thinking" %}
   document.querySelector("#message-assistant-thinking")?.remove();
   {% endif %}
-  document.querySelector("#message-{{ message_id }}")?.scrollIntoView({
-    behavior: 'smooth',
-    block: 'start'
-  });
   {% if buttons %}
     document.querySelector("#message-{{ message_id }}")
         ?.querySelectorAll('.assistant-button')
