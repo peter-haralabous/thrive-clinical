@@ -33,7 +33,7 @@ class UploadReferenceForm(forms.Form):
         required=True,
         label="Upload File",
         help_text="Upload a file to generate a form schema.",
-        widget=forms.FileInput(attrs={"accept": "application/pdf, text/csv"}),
+        widget=forms.FileInput(attrs={"accept": "application/pdf, text/csv", "class": "file-input"}),
         validators=[FileExtensionValidator(allowed_extensions=["pdf", "csv"])],
     )
     description = forms.CharField(
