@@ -70,6 +70,47 @@
 }
 
 @layer utility {
+  /* Display contents utility for toggle-container web component */
+  .contents {
+    display: contents;
+  }
+
+  /* Panel resizing: widths are set directly on .panel-expanded via JS */
+  .resizable-panel {
+    flex: 0 0 auto !important;
+  }
+
+  /* Hide resize handles when panels are collapsed
+   * When a panel's expanded view is hidden, its adjacent resize handle should also hide */
+  #left-panel:has(.panel-expanded.hidden) + #left-resize-handle,
+  #right-resize-handle:has(+ #right-panel .panel-expanded.hidden),
+  #right-panel:has(.panel-expanded.hidden) ~ #right-resize-handle {
+    display: none !important;
+  }
+
+  /* Add gap when panels are collapsed */
+  #left-panel:has(.panel-expanded.hidden) {
+    margin-right: 0.5rem;
+  }
+
+  #right-panel:has(.panel-expanded.hidden) {
+    margin-left: 0.5rem;
+  }
+
+  /* Mobile panel visibility: Force all panels to be expanded on mobile (< 1024px)
+   * Ensures panels display properly even if collapsed on desktop
+   * Only applies when parent panel is visible (doesn't have hidden class) */
+  @media (max-width: 1023px) {
+    #left-panel:not(.hidden) toggle-container > .panel-expanded,
+    #right-panel:not(.hidden) toggle-container > .panel-expanded {
+      display: flex !important;
+    }
+    #left-panel:not(.hidden) toggle-container > div:not(.panel-expanded),
+    #right-panel:not(.hidden) toggle-container > div:not(.panel-expanded) {
+      display: none !important;
+    }
+  }
+
   /* Update DaisyUI prose styling to match desired typography */
   .prose {
     line-height: 1.4;

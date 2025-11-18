@@ -11,6 +11,14 @@
   const modal = document.getElementById('edit-record-modal');
   modal.showModal();
   modal.addEventListener('close', () => {
-    window.history.back();
-  })
+    // Clear the modal container to avoid CSP violations from history.back()
+    // which can trigger HTMX history restoration with inline styles
+    document.getElementById('modal-container').innerHTML = '';
+  });
+
+  // Make sure HTMX processes the form
+  const form = modal.querySelector('form[hx-post]');
+  if (form && window.htmx) {
+    window.htmx.process(form);
+  }
 </script>

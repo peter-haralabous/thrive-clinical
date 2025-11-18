@@ -7,7 +7,6 @@ from typing import cast
 from uuid import UUID
 
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
@@ -85,40 +84,16 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
             )
             for model, icon in RECORD_TYPES.values()
         ]
+        context = {
+            "patient": patient,
+            "left_panel_title": left_panel_title,
+            "left_panel_back_link": left_panel_back_link,
+            "left_panel_items": items,
+        }
     elif record_type not in RECORD_TYPES:
         raise Http404(f"Unknown record type: {record_type}")
     else:
-        model, icon = RECORD_TYPES[record_type]
-        left_panel_title = str(model._meta.verbose_name_plural).capitalize()  # noqa: SLF001
-        left_panel_back_link = reverse("patients:patient_records", kwargs={"patient_id": patient.id})
-        items = [
-            NavItem(
-                link=record.get_absolute_url(),
-                label=str(record),
-                icon=icon,
-                target="modal",
-            )
-            # FIXME: need to page this list
-            for record in model.objects.filter(patient=patient).all()  # type: ignore[attr-defined]
-        ]
-        items.insert(
-            0,
-            NavItem(
-                link=reverse(
-                    "patients:health_records_add", kwargs={"patient_id": patient.id, "record_type": record_type}
-                ),
-                label="Add New",
-                icon="plus",
-                target="modal",
-            ),
-        )
-
-    context = {
-        "patient": patient,
-        "left_panel_title": left_panel_title,
-        "left_panel_back_link": left_panel_back_link,
-        "left_panel_items": items,
-    }
+        context = _build_health_record_list_context(patient, record_type)
     if request.headers.get("HX-Target") == "left-panel":
         return render(request, "patient/chatty/partials/left_panel_records.html", context)
 
@@ -143,22 +118,15 @@ def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, cate
             )
             for (value, label) in DocumentCategory.choices
         ]
+        context = {
+            "patient": patient,
+            "left_panel_title": left_panel_title,
+            "left_panel_back_link": left_panel_back_link,
+            "left_panel_items": items,
+        }
     else:
         category = DocumentCategory(category)
-        left_panel_title = str(category.label)
-        left_panel_back_link = reverse("patients:patient_repository", kwargs={"patient_id": patient.id})
-        items = [
-            NavItem(link=record.get_absolute_url(), label=str(record), icon="file", target="modal")
-            # FIXME: need to page this list
-            for record in patient.document_set.filter(category=category)
-        ]
-
-    context = {
-        "patient": patient,
-        "left_panel_title": left_panel_title,
-        "left_panel_back_link": left_panel_back_link,
-        "left_panel_items": items,
-    }
+        context = _build_document_list_context(patient, category)
     if request.headers.get("HX-Target") == "left-panel":
         return render(request, "patient/chatty/partials/left_panel_records.html", context)
 
@@ -211,21 +179,8 @@ class HealthRecordForm[M: HealthRecord](forms.ModelForm[M]):
     def __init__(self, *args, show_delete: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        if self.instance and self.instance.unattested:
-            pass  # should the button text change? or add a second button for "looks good"?
-        self.helper.add_input(Submit("submit", "Submit"))
-        if show_delete:
-            # NOTE-NG: hx-confirm doesn't do anything unless we attach custom hx-post behaviour to this button.
-            #          if it inherits the form's hx-post the confirmation dialog isn't shown.
-            self.helper.add_input(
-                Submit(
-                    "delete",
-                    "Delete",
-                    css_class="!btn-error",
-                    hx_delete=self.instance.get_absolute_url(),
-                    hx_confirm="Are you sure?",
-                )
-            )
+        self.helper.form_tag = False  # We'll handle the form tag in the template
+        self.show_delete = show_delete  # Store for template access
 
     # NOTE: patient is marked as optional here to prevent mypy from complaining that the signature is incompatible
     #       with the base class, but a database constraint will prevent the form from being submitted without a patient
@@ -290,22 +245,125 @@ def _form_class(record_type: str) -> type[HealthRecordForm]:
     raise Http404(f"Unknown form class: {record_type}")
 
 
+def _build_document_list_context(patient: Patient, category: DocumentCategory) -> dict[str, Any]:
+    """
+    Build template context for rendering a document list.
+
+    Args:
+        patient: The patient whose documents to display
+        category: The document category to filter by
+
+    Returns:
+        Dictionary containing template context with patient, title, back link, and items
+    """
+    left_panel_title = str(category.label)
+    left_panel_back_link = reverse("patients:patient_repository", kwargs={"patient_id": patient.id})
+    items = [
+        NavItem(link=record.get_absolute_url(), label=str(record), icon="file", target="modal")
+        for record in patient.document_set.filter(category=category)
+    ]
+    return {
+        "patient": patient,
+        "left_panel_title": left_panel_title,
+        "left_panel_back_link": left_panel_back_link,
+        "left_panel_items": items,
+    }
+
+
+def _build_health_record_list_context(patient: Patient, record_type: str) -> dict[str, Any]:
+    """
+    Build template context for rendering a health record list.
+
+    Args:
+        patient: The patient whose records to display
+        record_type: The type of record (e.g., 'condition', 'immunization', 'practitioner')
+
+    Returns:
+        Dictionary containing template context with patient, title, back link, and items
+
+    Raises:
+        KeyError: If record_type is not in RECORD_TYPES
+    """
+    model, icon = RECORD_TYPES[record_type]
+    left_panel_title = str(model._meta.verbose_name_plural).capitalize()  # noqa: SLF001
+    left_panel_back_link = reverse("patients:patient_records", kwargs={"patient_id": patient.id})
+    items = [
+        NavItem(
+            link=record.get_absolute_url(),
+            label=str(record),
+            icon=icon,
+            target="modal",
+        )
+        for record in model.objects.filter(patient=patient).all()  # type: ignore[attr-defined]
+    ]
+    items.insert(
+        0,
+        NavItem(
+            link=reverse("patients:health_records_add", kwargs={"patient_id": patient.id, "record_type": record_type}),
+            label="Add New",
+            icon="plus",
+            target="modal",
+        ),
+    )
+    return {
+        "patient": patient,
+        "left_panel_title": left_panel_title,
+        "left_panel_back_link": left_panel_back_link,
+        "left_panel_items": items,
+    }
+
+
 def show_updated_list_of_records(
     request: AuthenticatedHttpRequest, patient: Patient, record_type: str, instance: HealthRecord
 ) -> HttpResponse:
-    """after adding, updating, or deleting a record, show the updated list that record was a member of"""
+    """
+    Render updated record list after add/edit/delete operation.
 
+    After successfully adding, updating, or deleting a health record, this function
+    returns the updated list view. For HTMX requests, it renders the partial template
+    directly. For regular requests, it redirects to the appropriate list page.
+
+    Args:
+        request: The HTTP request
+        patient: The patient whose records are being displayed
+        record_type: The type of record ('document', 'condition', 'immunization', 'practitioner')
+        instance: The record instance that was just modified
+
+    Returns:
+        HttpResponse with the updated list view or redirect
+    """
+    # If this is an HTMX request, return the updated list directly
+    if request.headers.get("HX-Request"):
+        if record_type == "document":
+            # Type safety: verify instance is actually a Document before accessing category
+            if not isinstance(instance, Document):
+                logger.error(
+                    "Type mismatch: record_type is 'document' but instance is %s",
+                    type(instance).__name__,
+                )
+                raise TypeError(f"Expected Document instance but got {type(instance).__name__}")
+            context = _build_document_list_context(patient, instance.category)
+        else:
+            context = _build_health_record_list_context(patient, record_type)
+
+        context["clear_modal"] = True  # Signal to clear the modal
+        return render(request, "patient/chatty/partials/left_panel_records.html", context)
+
+    # For non-HTMX requests, redirect to the list page
     if record_type == "document":
+        # Type safety: verify instance is actually a Document
+        if not isinstance(instance, Document):
+            logger.error(
+                "Type mismatch: record_type is 'document' but instance is %s",
+                type(instance).__name__,
+            )
+            raise TypeError(f"Expected Document instance but got {type(instance).__name__}")
         url = reverse(
             "patients:patient_repository",
-            kwargs={"patient_id": patient.id, "category": cast("Document", instance).category},
+            kwargs={"patient_id": patient.id, "category": instance.category},
         )
     else:
         url = reverse("patients:patient_records", kwargs={"patient_id": patient.id, "record_type": record_type})
-
-    # htmx ignores 302 responses, so we need to redirect the browser ourselves
-    if request.headers.get("HX-Request"):
-        return HttpResponse(headers={"HX-Redirect": url})
     return HttpResponseRedirect(url)
 
 
