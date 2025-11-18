@@ -11,8 +11,6 @@ from .fact import Fact
 from .form import Form
 from .form_submission import FormSubmission
 from .formio_submission import FormioSubmission
-from .health_summary import HealthSummary
-from .health_summary import SummaryType
 from .immunization import Immunization
 from .invitation import Invitation
 from .langgraph import CheckpointBlobs
@@ -51,7 +49,6 @@ __all__ = [
     "Form",
     "FormSubmission",
     "FormioSubmission",
-    "HealthSummary",
     "Immunization",
     "Invitation",
     "ListViewPreference",
@@ -65,7 +62,6 @@ __all__ = [
     "Role",
     "Store",
     "StoreMigrations",
-    "SummaryType",
     "Task",
     "Template",
 ]

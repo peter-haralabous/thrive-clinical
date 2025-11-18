@@ -4,7 +4,6 @@ from sandwich.core.models import Condition
 from sandwich.core.models import Document
 from sandwich.core.models import Encounter
 from sandwich.core.models import FormioSubmission
-from sandwich.core.models import HealthSummary
 from sandwich.core.models import Immunization
 from sandwich.core.models import Invitation
 from sandwich.core.models import Practitioner
@@ -22,15 +21,5 @@ from .predicate import PredicateAdmin as PredicateAdmin
 from .template import TemplateAdmin as TemplateAdmin
 
 admin.site.register(
-    [
-        Condition,
-        Document,
-        Encounter,
-        FormioSubmission,
-        HealthSummary,
-        Immunization,
-        Invitation,
-        Practitioner,
-        Task,
-    ],
+    [Condition, Document, Encounter, FormioSubmission, Immunization, Invitation, Practitioner, Task],
 )
