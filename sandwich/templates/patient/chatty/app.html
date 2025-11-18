@@ -10,23 +10,15 @@
       {# The sse-swap here is misleading; messages include a hx-swap-oob with their real target #}
       <div sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
            sse-swap="assistant_message,assistant_thinking,user_message,ingest_progress"></div>
-      <div id="modal-container"></div>
-      <div id="panels-container"
-           data-active-view="chat"
-           class="flex flex-row gap-0 lg:p-6 h-full overflow-x-hidden">
+      <div class="flex flex-row gap-2 p-1 lg:p-6 h-full">
         {# Left Panel #}
         {% block left_panel %}
           {% include 'patient/chatty/partials/left_panel.html' %}
         {% endblock left_panel %}
-        {# Left Resize Handle #}
-        <div id="left-resize-handle"
-             class="hidden lg:flex items-center justify-center w-2 cursor-col-resize hover:bg-primary/20 transition-colors group">
-          <div class="h-12 w-1 bg-base-300 group-hover:bg-primary transition-colors"></div>
-        </div>
         {# Center Panel #}
         <div id="mobile-chat-view"
-             class="flex-1 lg:flex-1 flex flex-col h-full bg-base-100 rounded-none lg:rounded-xl border-0 lg:border lg:border-base-300">
-          <header class="navbar bg-base-100 border-b-0 lg:border-b rounded-none lg:rounded-t-xl">
+             class="w-full lg:w-auto lg:flex-1 flex flex-col h-full bg-base-100 rounded-xl border border-base-300">
+          <header class="navbar bg-base-100 border-b rounded-t-xl">
             <div class="flex-none pl-2">{% lucide "sparkles" class="size-6" %}</div>
             <div class="flex-1 px-2">
               <span class="font-semibold text-lg">Assistant</span>
@@ -41,11 +33,6 @@
           <footer class="p-4 bg-base-100 border-t border-base-300 rounded-b-xl flex flex-col items-center">
             {% include 'patient/chatty/partials/chat_form.html' %}
           </footer>
-        </div>
-        {# Right Resize Handle #}
-        <div id="right-resize-handle"
-             class="hidden lg:flex items-center justify-center w-2 cursor-col-resize hover:bg-primary/20 transition-colors group">
-          <div class="h-12 w-1 bg-base-300 group-hover:bg-primary transition-colors"></div>
         </div>
         {# Right Panel #}
         {% include 'patient/chatty/partials/right_panel.html' %}
@@ -84,4 +71,126 @@
          class="fixed inset-2 rounded-xl pointer-events-none z-50 border-4 border-dashed border-transparent transition-all">
     </div>
   </div>
+  <script nonce="{{ request.csp_nonce }}">
+    // Wait for the document to be ready
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // Get all the elements
+      const chatPanel = document.getElementById('mobile-chat-view');
+      const chatMessages = chatPanel.querySelector('#chat-messages');
+      const chatInput = chatPanel.querySelector("textarea");
+      const chatAttach = document.getElementById('chat-attach');
+      const chatUserMessageTemplate = chatPanel.querySelector('#user-message-template');
+
+      // Mobile navigation
+      const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+      const mobileViews = {
+        records: document.getElementById('left-panel'),
+        chat: document.getElementById('mobile-chat-view'),
+        feed: document.getElementById('right-panel'),
+      };
+
+      function setActiveView(viewName) {
+        // Update view visibility
+        Object.values(mobileViews).forEach(view => view.classList.add('hidden'));
+        if (mobileViews[viewName]) {
+          mobileViews[viewName].classList.remove('hidden');
+        }
+
+        // Update nav item styles
+        mobileNavItems.forEach(item => {
+          const itemView = item.dataset.view;
+          const label = item.querySelector('span');
+          if (itemView === viewName) {
+            item.classList.remove('text-base-content/60');
+            item.classList.add('text-primary');
+            label.classList.add('font-bold');
+          } else {
+            item.classList.add('text-base-content/60');
+            item.classList.remove('text-primary');
+            label.classList.remove('font-bold');
+          }
+        });
+      }
+
+      function handleResize() {
+        if (window.innerWidth < 1024) {
+          // Find the active view from the nav bar or default to 'chat'
+          const activeItem = document.querySelector('.mobile-nav-item.text-primary');
+          const activeView = activeItem ? activeItem.dataset.view : 'chat';
+          setActiveView(activeView);
+        } else {
+          // On desktop, show all views
+          Object.values(mobileViews).forEach(view => view.classList.remove('hidden'));
+        }
+      }
+
+      mobileNavItems.forEach(item => {
+        item.addEventListener('click', () => {
+          setActiveView(item.dataset.view);
+        });
+      });
+
+      // Define handlers for chat form
+      // this would be hx-on, but our CSP blocks that
+      document.querySelector("#mobile-chat-view footer").addEventListener("htmx:afterRequest", (event) => {
+        if (event.detail.successful) {
+          // note: if the backend returns a new empty form to swap in with HTMX the browser
+          // will still remember the previous form values and show them if the page is refreshed.
+          document.querySelector("#mobile-chat-view footer form").reset();
+        }
+      });
+
+      document.addEventListener("htmx:oobAfterSwap", (event) => {
+        if (event.detail.target?.id === "chat-messages") {
+          event.detail.target.children[event.detail.target.children.length - 1]?.scrollIntoView({
+            behavior: "smooth"
+          });
+        }
+      });
+
+      const hoverIndicator = document.getElementById('global-upload-hover');
+      const uploadForm = document.getElementById('global-upload-form');
+      const fileInput = uploadForm.querySelector('input');
+
+      // Drag and drop events for the whole window
+      window.addEventListener('dragover', e => {
+        e.preventDefault();
+        hoverIndicator.classList.add('border-primary', 'bg-base-300/50');
+        hoverIndicator.classList.remove('border-transparent');
+      });
+      window.addEventListener('dragleave', e => {
+        e.preventDefault();
+        hoverIndicator.classList.remove('border-primary', 'bg-base-300/50');
+        hoverIndicator.classList.add('border-transparent');
+      });
+      window.addEventListener('drop', e => {
+        e.preventDefault();
+        hoverIndicator.classList.remove('border-primary', 'bg-base-300/50');
+        hoverIndicator.classList.add('border-transparent');
+        const files = e.dataTransfer.files;
+        if (!files.length) return;
+        const validFiles = Array.from(files).filter(file => ["application/pdf", "text/plain"].includes(file.type));
+        if (validFiles.length < files.length) {
+          // TODO: add javascript interface for showing toast messages
+          alert("Unsupported file type. Please upload a PDF or plain text file.");
+          return;
+        }
+        const dataTransfer = new DataTransfer();
+        validFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+        uploadForm.requestSubmit();
+      });
+      // Manual file selection (optional: add a button if desired)
+      fileInput.addEventListener('change', () => {
+        uploadForm.requestSubmit();
+      });
+      chatAttach.addEventListener('click', () => fileInput.click())
+
+      // Set initial state on load and on resize
+      window.addEventListener('resize', handleResize);
+      handleResize(); // Call on initial load
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  </script>
 {% endblock body %}

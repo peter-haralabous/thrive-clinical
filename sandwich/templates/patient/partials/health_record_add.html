@@ -1,11 +1,4 @@
 {% load crispy_forms_tags %}
 
 <h2>Add {{ record_type_name }}</h2>
-<form method="post"
-      hx-post="{{ request.path }}"
-      hx-target="#left-panel"
-      hx-swap="outerHTML">
-  {% csrf_token %}
-  {% crispy form form.helper %}
-  <button type="submit" name="submit" class="btn btn-primary">Submit</button>
-</form>
+{% crispy form %}
