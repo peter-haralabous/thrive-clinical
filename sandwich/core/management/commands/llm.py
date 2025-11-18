@@ -1,5 +1,4 @@
 import logging
-from typing import TYPE_CHECKING
 
 from django.core.management import BaseCommand
 from django.core.management import CommandParser
@@ -9,12 +8,6 @@ from sandwich.core.management.lib.subcommand import SubcommandMixin
 from sandwich.core.management.types import patient_type
 from sandwich.core.models import Patient
 from sandwich.core.service.agent_service.memory import purge_thread
-from sandwich.core.service.chat_service.cli import cli_loop
-from sandwich.core.service.llm import ModelName
-from sandwich.core.service.llm import get_llm
-
-if TYPE_CHECKING:
-    from langchain_core.language_models import BaseChatModel
 
 
 class Command(SubcommandMixin, LoggingMixin, BaseCommand):  # type: ignore[override]
@@ -48,5 +41,4 @@ class Command(SubcommandMixin, LoggingMixin, BaseCommand):  # type: ignore[overr
             self.info(f"Purged thread {thread_id}. History cleared.")
             return
 
-        model: BaseChatModel = get_llm(ModelName.CLAUDE_SONNET_4_5)
-        cli_loop(model, patient.user, patient)
+        logging.info("Nothing to do. Use --delete to clear chat history for the patient.")
