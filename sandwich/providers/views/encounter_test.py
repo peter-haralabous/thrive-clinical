@@ -11,6 +11,7 @@ from django.contrib.sessions.backends.db import SessionStore
 from django.test import Client
 from django.urls import reverse
 from playwright.sync_api import Page
+from playwright.sync_api import expect
 
 from sandwich.core.factories.patient import PatientFactory
 from sandwich.core.models import ListViewType
@@ -611,3 +612,42 @@ def test_encounter_archive_changes_completed_to_in_progress(
     messages = list(result.context["messages"])
     assert len(messages) == 1
     assert "unarchived successfully" in str(messages[0]).lower()
+
+
+@pytest.mark.e2e
+@pytest.mark.django_db
+def test_kebab_menu_visible_in_table(
+    live_server, page: Page, provider: User, organization: Organization, encounter: Encounter
+) -> None:
+    """Test that kebab menu dropdowns are visible and not clipped."""
+    session = SessionStore()
+    session[SESSION_KEY] = str(provider.pk)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = provider.get_session_auth_hash()
+    session.save()
+
+    session_key = session.session_key
+    assert session_key is not None, "Session key should not be None"
+
+    page.context.add_cookies(
+        [
+            {
+                "name": settings.SESSION_COOKIE_NAME,
+                "value": session_key,
+                "domain": urlparse(live_server.url).hostname or "localhost",
+                "path": "/",
+                "httpOnly": True,
+            }
+        ]
+    )
+
+    page.goto(f"{live_server.url}{reverse('providers:encounter_list', kwargs={'organization_id': organization.id})}")
+    page.wait_for_load_state("networkidle")
+
+    page.locator('button[aria-label="Encounter actions menu"]').first.click()
+
+    dropdown = page.locator("table .dropdown-content.menu").first
+    patient_details = dropdown.locator("text=Patient Details")
+    encounter_details = dropdown.locator("text=Encounter Details")
+    expect(patient_details).to_be_visible()
+    expect(encounter_details).to_be_visible()
