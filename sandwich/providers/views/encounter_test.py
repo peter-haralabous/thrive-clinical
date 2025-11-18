@@ -235,15 +235,18 @@ def test_encounter_list_sorts_by_is_active(provider: User, organization: Organiz
     client.force_login(provider)
     url = reverse("providers:encounter_list", kwargs={"organization_id": organization.id})
 
-    response = client.get(f"{url}?sort=is_active")
+    # Use filter_mode=custom to bypass default filter and see all encounters
+    response = client.get(f"{url}?sort=is_active&filter_mode=custom", follow=True)
     assert response.status_code == 200
     encounters = list(response.context["encounters"])
+    # Ascending sort: inactive (False) comes before active (True)
     assert encounters[0] == inactive
     assert encounters[1] == active
 
-    response = client.get(f"{url}?sort=-is_active")
+    response = client.get(f"{url}?sort=-is_active&filter_mode=custom", follow=True)
     assert response.status_code == 200
     encounters = list(response.context["encounters"])
+    # Descending sort: active (True) comes before inactive (False)
     assert encounters[0] == active
     assert encounters[1] == inactive
 
