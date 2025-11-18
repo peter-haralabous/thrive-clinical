@@ -7,6 +7,7 @@ import './components/message-alert';
 import './components/sortable-columns';
 import './components/toggle-container';
 import { initializeDatadog } from './lib/datadog';
+import { initPatientWorkspace } from './patient-workspace';
 
 /* Project specific Javascript goes here. */
 
@@ -25,3 +26,8 @@ try {
 } catch (e) {
   // the user will see UTC dates, oh well.
 }
+
+// Initialize page-specific functionality
+document.addEventListener('DOMContentLoaded', () => {
+  initPatientWorkspace();
+});
