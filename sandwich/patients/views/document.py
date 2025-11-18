@@ -12,6 +12,7 @@ from private_storage.views import PrivateStorageDetailView
 from sandwich.core.models.document import Document
 from sandwich.core.models.patient import Patient
 from sandwich.core.service.document_service import assign_default_document_permissions
+from sandwich.core.service.ingest_service import ProcessDocumentContext
 from sandwich.core.service.ingest_service import process_document_job
 from sandwich.core.service.ingest_service import send_ingest_progress
 from sandwich.core.service.permissions_service import ObjPerm
@@ -44,6 +45,8 @@ SUPPORTED_FILE_TYPES = ["application/pdf", "text/plain"]
 
 
 class DocumentForm(forms.ModelForm):
+    context = forms.ChoiceField(widget=forms.HiddenInput, required=False, choices=ProcessDocumentContext.choices)
+
     class Meta:
         model = Document
         fields = ("file", "patient", "encounter")
@@ -73,12 +76,17 @@ class DocumentForm(forms.ModelForm):
 def document_upload_and_extract(request: AuthenticatedHttpRequest, patient: Patient):
     files = request.FILES.getlist("file")
     for file in files:
-        form = DocumentForm({"patient": patient.id}, MultiValueDict({"file": [file]}))
+        form = DocumentForm(
+            MultiValueDict({**request.POST, "patient": [patient.id]}),  # type: ignore[dict-item]
+            MultiValueDict({"file": [file]}),
+        )
         if form.is_valid():
             document = form.save()
             assign_default_document_permissions(document)
             try:
-                process_document_job.defer(document_id=str(document.id))
+                process_document_job.defer(
+                    document_id=str(document.id), document_context=form.cleaned_data.get("context")
+                )
                 send_ingest_progress(patient, text=f"Uploaded {document.original_filename}...")
             except RuntimeError:
                 logger.warning("Failed to enqueue document analysis", exc_info=True)

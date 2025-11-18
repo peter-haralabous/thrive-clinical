@@ -65,6 +65,7 @@
           hx-swap="none"
           class="hidden">
       <input type="file" name="file" accept="application/pdf, text/plain" multiple />
+      <input type="hidden" name="context" value="{{ document_context }}" />
       {% csrf_token %}
     </form>
     <div id="global-upload-hover"

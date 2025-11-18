@@ -3,6 +3,7 @@ from typing import Any
 from sandwich.core.models.patient import Patient
 from sandwich.core.service.agent_service.config import configure
 from sandwich.core.service.chat_service.chat import load_chat_messages
+from sandwich.core.service.ingest_service import ProcessDocumentContext
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.patients.views.chat import ChatForm
 
@@ -23,4 +24,5 @@ def _chat_context(request: AuthenticatedHttpRequest, patient: Patient) -> dict[s
     return _patient_context(request, patient=patient) | {
         "chat_form": ChatForm(user=request.user, initial={"patient": patient, "thread": chat_thread}),
         "chat_messages": load_chat_messages(configure(chat_thread), patient),
+        "document_context": ProcessDocumentContext.PATIENT_CHAT,
     }

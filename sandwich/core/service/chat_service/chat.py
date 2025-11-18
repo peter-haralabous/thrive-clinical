@@ -58,7 +58,7 @@ def receive_chat_message(
         )["structured_response"]
 
 
-def _timestamp_from_message(message: HumanMessage | AIMessage) -> datetime.datetime | None:
+def _timestamp_from_message(message: BaseMessage) -> datetime.datetime | None:
     if isinstance(message, HumanMessage):
         raw_timestamp = message.response_metadata.get("timestamp")
         if raw_timestamp:
@@ -82,6 +82,7 @@ def initial_chat_messages(config: "RunnableConfig", patient: Patient) -> list[Sa
     )
     state = set_state(config, values={"messages": messages})
     return list(html_message_list(state.values.get("messages", [])))
+
 
 def load_chat_messages(config: "RunnableConfig", patient: Patient) -> list[SafeString]:
     state: StateSnapshot = get_state(config)

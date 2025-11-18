@@ -1,5 +1,6 @@
 import logging
 
+from django.db import models
 from django.template import loader
 
 from sandwich.core.models import Document
@@ -17,10 +18,14 @@ from sandwich.core.util.procrastinate import define_task
 logger = logging.getLogger(__name__)
 
 
+class ProcessDocumentContext(models.TextChoices):
+    PATIENT_CHAT = "patient_chat"
+
+
 @define_task
-def process_document_job(document_id: str):
+def process_document_job(document_id: str, document_context: ProcessDocumentContext | None = None):
     extract_facts_from_document_job.defer(document_id=document_id)
-    extract_records_from_document_job.defer(document_id=document_id)
+    extract_records_from_document_job.defer(document_id=document_id, document_context=document_context)
 
 
 @define_task
@@ -52,7 +57,7 @@ def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.
 
 
 @define_task
-def extract_records_from_document_job(document_id: str):
+def extract_records_from_document_job(document_id: str, document_context: ProcessDocumentContext | None = None):
     document = Document.objects.get(id=document_id)
     patient = document.patient
     send_ingest_progress(patient, text=f"Processing {document.original_filename}...")
