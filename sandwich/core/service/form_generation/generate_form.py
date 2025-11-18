@@ -49,33 +49,12 @@ class SurveySchema(pydantic.BaseModel):
     )
 
 
-@define_task
-def generate_form_schema(form_id: str, description: str | None = None) -> None:
+def generate_form_schema_from_bytes(doc_type: str, doc_bytes: bytes, text_prompt: str) -> SurveySchema:
     """
-    Entry for PDF/CSV -> SurveyJS form schema generation.
+    Generate a form schema from a file.
     """
-
-    form = Form.objects.get(id=form_id)
-    file = form.reference_file
-    ext = Path(file.name).suffix
-
-    # TODO(MM): Process multipage PDFs one page at a time.The current
-    # implementation times out with large, multipage PDFs.
-    if ext == ".pdf":
-        doc_type = "pdf"
-        prompt = form_from_pdf(description)
-
-    elif ext == ".csv":
-        doc_type = "csv"
-        prompt = form_from_csv(description)
-
-    else:
-        raise ValueError(f"Unsupported file type: {file.content_type}")
-
-    doc_bytes = file.read()
-
     llm = get_llm(ModelName.CLAUDE_SONNET_4_5)
-    response = cast(
+    return cast(
         "SurveySchema",
         llm.with_structured_output(SurveySchema).invoke(
             input=[
@@ -89,12 +68,36 @@ def generate_form_schema(form_id: str, description: str | None = None) -> None:
                                 "source": {"bytes": doc_bytes},
                             }
                         },
-                        {"text": prompt},
+                        {"text": text_prompt},
                     ],
                 }
             ]
         ),
     )
+
+
+@define_task
+def generate_form_schema_from_reference_file(form_id: str, description: str | None = None) -> None:
+    """
+    Entry for PDF/CSV -> SurveyJS form schema generation.
+    """
+
+    form = Form.objects.get(id=form_id)
+    file = form.reference_file
+    ext = Path(file.name).suffix
+
+    # TODO(MM): Process multipage PDFs one page at a time.The current
+    # implementation times out with large, multipage PDFs.
+    if ext == ".pdf":
+        prompt = form_from_pdf(description)
+        response = generate_form_schema_from_bytes(doc_type="pdf", doc_bytes=file.read(), text_prompt=prompt)
+
+    elif ext == ".csv":
+        prompt = form_from_csv(description)
+        response = generate_form_schema_from_bytes(doc_type="csv", doc_bytes=file.read(), text_prompt=prompt)
+
+    else:
+        raise ValueError(f"Unsupported file type: {file.content_type}")
 
     # TODO(MM): Add navigation for multipage forms and other defaults
     schema = response.model_dump()
