@@ -697,10 +697,7 @@ class TestInlineEditHelperFunctions:
 
         display = _get_field_display_value(encounter, str(multi_enum_attribute.id), organization)
 
-        # Should return comma-separated list
-        assert "Urgent" in display
-        assert "Review" in display
-        assert ", " in display
+        assert display == "Review, Urgent"  # Alphabetical order
 
     @pytest.mark.django_db
     def test_get_field_display_value_returns_placeholder_for_unset_multi_valued_attribute(

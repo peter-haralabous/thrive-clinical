@@ -96,7 +96,9 @@ def _format_attribute_value(attr: CustomAttribute, values: list) -> str | None:
         if attr.data_type == CustomAttribute.DataType.DATE:
             formatted = [str(v.value_date) for v in values if v.value_date]
         elif attr.data_type == CustomAttribute.DataType.ENUM:
-            formatted = [v.value_enum.label for v in values if v.value_enum]
+            # Sort by enum ID to ensure consistent ordering
+            sorted_values = sorted(values, key=lambda v: v.value_enum.id if v.value_enum else 0)
+            formatted = [v.value_enum.label for v in sorted_values if v.value_enum]
         else:
             return None
         return ", ".join(formatted) if formatted else None
@@ -433,7 +435,7 @@ def _get_custom_attribute_value_display(
             object_id=encounter.id,
         )
         if attr_values.exists():
-            labels = [av.value_enum.label for av in attr_values if av.value_enum]
+            labels = sorted([av.value_enum.label for av in attr_values if av.value_enum])
             return ", ".join(labels) if labels else "—"
         return "—"
 
