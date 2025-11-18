@@ -10,8 +10,10 @@ from django.db.models import OuterRef
 from django.db.models import Q
 from django.db.models import QuerySet
 from django.db.models import Subquery
+from django.utils.dateparse import parse_date
 
 from sandwich.core.models import CustomAttribute
+from sandwich.core.models import CustomAttributeEnum
 from sandwich.core.models import CustomAttributeValue
 from sandwich.core.models import Organization
 
@@ -540,3 +542,155 @@ def apply_filters_with_custom_attributes[ModelT: Model](
         )
 
     return queryset
+
+
+def _update_multi_enum_attribute(
+    encounter: Model,
+    attribute: CustomAttribute,
+    new_value: str | list[str],
+    content_type: ContentType,
+) -> bool:
+    """Update a multi-valued ENUM custom attribute."""
+    value_ids = ([new_value] if new_value else []) if isinstance(new_value, str) else new_value
+
+    try:
+        enum_values = list(CustomAttributeEnum.objects.filter(id__in=value_ids, attribute=attribute))
+        if len(enum_values) != len(value_ids):
+            logger.warning(
+                "Some enum values not found for custom attribute update",
+                extra={"attribute_id": str(attribute.id), "new_values": value_ids},
+            )
+            return False
+    except (ValueError, CustomAttributeEnum.DoesNotExist):
+        logger.warning(
+            "Invalid enum values for custom attribute update",
+            extra={"attribute_id": str(attribute.id), "new_values": value_ids},
+        )
+        return False
+
+    # Delete existing values and then create new ones
+    CustomAttributeValue.objects.filter(
+        attribute=attribute,
+        content_type=content_type,
+        object_id=encounter.pk,
+    ).delete()
+
+    for enum_value in enum_values:
+        CustomAttributeValue.objects.create(
+            attribute=attribute,
+            content_type=content_type,
+            object_id=encounter.pk,
+            value_enum=enum_value,
+        )
+
+    logger.info(
+        "Updated multi-valued ENUM custom attribute",
+        extra={
+            "attribute_id": str(attribute.id),
+            "encounter_id": encounter.pk,
+            "enum_value_ids": [str(e.id) for e in enum_values],
+        },
+    )
+    return True
+
+
+def _update_single_enum_attribute(
+    encounter: Model,
+    attribute: CustomAttribute,
+    new_value: str | list[str],
+    content_type: ContentType,
+) -> bool:
+    """Update a single-valued ENUM custom attribute."""
+    if isinstance(new_value, list):
+        logger.warning(
+            "Multiple values provided for single-value enum attribute",
+            extra={"attribute_id": str(attribute.id), "new_values": new_value},
+        )
+        return False
+
+    try:
+        enum_value = CustomAttributeEnum.objects.get(id=new_value, attribute=attribute)
+    except CustomAttributeEnum.DoesNotExist:
+        logger.warning(
+            "Invalid enum value for custom attribute update",
+            extra={"attribute_id": str(attribute.id), "new_value": new_value},
+        )
+        return False
+
+    CustomAttributeValue.objects.update_or_create(
+        attribute=attribute,
+        content_type=content_type,
+        object_id=encounter.pk,
+        defaults={"value_enum": enum_value},
+    )
+    logger.info(
+        "Updated ENUM custom attribute",
+        extra={
+            "attribute_id": str(attribute.id),
+            "encounter_id": encounter.pk,
+            "enum_value_id": enum_value.id,
+        },
+    )
+    return True
+
+
+def _update_date_attribute(
+    encounter: Model,
+    attribute: CustomAttribute,
+    new_value: str | list[str],
+    content_type: ContentType,
+) -> bool:
+    """Update a DATE custom attribute."""
+    if isinstance(new_value, list):
+        logger.warning(
+            "Multiple values provided for date attribute",
+            extra={"attribute_id": str(attribute.id), "new_values": new_value},
+        )
+        return False
+
+    date_value = parse_date(new_value)
+    if not date_value:
+        logger.warning(
+            "Invalid date value for custom attribute update",
+            extra={"attribute_id": str(attribute.id), "new_value": new_value},
+        )
+        return False
+
+    CustomAttributeValue.objects.update_or_create(
+        attribute=attribute,
+        content_type=content_type,
+        object_id=encounter.pk,
+        defaults={"value_date": date_value},
+    )
+    logger.info(
+        "Updated DATE custom attribute",
+        extra={
+            "attribute_id": str(attribute.id),
+            "encounter_id": encounter.pk,
+            "date_value": date_value.isoformat(),
+        },
+    )
+    return True
+
+
+def update_custom_attribute(
+    encounter: Model,
+    attribute: CustomAttribute,
+    new_value: str | list[str],
+) -> bool:
+    """Update a custom attribute value on the given model instance."""
+    content_type = ContentType.objects.get_for_model(encounter.__class__)
+
+    if attribute.data_type == CustomAttribute.DataType.ENUM:
+        if attribute.is_multi:
+            return _update_multi_enum_attribute(encounter, attribute, new_value, content_type)
+        return _update_single_enum_attribute(encounter, attribute, new_value, content_type)
+
+    if attribute.data_type == CustomAttribute.DataType.DATE:
+        return _update_date_attribute(encounter, attribute, new_value, content_type)
+
+    logger.warning(
+        "Unsupported data type for custom attribute update",
+        extra={"attribute_id": str(attribute.id), "data_type": attribute.data_type},
+    )
+    return False

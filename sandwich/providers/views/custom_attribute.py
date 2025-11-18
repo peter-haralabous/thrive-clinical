@@ -16,6 +16,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from slugify import slugify
 
+from sandwich.core.forms import DeleteConfirmationForm
 from sandwich.core.models.custom_attribute import CustomAttribute
 from sandwich.core.models.custom_attribute import CustomAttributeEnum
 from sandwich.core.models.encounter import Encounter
@@ -41,7 +42,6 @@ class CustomAttributeForm(forms.ModelForm[CustomAttribute]):
         ],
         widget=forms.Select(
             attrs={
-                "class": "form-select",
                 "hx-get": "",  # Set dynamically in __init__
                 "hx-target": "#enum-fields-container",
                 "hx-trigger": "change",
@@ -125,6 +125,11 @@ class CustomAttributeEnumForm(forms.ModelForm[CustomAttributeEnum]):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
+        self.helper.form_show_labels = True
+
+        self.fields["label"].label = "Label"
+        self.fields["value"].label = "Value"
+        self.fields["color_code"].label = "Color code"
 
         self.fields["value"].required = False
         self.fields["color_code"].required = False
@@ -284,13 +289,10 @@ def custom_attribute_edit(
     return render(request, "provider/custom_attribute_edit.html", context)
 
 
-@login_required
-@authorize_objects([ObjPerm(Organization, "organization_id", ["change_organization", "view_organization"])])
-def custom_attribute_list(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
+def _get_custom_attribute_list_context(request: AuthenticatedHttpRequest, organization: Organization) -> dict:
+    """Get the context for rendering the custom attribute list."""
     page = request.GET.get("page", 1)
 
-    # TODO: permission filtering after defining the rules
-    # provider_patients: QuerySet = get_objects_for_user(request.user, "core.view_patient")
     sort = (
         validate_sort(
             request.GET.get("sort"),
@@ -307,12 +309,18 @@ def custom_attribute_list(request: AuthenticatedHttpRequest, organization: Organ
 
     paginator = Paginator(attributes, 25)
 
-    context = {
+    return {
         "attributes": paginator.get_page(page),
         "organization": organization,
         "sort": sort,
         "page": page,
     }
+
+
+@login_required
+@authorize_objects([ObjPerm(Organization, "organization_id", ["change_organization", "view_organization"])])
+def custom_attribute_list(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
+    context = _get_custom_attribute_list_context(request, organization)
     if request.headers.get("HX-Request"):
         return render(request, "provider/partials/custom_attribute_list_table.html", context)
     return render(request, "provider/custom_attribute_list.html", context)
@@ -323,4 +331,61 @@ def custom_attribute_list(request: AuthenticatedHttpRequest, organization: Organ
 def custom_attribute_archive(
     request: AuthenticatedHttpRequest, organization: Organization, attribute_id: UUID
 ) -> HttpResponse:
-    return HttpResponse(status=200)
+    """Delete a custom attribute and all its associated values."""
+    attribute = get_object_or_404(CustomAttribute, id=attribute_id, organization=organization)
+
+    if request.method == "POST":
+        logger.info(
+            "Processing custom attribute deletion",
+            extra={"user_id": request.user.id, "attribute_id": attribute_id, "organization_id": organization.id},
+        )
+        form = DeleteConfirmationForm(request.POST)
+
+        if form.is_valid():
+            attribute_name = attribute.name
+            logger.info(
+                "Deleting custom attribute",
+                extra={
+                    "attribute_id": attribute.id,
+                    "attribute_name": attribute_name,
+                    "organization_id": organization.id,
+                },
+            )
+
+            # Delete the attribute (will cascade to values and enums)
+            attribute.delete()
+
+            messages.success(request, f"Custom field '{attribute_name}' has been deleted.")
+
+            # Redirect back to the list page
+            return HttpResponseRedirect(
+                reverse("providers:custom_attribute_list", kwargs={"organization_id": organization.id})
+            )
+        logger.warning(
+            "Invalid custom attribute delete confirmation",
+            extra={"user_id": request.user.id, "attribute_id": attribute_id},
+        )
+        messages.error(request, "Invalid confirmation. Please type 'DELETE' to confirm.")
+        # Rerender the full page with the modal open
+        modal_context = {"form": form, "attribute": attribute, "organization": organization}
+        context = _get_custom_attribute_list_context(request, organization)
+        context.update(modal_context)
+        return render(request, "provider/custom_attribute_archive.html", context)
+
+    # GET request - render the modal
+    form = DeleteConfirmationForm(
+        form_action=reverse(
+            "providers:custom_attribute_archive",
+            kwargs={"organization_id": organization.id, "attribute_id": attribute.id},
+        )
+    )
+    modal_context = {"form": form, "attribute": attribute, "organization": organization}
+
+    # If it's an HTMX request, render the modal partial
+    if request.headers.get("HX-Request"):
+        return render(request, "provider/partials/custom_attribute_archive_modal.html", modal_context)
+
+    # Otherwise (direct URL access or page refresh), render the full list page with the modal
+    context = _get_custom_attribute_list_context(request, organization)
+    context.update(modal_context)
+    return render(request, "provider/custom_attribute_archive.html", context)

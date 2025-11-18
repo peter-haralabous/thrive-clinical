@@ -1,46 +1,28 @@
-{% load crispy_forms_tags %}
+{% load crispy_forms_tags lucide %}
 
-<div class="mb-4">
-  <h5>Options</h5>
+<div class="mb-4" data-enum-formset>
+  <h5 class="text-lg font-semibold mb-3">Options</h5>
   {{ formset.management_form }}
-  <div id="enum-forms">
+  <div id="enum-forms" class="space-y-3">
     {% for form in formset %}
-      <div class="enum-form-row mb-2 border p-3">
+      <div class="enum-form-row card bg-base-100 shadow-sm border border-base-300 relative">
         {{ form.id }}
-        <div class="row">{% crispy form %}</div>
+        <button type="button"
+                class="delete-option-btn btn btn-ghost btn-sm btn-circle absolute top-3 right-3 z-10"
+                title="Delete option">{% lucide "x" class="size-5" %}</button>
+        <div class="card-body pt-12 pr-12">
+          {% for field in form.visible_fields %}
+            {% if field.name != 'DELETE' %}
+              {% include 'tailwind/field.html' with field=field form_show_labels=True %}
+            {% endif %}
+          {% endfor %}
+          <div class="hidden">{{ form.DELETE }}</div>
+        </div>
       </div>
     {% endfor %}
   </div>
-  <button type="button" class="btn btn-secondary" id="add-option-btn">Add Option</button>
+  <button type="button" class="btn btn-outline mt-3" id="add-option-btn">
+    {% lucide "plus" class="size-5 mr-1" %}
+    Add Option
+  </button>
 </div>
-<script>
-  document
-    .getElementById("add-option-btn")
-    ?.addEventListener("click", function() {
-      const formset = document.getElementById("enum-forms");
-      const totalForms = document.querySelector('[name="enums-TOTAL_FORMS"]');
-      const formCount = parseInt(totalForms.value);
-
-      // Clone first form and update indices
-      const templateForm = formset.querySelector(".enum-form-row");
-      const newForm = templateForm.cloneNode(true);
-
-      // Update all name/id attributes
-      newForm.innerHTML = newForm.innerHTML.replace(
-        /enums-\d+-/g,
-        `enums-${formCount}-`
-      );
-
-      // Clear values
-      newForm.querySelectorAll("input").forEach((input) => {
-        if (!input.name.includes("DELETE")) input.value = "";
-      });
-
-      const oldCsrfInput = templateForm.querySelector("input[name='csrfmiddlewaretoken']")
-      const newCsrfInput = newForm.querySelector("input[name='csrfmiddlewaretoken']");
-      newCsrfInput.value = oldCsrfInput.value;
-
-      formset.appendChild(newForm);
-      totalForms.value = formCount + 1;
-    });
-</script>

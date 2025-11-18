@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_enum import EnumField
 
@@ -31,8 +32,12 @@ class TaskStatus(models.TextChoices):
     ENTERED_IN_ERROR = "entered-in-error", _("Entered in Error")
 
 
+TERMINAL_TASK_STATUSES = [TaskStatus.CANCELLED, TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.ENTERED_IN_ERROR]
+ACTIVE_TASK_STATUSES = [s for s in TaskStatus if s not in TERMINAL_TASK_STATUSES]
+
+
 def terminal_task_status(status: TaskStatus) -> bool:
-    return status in [TaskStatus.CANCELLED, TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.ENTERED_IN_ERROR]
+    return status in TERMINAL_TASK_STATUSES
 
 
 class TaskManager(models.Manager["Task"]):
@@ -108,6 +113,9 @@ class Task(BaseModel):
             return self._formio_submission
         except FormioSubmission.DoesNotExist:
             return None
+
+    def get_absolute_url(self):
+        return reverse("patients:task", kwargs={"task_id": self.id, "patient_id": self.patient.id})
 
     class Meta:
         permissions = (("complete_task", "Can complete a task."),)

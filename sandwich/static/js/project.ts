@@ -1,5 +1,8 @@
 import '../css/project.css';
+import 'choices.js/public/assets/styles/choices.css';
 import './components/command-palette';
+import './components/enum-formset';
+import './components/inline-edit-field';
 import './components/message-alert';
 import './components/sortable-columns';
 import './components/toggle-container';

@@ -2,6 +2,7 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 
+from sandwich.core.models import CustomAttribute
 from sandwich.core.models import ListViewPreference
 from sandwich.core.models import ListViewType
 from sandwich.core.models.encounter import EncounterStatus
@@ -204,3 +205,39 @@ def test_can_save_empty_filters_after_clear_all(provider, organization):
         user=provider,
     )
     assert preference.saved_filters == {"custom_attributes": {}, "model_fields": {}}
+
+
+@pytest.mark.django_db
+def test_custom_attribute_names_are_escaped_in_filter_modal(provider, organization):
+    """Test that custom attribute names with HTML/JS are properly escaped."""
+    client = Client()
+    client.force_login(provider)
+
+    malicious_name = '"><script>alert("xss")</script><input value="'
+    content_type = ListViewType.ENCOUNTER_LIST.get_content_type()
+    assert content_type is not None
+
+    CustomAttribute.objects.create(
+        organization=organization,
+        content_type=content_type,
+        name=malicious_name,
+        data_type=CustomAttribute.DataType.DATE,
+    )
+
+    url = reverse(
+        "providers:show_filter_modal",
+        kwargs={
+            "organization_id": organization.id,
+            "list_type": ListViewType.ENCOUNTER_LIST.value,
+        },
+    )
+
+    response = client.get(url, HTTP_HX_REQUEST="true")
+
+    assert response.status_code == 200
+    content = response.content.decode("utf-8")
+
+    # Verify the script tag is escaped and not executable
+    assert "<script>alert" not in content
+    assert "&lt;script&gt;" in content or "&#x27;&gt;&lt;script&gt;" in content
+    assert '"><script>' not in content

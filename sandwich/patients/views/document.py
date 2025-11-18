@@ -79,7 +79,7 @@ def document_upload_and_extract(request: AuthenticatedHttpRequest, patient: Pati
             assign_default_document_permissions(document)
             try:
                 process_document_job.defer(document_id=str(document.id))
-                send_ingest_progress(patient.id, text=f"Uploaded {document.original_filename}...")
+                send_ingest_progress(patient, text=f"Uploaded {document.original_filename}...")
             except RuntimeError:
                 logger.warning("Failed to enqueue document analysis", exc_info=True)
                 messages.add_message(request, messages.ERROR, "Failed to enqueue document analysis")

@@ -1,12 +1,14 @@
 from http import HTTPStatus
 
 import pytest
+from django.contrib.contenttypes.models import ContentType
 from django.http import HttpResponseRedirect
 from django.test import Client
 from django.urls import reverse
 
 from sandwich.core.models.custom_attribute import CustomAttribute
 from sandwich.core.models.custom_attribute import CustomAttributeEnum
+from sandwich.core.models.custom_attribute import CustomAttributeValue
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.organization import Organization
 from sandwich.core.models.role import RoleName
@@ -157,3 +159,119 @@ def test_select_attribute_requires_one_option(user: User, organization: Organiza
     assert b"At least one option is required for Select/Multi-Select types. Please add options below." in res.content
     # Should not create attribute
     assert not CustomAttribute.objects.filter(name="broken select field").exists()
+
+
+@pytest.mark.django_db
+def test_delete_custom_attribute_with_confirmation(
+    user: User, organization: Organization, encounter: Encounter
+) -> None:
+    """Test deleting a custom attribute with proper DELETE confirmation."""
+    assign_organization_role(organization, RoleName.OWNER, user)
+
+    # Create a custom attribute with enum values
+    attribute = CustomAttribute.objects.create(
+        organization=organization,
+        content_type=ContentType.objects.get_for_model(Encounter),
+        name="Priority",
+        data_type=CustomAttribute.DataType.ENUM,
+        is_multi=False,
+    )
+    enum_value = CustomAttributeEnum.objects.create(
+        attribute=attribute,
+        label="High Priority",
+        value="high",
+        color_code="FF0000",
+    )
+
+    # Create a value for this attribute on an encounter
+    attr_value = CustomAttributeValue.objects.create(
+        attribute=attribute,
+        content_type=ContentType.objects.get_for_model(Encounter),
+        object_id=encounter.id,
+        value_enum=enum_value,
+    )
+
+    client = Client()
+    client.force_login(user)
+    url = reverse(
+        "providers:custom_attribute_archive", kwargs={"organization_id": organization.id, "attribute_id": attribute.id}
+    )
+
+    # Post with correct confirmation
+    data = {"confirmation": "DELETE"}
+    res = client.post(url, data)
+
+    # Should redirect or return success
+    assert res.status_code in [HTTPStatus.FOUND, HTTPStatus.OK]
+
+    # Attribute should be deleted
+    assert not CustomAttribute.objects.filter(id=attribute.id).exists()
+
+    # Enum values should be deleted (CASCADE)
+    assert not CustomAttributeEnum.objects.filter(id=enum_value.id).exists()
+
+    # Attribute values should be deleted (CASCADE)
+    assert not CustomAttributeValue.objects.filter(id=attr_value.id).exists()
+
+
+@pytest.mark.django_db
+def test_delete_custom_attribute_wrong_confirmation(
+    user: User, organization: Organization, encounter: Encounter
+) -> None:
+    """Test that deletion fails with incorrect confirmation text."""
+    assign_organization_role(organization, RoleName.OWNER, user)
+
+    # Create a custom attribute
+    attribute = CustomAttribute.objects.create(
+        organization=organization,
+        content_type=ContentType.objects.get_for_model(Encounter),
+        name="Test Field",
+        data_type=CustomAttribute.DataType.DATE,
+        is_multi=False,
+    )
+
+    client = Client()
+    client.force_login(user)
+    url = reverse(
+        "providers:custom_attribute_archive", kwargs={"organization_id": organization.id, "attribute_id": attribute.id}
+    )
+
+    # Post with wrong confirmation
+    data = {"confirmation": "delete"}  # lowercase, should fail
+    res = client.post(url, data)
+
+    # Should render the archive page with modal open (200), not redirect
+    assert res.status_code == HTTPStatus.OK
+
+    # Attribute should NOT be deleted
+    assert CustomAttribute.objects.filter(id=attribute.id).exists()
+
+
+@pytest.mark.django_db
+def test_delete_custom_attribute_deny_access(user: User, organization: Organization, encounter: Encounter) -> None:
+    """Test that users without permissions cannot delete custom attributes."""
+    assign_organization_role(organization, RoleName.PATIENT, user)
+
+    # Create a custom attribute
+    attribute = CustomAttribute.objects.create(
+        organization=organization,
+        content_type=ContentType.objects.get_for_model(Encounter),
+        name="Test Field",
+        data_type=CustomAttribute.DataType.DATE,
+        is_multi=False,
+    )
+
+    client = Client()
+    client.force_login(user)
+    url = reverse(
+        "providers:custom_attribute_archive", kwargs={"organization_id": organization.id, "attribute_id": attribute.id}
+    )
+
+    data = {"confirmation": "DELETE"}
+    res = client.post(url, data)
+
+    # Should deny access
+    assert res.status_code == HTTPStatus.NOT_FOUND
+
+    # Attribute should NOT be deleted
+    assert CustomAttribute.objects.filter(id=attribute.id).exists()

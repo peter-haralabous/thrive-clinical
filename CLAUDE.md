@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -224,7 +225,7 @@ class Form(VersionMixin, BaseModel):
     name = models.CharField(max_length=255)
     schema = models.JSONField(default=dict)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    
+
     def get_versions(self):
         """Get all historical versions"""
         return self.events.order_by("-pgh_id")
@@ -238,7 +239,7 @@ class Form(VersionMixin, BaseModel):
 ```python
 class Patient(BaseModel):
     search_vector = SearchVectorField(null=True, blank=True)
-    
+
     class PatientQuerySet(models.QuerySet):
         def search(self, query: str) -> Self:
             search_query = to_search_query(query)
@@ -268,7 +269,7 @@ HTMX is used for **partial page updates** without full page reloads:
 <meta name="htmx-config" content='{"inlineScriptNonce":"{{ request.csp_nonce }}"}' />
 <body hx-ext="sse">
   <!-- HTMX SSE extension for server-sent events -->
-  
+
   <script nonce="{{ request.csp_nonce }}">
     // Auto-attach CSRF token to HTMX requests
     document.body.addEventListener('htmx:configRequest', (event) => {
@@ -290,8 +291,8 @@ HTMX is used for **partial page updates** without full page reloads:
 <form hx-get="{% url 'providers:patient_list' organization_id=organization.id %}"
       hx-target="#patient_table_container"
       hx-push-url="true"
-      hx-trigger="keyup changed delay:300ms from:input[name='search'], 
-                  change from:select[name='has_active_encounter'], 
+      hx-trigger="keyup changed delay:300ms from:input[name='search'],
+                  change from:select[name='has_active_encounter'],
                   filtersChanged from:body">
   <input name="search" type="text" placeholder="Search" />
   <select name="has_active_encounter">
@@ -344,14 +345,14 @@ from sandwich.core.util.http import AuthenticatedHttpRequest
 def patient_list(request: AuthenticatedHttpRequest, organization_id: UUID):
     # Fetch and filter data
     patients = Patient.objects.filter(organization_id=organization_id)
-    
+
     # Detect if HTMX request
     if request.headers.get("HX-Request") == "true":
         # Return only the table partial, not full page
         return render(request, "provider/partials/patient_list_table.html", {
             "patients": patients
         })
-    
+
     # Standard request: return full page
     return render(request, "provider/patient_list.html", {
         "patients": patients
@@ -419,7 +420,7 @@ def define_task(original_func=None, **kwargs):
     2. Adds pghistory context for audit trails
     3. Manages database connections
     """
-    
+
     def decorator(func):
         @functools.wraps(func)
         def new_func(context: JobContext, *job_args, **job_kwargs):
@@ -449,14 +450,14 @@ def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.
     """Extract structured facts using LLM"""
     document = Document.objects.get(id=document_id)
     llm_client = get_llm(ModelName(llm_name))
-    
+
     # Send progress update via SSE
     send_ingest_progress(document.patient.id, text=f"Processing {document.original_filename}...")
-    
+
     # Extract facts from PDF/text
     with document.file.open("rb") as f:
         content = f.read()
-    
+
     if document.content_type == "application/pdf":
         triples = extract_facts_from_pdf(content, llm_client, patient=document.patient, document=document)
     else:
@@ -490,7 +491,7 @@ import sandwich.core.service.invitation_service
 def send_ingest_progress(patient_id: UUID, *, text: str, done=False):
     """Send Server-Sent Event to update UI"""
     from django_eventstream import send_event
-    
+
     context = {"text": text, "done": done}
     content = loader.render_to_string("patient/partials/ingest_progress.html", context)
     # Sends event to client listening on "patient/{patient_id}" channel
@@ -529,7 +530,7 @@ class ObjPerm:
 def authorize_objects(rules: list[ObjPerm]):
     """
     Extracts URL parameters, validates permissions, injects objects.
-    
+
     Example usage:
     """
     def decorator(view_func):
@@ -564,10 +565,10 @@ def patient_edit(request, organization: Organization, patient: Patient):
 # sandwich/core/middleware/consent.py
 class ConsentMiddleware:
     """Redirect to consent page if user hasn't accepted required policies"""
-    
+
     exempt_namespaces = {"admin", "accounts", "static"}
     required_policies = {ConsentPolicy.THRIVE_PRIVACY_POLICY, ConsentPolicy.THRIVE_TERMS_OF_USE}
-    
+
     def __call__(self, request):
         if self.should_process(request, match):
             if not _has_consented_to_policies(request.user, self.required_policies):
@@ -581,7 +582,7 @@ class ConsentMiddleware:
 # sandwich/patients/middleware/patient_access.py
 class PatientAccessMiddleware:
     """Ensure user has a patient record before accessing patient routes"""
-    
+
     def __call__(self, request):
         if request.user.is_authenticated:
             match = cached_resolve(request)
@@ -642,7 +643,7 @@ class PatientQuerySet(models.QuerySet):
 class PatientManager(models.Manager):
     def get_queryset(self):
         return PatientQuerySet(self.model, using=self._db)
-    
+
     def create(self, **kwargs) -> "Patient":
         """Auto-assign permissions when patient created"""
         patient = super().create(**kwargs)
@@ -696,12 +697,12 @@ ListViewPreference:
 def patient_list(request, organization_id):
     # Get user's saved preferences
     preferences = get_list_view_preference(request.user, "patient_list", organization_id)
-    
+
     # Auto-apply sort, filters
     patients = Patient.objects.filter(organization_id=organization_id)
     patients = apply_sort_with_custom_attributes(patients, preferences.sort_by)
     patients = apply_filters_with_custom_attributes(patients, preferences.filters)
-    
+
     return render(request, "...", {"patients": patients})
 ```
 
@@ -888,14 +889,14 @@ from django.db import models
 class MyQuerySet(models.QuerySet):
     def active(self):
         return self.filter(is_active=True)
-    
+
     def for_user(self, user):
         return self.filter(user=user)
 
 class MyManager(models.Manager):
     def get_queryset(self):
         return MyQuerySet(self.model)
-    
+
     def active(self):
         return self.get_queryset().active()
 

@@ -1,4 +1,4 @@
-# Copilot Instructions for thrive-prototypes
+# Agent Instructions for thrive-prototypes
 
 This repository is a Django web application built with HTMX and Tailwind CSS for prototyping healthcare-related forms and workflows.
 
