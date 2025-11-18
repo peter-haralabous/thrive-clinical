@@ -32,6 +32,10 @@
               {% lucide "trash-2" class="h-4 w-4 text-red-500" %}
             </button>
           </td>
+          <td>
+            <a href="{% url "providers:custom_attribute_edit" organization_id=organization.id attribute_id=attribute.id %}"
+               class="btn btn-primary">Edit</a>
+          </td>
         </tr>
       {% empty %}
         <tr>

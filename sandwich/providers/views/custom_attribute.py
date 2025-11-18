@@ -11,6 +11,7 @@ from django.db import transaction
 from django.forms import BaseInlineFormSet
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_list_or_404
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.urls import reverse
@@ -50,11 +51,22 @@ class CustomAttributeForm(forms.ModelForm[CustomAttribute]):
         initial=None,
     )
 
-    def __init__(self, *args, content_type: ContentType, organization: Organization, **kwargs) -> None:
+    def __init__(
+        self,
+        *args,
+        content_type: ContentType,
+        organization: Organization,
+        **kwargs,
+    ) -> None:
         super().__init__(*args, **kwargs)
 
         self.organization = organization
         self.content_type = content_type
+
+        instance: CustomAttribute | None = kwargs.get("instance")
+        if instance is not None:
+            input_type = self._from_instance(instance)
+            self.fields["input_type"].initial = input_type
 
         # Set HTMX URL with organization_id
         self.fields["input_type"].widget.attrs["hx-get"] = reverse(
@@ -63,10 +75,6 @@ class CustomAttributeForm(forms.ModelForm[CustomAttribute]):
 
         self.helper = FormHelper()
         self.helper.form_tag = False  # Handle form tag in template
-
-        # if self.instance.pk:
-        #     self.initial["input_type"] = self._from_instance(self.instance)
-        #     self.fields["input_type"].widget.attrs["disabled"] = True
 
     def _from_instance(self, instance: CustomAttribute) -> str | None:
         """Derive 'input_type' field value from instance data."""
@@ -271,6 +279,16 @@ def custom_attribute_edit(
         content_type=attribute.content_type,
         organization=organization,
     )
+    requires_enums = attribute.data_type == CustomAttribute.DataType.ENUM
+    formset = CustomAttributeEnumFormSet(prefix="enums")
+    if requires_enums:
+        attribute_enums = get_list_or_404(CustomAttributeEnum, attribute_id=attribute_id)
+        enums_as_dict = [enum.__dict__ for enum in attribute_enums]
+        formset = CustomAttributeEnumFormSet(
+            request.POST if request.method == "POST" else None, prefix="enums", initial=enums_as_dict
+        )
+        formset.extra = attribute_enums.__len__()
+
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.add_message(request, messages.SUCCESS, "Custom attribute updated successfully.")
@@ -284,7 +302,8 @@ def custom_attribute_edit(
     context = {
         "organization": organization,
         "form": form,
-        "attribute": attribute,
+        "formset": formset,
+        "show_enum_fields": requires_enums,
     }
     return render(request, "provider/custom_attribute_edit.html", context)
 
