@@ -197,6 +197,26 @@ def test_encounter_list_shows_filter_panel_in_custom_mode_without_filters(
 
 
 @pytest.mark.django_db
+def test_encounter_list_default_excludes_archived_encounters(provider: User, organization: Organization) -> None:
+    """Test that archived encounters are excluded by default on first load."""
+    patient = PatientFactory.create(organization=organization)
+
+    active = Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.IN_PROGRESS)
+    archived = Encounter.objects.create(organization=organization, patient=patient, status=EncounterStatus.COMPLETED)
+
+    client = Client()
+    client.force_login(provider)
+    url = reverse("providers:encounter_list", kwargs={"organization_id": organization.id})
+
+    # First load without any query parameters should exclude archived encounters
+    response = client.get(url, follow=True)
+    assert response.status_code == 200
+    encounters = list(response.context["encounters"])
+    assert active in encounters
+    assert archived not in encounters
+
+
+@pytest.mark.django_db
 def test_encounter_list_filters_by_is_active(provider: User, organization: Organization) -> None:
     """Test filtering encounters by is_active field."""
     patient = PatientFactory.create(organization=organization)
