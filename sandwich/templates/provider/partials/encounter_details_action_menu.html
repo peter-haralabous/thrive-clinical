@@ -1,65 +1,35 @@
 {% load lucide %}
 
-{# Desktop view: show all buttons inline #}
-<div class="hidden md:flex gap-2 flex-wrap">
-  <button class="btn btn-primary"
-          hx-target="#add-task-modal"
-          hx-get="{% url 'providers:patient_add_task' organization_id=organization.id patient_id=patient.id %}">
-    Send Form
-  </button>
-  <a href="{% url "providers:patient" organization_id=organization.id patient_id=patient.id %}"
-     class="btn btn-secondary">View Patient</a>
-  <a href="{% url "providers:patient_edit" organization_id=organization.id patient_id=patient.id %}"
-     class="btn btn-tertiary">Edit Patient Record</a>
-  <form action="{% url "providers:encounter_archive" organization_id=organization.id encounter_id=encounter.id %}"
-        class="inline"
-        method="post">
-    {% csrf_token %}
-    <button type="submit"
-            class="btn {% if encounter.status == "completed" %}btn-outline{% else %}btn-error{% endif %}">
-      {% if encounter.status == "completed" %}
-        Unarchive Encounter
-      {% else %}
-        Archive Encounter
-      {% endif %}
+{% if request.GET.slideout %}
+  {# Inside slideout: Always show mobile layout due to width constraints #}
+  <div class="dropdown dropdown-end">{% include 'provider/partials/encounter_details_action_menu_dropdown.html' %}</div>
+{% else %}
+  {# Full page view: responsive breakpoints #}
+  {# Desktop view: show all buttons inline #}
+  <div class="hidden lg:flex gap-2 flex-wrap">
+    <a href="{% url "providers:patient" organization_id=organization.id patient_id=patient.id %}"
+       class="btn btn-primary">View Patient</a>
+    <button class="btn btn-secondary"
+            hx-target="#add-task-modal"
+            hx-get="{% url 'providers:patient_add_task' organization_id=organization.id patient_id=patient.id %}">
+      Send Form
     </button>
-  </form>
-</div>
-{# Mobile view: kebab menu dropdown #}
-<div class="md:hidden dropdown dropdown-end">
-  <button tabindex="0"
-          class="btn btn-ghost btn-sm rounded-full cursor-pointer"
-          aria-label="Encounter actions menu">{% lucide "menu" class="size-6" %}</button>
-  <ul tabindex="0"
-      class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
-    <li>
-      <a hx-get="{% url 'providers:patient_add_task' organization_id=organization.id patient_id=patient.id %}"
-         hx-target="#add-task-modal"
-         class="flex items-center gap-2">{% lucide "send" class="size-4" %} Send Form</a>
-    </li>
-    <li>
-      <a href="{% url "providers:patient" organization_id=organization.id patient_id=patient.id %}"
-         class="flex items-center gap-2">{% lucide "user" class="size-4" %} View Patient</a>
-    </li>
-    <li>
-      <a href="{% url "providers:patient_edit" organization_id=organization.id patient_id=patient.id %}"
-         class="flex items-center gap-2">{% lucide "square-pen" class="size-4" %} Edit Patient Record</a>
-    </li>
-    <li>
-      <form action="{% url "providers:encounter_archive" organization_id=organization.id encounter_id=encounter.id %}"
-            method="post">
-        {% csrf_token %}
+    <form action="{% url "providers:encounter_archive" organization_id=organization.id encounter_id=encounter.id %}"
+          class="inline"
+          method="post">
+      {% csrf_token %}
+      <button type="submit"
+              class="btn {% if encounter.status == "completed" %}btn-outline{% else %}btn-error{% endif %}">
         {% if encounter.status == "completed" %}
-          <button type="submit" class="w-full text-left flex items-center gap-2">
-            {% lucide "rotate-ccw" class="size-4" %} Unarchive Encounter
-          </button>
+          Unarchive Encounter
         {% else %}
-          <button type="submit"
-                  class="w-full text-left text-error flex items-center gap-2">
-            {% lucide "archive" class="size-4" %} Archive Encounter
-          </button>
+          Archive Encounter
         {% endif %}
-      </form>
-    </li>
-  </ul>
-</div>
+      </button>
+    </form>
+  </div>
+  {# Mobile view: kebab menu dropdown #}
+  <div class="lg:hidden dropdown dropdown-end">
+    {% include 'provider/partials/encounter_details_action_menu_dropdown.html' %}
+  </div>
+{% endif %}
