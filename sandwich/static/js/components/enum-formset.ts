@@ -181,8 +181,9 @@ class EnumFormset {
 const initializedFormsets = new WeakSet<HTMLElement>();
 
 export function initCustomAttributeEnumFormsets(): void {
+  console.log('hey toria initCustomAttributeEnumFormsets');
   document
-    .querySelectorAll<HTMLElement>('[data-enum-formset]')
+    .querySelectorAll<HTMLElement>('#data-enum-formset')
     .forEach((container) => {
       if (initializedFormsets.has(container)) {
         return;
@@ -200,6 +201,6 @@ export function initCustomAttributeEnumFormsets(): void {
     });
 }
 
-document.addEventListener('htmx:afterSwap', () => {
+document.addEventListener('data-enum-formset:init', () => {
   initCustomAttributeEnumFormsets();
 });

@@ -273,6 +273,7 @@ def custom_attribute_edit(
     request: AuthenticatedHttpRequest, organization: Organization, attribute_id: UUID
 ) -> HttpResponse:
     attribute = get_object_or_404(CustomAttribute, id=attribute_id, organization=organization)  # TODO permission check
+
     form = CustomAttributeForm(
         request.POST if request.method == "POST" else None,
         instance=attribute,
@@ -290,6 +291,23 @@ def custom_attribute_edit(
         formset.extra = attribute_enums.__len__()
 
     if request.method == "POST" and form.is_valid():
+        if requires_enums and formset.is_valid():
+            ## Get info onto formset
+            formset.save(commit=False)
+            existing_options = [enum for enum in formset.cleaned_data if not enum.get("DELETE")]
+            if existing_options.__len__() == 0:
+                form.add_error(
+                    "input_type",
+                    "At least one option is required for Select/Multi-Select types. Please add options below.",
+                )
+                context = {
+                    "organization": organization,
+                    "form": form,
+                    "formset": CustomAttributeEnumFormSet(prefix="enums"),
+                    "show_enum_fields": True,
+                }
+                return render(request, "provider/custom_attribute_edit.html", context)
+
         form.save()
         messages.add_message(request, messages.SUCCESS, "Custom attribute updated successfully.")
         return HttpResponseRedirect(
