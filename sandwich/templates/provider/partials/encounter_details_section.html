@@ -1,5 +1,10 @@
-<div class="flex justify-between items-center mb-4">
+<div class="flex items-center gap-2 mb-4">
   <h3 class="m-0">Encounter Details</h3>
+  {% if encounter.active %}
+    <span class="badge badge-md badge-success">Active</span>
+  {% else %}
+    <span class="badge badge-md badge-error">Archived</span>
+  {% endif %}
 </div>
 <div class="rounded-box border border-base-200 bg-base-100 p-6">
   <div class="grid grid-cols-3 gap-x-8 gap-y-4">
@@ -8,16 +13,12 @@
       <div>{{ encounter.type|default:EMPTY_VALUE_DISPLAY }}</div>
     </div>
     <div>
-      <div class="text-sm text-base-content/60 mb-1">Status</div>
-      <div>{{ encounter.active|yesno:"Active,Archived" }}</div>
-    </div>
-    <div>
       <div class="text-sm text-base-content/60 mb-1">Created</div>
-      <div>{{ encounter.created_at|date:"Y-m-d H:i" }}</div>
+      <div>{{ encounter.created_at|date:DJANGO_DATE_TIME_FORMAT }}</div>
     </div>
     <div>
       <div class="text-sm text-base-content/60 mb-1">Updated</div>
-      <div>{{ encounter.updated_at|date:"Y-m-d H:i" }}</div>
+      <div>{{ encounter.updated_at|date:DJANGO_DATE_TIME_FORMAT }}</div>
     </div>
     {% for attr in formatted_attributes %}
       <div>

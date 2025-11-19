@@ -31,8 +31,8 @@
               </a>
             </td>
           {% endif %}
-          <td>{{ form.created_at }}</td>
-          <td>{{ form.updated_at }}</td>
+          <td>{{ form.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
+          <td>{{ form.updated_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
         </tr>
       {% empty %}
         <tr>

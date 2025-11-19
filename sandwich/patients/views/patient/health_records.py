@@ -26,6 +26,7 @@ from sandwich.core.models import Practitioner
 from sandwich.core.models import Task
 from sandwich.core.models.document import DocumentCategory
 from sandwich.core.models.health_record import HealthRecord
+from sandwich.core.models.health_record import HealthRecordType
 from sandwich.core.models.task import ACTIVE_TASK_STATUSES
 from sandwich.core.service.health_record_service import get_document_count_by_category
 from sandwich.core.service.health_record_service import get_health_record_count_by_type
@@ -59,15 +60,15 @@ class NavGroup:
 
 
 RECORD_TYPES = {
-    "condition": (Condition, "heart"),
-    "immunization": (Immunization, "syringe"),
-    "practitioner": (Practitioner, "contact"),
+    HealthRecordType.CONDITION: (Condition, "heart"),
+    HealthRecordType.IMMUNIZATION: (Immunization, "syringe"),
+    HealthRecordType.PRACTITIONER: (Practitioner, "contact"),
 }
 
 
 @login_required
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient"])])
-def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_type: str | None = None):
+def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_type: HealthRecordType | None = None):
     if record_type is None:
         counts = get_health_record_count_by_type(patient)
         left_panel_title = "Records"
@@ -266,6 +267,7 @@ class ImmunizationForm(HealthRecordForm[Immunization]):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["date"].validators.append(not_in_future)
+        self.fields["date"].widget = forms.DateInput(attrs={"type": "date"})
 
     class Meta:
         model = Immunization
@@ -278,24 +280,24 @@ class PractitionerForm(HealthRecordForm[Practitioner]):
         fields = ("name",)
 
 
-def _form_class(record_type: str) -> type[HealthRecordForm]:
-    if record_type == "condition":
+def _form_class(record_type: HealthRecordType) -> type[HealthRecordForm]:
+    if record_type == HealthRecordType.CONDITION:
         return ConditionForm
-    if record_type == "document":
+    if record_type == HealthRecordType.DOCUMENT:
         return DocumentForm
-    if record_type == "immunization":
+    if record_type == HealthRecordType.IMMUNIZATION:
         return ImmunizationForm
-    if record_type == "practitioner":
+    if record_type == HealthRecordType.PRACTITIONER:
         return PractitionerForm
     raise Http404(f"Unknown form class: {record_type}")
 
 
 def show_updated_list_of_records(
-    request: AuthenticatedHttpRequest, patient: Patient, record_type: str, instance: HealthRecord
+    request: AuthenticatedHttpRequest, patient: Patient, record_type: HealthRecordType, instance: HealthRecord
 ) -> HttpResponse:
     """after adding, updating, or deleting a record, show the updated list that record was a member of"""
 
-    if record_type == "document":
+    if record_type == HealthRecordType.DOCUMENT:
         url = reverse(
             "patients:patient_repository",
             kwargs={"patient_id": patient.id, "category": cast("Document", instance).category},
@@ -311,7 +313,7 @@ def show_updated_list_of_records(
 
 @login_required
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient", "change_patient"])])
-def health_records_add(request: AuthenticatedHttpRequest, patient: Patient, record_type: str):
+def health_records_add(request: AuthenticatedHttpRequest, patient: Patient, record_type: HealthRecordType):
     form_class = _form_class(record_type)
     if request.method == "POST":
         form = form_class(request.POST)
@@ -321,6 +323,12 @@ def health_records_add(request: AuthenticatedHttpRequest, patient: Patient, reco
     else:
         form = form_class()
 
+    form.helper.form_action = reverse(
+        "patients:health_records_add", kwargs={"patient_id": patient.id, "record_type": record_type}
+    )
+    form.helper.attrs["hx-post"] = form.helper.form_action
+    form.helper.attrs["hx-target"] = "closest dialog"
+    form.helper.attrs["hx-swap"] = "outerHTML"
     context = {
         "record_type": record_type,
         "record_type_name": form_class.verbose_name(),
@@ -403,7 +411,7 @@ def _history_events(instance: HealthRecord, user: User, limit: int = 10) -> list
     return [HistoryEvent.from_event(user, event) for event in events]
 
 
-def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, instance: HealthRecord):
+def _generic_edit_view(record_type: HealthRecordType, request: AuthenticatedHttpRequest, instance: HealthRecord):
     patient = instance.patient
     if not request.user.has_perms(["view_patient", "change_patient"], instance.patient):
         # this is the same error that get_object_or_404 raises
@@ -421,6 +429,10 @@ def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, inst
     else:
         form = form_class(instance=instance, show_delete=True)
 
+    form.helper.form_action = instance.get_absolute_url()
+    form.helper.attrs["hx-post"] = form.helper.form_action
+    form.helper.attrs["hx-target"] = "closest dialog"
+    form.helper.attrs["hx-swap"] = "outerHTML"
     context = {
         "record_type": record_type,
         "record_type_name": form_class.verbose_name(),
@@ -441,22 +453,22 @@ def _generic_edit_view(record_type: str, request: AuthenticatedHttpRequest, inst
 @login_required
 def condition_edit(request: AuthenticatedHttpRequest, condition_id: UUID):
     instance = get_object_or_404(Condition, id=condition_id)
-    return _generic_edit_view("condition", request, instance)
+    return _generic_edit_view(HealthRecordType.CONDITION, request, instance)
 
 
 @login_required
 def document_edit(request: AuthenticatedHttpRequest, document_id: UUID):
     instance = get_object_or_404(Document, id=document_id)
-    return _generic_edit_view("document", request, instance)
+    return _generic_edit_view(HealthRecordType.DOCUMENT, request, instance)
 
 
 @login_required
 def immunization_edit(request: AuthenticatedHttpRequest, immunization_id: UUID):
     instance = get_object_or_404(Immunization, id=immunization_id)
-    return _generic_edit_view("immunization", request, instance)
+    return _generic_edit_view(HealthRecordType.IMMUNIZATION, request, instance)
 
 
 @login_required
 def practitioner_edit(request: AuthenticatedHttpRequest, practitioner_id: UUID):
     instance = get_object_or_404(Practitioner, id=practitioner_id)
-    return _generic_edit_view("practitioner", request, instance)
+    return _generic_edit_view(HealthRecordType.PRACTITIONER, request, instance)

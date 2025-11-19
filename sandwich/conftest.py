@@ -9,18 +9,28 @@ from django.contrib.auth import HASH_SESSION_KEY
 from django.contrib.auth import SESSION_KEY
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.management import call_command
+from syrupy.extensions.single_file import SingleFileSnapshotExtension
+from syrupy.extensions.single_file import WriteMode
 
-from sandwich.core.factories.organization import OrganizationFactory
-from sandwich.core.middleware import ConsentMiddleware
-from sandwich.core.models.encounter import Encounter
-from sandwich.core.models.encounter import EncounterStatus
-from sandwich.core.models.organization import Organization
-from sandwich.core.models.patient import Patient
-from sandwich.core.models.role import RoleName
 from sandwich.core.util.testing import UserRequestFactory
-from sandwich.fixtures.patient import patient
-from sandwich.fixtures.patient import patient_entity
-from sandwich.fixtures.patient import patient_knowledge_graph
+from sandwich.fixtures.default import document
+from sandwich.fixtures.default import encounter
+from sandwich.fixtures.default import organization
+from sandwich.fixtures.default import owner
+from sandwich.fixtures.default import patient
+from sandwich.fixtures.default import provider
+from sandwich.fixtures.default import task
+from sandwich.fixtures.default import user
+from sandwich.fixtures.knowledge_graph import patient_entity
+from sandwich.fixtures.knowledge_graph import patient_knowledge_graph
+from sandwich.fixtures.other import other_document
+from sandwich.fixtures.other import other_encounter
+from sandwich.fixtures.other import other_organization
+from sandwich.fixtures.other import other_owner
+from sandwich.fixtures.other import other_patient
+from sandwich.fixtures.other import other_provider
+from sandwich.fixtures.other import other_task
+from sandwich.fixtures.other import other_user
 from sandwich.fixtures.webpack import conditional_webpack
 from sandwich.users.factories import UserFactory
 from sandwich.users.models import User
@@ -28,7 +38,28 @@ from sandwich.users.models import User
 # For playwright tests, it uses async internally.
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
-__all__ = ["conditional_webpack", "patient", "patient_entity", "patient_knowledge_graph"]
+__all__ = [
+    "conditional_webpack",
+    "document",
+    "encounter",
+    "organization",
+    "other_document",
+    "other_encounter",
+    "other_organization",
+    "other_organization",
+    "other_owner",
+    "other_patient",
+    "other_provider",
+    "other_task",
+    "other_user",
+    "owner",
+    "patient",
+    "patient_entity",
+    "patient_knowledge_graph",
+    "provider",
+    "task",
+    "user",
+]
 
 
 @pytest.fixture(autouse=True)
@@ -39,16 +70,6 @@ def _media_storage(settings, tmpdir) -> None:
 @pytest.fixture
 def urf() -> UserRequestFactory:
     return UserRequestFactory()
-
-
-@pytest.fixture
-def encounter(organization: Organization, patient: Patient):
-    return Encounter.objects.create(patient=patient, organization=organization, status=EncounterStatus.IN_PROGRESS)
-
-
-@pytest.fixture
-def user(db) -> User:
-    return UserFactory.create(consents=ConsentMiddleware.required_policies)
 
 
 @pytest.fixture
@@ -80,34 +101,6 @@ def user_wo_consent(db) -> User:
     return UserFactory.create(consents=None)
 
 
-@pytest.fixture
-def organization(db) -> Organization:
-    return OrganizationFactory.create(name="Test Organization")
-
-
-@pytest.fixture
-def provider(db, organization: Organization) -> User:
-    return UserFactory.create(
-        email="provider@organization.org",
-        consents=ConsentMiddleware.required_policies,
-        groups={role.group for role in organization.role_set.filter(name=RoleName.STAFF)},
-    )
-
-
-@pytest.fixture
-def owner(db, organization: Organization) -> User:
-    return UserFactory.create(
-        email="owner@organization.org",
-        consents=ConsentMiddleware.required_policies,
-        groups={role.group for role in organization.role_set.filter(name=RoleName.OWNER)},
-    )
-
-
-@pytest.fixture
-def other_organization(db) -> Organization:
-    return OrganizationFactory.create(name="Other")
-
-
 def django_session_fixtures(fixtures: Iterable[str]):
     """Build a session fixture that loads some Django fixtures once per test session."""
 
@@ -117,6 +110,9 @@ def django_session_fixtures(fixtures: Iterable[str]):
             call_command("loaddata", *fixtures)
 
     return load_data
+
+
+template_fixture = django_session_fixtures(["template"])
 
 
 @pytest.fixture(scope="module")
@@ -138,4 +134,16 @@ def vcr_config():
     }
 
 
-template_fixture = django_session_fixtures(["template"])
+class SingleFileHtmlSnapshotExtension(SingleFileSnapshotExtension):
+    _file_extension = "html"
+    _write_mode = WriteMode.TEXT
+
+
+@pytest.fixture
+def snapshot_html(snapshot):
+    """
+    Syrupy fixture that write snapshots as individual HTML files.
+
+    This makes it a lot easier to open the snapshot in a browser and ensure that it looks ok.
+    """
+    return snapshot.with_defaults(extension_class=SingleFileHtmlSnapshotExtension)

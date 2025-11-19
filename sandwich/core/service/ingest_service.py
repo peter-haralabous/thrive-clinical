@@ -1,5 +1,6 @@
 import logging
 
+from django.db import models
 from django.template import loader
 
 from sandwich.core.models import Document
@@ -17,10 +18,14 @@ from sandwich.core.util.procrastinate import define_task
 logger = logging.getLogger(__name__)
 
 
+class ProcessDocumentContext(models.TextChoices):
+    PATIENT_CHAT = "patient_chat"
+
+
 @define_task
-def process_document_job(document_id: str):
+def process_document_job(document_id: str, document_context: ProcessDocumentContext | None = None):
     extract_facts_from_document_job.defer(document_id=document_id)
-    extract_records_from_document_job.defer(document_id=document_id)
+    extract_records_from_document_job.defer(document_id=document_id, document_context=document_context)
 
 
 @define_task
@@ -52,7 +57,11 @@ def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.
 
 
 @define_task
-def extract_records_from_document_job(document_id: str):
+def extract_records_from_document_job(document_id: str, document_context: ProcessDocumentContext | None = None):
+    from sandwich.core.service.chat_service.chat import ChatContext  # noqa: PLC0415
+    from sandwich.core.service.chat_service.chat import FileUploadEvent  # noqa: PLC0415
+    from sandwich.core.service.chat_service.chat import receive_chat_event  # noqa: PLC0415
+
     document = Document.objects.get(id=document_id)
     patient = document.patient
     send_ingest_progress(patient, text=f"Processing {document.original_filename}...")
@@ -62,6 +71,15 @@ def extract_records_from_document_job(document_id: str):
     send_ingest_progress(
         patient, text=f"Extracted {len(records)} records from {document.original_filename}", done=True
     )
+    if document_context and document_context == ProcessDocumentContext.PATIENT_CHAT:
+        receive_chat_event(
+            FileUploadEvent(
+                context=ChatContext(patient_id=str(patient.id)),
+                document_id=str(document.id),
+                document_filename=document.original_filename,
+                records=records,
+            )
+        )
 
 
 def send_ingest_progress(patient: Patient, *, text: str, done=False):

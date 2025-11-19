@@ -15,14 +15,9 @@
       <div>
         <div class="flex items-center space-x-2">
           <h1>{{ patient.last_name }}, {{ patient.first_name }}</h1>
-          {% if encounter.active %}
-            <span class="badge badge-md badge-success">Active</span>
-          {% else %}
-            <span class="badge badge-md badge-error">Archived</span>
-          {% endif %}
         </div>
         <p class="text-sm tracking-wide flex gap-6 mt-2 items-center">
-          <span class="flex items-center gap-1">{% lucide "calendar" class="size-4" %} DOB: {{ patient.date_of_birth|date:"M d, Y" }} </span>
+          <span class="flex items-center gap-1">{% lucide "calendar" class="size-4" %} DOB: {{ patient.date_of_birth|date:DJANGO_DATE_FORMAT }} </span>
           <span class="flex items-center gap-1">{% lucide "id-card" class="size-4" %} PHN: {{ patient.phn|default:EMPTY_VALUE_DISPLAY }}</span>
           <span class="flex items-center gap-1">{% lucide "info" class="size-4" %} Contact: {{ patient.email|default:EMPTY_VALUE_DISPLAY }}</span>
         </p>
@@ -68,8 +63,8 @@
             {# TODO: link to details about past encounters #}
             {% for encounter in other_encounters %}
               <tr>
-                <td>{{ encounter.created_at }}</td>
-                <td>{{ encounter.ended_at|default:EMPTY_VALUE_DISPLAY }}</td>
+                <td>{{ encounter.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
+                <td>{{ encounter.ended_at|date:DJANGO_DATE_TIME_FORMAT|default:EMPTY_VALUE_DISPLAY }}</td>
                 <td>{{ encounter.get_status_display }}</td>
                 <td>
                   <a class="btn btn-sm"

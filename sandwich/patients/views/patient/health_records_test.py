@@ -9,6 +9,7 @@ from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
 from sandwich.core.models.condition import ConditionStatus
+from sandwich.core.models.health_record import HealthRecordType
 from sandwich.patients.views.patient.health_records import HistoryEvent
 from sandwich.patients.views.patient.health_records import _history_events
 from sandwich.users.models import User
@@ -19,13 +20,19 @@ def test_add_and_remove_immunization(client: Client, user: User, patient: Patien
 
     # get the "add" form
     response = client.get(
-        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "immunization"})
+        reverse(
+            "patients:health_records_add",
+            kwargs={"patient_id": patient.pk, "record_type": HealthRecordType.IMMUNIZATION},
+        )
     )
     assert response.status_code == 200
 
     # submit the "add" form
     response = client.post(
-        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "immunization"}),
+        reverse(
+            "patients:health_records_add",
+            kwargs={"patient_id": patient.pk, "record_type": HealthRecordType.IMMUNIZATION},
+        ),
         data={
             "date": "2022-01-01",
             "name": "PCV13",
@@ -61,13 +68,19 @@ def test_add_update_and_remove_practitioner(client: Client, user: User, patient:
 
     # get the "add" form
     response = client.get(
-        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "practitioner"})
+        reverse(
+            "patients:health_records_add",
+            kwargs={"patient_id": patient.pk, "record_type": HealthRecordType.PRACTITIONER},
+        )
     )
     assert response.status_code == 200
 
     # submit the "add" form
     response = client.post(
-        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "practitioner"}),
+        reverse(
+            "patients:health_records_add",
+            kwargs={"patient_id": patient.pk, "record_type": HealthRecordType.PRACTITIONER},
+        ),
         data={
             "name": "Dr. Jekyll",
         },
@@ -99,13 +112,17 @@ def test_add_condition(client: Client, user: User, patient: Patient):
 
     # get the "add" form
     response = client.get(
-        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "condition"})
+        reverse(
+            "patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": HealthRecordType.CONDITION}
+        )
     )
     assert response.status_code == 200
 
     # submit the "add" form
     response = client.post(
-        reverse("patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": "condition"}),
+        reverse(
+            "patients:health_records_add", kwargs={"patient_id": patient.pk, "record_type": HealthRecordType.CONDITION}
+        ),
         data={
             "name": "Cancer",
             "status": "remission",
