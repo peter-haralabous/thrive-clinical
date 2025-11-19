@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from enum import StrEnum
 
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -38,3 +39,10 @@ class HealthRecord(VersionMixin, BaseModel):
 
     @abstractmethod
     def get_absolute_url(self) -> str: ...
+
+
+class HealthRecordType(StrEnum):
+    DOCUMENT = "document"
+    CONDITION = "condition"
+    IMMUNIZATION = "immunization"
+    PRACTITIONER = "practitioner"
