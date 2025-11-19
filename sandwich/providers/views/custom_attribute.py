@@ -274,48 +274,79 @@ def custom_attribute_edit(
 ) -> HttpResponse:
     attribute = get_object_or_404(CustomAttribute, id=attribute_id, organization=organization)  # TODO permission check
 
+    if request.method == "POST":
+        form = CustomAttributeForm(
+            request.POST,
+            content_type=ContentType.objects.get_for_model(Encounter),
+            organization=organization,
+            instance=attribute,
+        )
+        if form.is_valid():
+            input_type = form.data["input_type"]
+            requires_enums = input_type in ("select", "multi_select")
+            formset = CustomAttributeEnumFormSet(request.POST, prefix="enums", instance=attribute)
+            if requires_enums:
+                if formset.is_valid():
+                    existing_options = [enum for enum in formset.cleaned_data if not enum.get("DELETE")]
+                    if existing_options.__len__() == 0:
+                        form.add_error(
+                            "input_type",
+                            "At least one option is required for Select/Multi-Select types. Please add options below.",
+                        )
+                        context = {
+                            "organization": organization,
+                            "form": form,
+                            "formset": CustomAttributeEnumFormSet(prefix="enums"),
+                            "show_enum_fields": True,
+                        }
+                        return render(request, "provider/custom_attribute_edit.html", context)
+                else:
+                    messages.error(request, "Error with updating custom attribute options")
+                    context = {
+                        "organization": organization,
+                        "form": form,
+                        "formset": formset,
+                        "show_enum_fields": requires_enums,
+                    }
+                    return render(request, "provider/custom_attribute_edit.html", context)
+
+            with transaction.atomic():
+                instance = form.save()
+
+                if requires_enums:
+                    formset.instance = instance
+                    formset.save()
+
+                messages.add_message(request, messages.SUCCESS, "Custom attribute updated successfully.")
+                return HttpResponseRedirect(
+                    reverse(
+                        "providers:custom_attribute_list",
+                        kwargs={"organization_id": organization.id},
+                    )
+                )
+            messages.error(request, "Error while updating custom attribute")
+            context = {
+                "organization": organization,
+                "form": form,
+                "formset": formset,
+                "show_enum_fields": requires_enums,
+            }
+            return render(request, "provider/custom_attribute_edit.html", context)
+
     form = CustomAttributeForm(
-        request.POST if request.method == "POST" else None,
         instance=attribute,
         content_type=attribute.content_type,
         organization=organization,
     )
+
     requires_enums = attribute.data_type == CustomAttribute.DataType.ENUM
     formset = CustomAttributeEnumFormSet(prefix="enums")
     if requires_enums:
         attribute_enums = get_list_or_404(CustomAttributeEnum, attribute_id=attribute_id)
-        enums_as_dict = [enum.__dict__ for enum in attribute_enums]
-        formset = CustomAttributeEnumFormSet(
-            request.POST if request.method == "POST" else None, prefix="enums", initial=enums_as_dict
-        )
-        formset.extra = attribute_enums.__len__()
-
-    if request.method == "POST" and form.is_valid():
-        if requires_enums and formset.is_valid():
-            ## Get info onto formset
-            formset.save(commit=False)
-            existing_options = [enum for enum in formset.cleaned_data if not enum.get("DELETE")]
-            if existing_options.__len__() == 0:
-                form.add_error(
-                    "input_type",
-                    "At least one option is required for Select/Multi-Select types. Please add options below.",
-                )
-                context = {
-                    "organization": organization,
-                    "form": form,
-                    "formset": CustomAttributeEnumFormSet(prefix="enums"),
-                    "show_enum_fields": True,
-                }
-                return render(request, "provider/custom_attribute_edit.html", context)
-
-        form.save()
-        messages.add_message(request, messages.SUCCESS, "Custom attribute updated successfully.")
-        return HttpResponseRedirect(
-            reverse(
-                "providers:custom_attribute_list",
-                kwargs={"organization_id": organization.id},
-            )
-        )
+        enums_as_dict = [vars(enum) for enum in attribute_enums]
+        formset = CustomAttributeEnumFormSet(prefix="enums", initial=enums_as_dict, instance=attribute)
+        # Don't want to add an extra blank option when editing
+        formset.extra = 0
 
     context = {
         "organization": organization,
