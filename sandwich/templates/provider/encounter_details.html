@@ -15,11 +15,6 @@
       <div>
         <div class="flex items-center space-x-2">
           <h1>{{ patient.last_name }}, {{ patient.first_name }}</h1>
-          {% if encounter.active %}
-            <span class="badge badge-md badge-success">Active</span>
-          {% else %}
-            <span class="badge badge-md badge-error">Archived</span>
-          {% endif %}
         </div>
         <p class="text-sm tracking-wide flex gap-6 mt-2 items-center">
           <span class="flex items-center gap-1">{% lucide "calendar" class="size-4" %} DOB: {{ patient.date_of_birth|date:"M d, Y" }} </span>
