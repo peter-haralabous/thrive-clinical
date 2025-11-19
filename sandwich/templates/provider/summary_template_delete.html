@@ -1,0 +1,6 @@
+{% extends "provider/summary_template_list.html" %}
+
+{% block modal %}
+  {{ block.super }}
+  {% include "provider/partials/summary_template_delete_modal.html" %}
+{% endblock modal %}

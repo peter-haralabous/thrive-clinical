@@ -41,6 +41,10 @@ from .views.patient import patient_edit
 from .views.patient import patient_list
 from .views.patient import patient_resend_invite
 from .views.search import search
+from .views.summary_templates import summary_template_add
+from .views.summary_templates import summary_template_delete
+from .views.summary_templates import summary_template_edit
+from .views.summary_templates import summary_template_list
 from .views.task import task
 from .views.templates import form_builder
 from .views.templates import form_details
@@ -88,6 +92,27 @@ urlpatterns = [
     ),
     path("organization/<uuid:organization_id>/templates/form/file_upload", form_file_upload, name="form_file_upload"),
     path("organization/<uuid:organization_id>/templates/forms/builder", form_builder, name="form_template_builder"),
+    # Summary template management endpoints
+    path(
+        "organization/<uuid:organization_id>/templates/summary",
+        summary_template_list,
+        name="summary_template_list",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/summary/add",
+        summary_template_add,
+        name="summary_template_add",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/summary/<uuid:template_id>/edit",
+        summary_template_edit,
+        name="summary_template_edit",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/summary/<uuid:template_id>/delete",
+        summary_template_delete,
+        name="summary_template_delete",
+    ),
     path("organization/<uuid:organization_id>/encounters", encounter_list, name="encounter_list"),
     path(
         "organization/<uuid:organization_id>/encounter/create/search",

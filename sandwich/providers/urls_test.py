@@ -7,6 +7,7 @@ from django.test import Client
 from django.urls import reverse
 
 from sandwich.core.factories.patient import PatientFactory
+from sandwich.core.factories.summary_template import SummaryTemplateFactory
 from sandwich.core.factories.task import TaskFactory
 from sandwich.core.models import Encounter
 from sandwich.core.models import Form
@@ -78,6 +79,8 @@ def _build_url_kwargs(url: UrlRegistration, test_objects: dict[str, Any]) -> dic
         kwargs["form_id"] = test_objects["form"].pk
     if ":form_version_id>" in url.pattern:
         kwargs["form_version_id"] = test_objects["form"].get_current_version().pgh_id
+    if ":template_id>" in url.pattern:
+        kwargs["template_id"] = test_objects["template"].pk
     if url.name in {
         "list_preference_settings",
         "organization_preference_settings_detail",
@@ -127,6 +130,9 @@ def test_provider_http_get_urls_return_status_200(db, user, organization, url) -
     # Need a form for the form route
     form = Form.objects.create(organization=organization, name="Test Form", schema={"title": "Test Form"})
 
+    # Need a summary template for the summary template routes
+    template = SummaryTemplateFactory.create(organization=organization, form=form)
+
     test_objects = {
         "encounter": encounter,
         "organization": organization,
@@ -134,6 +140,7 @@ def test_provider_http_get_urls_return_status_200(db, user, organization, url) -
         "task": task,
         "attribute": attribute,
         "form": form,
+        "template": template,
     }
     kwargs = _build_url_kwargs(url, test_objects)
 

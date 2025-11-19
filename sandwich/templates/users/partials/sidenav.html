@@ -42,7 +42,11 @@
               </li>
               <li>
                 <a href="{% url "providers:form_templates_list" organization_id=organization.id %}"
-                   class="{% if 'template' in request.resolver_match.url_name and organization.id == request.resolver_match.kwargs.organization_id %}menu-active{% endif %}">Form Templates</a>
+                   class="{% if 'form_template' in request.resolver_match.url_name and organization.id == request.resolver_match.kwargs.organization_id %}menu-active{% endif %}">Form Templates</a>
+              </li>
+              <li>
+                <a href="{% url 'providers:summary_template_list' organization_id=organization.id %}"
+                   class="{% if 'summary_template' in request.resolver_match.url_name and organization.id == request.resolver_match.kwargs.organization_id %}menu-active{% endif %}">Summary Templates</a>
               </li>
             </ul>
           </li>

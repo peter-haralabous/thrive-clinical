@@ -1,0 +1,47 @@
+{% load crispy_forms_tags %}
+
+<dialog id="delete-template-modal-{{ template.id }}" class="modal">
+  <div class="modal-box">
+    {% include "partials/modal_close_button.html" %}
+    <div class="space-y-4">
+      <h3 class="text-lg font-bold">
+        Delete Template: <span class="text-red-700">{{ template.name }}</span>
+      </h3>
+      <p class="text-base">
+        This action cannot be undone and will delete this template. This template will no longer be available for generating summaries.
+      </p>
+      <p>
+        Type <strong class="text-red-700">DELETE</strong> to confirm.
+      </p>
+      <form method="post"
+            action="{% url 'providers:summary_template_delete' organization_id=organization.id template_id=template.id %}"
+            class="space-y-2">
+        {% csrf_token %}
+        <input type="text"
+               name="confirmation"
+               value="{{ form.confirmation.value|default:'' }}"
+               maxlength="6"
+               placeholder="Type 'DELETE' to confirm"
+               autofocus
+               class="input input-bordered w-full" />
+        {% if form.confirmation.errors %}<p class="text-error text-sm">{{ form.confirmation.errors.0 }}</p>{% endif %}
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button"
+                  class="btn btn-ghost"
+                  onclick="document.getElementById('delete-template-modal-{{ template.id }}').close()">Cancel</button>
+          <button type="submit" class="btn btn-error">Delete</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+<script nonce="{{ request.csp_nonce }}" type="module">
+  const modal = document.getElementById('delete-template-modal-{{ template.id }}');
+  modal.showModal();
+  modal.addEventListener('close', () => {
+    window.location.replace("{% url 'providers:summary_template_list' organization_id=organization.id %}");
+  });
+</script>
