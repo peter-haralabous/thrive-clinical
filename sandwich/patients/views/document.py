@@ -97,17 +97,3 @@ def document_upload_and_extract(request: AuthenticatedHttpRequest, patient: Pati
             messages.add_message(request, messages.ERROR, f"Failed to upload document: {error}")
 
     return render(request, "partials/messages_oob.html")
-
-
-@require_POST
-@login_required
-@authorize_objects(
-    [
-        ObjPerm(Patient, "patient_id", ["view_patient"]),
-        ObjPerm(Document, "document_id", ["view_document", "delete_document"]),
-    ]
-)
-def document_delete(request: AuthenticatedHttpRequest, patient: Patient, document: Document):
-    document.delete()
-    documents = patient.document_set.all()
-    return render(request, "patient/partials/documents_table.html", {"documents": documents})

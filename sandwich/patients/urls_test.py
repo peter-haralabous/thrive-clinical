@@ -31,7 +31,6 @@ EXCLUDED_URL_NAMES = {
     "home",  # Redirect
     "accept_invite",  # POST
     "chat",  # POST
-    "document_delete",  # POST
     "document_upload_and_extract",  # POST
     "task",  # POST
     "patient_onboarding_add",  # redirects if there's already a patient for the user
