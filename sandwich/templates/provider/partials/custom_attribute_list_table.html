@@ -19,8 +19,8 @@
           <td>{{ attribute.name }}</td>
           <td>{{ attribute.data_type.label }}</td>
           <td>{{ attribute.is_multi|yesno:"Yes,No" }}</td>
-          <td>{{ attribute.created_at }}</td>
-          <td>{{ attribute.updated_at }}</td>
+          <td>{{ attribute.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
+          <td>{{ attribute.updated_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
           <td class="text-right">
             <button class="btn btn-ghost btn-sm"
                     type="button"

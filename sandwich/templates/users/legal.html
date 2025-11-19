@@ -17,7 +17,7 @@
                   <div class="text-xs uppercase font-semibold opacity-60">
                     Learn how we collect, use, and protect your personal information.
                   </div>
-                  <div class="text-xs opacity-60">Agreed on: {{ consent.date|date:"F j, Y" }}</div>
+                  <div class="text-xs opacity-60">Agreed on: {{ consent.date|date:DJANGO_DATE_FORMAT }}</div>
                 </div>
                 <span class="text-primary">View Privacy Policy →</span>
               </a>
@@ -33,7 +33,7 @@
                   <div class="text-xs uppercase font-semibold opacity-60">
                     Understand the rules and guidelines for using our service.
                   </div>
-                  <div class="text-xs opacity-60">Agreed on: {{ consent.date|date:"F j, Y" }}</div>
+                  <div class="text-xs opacity-60">Agreed on: {{ consent.date|date:DJANGO_DATE_FORMAT }}</div>
                 </div>
                 <span class="text-primary">View Terms of Use →</span>
               </a>

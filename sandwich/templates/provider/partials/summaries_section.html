@@ -11,7 +11,7 @@
         <div class="flex items-center justify-between p-4 bg-base-200/50 rounded-lg hover:bg-base-200 transition-colors cursor-pointer">
           <div>
             <div class="font-medium">{{ summary.title|default:"Summary" }}</div>
-            <div class="text-sm text-base-content/60">Generated {{ summary.created_at|date:"m/d/Y" }}</div>
+            <div class="text-sm text-base-content/60">Generated {{ summary.created_at|date:DJANGO_DATE_FORMAT }}</div>
           </div>
           <div>{% lucide "chevron-right" class="size-5 text-base-content/60" %}</div>
         </div>

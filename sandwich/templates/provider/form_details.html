@@ -26,7 +26,7 @@
               v{{ forloop.revcounter }}
               {% if forloop.first %}<span class="badge badge-success badge-xs ml-2">Latest</span>{% endif %}
             </td>
-            <td>{{ form_version.pgh_created_at }}</td>
+            <td>{{ form_version.pgh_created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
             <td>
               {# TODO: swap to kebab menu of actions #}
               <a class="btn btn-sm"

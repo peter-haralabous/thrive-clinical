@@ -22,8 +22,8 @@
               <a class="link"
                  href="{% url "providers:organization" organization_id=organization.id %}">{{ organization.name }}</a>
             </td>
-            <td>{{ organization.created_at }}</td>
-            <td>{{ organization.updated_at }}</td>
+            <td>{{ organization.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
+            <td>{{ organization.updated_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
           </tr>
         {% empty %}
           <tr>

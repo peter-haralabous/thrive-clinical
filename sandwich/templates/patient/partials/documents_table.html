@@ -27,7 +27,7 @@
           <td>
             {% if document.size %}{{ document.size|filesizeformat }}{% endif %}
           </td>
-          <td>{{ document.created_at }}</td>
+          <td>{{ document.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
           <td class="flex items-center justify-end gap-2">
             {% if document.unattested %}
               <div class="tooltip" data-tip="AI extracted data">{% lucide "sparkles" class="size-4" %}</div>

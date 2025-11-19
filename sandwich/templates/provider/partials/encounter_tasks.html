@@ -30,8 +30,8 @@
               {{ task }}
             {% endif %}
           </td>
-          <td>{{ task.created_at }}</td>
-          <td>{{ task.ended_at|default:EMPTY_VALUE_DISPLAY }}</td>
+          <td>{{ task.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
+          <td>{{ task.ended_at|date:DJANGO_DATE_TIME_FORMAT|default:EMPTY_VALUE_DISPLAY }}</td>
           <td>{{ task.get_status_display }}</td>
           <td>
             <a class="btn btn-outline-secondary btn-sm"

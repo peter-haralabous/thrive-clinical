@@ -35,7 +35,7 @@
             {% else %}
               <div class="badge badge-outline badge-neutral capitalize">{{ task.status }}</div>
             {% endif %}
-            <p>Assigned on {{ task.created_at }}</p>
+            <p>Assigned on {{ task.created_at|date:DJANGO_DATE_TIME_FORMAT }}</p>
             {% if task.ended_at %}<p>Completed on {{ task.ended_at }}</p>{% endif %}
             <div class="card-actions justify-end">
               <a href="{% url "patients:task" patient_id=task.patient_id task_id=task.id %}"

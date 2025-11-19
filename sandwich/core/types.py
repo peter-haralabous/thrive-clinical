@@ -1,7 +1,9 @@
 from typing import Annotated
 
 EMPTY_VALUE_DISPLAY = "—"
-DATE_DISPLAY_FORMAT = "%e %b %Y"
+DATE_DISPLAY_FORMAT = "%Y-%m-%d"  # For python date formatting
+DJANGO_DATE_FORMAT = "Y-m-d"  # Django date filter format for ISO consistent with DATE_DISPLAY_FORMAT
+DJANGO_DATE_TIME_FORMAT = "Y-m-d H:i"
 
 type HtmlStr = Annotated[str, "HTML formatted string"]
 type RePattern = Annotated[str, "A non-compiled regex pattern"]
