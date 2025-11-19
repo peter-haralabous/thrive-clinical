@@ -1,6 +1,7 @@
 import { LitElement, html, type TemplateResult } from 'lit';
 import { Model } from 'survey-core';
 import CustomSandwichTheme from '../lib/survey-form-theme';
+import { registerCustomComponents } from './forms/custom-components';
 
 type SurveyJson = Record<string, unknown> | Array<unknown>;
 
@@ -145,6 +146,8 @@ export class SurveyForm extends LitElement {
         `[survey-form] initSurvey: target element not found: ${this._containerId}`,
       );
     }
+
+    registerCustomComponents();
 
     // SurveyJS Model expects a loosely-typed config; cast from our safer
     // SurveyJson to `any` for the library boundary.
