@@ -1,7 +1,7 @@
 from typing import Any
 from typing import Literal
 
-from django.core import serializers
+from django.core.serializers.python import Serializer as PythonSerializer
 from django.utils.text import slugify
 from guardian.shortcuts import get_objects_for_user
 from langchain_core.tools import BaseTool
@@ -52,6 +52,8 @@ def build_patient_graph_tool(user: User, patient: Patient) -> BaseTool:
 def build_patient_record_tool(user: User, patient: Patient) -> BaseTool:
     """Build a tool that can present the patient's medical record visible to the user."""
 
+    serializer = PythonSerializer()
+
     @tool(
         f"{_patient_fn_slug(patient)}_medical_record",
         description=f"Access medical records for {patient.full_name}",
@@ -61,22 +63,19 @@ def build_patient_record_tool(user: User, patient: Patient) -> BaseTool:
 
         if "conditions" in types:
             records.extend(
-                serializers.serialize(
-                    format="json",
+                serializer.serialize(
                     queryset=Condition.objects.filter(patient=patient),
                 )
             )
         if "immunizations" in types:
             records.extend(
-                serializers.serialize(
-                    format="json",
+                serializer.serialize(
                     queryset=Immunization.objects.filter(patient=patient),
                 )
             )
         if "practitioners" in types:
             records.extend(
-                serializers.serialize(
-                    format="json",
+                serializer.serialize(
                     queryset=Practitioner.objects.filter(patient=patient),
                 )
             )
