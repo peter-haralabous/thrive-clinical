@@ -9,6 +9,8 @@ from django.contrib.auth import HASH_SESSION_KEY
 from django.contrib.auth import SESSION_KEY
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.management import call_command
+from syrupy.extensions.single_file import SingleFileSnapshotExtension
+from syrupy.extensions.single_file import WriteMode
 
 from sandwich.core.factories.organization import OrganizationFactory
 from sandwich.core.middleware import ConsentMiddleware
@@ -119,6 +121,9 @@ def django_session_fixtures(fixtures: Iterable[str]):
     return load_data
 
 
+template_fixture = django_session_fixtures(["template"])
+
+
 @pytest.fixture(scope="module")
 def vcr_config():
     def before_record_request(request):
@@ -138,4 +143,16 @@ def vcr_config():
     }
 
 
-template_fixture = django_session_fixtures(["template"])
+class SingleFileHtmlSnapshotExtension(SingleFileSnapshotExtension):
+    _file_extension = "html"
+    _write_mode = WriteMode.TEXT
+
+
+@pytest.fixture
+def snapshot_html(snapshot):
+    """
+    Syrupy fixture that write snapshots as individual HTML files.
+
+    This makes it a lot easier to open the snapshot in a browser and ensure that it looks ok.
+    """
+    return snapshot.with_defaults(extension_class=SingleFileHtmlSnapshotExtension)
