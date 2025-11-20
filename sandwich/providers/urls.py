@@ -49,6 +49,7 @@ from .views.templates import form_edit
 from .views.templates import form_file_upload
 from .views.templates import form_list
 from .views.templates import form_template_preview
+from .views.templates import form_template_restore
 
 app_name = "providers"
 urlpatterns = [
@@ -80,9 +81,14 @@ urlpatterns = [
     path("organization/<uuid:organization_id>/templates/forms", form_list, name="form_templates_list"),
     path("organization/<uuid:organization_id>/templates/form/<uuid:form_id>", form_details, name="form_template"),
     path(
-        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/form_version/<int:form_version_id>/preview",
+        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/version/<int:form_version_id>/preview",
         form_template_preview,
         name="form_template_preview",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/version/<int:form_version_id>/restore",
+        form_template_restore,
+        name="form_template_restore",
     ),
     path(
         "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/edit", form_edit, name="form_template_edit"

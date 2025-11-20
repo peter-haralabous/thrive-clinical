@@ -80,6 +80,48 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
     )
 
 
+@login_required
+@authorize_objects(
+    [
+        ObjPerm(Organization, "organization_id", ["view_organization"]),
+        ObjPerm(Form, "form_id", ["change_form"]),
+    ]
+)
+def form_template_restore(
+    request: AuthenticatedHttpRequest, organization: Organization, form: Form, form_version_id: int
+):
+    """
+    Restores a form version to make it the current form
+    """
+
+    if request.method == "POST":
+        logger.info(
+            "Restoring a form version of a specific form",
+            extra={
+                "user_id": request.user.id,
+                "organization_id": organization.id,
+                "form_id": form.id,
+                "form_version_pgh_id": form_version_id,
+            },
+        )
+
+        form.restore_to(form_version_id)
+
+        return redirect(
+            reverse("providers:form_template", kwargs={"organization_id": organization.id, "form_id": form.id})
+        )
+
+    version_number = request.GET.get("version_number")
+    modal_context = {
+        "form": form,
+        "organization": organization,
+        "form_version_id": form_version_id,
+        "version_number": version_number,
+    }
+
+    return render(request, "provider/partials/restore_form_template_modal.html", modal_context)
+
+
 @require_GET
 @login_required
 @authorize_objects(

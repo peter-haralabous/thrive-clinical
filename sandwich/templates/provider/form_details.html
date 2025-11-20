@@ -1,6 +1,7 @@
 {% extends "users/base.html" %}
 
 {% load lucide %}
+{% load crispy_forms_tags %}
 
 {% block content %}
   <div class="flex items-center mb-5">
@@ -9,7 +10,7 @@
     <h1 class="mr-2">Version History</h1>
   </div>
   <h3>{{ form.name|capfirst }}</h3>
-  <div class="overflow-x-auto rounded-box border border-base-200 bg-base-100">
+  <div class="rounded-box border border-base-200 bg-base-100">
     <table class="table">
       <thead>
         <tr>
@@ -19,7 +20,6 @@
         </tr>
       </thead>
       <tbody>
-        {# TODO: form version actions #}
         {% for form_version in forms %}
           <tr>
             <td data-form-version-id="{{ form_version.pgh_id }}">
@@ -27,11 +27,8 @@
               {% if forloop.first %}<span class="badge badge-success badge-xs ml-2">Latest</span>{% endif %}
             </td>
             <td>{{ form_version.pgh_created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
-            <td>
-              {# TODO: swap to kebab menu of actions #}
-              <a class="btn btn-sm"
-                 href="{% url 'providers:form_template_preview' organization_id=organization.id form_id=form.id form_version_id=form_version.pgh_id %}">View</a>
-              <a class="btn btn-sm" href="#" {% if forloop.first %}disabled{% endif %}>Restore</a>
+            <td class="w-px text-right">
+              {% include 'provider/partials/form_template_action_menu.html' with organization=organization form=form form_version=form_version most_recent_version=forloop.first version_number=forloop.revcounter %}
             </td>
           </tr>
         {% empty %}
