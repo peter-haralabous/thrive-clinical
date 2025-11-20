@@ -104,6 +104,10 @@ class CustomAttributeForm(forms.ModelForm[CustomAttribute]):
         #     return self._from_instance(self.instance)
         return self.cleaned_data["input_type"]
 
+    def requires_enums(self):
+        input_type = self.data["input_type"]
+        return input_type in ("select", "multi_select")
+
     def save(self, commit=True):  # noqa: FBT002
         instance = super().save(commit=False)
 
@@ -171,10 +175,7 @@ def validate_custom_enum(
     formset: BaseInlineFormSet[CustomAttributeEnum, CustomAttribute, CustomAttributeEnumForm],
 ):
     # Validate formset only if ENUM type
-    input_type = form.cleaned_data["input_type"]
-    requires_enums = input_type in ("select", "multi_select")
-
-    if requires_enums:
+    if form.requires_enums():
         if formset.is_valid():
             # Check at least one enum value
             existing_options = [enum for enum in formset.cleaned_data if not enum.get("DELETE")]
@@ -215,8 +216,7 @@ def custom_attribute_add(request: AuthenticatedHttpRequest, organization: Organi
 
         # Create formset with POST data, but without instance yet
         formset = CustomAttributeEnumFormSet(request.POST, prefix="enums")
-        input_type = form.data["input_type"]
-        requires_enums = input_type in ("select", "multi_select")
+        requires_enums = form.requires_enums()
 
         if form.is_valid():
             validate_custom_enum(request, organization, form, formset)
@@ -285,8 +285,7 @@ def custom_attribute_edit(
             instance=attribute,
         )
         if form.is_valid():
-            input_type = form.data["input_type"]
-            requires_enums = input_type in ("select", "multi_select")
+            requires_enums = form.requires_enums()
             formset = CustomAttributeEnumFormSet(request.POST, prefix="enums", instance=attribute)
             validate_custom_enum(request, organization, form, formset)
 
