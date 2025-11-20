@@ -197,7 +197,11 @@ def form_file_upload(request: AuthenticatedHttpRequest, organization: Organizati
 
             form_title = reference_file.name.split(".")[0]
             form = Form.objects.create(
-                name=form_title,  # placeholder title
+                # TODO(MM): Title should be a field in the
+                # upload_reference_form. Let's not rely on AI to generate a
+                # title that should really be defined by the user. That also
+                # solves the problem of the title changing after AI generation
+                name=form_title,
                 organization=organization,
                 reference_file=reference_file,
             )

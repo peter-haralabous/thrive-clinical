@@ -37,12 +37,15 @@ class DocType(StrEnum):
     CSV = "csv"
 
 
-def generate_form_schema_from_bytes(
-    doc_type: DocType, doc_bytes: bytes, text_prompt: str, thread_id: str
-) -> SurveySchema:
+def generate_form_schema_from_bytes(form: Form, doc_type: DocType, text_prompt: str) -> None:
     """
     Generate a form schema from a file.
     """
+    assert form.reference_file, "Form does not have a reference file attached."
+
+    doc_bytes = form.reference_file.read()
+    thread_id = str(form.id)
+
     match doc_type:
         case DocType.PDF:
             document = {
@@ -56,8 +59,8 @@ def generate_form_schema_from_bytes(
                 "text": f"CSV data: \n{doc_bytes.decode()}",
             }
 
-    with form_gen_agent() as agent:
-        return agent.invoke(
+    with form_gen_agent(form) as agent:
+        agent.invoke(
             input={
                 "messages": [
                     {
@@ -70,7 +73,7 @@ def generate_form_schema_from_bytes(
                 ]
             },
             config=configure(thread_id),
-        )["structured_response"]
+        )
 
 
 @define_task
@@ -78,7 +81,6 @@ def generate_form_schema_from_reference_file(form_id: str, description: str | No
     """
     Entry for PDF/CSV -> SurveyJS form schema generation.
     """
-
     form = Form.objects.get(id=form_id)
     file = form.reference_file
     ext = Path(file.name).suffix
@@ -87,21 +89,15 @@ def generate_form_schema_from_reference_file(form_id: str, description: str | No
     # implementation times out with large, multipage PDFs.
     if ext == ".pdf":
         prompt = form_from_pdf(description)
-        response = generate_form_schema_from_bytes(
-            doc_type=DocType.PDF, doc_bytes=file.read(), text_prompt=prompt, thread_id=str(form.id)
-        )
+        doc_type = DocType.PDF
 
     elif ext == ".csv":
         prompt = form_from_csv(description)
-        response = generate_form_schema_from_bytes(
-            doc_type=DocType.CSV, doc_bytes=file.read(), text_prompt=prompt, thread_id=str(form.id)
-        )
+        doc_type = DocType.CSV
 
     else:
         raise ValueError(f"Unsupported file type: {file.content_type}")
 
+    generate_form_schema_from_bytes(form=form, doc_type=doc_type, text_prompt=prompt)
+
     # TODO(MM): Add navigation for multipage forms and other defaults
-    schema = response.model_dump()
-    form.name = response.title
-    form.schema = schema
-    form.save()
