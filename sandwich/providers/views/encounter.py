@@ -41,6 +41,7 @@ from sandwich.core.service.list_preference_service import parse_filters_from_que
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.service.task_service import ordered_tasks_for_encounter
+from sandwich.core.service.task_service import ordered_tasks_for_encounter
 from sandwich.core.types import DATE_DISPLAY_FORMAT
 from sandwich.core.types import EMPTY_VALUE_DISPLAY
 from sandwich.core.util.http import AuthenticatedHttpRequest
