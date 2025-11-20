@@ -34,39 +34,39 @@
       </form>
     </div>
   {% endif %}
-  {% if encounters %}
-    <hr />
-    <h3>Encounters</h3>
-    <div class="overflow-x-auto rounded-box border border-base-200 bg-base-100">
-      <table class="table">
-        <thead>
+  <hr />
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="m-0">Encounters</h3>
+  </div>
+  <div class="overflow-x-auto rounded-box border border-base-200 bg-base-100">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Started</th>
+          <th>Ended</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for encounter in encounters %}
           <tr>
-            <th>Started</th>
-            <th>Ended</th>
-            <th>Status</th>
+            <td>{{ encounter.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
+            <td>{{ encounter.ended_at|date:DJANGO_DATE_TIME_FORMAT|default:EMPTY_VALUE_DISPLAY }}</td>
+            {# TODO: Add encounter status badge partial with color-coded pills for visual distinction (e.g., badge-success for active, badge-neutral for archived) #}
+            <td>{{ encounter.get_status_display }}</td>
+            <td class="text-right">
+              <a class="btn btn-sm"
+                 href="{% url "providers:encounter" encounter_id=encounter.id organization_id=organization.id %}">Details</a>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {% for encounter in encounters %}
-            <tr>
-              <td>{{ encounter.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
-              <td>{{ encounter.ended_at|date:DJANGO_DATE_TIME_FORMAT|default:EMPTY_VALUE_DISPLAY }}</td>
-              {# TODO: Add encounter status badge partial with color-coded pills for visual distinction (e.g., badge-success for active, badge-neutral for archived) #}
-              <td>{{ encounter.get_status_display }}</td>
-              <td>
-                <a class="btn btn-sm"
-                   href="{% url "providers:encounter" encounter_id=encounter.id organization_id=organization.id %}">Details</a>
-              </td>
-            </tr>
-          {% empty %}
-            <tr>
-              <td colspan="4" class="text-center">No encounters.</td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  {% endif %}
+        {% empty %}
+          <tr>
+            <td colspan="4" class="text-center">No encounters.</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% if current_encounter %}
     <hr />
     {% include 'provider/partials/forms_section.html' %}
