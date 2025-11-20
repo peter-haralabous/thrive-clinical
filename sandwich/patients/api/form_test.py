@@ -8,11 +8,13 @@ from freezegun import freeze_time
 from guardian.shortcuts import remove_perm
 
 # Import your models, factories, and services
+from sandwich.core.factories.summary_template import SummaryTemplateFactory
 from sandwich.core.factories.task import TaskFactory
 from sandwich.core.models.encounter import Encounter
 from sandwich.core.models.form_submission import FormSubmission
 from sandwich.core.models.form_submission import FormSubmissionStatus
 from sandwich.core.models.patient import Patient
+from sandwich.core.models.summary import Summary
 from sandwich.users.models import User
 
 
@@ -118,7 +120,6 @@ def test_save_draft_form_success_updates_existing_draft(user: User, encounter: E
     client.force_login(user)
     task = TaskFactory.create(encounter=encounter, patient=patient)
 
-    # Create an initial draft submission
     submission = FormSubmission.objects.create(
         task=task,
         patient=task.patient,
@@ -169,7 +170,6 @@ def test_save_draft_form_on_completed_submission(user: User, encounter: Encounte
     client.force_login(user)
     task = TaskFactory.create(encounter=encounter, patient=patient)
 
-    # Create a submission that is already COMPLETED
     FormSubmission.objects.create(
         task=task,
         patient=task.patient,
@@ -185,3 +185,55 @@ def test_save_draft_form_on_completed_submission(user: User, encounter: Encounte
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json()["detail"] == "This form has already been submitted"
+
+
+@pytest.mark.django_db
+def test_submit_form_triggers_summary_generation(user: User, encounter: Encounter, patient: Patient):
+    client = Client()
+    client.force_login(user)
+
+    template = SummaryTemplateFactory.create(
+        organization=patient.organization,
+        name="Test Summary",
+        text="# Summary\n\nPatient: {{ patient.first_name }}\nData: {{ submission.data.answer }}",
+    )
+
+    form = template.form
+    form_version = form.get_current_version()
+    task = TaskFactory.create(encounter=encounter, patient=patient, form_version=form_version)
+
+    payload = {"answer": "Test Answer"}
+    url = reverse("patients:patients-api:submit_form", kwargs={"task_id": task.id})
+
+    response = client.post(url, data=payload, content_type="application/json")
+
+    assert response.status_code == HTTPStatus.OK
+
+    summaries = Summary.objects.filter(
+        patient=patient,
+        template=template,
+    )
+    assert summaries.count() == 1
+
+    summary = summaries.first()
+    assert summary is not None
+    assert summary.submission.task == task
+    assert summary.title == "Test Summary"
+
+
+@pytest.mark.django_db
+def test_submit_form_no_summary_generation_without_template(user: User, encounter: Encounter, patient: Patient):
+    client = Client()
+    client.force_login(user)
+
+    task = TaskFactory.create(encounter=encounter, patient=patient)
+
+    payload = {"answer": "Test Answer"}
+    url = reverse("patients:patients-api:submit_form", kwargs={"task_id": task.id})
+
+    response = client.post(url, data=payload, content_type="application/json")
+
+    assert response.status_code == HTTPStatus.OK
+
+    summaries = Summary.objects.filter(patient=patient)
+    assert summaries.count() == 0
