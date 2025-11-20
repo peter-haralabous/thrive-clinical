@@ -3,6 +3,7 @@ import logging
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 import pydantic
 from pydantic.fields import Field
@@ -37,14 +38,14 @@ class DocType(StrEnum):
     CSV = "csv"
 
 
-def generate_form_schema_from_bytes(form: Form, doc_type: DocType, text_prompt: str) -> None:
+def generate_form_schema_from_reference_file(form: Form, doc_type: DocType, text_prompt: str) -> None:
     """
     Generate a form schema from a file.
     """
     assert form.reference_file, "Form does not have a reference file attached."
 
     doc_bytes = form.reference_file.read()
-    thread_id = str(form.id)
+    thread_id = f"{form.id!s}_{uuid4()}"
 
     match doc_type:
         case DocType.PDF:
@@ -77,7 +78,7 @@ def generate_form_schema_from_bytes(form: Form, doc_type: DocType, text_prompt: 
 
 
 @define_task
-def generate_form_schema_from_reference_file(form_id: str, description: str | None = None) -> None:
+def generate_form_schema(form_id: str, description: str | None = None) -> None:
     """
     Entry for PDF/CSV -> SurveyJS form schema generation.
     """
@@ -98,6 +99,6 @@ def generate_form_schema_from_reference_file(form_id: str, description: str | No
     else:
         raise ValueError(f"Unsupported file type: {file.content_type}")
 
-    generate_form_schema_from_bytes(form=form, doc_type=doc_type, text_prompt=prompt)
+    generate_form_schema_from_reference_file(form=form, doc_type=doc_type, text_prompt=prompt)
 
     # TODO(MM): Add navigation for multipage forms and other defaults

@@ -20,7 +20,7 @@ from guardian.shortcuts import get_objects_for_user
 from sandwich.core.decorators import surveyjs_csp
 from sandwich.core.models import Form
 from sandwich.core.models import Organization
-from sandwich.core.service.form_generation.generate_form import generate_form_schema_from_reference_file
+from sandwich.core.service.form_generation.generate_form import generate_form_schema
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -205,7 +205,7 @@ def form_file_upload(request: AuthenticatedHttpRequest, organization: Organizati
                 organization=organization,
                 reference_file=reference_file,
             )
-            generate_form_schema_from_reference_file.defer(form_id=str(form.id))
+            generate_form_schema.defer(form_id=str(form.id))
 
             res = HttpResponse(status=HTTPStatus.OK)
             res["HX-Redirect"] = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
