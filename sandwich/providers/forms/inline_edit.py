@@ -130,6 +130,7 @@ class InlineEditDateForm(InlineEditForm):
                     "class": "input input-sm input-bordered w-full inline-edit-input",
                     "autofocus": True,
                     "aria-label": field_name,
+                    "max": "9999-12-31",
                 }
             ),
         )

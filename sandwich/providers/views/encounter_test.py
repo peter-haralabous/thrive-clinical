@@ -23,6 +23,7 @@ from sandwich.core.models.invitation import Invitation
 from sandwich.core.models.invitation import InvitationStatus
 from sandwich.core.models.organization import Organization
 from sandwich.core.service.list_preference_service import save_list_view_preference
+from sandwich.core.types import EMPTY_VALUE_DISPLAY
 from sandwich.users.models import User
 
 
@@ -108,13 +109,13 @@ def test_encounter_details_includes_custom_attributes(
 
     assert result.status_code == 200
     assert result.context is not None
-    assert "formatted_attributes" in result.context
+    assert "enriched_attributes" in result.context
 
-    formatted_attrs = result.context["formatted_attributes"]
-    assert len(formatted_attrs) == 2
+    enriched_attrs = result.context["enriched_attributes"]
+    assert len(enriched_attrs) == 2
 
     # Check that both attributes are present with correct values
-    attr_dict = {attr["name"]: attr["value"] for attr in formatted_attrs}
+    attr_dict = {attr["name"]: attr["value"] for attr in enriched_attrs}
     assert attr_dict["Follow-up Date"] == "2025-12-31"
     assert attr_dict["Priority"] == "High"
 
@@ -123,7 +124,7 @@ def test_encounter_details_includes_custom_attributes(
 def test_encounter_details_shows_custom_attributes_with_no_value(
     provider: User, organization: Organization, encounter: Encounter
 ) -> None:
-    """Test that custom attributes without values show None in context."""
+    """Test that custom attributes without values show EMPTY_VALUE_DISPLAY in context."""
 
     # Create a custom attribute but don't set a value
     content_type = ContentType.objects.get_for_model(Encounter)
@@ -141,12 +142,12 @@ def test_encounter_details_shows_custom_attributes_with_no_value(
 
     assert result.status_code == 200
     assert result.context is not None
-    formatted_attrs = result.context["formatted_attributes"]
+    enriched_attrs = result.context["enriched_attributes"]
 
     # Find the Notes attribute
-    notes_attr = next((a for a in formatted_attrs if a["name"] == "Notes"), None)
+    notes_attr = next((a for a in enriched_attrs if a["name"] == "Notes"), None)
     assert notes_attr is not None
-    assert notes_attr["value"] is None
+    assert notes_attr["value"] == EMPTY_VALUE_DISPLAY
 
 
 @pytest.mark.django_db
@@ -693,3 +694,233 @@ def test_kebab_menu_visible_in_table(
     encounter_details = dropdown.locator("text=Encounter Details")
     expect(patient_details).to_be_visible()
     expect(encounter_details).to_be_visible()
+
+
+@pytest.mark.e2e
+@pytest.mark.django_db(transaction=True)
+def test_inline_edit_custom_attribute_on_encounter_details_page(
+    live_server, page: Page, provider: User, organization: Organization, encounter: Encounter
+) -> None:
+    """Test that inline editing custom attributes works on the full encounter details page."""
+    # Create a custom attribute for encounters
+    content_type = ContentType.objects.get_for_model(Encounter)
+    enum_attr = CustomAttribute.objects.create(
+        organization=organization,
+        content_type=content_type,
+        name="Priority",
+        data_type=CustomAttribute.DataType.ENUM,
+    )
+
+    high_priority = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="High",
+        value="high",
+    )
+
+    low_priority = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="Low",
+        value="low",
+    )
+
+    # Set initial value
+    encounter.attributes.create(
+        attribute=enum_attr,
+        value_enum=low_priority,
+    )
+
+    # Create auth cookies for the provider
+    session = SessionStore()
+    session[SESSION_KEY] = str(provider.pk)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = provider.get_session_auth_hash()
+    session.save()
+
+    parsed = urlparse(live_server.url)
+    domain = parsed.hostname or "localhost"
+
+    session_key = session.session_key
+    assert session_key is not None, "Session key should not be None"
+
+    page.context.add_cookies(
+        [
+            {
+                "name": settings.SESSION_COOKIE_NAME,
+                "value": session_key,
+                "domain": domain,
+                "path": "/",
+                "httpOnly": True,
+            }
+        ]
+    )
+
+    # Navigate to encounter details page
+    url = f"{live_server.url}" + reverse(
+        "providers:encounter",
+        kwargs={
+            "organization_id": organization.id,
+            "encounter_id": encounter.id,
+        },
+    )
+    page.goto(url)
+    page.wait_for_load_state("networkidle")
+
+    # Wait for the Encounter Details section to be visible
+    expect(page.locator('h3:has-text("Encounter Details")')).to_be_visible(timeout=10000)
+
+    # Check that the Priority attribute is visible on the page
+    expect(page.locator("text=Priority")).to_be_visible()
+
+    # Find the table row with Priority header
+    priority_row = page.locator('tr:has(th:has-text("Priority"))')
+    expect(priority_row).to_be_visible()
+
+    # Find the inline edit cell in that row showing "Low"
+    priority_cell = priority_row.locator("td.inline-edit-cell")
+    expect(priority_cell).to_contain_text("Low")
+
+    # Click to enter edit mode
+    priority_cell.click()
+
+    # Wait for HTMX to swap the cell content with the form
+    page.wait_for_timeout(500)
+
+    # Wait for the Choices.js dropdown to appear within the inline-edit-field
+    inline_edit = priority_row.locator("inline-edit-field")
+    inline_edit.wait_for(state="attached", timeout=3000)
+
+    choices_container = inline_edit.locator(".choices")
+    choices_container.wait_for(state="visible", timeout=5000)
+
+    # Click on the dropdown option for High priority
+    dropdown_item = choices_container.locator(".choices__item--choice", has_text="High")
+    dropdown_item.wait_for(state="visible", timeout=2000)
+    dropdown_item.click()
+
+    # Wait for HTMX to process the form submission and update the display
+    choices_container.wait_for(state="hidden", timeout=3000)
+
+    # Verify the display was updated to show "High"
+    page.wait_for_timeout(1000)  # Give time for the swap to complete
+    expect(priority_row.locator("td.inline-edit-cell")).to_contain_text("High")
+
+    # Verify the database was updated
+    encounter.refresh_from_db()
+    value = encounter.attributes.filter(attribute=enum_attr).first()
+    assert value is not None
+    assert value.value_enum == high_priority
+
+
+@pytest.mark.e2e
+@pytest.mark.django_db(transaction=True)
+def test_inline_edit_custom_attribute_in_encounter_slideout(
+    live_server, page: Page, provider: User, organization: Organization, encounter: Encounter
+) -> None:
+    """Test that inline editing custom attributes works in the encounter details slideout."""
+    # Create a custom attribute for encounters
+    content_type = ContentType.objects.get_for_model(Encounter)
+    enum_attr = CustomAttribute.objects.create(
+        organization=organization,
+        content_type=content_type,
+        name="Urgency",
+        data_type=CustomAttribute.DataType.ENUM,
+    )
+
+    urgent = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="Urgent",
+        value="urgent",
+    )
+
+    routine = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="Routine",
+        value="routine",
+    )
+
+    # Set initial value
+    encounter.attributes.create(
+        attribute=enum_attr,
+        value_enum=routine,
+    )
+
+    # Create auth cookies for the provider
+    session = SessionStore()
+    session[SESSION_KEY] = str(provider.pk)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = provider.get_session_auth_hash()
+    session.save()
+
+    parsed = urlparse(live_server.url)
+    domain = parsed.hostname or "localhost"
+
+    session_key = session.session_key
+    assert session_key is not None, "Session key should not be None"
+
+    page.context.add_cookies(
+        [
+            {
+                "name": settings.SESSION_COOKIE_NAME,
+                "value": session_key,
+                "domain": domain,
+                "path": "/",
+                "httpOnly": True,
+            }
+        ]
+    )
+
+    # Navigate to encounter list
+    url = f"{live_server.url}{reverse('providers:encounter_list', kwargs={'organization_id': organization.id})}"
+    page.goto(url)
+    page.wait_for_load_state("networkidle")
+
+    # Find and click on the patient name to open the slideout
+    patient_name = f"{encounter.patient.last_name}, {encounter.patient.first_name}"
+    patient_link = page.locator(f'a.link:has-text("{patient_name}")').first
+    patient_link.click()
+
+    # Wait for slideout to appear and content to load
+    slideout = page.locator(f"#encounter-details-modal-{encounter.id}")
+    expect(slideout).to_be_visible(timeout=10000)
+
+    # Wait for the Encounter Details heading to ensure content is loaded
+    expect(slideout.locator('h3:has-text("Encounter Details")')).to_be_visible(timeout=5000)
+
+    # Find the table row with Urgency header within the slideout
+    urgency_row = slideout.locator('tr:has(th:has-text("Urgency"))')
+    expect(urgency_row).to_be_visible(timeout=5000)
+
+    # Find the inline edit cell in that row showing "Routine"
+    urgency_cell = urgency_row.locator("td.inline-edit-cell")
+    expect(urgency_cell).to_contain_text("Routine")
+
+    # Click to enter edit mode
+    urgency_cell.click()
+
+    # Wait for HTMX to swap the cell content with the form
+    page.wait_for_timeout(500)
+
+    # Wait for the Choices.js dropdown to appear within the inline-edit-field
+    inline_edit = urgency_row.locator("inline-edit-field")
+    inline_edit.wait_for(state="attached", timeout=3000)
+
+    choices_container = inline_edit.locator(".choices")
+    choices_container.wait_for(state="visible", timeout=5000)
+
+    # Click on the dropdown option for Urgent
+    dropdown_item = choices_container.locator(".choices__item--choice", has_text="Urgent")
+    dropdown_item.wait_for(state="visible", timeout=2000)
+    dropdown_item.click()
+
+    # Wait for HTMX to process the form submission and update the display
+    choices_container.wait_for(state="hidden", timeout=3000)
+
+    # Verify the display was updated to show "Urgent"
+    page.wait_for_timeout(1000)  # Give time for the swap to complete
+    expect(urgency_row.locator("td.inline-edit-cell")).to_contain_text("Urgent")
+
+    # Verify the database was updated
+    encounter.refresh_from_db()
+    value = encounter.attributes.filter(attribute=enum_attr).first()
+    assert value is not None
+    assert value.value_enum == urgent

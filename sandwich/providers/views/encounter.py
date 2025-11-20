@@ -1,6 +1,8 @@
 import logging
 from typing import TYPE_CHECKING
-from typing import Any
+
+if TYPE_CHECKING:
+    from uuid import UUID
 
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
@@ -84,66 +86,6 @@ class EncounterCreateForm(forms.ModelForm[Encounter]):
         return encounter
 
 
-def _format_attribute_value(attr: CustomAttribute, values: list) -> str | None:
-    """
-    Format custom attribute values for display.
-
-    Returns formatted string value, or None if no values exist
-    """
-    if not values:
-        return None
-
-    if attr.is_multi:
-        # Handle multi-valued attributes - return comma-separated string
-        if attr.data_type == CustomAttribute.DataType.DATE:
-            formatted = [v.value_date.strftime(DATE_DISPLAY_FORMAT) for v in values if v.value_date]
-        elif attr.data_type == CustomAttribute.DataType.ENUM:
-            # Sort by enum ID to ensure consistent ordering
-            sorted_values = sorted(values, key=lambda v: v.value_enum.id if v.value_enum else 0)
-            formatted = [v.value_enum.label for v in sorted_values if v.value_enum]
-        else:
-            return None
-        return ", ".join(formatted) if formatted else None
-    # Handle single-valued attributes
-    value = values[0]
-    if attr.data_type == CustomAttribute.DataType.DATE:
-        return value.value_date.strftime(DATE_DISPLAY_FORMAT) if value.value_date else None
-    if attr.data_type == CustomAttribute.DataType.ENUM:
-        return value.value_enum.label if value.value_enum else None
-    return None
-
-
-def _format_attributes(encounter: Encounter, custom_attributes: list[CustomAttribute]) -> list[dict[str, Any]]:
-    """
-    Build a simplified representation of custom attributes with their values.
-
-    Returns list of dicts with 'name' and 'value' keys for template rendering
-    """
-    # Prefetch all attribute values for this encounter to avoid N+1 queries
-    attribute_values_qs = encounter.attributes.select_related("value_enum").all()
-
-    # Group values by attribute ID
-    values_by_attr: dict[UUID, list] = {}
-    for value in attribute_values_qs:
-        if value.attribute_id not in values_by_attr:
-            values_by_attr[value.attribute_id] = []
-        values_by_attr[value.attribute_id].append(value)
-
-    # Build formatted attribute list
-    formatted = []
-    for attr in custom_attributes:
-        values = values_by_attr.get(attr.id, [])
-        formatted_value = _format_attribute_value(attr, values)
-        formatted.append(
-            {
-                "name": attr.name,
-                "value": formatted_value,
-            }
-        )
-
-    return formatted
-
-
 @login_required
 @authorize_objects(
     [
@@ -171,8 +113,39 @@ def encounter_details(
         ).order_by("name")
     )
 
-    # Format attributes with their values for display
-    formatted_attributes = _format_attributes(encounter, custom_attributes)
+    # Prefetch all attribute values for this encounter to avoid N+1 queries
+    attribute_values_qs = encounter.attributes.select_related("value_enum").all()
+
+    # Dictionary with attribute ID for quick lookup
+    values_by_attr: dict[UUID, list[CustomAttributeValue]] = {}
+    for value in attribute_values_qs:
+        if value.attribute_id not in values_by_attr:
+            values_by_attr[value.attribute_id] = []
+        values_by_attr[value.attribute_id].append(value)
+
+    # Create enriched attributes with both metadata and display values for inline editing
+    enriched_attributes = []
+    for attr in custom_attributes:
+        attr_values = values_by_attr.get(attr.id, [])
+
+        # Format the display value based on attribute type
+        display_value = EMPTY_VALUE_DISPLAY
+        if attr_values:
+            if attr.data_type == CustomAttribute.DataType.ENUM and attr.is_multi:
+                labels = sorted([av.value_enum.label for av in attr_values if av.value_enum])
+                display_value = ", ".join(labels) if labels else EMPTY_VALUE_DISPLAY
+            elif attr.data_type == CustomAttribute.DataType.ENUM and attr_values[0].value_enum:
+                display_value = attr_values[0].value_enum.label
+            elif attr.data_type == CustomAttribute.DataType.DATE and attr_values[0].value_date:
+                display_value = attr_values[0].value_date.strftime(DATE_DISPLAY_FORMAT)
+
+        enriched_attributes.append(
+            {
+                "id": attr.id,
+                "name": attr.name,
+                "value": display_value,
+            }
+        )
 
     context = {
         "patient": patient,
@@ -181,10 +154,12 @@ def encounter_details(
         "other_encounters": other_encounters,
         "tasks": tasks,
         "pending_invitation": pending_invitation,
-        "formatted_attributes": formatted_attributes,
+        "enriched_attributes": enriched_attributes,
     }
+
     if request.GET.get("slideout"):
         return render(request, "provider/partials/encounter_details_slideout.html", context)
+
     return render(request, "provider/encounter_details.html", context)
 
 
