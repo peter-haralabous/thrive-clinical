@@ -6,6 +6,7 @@ from sandwich.core.factories.encounter import EncounterFactory
 from sandwich.core.factories.immunization import ImmunizationFactory
 from sandwich.core.factories.organization import OrganizationFactory
 from sandwich.core.factories.patient import PatientFactory
+from sandwich.core.factories.practitioner import PractitionerFactory
 from sandwich.core.middleware import ConsentMiddleware
 from sandwich.core.models import Condition
 from sandwich.core.models import Document
@@ -13,6 +14,7 @@ from sandwich.core.models import Encounter
 from sandwich.core.models import Immunization
 from sandwich.core.models import Organization
 from sandwich.core.models import Patient
+from sandwich.core.models import Practitioner
 from sandwich.core.models import Task
 from sandwich.core.models.role import RoleName
 from sandwich.core.models.task import TaskStatus
@@ -82,6 +84,11 @@ def other_encounter(other_patient, other_organization):
 @pytest.fixture
 def other_immunization(other_patient: Patient, other_encounter: Encounter) -> Immunization:
     return ImmunizationFactory.create(patient=other_patient, encounter=other_encounter)
+
+
+@pytest.fixture
+def other_practitioner(other_patient: Patient) -> Practitioner:
+    return PractitionerFactory.create(patient=other_patient, encounter=None)
 
 
 @pytest.fixture

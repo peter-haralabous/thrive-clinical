@@ -23,6 +23,7 @@ from sandwich.fixtures.default import immunization
 from sandwich.fixtures.default import organization
 from sandwich.fixtures.default import owner
 from sandwich.fixtures.default import patient
+from sandwich.fixtures.default import practitioner
 from sandwich.fixtures.default import provider
 from sandwich.fixtures.default import task
 from sandwich.fixtures.default import user
@@ -35,6 +36,7 @@ from sandwich.fixtures.other import other_immunization
 from sandwich.fixtures.other import other_organization
 from sandwich.fixtures.other import other_owner
 from sandwich.fixtures.other import other_patient
+from sandwich.fixtures.other import other_practitioner
 from sandwich.fixtures.other import other_provider
 from sandwich.fixtures.other import other_task
 from sandwich.fixtures.other import other_user
@@ -59,6 +61,7 @@ __all__ = [
     "other_organization",
     "other_owner",
     "other_patient",
+    "other_practitioner",
     "other_provider",
     "other_task",
     "other_user",
@@ -66,6 +69,7 @@ __all__ = [
     "patient",
     "patient_entity",
     "patient_knowledge_graph",
+    "practitioner",
     "provider",
     "task",
     "user",
