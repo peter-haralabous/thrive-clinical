@@ -314,6 +314,11 @@ def custom_attribute_edit(
                 instance = form.save()
 
                 if requires_enums:
+                    # Creates deleted_forms attribute
+                    formset.save(commit=False)
+                    deleted_enums = [deleted_form.instance for deleted_form in formset.deleted_forms]
+                    for enum in deleted_enums:
+                        enum.delete()
                     formset.instance = instance
                     formset.save()
 
