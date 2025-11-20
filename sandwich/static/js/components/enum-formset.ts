@@ -109,6 +109,8 @@ class EnumFormset {
 
     this.updateFormIndices(newForm, formIndex);
 
+    // In case we're copying a hidden "deleted" form
+    newForm.classList.remove('hidden');
     newForm
       .querySelectorAll<HTMLInputElement>('input[type="text"]')
       .forEach((input) => {
@@ -181,7 +183,6 @@ class EnumFormset {
 const initializedFormsets = new WeakSet<HTMLElement>();
 
 export function initCustomAttributeEnumFormsets(): void {
-  console.log('hey toria initCustomAttributeEnumFormsets');
   document
     .querySelectorAll<HTMLElement>('#data-enum-formset')
     .forEach((container) => {
