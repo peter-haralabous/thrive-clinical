@@ -13,8 +13,10 @@ from django.core.paginator import Paginator
 from django.db.models import Exists
 from django.db.models import OuterRef
 from django.db.models import QuerySet
+from django.http import HttpRequest
 from django.http import HttpResponse
 from django.http import HttpResponseNotFound
+from django.http import JsonResponse
 from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
@@ -604,3 +606,23 @@ def patient_resend_invite(
     return HttpResponseRedirect(
         reverse("providers:patient", kwargs={"organization_id": organization.id, "patient_id": patient.id})
     )
+
+
+@require_http_methods(["GET"])
+def address_search(request: HttpRequest) -> HttpResponse:
+    # TODO: Can we Ninja API this with proper api keys?
+    logger.info("ADDRESS SEARCH")
+
+    query = request.GET.get("query", "").strip()
+    logger.debug("Address autocomplete query received", extra={"query_length": len(query)})
+
+    suggestions = []
+
+    if query:
+        suggestions = [
+            "2245 McDonald St, Regina, SK, S4N 0B3",
+            "123 Street, Cityville, BC",
+            "546 Avenue, Townsville, BC",
+            "978 Boulevard, Villageville, BC",
+        ]
+    return JsonResponse(suggestions, safe=False)

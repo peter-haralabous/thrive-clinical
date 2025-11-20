@@ -10,6 +10,7 @@ export class SurveyForm extends LitElement {
   private _completeUrl: string | null = null; // URL to go to after completion
   private _submitUrl: string | null = null; // URL to submit form data to
   private _saveDraftUrl: string | null = null; // URL to save draft data to
+  private _addressAutocompleteUrl: string | null = null; // URL for address autocomplete
   private _csrfToken: string | null = null; // CSRF token for secure submissions
   model: Model | null = null;
 
@@ -62,6 +63,7 @@ export class SurveyForm extends LitElement {
     this._submitUrl = this.getAttribute('data-submit-url');
     this._saveDraftUrl = this.getAttribute('data-save-draft-url');
     this._csrfToken = this.getAttribute('data-csrf-token');
+    this._addressAutocompleteUrl = this.getAttribute('data-address-url');
 
     this.updateComplete.then(() => void this._initFromSchemaId());
   }
@@ -135,6 +137,21 @@ export class SurveyForm extends LitElement {
     }
   }
 
+  private fetchAddressSuggestions(
+    url: string,
+    onloadSuccessCallback: (data: Array<string>) => void,
+  ) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = () => {
+      if (xhr.status === 200) {
+        onloadSuccessCallback(JSON.parse(xhr.response));
+      }
+    };
+    xhr.send();
+  }
+
   // Initialize and render the Survey model into this component's container.
   initSurvey(json: SurveyJson): Model {
     // Resolve the target element once and fail fast if it's missing.
@@ -152,6 +169,32 @@ export class SurveyForm extends LitElement {
     // SurveyJS Model expects a loosely-typed config; cast from our safer
     // SurveyJson to `any` for the library boundary.
     this.model = new Model(json as any);
+
+    this.model.onChoicesLazyLoad.add((_, options) => {
+      if (options.question.getType() !== 'dropdown') return;
+
+      // Try LazyLoading for Address Autocomplete
+      // https://surveyjs.io/form-library/examples/lazy-loading-dropdown/vanillajs#content-code
+      // https://surveyjs.answerdesk.io/ticket/details/t16719/autocomplete-choicesbyurl-based-on-entered-text
+      if (options.question.name === 'suggested_addresses') {
+        if (!this._addressAutocompleteUrl) {
+          // TODO: Do we need a UI message here?
+          console.log('No address autocomplete URL configured.');
+          return;
+        }
+
+        console.log('Loading address suggestions for:', options.filter);
+        if (options.filter) {
+          const url = `${this._addressAutocompleteUrl}?query=${encodeURIComponent(options.filter)}`;
+          this.fetchAddressSuggestions(url, (data) => {
+            console.log('Received address suggestions:', data);
+            if (data.length) {
+              options.setItems(data, data.length);
+            }
+          });
+        }
+      }
+    });
 
     this.model.onAfterRenderSurvey.add(() => {
       targetEl.setAttribute('data-survey-rendered', '1');
