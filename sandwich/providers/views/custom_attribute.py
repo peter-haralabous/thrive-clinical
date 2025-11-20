@@ -177,8 +177,8 @@ def validate_custom_enum(
     if requires_enums:
         if formset.is_valid():
             # Check at least one enum value
-            valid_forms = [f for f in formset if f.cleaned_data and not f.cleaned_data.get("DELETE")]
-            if not valid_forms:
+            existing_options = [enum for enum in formset.cleaned_data if not enum.get("DELETE")]
+            if existing_options.__len__() == 0:
                 form.add_error(
                     "input_type",
                     "At least one option is required for Select/Multi-Select types. Please add options below.",
@@ -191,6 +191,7 @@ def validate_custom_enum(
                 }
                 return render(request, "provider/custom_attribute_edit.html", context)
         else:
+            logger.error("Error with updating custom attribute options", extra={"formset_errors": formset.errors})
             context = {
                 "organization": organization,
                 "form": form,
@@ -199,18 +200,7 @@ def validate_custom_enum(
             }
             return render(request, "provider/custom_attribute_edit.html", context)
 
-    # Save everything in transaction
-    with transaction.atomic():
-        instance = form.save()
-
-        if requires_enums:
-            formset.instance = instance
-            formset.save()
-
-    messages.success(request, "Custom attribute created successfully.")
-    return HttpResponseRedirect(
-        reverse("providers:custom_attribute_list", kwargs={"organization_id": organization.id})
-    )
+    return True
 
 
 @login_required
@@ -229,8 +219,21 @@ def custom_attribute_add(request: AuthenticatedHttpRequest, organization: Organi
         requires_enums = input_type in ("select", "multi_select")
 
         if form.is_valid():
-            return validate_custom_enum(request, organization, form, formset)
+            validate_custom_enum(request, organization, form, formset)
+            # Save everything in transaction
+            with transaction.atomic():
+                instance = form.save()
 
+                if requires_enums:
+                    formset.instance = instance
+                    formset.save()
+
+            messages.success(request, "Custom attribute created successfully.")
+            return HttpResponseRedirect(
+                reverse("providers:custom_attribute_list", kwargs={"organization_id": organization.id})
+            )
+
+        logger.error("Error with updating custom attribute", extra={"form_errors": form.errors})
         messages.error(request, "Error while creating custom attribute")
         context = {
             "organization": organization,
@@ -285,30 +288,7 @@ def custom_attribute_edit(
             input_type = form.data["input_type"]
             requires_enums = input_type in ("select", "multi_select")
             formset = CustomAttributeEnumFormSet(request.POST, prefix="enums", instance=attribute)
-            if requires_enums:
-                if formset.is_valid():
-                    existing_options = [enum for enum in formset.cleaned_data if not enum.get("DELETE")]
-                    if existing_options.__len__() == 0:
-                        form.add_error(
-                            "input_type",
-                            "At least one option is required for Select/Multi-Select types. Please add options below.",
-                        )
-                        context = {
-                            "organization": organization,
-                            "form": form,
-                            "formset": CustomAttributeEnumFormSet(prefix="enums"),
-                            "show_enum_fields": True,
-                        }
-                        return render(request, "provider/custom_attribute_edit.html", context)
-                else:
-                    messages.error(request, "Error with updating custom attribute options")
-                    context = {
-                        "organization": organization,
-                        "form": form,
-                        "formset": formset,
-                        "show_enum_fields": requires_enums,
-                    }
-                    return render(request, "provider/custom_attribute_edit.html", context)
+            validate_custom_enum(request, organization, form, formset)
 
             with transaction.atomic():
                 instance = form.save()
@@ -329,6 +309,8 @@ def custom_attribute_edit(
                         kwargs={"organization_id": organization.id},
                     )
                 )
+
+            logger.error("Error with updating custom attribute", extra={"form_errors": form.errors})
             messages.error(request, "Error while updating custom attribute")
             context = {
                 "organization": organization,
