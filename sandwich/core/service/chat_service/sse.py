@@ -19,12 +19,16 @@ logger = logging.getLogger(__name__)
 
 
 def send_user_message(event: "UserMessageEvent") -> None:
+    from sandwich.core.service.chat_service.chat import user_message  # noqa: PLC0415
+
     sse_send_html(
         sse_patient_channel(event.context.patient),
         EventType.USER_MESSAGE,
-        loader.render_to_string(
-            "patient/chatty/partials/user_message.html",
-            context={"oob": True, "message": event.content},
+        user_message(
+            patient=event.context.patient,
+            content=event.content,
+            timestamp=event.timestamp,
+            context={"oob": True},
         ),
     )
 

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from typing import Any
 from typing import Unpack
 
+from django.template.context import ContextDict
 from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.safestring import SafeString
@@ -101,11 +102,7 @@ def html_message_list(messages: Iterable[BaseMessage], patient: Patient) -> Gene
     for message in messages:
         timestamp = _timestamp_from_message(message)
         if isinstance(message, HumanMessage):
-            yield user_message(
-                patient,
-                message.content,  # type: ignore[arg-type]
-                timestamp,
-            )
+            yield user_message(patient, str(message.content), timestamp)
 
         elif isinstance(message, AIMessage):
             for tool_call in message.tool_calls:
@@ -117,8 +114,15 @@ def html_message_list(messages: Iterable[BaseMessage], patient: Patient) -> Gene
                     )
 
 
-def user_message(patient: Patient, content: str, timestamp: datetime.datetime | None) -> SafeString:
-    context = {"patient": patient, "message": content, "timestamp": timestamp}
+def user_message(
+    patient: Patient,
+    content: str,
+    timestamp: datetime.datetime | None,
+    context: ContextDict | dict[str, Any] | None = None,
+) -> SafeString:
+    if context is None:
+        context = {}
+    context.update({"patient": patient, "message": content, "timestamp": timestamp})
     return render_to_string("patient/chatty/partials/user_message.html", context)
 
 
