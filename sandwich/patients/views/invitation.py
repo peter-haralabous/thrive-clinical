@@ -1,8 +1,5 @@
 import logging
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
-from django import forms
 from django.contrib.auth.decorators import login_not_required
 from django.http import HttpRequest
 from django.http import HttpResponse
@@ -16,32 +13,10 @@ from sandwich.core.models.invitation import Invitation
 from sandwich.core.models.invitation import InvitationStatus
 from sandwich.core.models.organization import VerificationType
 from sandwich.core.service.invitation_service import accept_patient_invitation
+from sandwich.patients.forms.invitation import DateOfBirthInvitationAcceptForm
+from sandwich.patients.forms.invitation import InvitationAcceptForm
 
 logger = logging.getLogger(__name__)
-
-
-class InvitationAcceptForm(forms.Form):
-    accepted = forms.BooleanField(required=True, label="I accept the invitation")
-
-    def __init__(self, *args, invitation: Invitation, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self._invitation = invitation
-        self.helper = FormHelper()
-        self.helper.add_input(Submit("submit", "Submit"))
-
-
-class DateOfBirthInvitationAcceptForm(InvitationAcceptForm):
-    date_of_birth = forms.DateField(
-        required=True, label="Date of birth", widget=forms.DateInput(attrs={"type": "date"})
-    )
-
-    def clean_date_of_birth(self):
-        date_of_birth = self.cleaned_data["date_of_birth"]
-        if date_of_birth != self._invitation.patient.date_of_birth:
-            self._invitation.increment_verification_attempts()
-            raise forms.ValidationError("Incorrect date of birth.")
-        return date_of_birth
-
 
 INVITATION_ACCEPT_FORMS = {
     VerificationType.NONE: InvitationAcceptForm,
