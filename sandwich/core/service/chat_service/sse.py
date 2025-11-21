@@ -10,9 +10,9 @@ from sandwich.core.service.sse_service import sse_send_html
 from sandwich.core.service.sse_service import sse_send_json
 
 if TYPE_CHECKING:
-    from sandwich.core.service.chat_service.chat import AssistantMessageEvent
-    from sandwich.core.service.chat_service.chat import ChatEvent
-    from sandwich.core.service.chat_service.chat import UserMessageEvent
+    from sandwich.core.service.chat_service.event import AssistantMessageEvent
+    from sandwich.core.service.chat_service.event import ChatEvent
+    from sandwich.core.service.chat_service.event import UserMessageEvent
 
 logger = logging.getLogger(__name__)
 

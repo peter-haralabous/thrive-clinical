@@ -9,8 +9,7 @@ from sandwich.core.service.prompt_service.template import template_contents
 from sandwich.core.service.template_service import ContextDict
 
 if TYPE_CHECKING:
-    from sandwich.core.service.chat_service.chat import FileUploadEvent
-
+    from sandwich.core.service.chat_service.event import FileUploadEvent
 
 chat_template = ChatPromptTemplate(
     [
