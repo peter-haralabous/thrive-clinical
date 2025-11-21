@@ -3,10 +3,13 @@ from types import SimpleNamespace
 import pytest
 from allauth.account.internal.flows.password_reset import request_password_reset
 from allauth.account.internal.flows.signup import send_unknown_account_mail
+from allauth.account.models import EmailAddress
+from allauth.account.models import EmailConfirmation
 from allauth.core.context import request_context
 from django.contrib.auth.models import AnonymousUser
 from django.test import RequestFactory
 
+from sandwich.users.adapters import AccountAdapter
 from sandwich.users.factories import UserFactory
 
 
@@ -48,4 +51,21 @@ def test_password_reset_email(
     assert len(mailoutbox) == 1
     email = mailoutbox[0]
     assert email.subject == "Password Reset Email"
+    assert email.body == snapshot_html
+
+
+@pytest.mark.django_db
+def test_password_confirmation_email(
+    template_fixture: None,
+    allauth_request,
+    mailoutbox,
+    snapshot_html,
+) -> None:
+    user = UserFactory.build(id=1, email="somebody@example.com")
+    emailconfirmation = EmailConfirmation(email_address=EmailAddress(user=user, email=user.email), key="abracadabra")
+    AccountAdapter().send_confirmation_mail(allauth_request, emailconfirmation, signup=True)
+
+    assert len(mailoutbox) == 1
+    email = mailoutbox[0]
+    assert email.subject == "Welcome to Thrive! Please confirm your email address"
     assert email.body == snapshot_html
