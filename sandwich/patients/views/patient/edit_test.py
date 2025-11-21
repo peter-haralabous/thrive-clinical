@@ -6,7 +6,7 @@ from django.test import Client
 from django.urls import reverse
 
 from sandwich.core.models import Patient
-from sandwich.patients.views.patient.edit import PatientEdit
+from sandwich.patients.forms.patient_edit import PatientEdit
 from sandwich.users.models import User
 
 
