@@ -8,6 +8,9 @@ from sandwich.core.models import Document
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
 from sandwich.core.models.document import DocumentCategory
+from sandwich.core.service.ingest.extract_records import PractitionerRecord
+from sandwich.core.service.ingest.extract_records import RecordsResponse
+from sandwich.core.service.ingest.extract_records import _save_records
 from sandwich.core.service.ingest.extract_records import extract_records
 
 
@@ -69,3 +72,20 @@ def test_extract_records_from_pdf(patient: Patient):
     assert str(document.date) == "2025-09-12"  # incorrect -- should be 2025-09-16
     assert document.category == DocumentCategory.HEALTH_VISITS
     assert document.unattested is True
+
+
+def test__save_records(patient: Patient):
+    Practitioner.objects.create(patient=patient, name="DR. JOHN SMITH")
+    document = Document(patient=patient)
+    records = RecordsResponse(
+        document_category=DocumentCategory.HEALTH_VISITS,
+        document_date=None,
+        conditions=[],
+        immunizations=[],
+        practitioners=[PractitionerRecord(name="Dr. John Smith")],
+    )
+
+    _save_records(document, records)
+
+    # we should not have created a second practitioner that differs only by case
+    assert len(patient.practitioner_set.all()) == 1
