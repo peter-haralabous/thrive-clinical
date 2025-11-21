@@ -22,6 +22,7 @@ from sandwich.core.models.organization import Organization
 from sandwich.core.models.summary_template import SummaryTemplate
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
+from sandwich.core.service.summary_template_service import assign_default_summarytemplate_permissions
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
 logger = logging.getLogger(__name__)
@@ -182,6 +183,7 @@ def summary_template_add(request: AuthenticatedHttpRequest, organization: Organi
         form = SummaryTemplateForm(request.POST, organization=organization)
         if form.is_valid():
             template = form.save()
+            assign_default_summarytemplate_permissions(template)
             logger.info(
                 "Summary template created successfully",
                 extra={

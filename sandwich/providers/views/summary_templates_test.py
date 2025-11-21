@@ -4,11 +4,13 @@ import pytest
 from django.test import Client
 from django.urls import reverse
 from guardian.shortcuts import assign_perm
+from guardian.shortcuts import get_perms
 from playwright.sync_api import Page
 from playwright.sync_api import expect
 
 from sandwich.core.factories.form import FormFactory
 from sandwich.core.models import Organization
+from sandwich.core.models.role import RoleName
 from sandwich.core.models.summary_template import SummaryTemplate
 from sandwich.users.models import User
 
@@ -136,6 +138,63 @@ def test_summary_template_add_post(client: Client, provider: User, organization:
     assert template.organization == organization
     assert template.description == "Test description"
     assert template.form == form
+
+
+def test_summary_template_creation_assigns_permissions(
+    client: Client, owner: User, organization: Organization
+) -> None:
+    """Test that creating a template assigns default permissions."""
+    assign_perm("create_summarytemplate", owner, organization)
+    form = FormFactory.create(organization=organization)
+    client.force_login(owner)
+
+    owner_role = organization.get_role("owner")
+    assert owner_role.group in owner.groups.all()
+
+    # Create template via the form
+    url = reverse("providers:summary_template_add", kwargs={"organization_id": organization.id})
+    data = {
+        "name": "Owner Created Template",
+        "description": "Template created by owner",
+        "text": "Template content {% ai %}test{% endai %}",
+        "form": form.id,
+    }
+    response = client.post(url, data)
+    assert response.status_code == HTTPStatus.FOUND
+
+    template = SummaryTemplate.objects.get(name="Owner Created Template")
+
+    # Verify owner can view the template
+    perms = get_perms(owner, template)
+    assert "view_summarytemplate" in perms
+
+    # Verify template appears in the list for the owner
+    list_url = reverse("providers:summary_template_list", kwargs={"organization_id": organization.id})
+    list_response = client.get(list_url)
+    assert list_response.status_code == HTTPStatus.OK
+    templates_in_list = list(list_response.context["templates"].object_list)
+    assert template in templates_in_list
+
+    # Test direct creation via objects.create()
+    direct_template = SummaryTemplate.objects.create(
+        organization=organization,
+        name="Direct Create Template",
+        description="Created via objects.create",
+        text="Template content",
+        form=form,
+    )
+
+    admin_role = organization.get_role(RoleName.ADMIN)
+    staff_role = organization.get_role(RoleName.STAFF)
+
+    owner_perms = get_perms(owner_role.group, direct_template)
+    admin_perms = get_perms(admin_role.group, direct_template)
+    staff_perms = get_perms(staff_role.group, direct_template)
+
+    assert set(owner_perms) == {"view_summarytemplate", "change_summarytemplate", "delete_summarytemplate"}
+    assert set(admin_perms) == {"view_summarytemplate", "change_summarytemplate", "delete_summarytemplate"}
+
+    assert set(staff_perms) == {"view_summarytemplate"}
 
 
 def test_summary_template_edit_get(client: Client, provider: User, organization: Organization) -> None:
