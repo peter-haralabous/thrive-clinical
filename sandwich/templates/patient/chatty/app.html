@@ -43,9 +43,6 @@
             </div>
           </header>
           <main id="chat-messages" class="flex-1 overflow-y-auto h-full p-4">
-            <template id="user-message-template" class="hidden">
-              {% include "patient/chatty/partials/user_message.html" %}
-            </template>
             {% for message in chat_messages %}{{ message }}{% endfor %}
           </main>
           <footer class="p-4 bg-base-100 border-t border-base-300 rounded-b-xl flex flex-col items-center">
@@ -99,7 +96,6 @@
       const chatMessages = chatPanel.querySelector('#chat-messages');
       const chatInput = chatPanel.querySelector("textarea");
       const chatAttach = document.getElementById('chat-attach');
-      const chatUserMessageTemplate = chatPanel.querySelector('#user-message-template');
 
       // Mobile navigation
       const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
