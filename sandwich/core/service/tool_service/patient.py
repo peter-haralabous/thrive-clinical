@@ -1,3 +1,5 @@
+from typing import Annotated
+from typing import Any
 from typing import cast
 
 from django.core.serializers.python import Serializer as PythonSerializer
@@ -99,3 +101,29 @@ def build_write_patient_record_tool(user: User, patient: Patient, type_: HealthR
         return ErrorResponse(errors=form.errors)
 
     return cast("StructuredTool", write_patient_record)
+
+
+def build_update_patient_record_tool(user: User, patient: Patient, type_: HealthRecordType) -> StructuredTool:
+    """Build a tool that can edit the patient's medical record"""
+    from sandwich.patients.views.patient.health_records import _form_class  # noqa: PLC0415
+
+    form_class = _form_class(type_)
+    model_class = form_class._meta.model  # noqa: SLF001
+
+    class ArgsSchema(form_class.pydantic_schema()):  # type: ignore[misc]
+        pk: Annotated[str, "The primary key of the record to update"]
+
+    @tool(
+        f"update_{_patient_fn_slug(patient)}_{type_.value.lower()}_record",
+        description=f"Update {type_} records for {patient.full_name}",
+        args_schema=ArgsSchema,
+    )
+    def update_patient_record(pk: str, **kwargs) -> dict[str, Any]:
+        instance = model_class.objects.get(pk=pk, patient=patient)
+        form = form_class(data=kwargs, instance=instance)
+        if form.is_valid():
+            obj = form.save(patient=patient)
+            return PythonSerializer().serialize([obj])[0]
+        return {"errors": form.errors}
+
+    return cast("StructuredTool", update_patient_record)

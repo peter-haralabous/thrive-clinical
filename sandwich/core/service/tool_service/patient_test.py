@@ -11,6 +11,7 @@ from sandwich.core.models import Practitioner
 from sandwich.core.models.condition import ConditionStatus
 from sandwich.core.models.health_record import HealthRecordType
 from sandwich.core.service.tool_service.patient import build_read_patient_record_tool
+from sandwich.core.service.tool_service.patient import build_update_patient_record_tool
 from sandwich.core.service.tool_service.patient import build_write_patient_record_tool
 from sandwich.users.models import User
 
@@ -101,6 +102,28 @@ def test_create_condition_tool(
     assert condition.status == ConditionStatus.ACTIVE
 
 
+def test_update_condition_tool(
+    user: User,
+    patient: Patient,
+    condition: Condition,
+):
+    tool: StructuredTool = build_update_patient_record_tool(user, patient, HealthRecordType.CONDITION)
+    result: ModelDict = tool.func(
+        pk=str(condition.pk),
+        name="New Name",
+        status=ConditionStatus.RESOLVED,
+        onset=datetime.date(1999, 12, 31),
+        abatement=datetime.date(2020, 1, 1),
+    )  # type: ignore[misc]
+    condition = Condition.objects.get(pk=result["pk"])
+
+    assert condition.patient == patient
+    assert condition.name == "New Name"
+    assert condition.onset == datetime.date(1999, 12, 31)
+    assert condition.abatement == datetime.date(2020, 1, 1)
+    assert condition.status == ConditionStatus.RESOLVED
+
+
 def test_create_immunization_tool(
     user: User,
     patient: Patient,
@@ -118,6 +141,24 @@ def test_create_immunization_tool(
     assert immunization.date == datetime.date(1999, 12, 31)
 
 
+def test_update_immunization_tool(
+    user: User,
+    patient: Patient,
+    immunization: Immunization,
+):
+    tool: StructuredTool = build_update_patient_record_tool(user, patient, HealthRecordType.IMMUNIZATION)
+    result: ModelDict = tool.func(
+        pk=str(immunization.pk),
+        name="New Name",
+        date=datetime.date(2000, 12, 31),
+    )  # type: ignore[misc]
+    immunization = Immunization.objects.get(pk=result["pk"])
+
+    assert immunization.patient == patient
+    assert immunization.name == "New Name"
+    assert immunization.date == datetime.date(2000, 12, 31)
+
+
 def test_create_practitioner_tool(
     user: User,
     patient: Patient,
@@ -131,3 +172,19 @@ def test_create_practitioner_tool(
     assert practitioner.patient == patient
     assert practitioner.encounter is None
     assert practitioner.name == "Name"
+
+
+def test_update_practitioner_tool(
+    user: User,
+    patient: Patient,
+    practitioner: Practitioner,
+):
+    tool: StructuredTool = build_update_patient_record_tool(user, patient, HealthRecordType.PRACTITIONER)
+    result: ModelDict = tool.func(
+        pk=str(practitioner.pk),
+        name="New Name",
+    )  # type: ignore[misc]
+    practitioner = Practitioner.objects.get(pk=result["pk"])
+
+    assert practitioner.patient == patient
+    assert practitioner.name == "New Name"
