@@ -89,8 +89,7 @@ def send_task_added_email(task: Task) -> None:
 
     send_templated_email(
         to=task.patient.email,
-        subject_template="email/task/send_task_added_subject",
-        body_template="email/task/send_task_added_body",
+        template="email/task/send_task_added",
         context={"task": task, "task_url": task_url},
         organization=task.patient.organization,
         language=None,

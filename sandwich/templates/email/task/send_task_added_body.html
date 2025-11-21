@@ -1,5 +1,4 @@
-{% extends "email/base" %}
-{% load account %}
+{% extends "email/base.html" %}
 
 {% block text %}
 Hi {{ task.patient.first_name }}, {{ task.encounter.organization.name }} has assigned you a new task to complete.
