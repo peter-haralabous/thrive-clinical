@@ -57,7 +57,9 @@ repos:
     rev: v1.36.4
     hooks:
       - id: djlint-reformat-django
+        exclude: templates/email/
       - id: djlint-django
+        exclude: templates/email/
 
   - repo: local
     hooks:

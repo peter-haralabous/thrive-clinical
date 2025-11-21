@@ -1,0 +1,7 @@
+{% extends "email/base" %}
+
+{% block text %}
+{% block content %}
+{% endblock content %}
+{% endblock text %}
+{% block cta %}{% endblock cta %}

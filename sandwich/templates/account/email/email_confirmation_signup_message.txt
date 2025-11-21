@@ -1,0 +1,18 @@
+{% extends "email/base" %}
+{% load account %}
+
+{% block text %}
+You're receiving this email because user {{ user }} has given your email address to register an account on <a href="{{ current_site.domain }}">{{ current_site.name }}</a>
+
+Please click on the link below to confirm your email address and complete the registration of your account
+
+Alternatively, visit:
+
+{{ activate_url }}
+
+If you did not make this request, you can ignore this email.
+
+{% endblock text %}
+
+{% block cta_link %}{{ activate_url }}{% endblock cta_link %}
+{% block cta_text %}Confirm{% endblock cta_text %}
