@@ -22,7 +22,9 @@ logger = logging.getLogger(__name__)
     ]
 )
 def summary_detail(request: AuthenticatedHttpRequest, organization: Organization, summary: Summary) -> HttpResponse:
-    """Display a standalone summary detail page."""
+    """Display summary detail - returns modal for HTMX requests, full page otherwise."""
+    is_htmx = bool(request.headers.get("HX-Request"))
+
     logger.info(
         "Accessing summary detail",
         extra={
@@ -30,9 +32,22 @@ def summary_detail(request: AuthenticatedHttpRequest, organization: Organization
             "organization_id": organization.id,
             "summary_id": summary.id,
             "patient_id": summary.patient.id,
+            "is_htmx": is_htmx,
         },
     )
 
+    context = {
+        "organization": organization,
+        "summary": summary,
+        "patient": summary.patient,
+        "encounter": summary.encounter,
+    }
+
+    # If HTMX request, return modal partial
+    if is_htmx:
+        return render(request, "provider/partials/summary_modal.html", context)
+
+    # Otherwise return full page with breadcrumbs
     if summary.encounter:
         breadcrumb_url = reverse(
             "providers:encounter",
@@ -46,13 +61,7 @@ def summary_detail(request: AuthenticatedHttpRequest, organization: Organization
         )
         breadcrumb_text = "Back to patient"
 
-    context = {
-        "organization": organization,
-        "summary": summary,
-        "patient": summary.patient,
-        "encounter": summary.encounter,
-        "breadcrumb_url": breadcrumb_url,
-        "breadcrumb_text": breadcrumb_text,
-    }
+    context["breadcrumb_url"] = breadcrumb_url  # type: ignore[assignment]
+    context["breadcrumb_text"] = breadcrumb_text  # type: ignore[assignment]
 
     return render(request, "provider/summary_detail.html", context)

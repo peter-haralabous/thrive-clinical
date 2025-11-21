@@ -172,6 +172,58 @@ def test_summary_detail_summary_with_different_statuses(provider: User, organiza
 
 
 @pytest.mark.django_db
+def test_summary_detail_htmx_request_returns_modal(
+    provider: User, organization: Organization, patient, encounter: Encounter
+) -> None:
+    summary = SummaryFactory.create(
+        patient=patient,
+        encounter=encounter,
+        organization=organization,
+        title="Test Summary",
+        body="<p>Test content</p>",
+    )
+    assign_perm("view_summary", provider, summary)
+
+    client = Client()
+    client.force_login(provider)
+    url = reverse("providers:summary_detail", kwargs={"organization_id": organization.id, "summary_id": summary.id})
+
+    result = client.get(url, HTTP_HX_REQUEST="true")
+
+    assert result.status_code == 200
+    assert "provider/partials/summary_modal.html" in [template.name for template in result.templates]
+    # Modal doesn't need breadcrumb context
+    assert "breadcrumb_url" not in result.context
+    assert "breadcrumb_text" not in result.context
+
+
+@pytest.mark.django_db
+def test_summary_detail_regular_request_returns_full_page(
+    provider: User, organization: Organization, patient, encounter: Encounter
+) -> None:
+    summary = SummaryFactory.create(
+        patient=patient,
+        encounter=encounter,
+        organization=organization,
+        title="Test Summary",
+        body="<p>Test content</p>",
+    )
+    assign_perm("view_summary", provider, summary)
+
+    client = Client()
+    client.force_login(provider)
+    url = reverse("providers:summary_detail", kwargs={"organization_id": organization.id, "summary_id": summary.id})
+
+    result = client.get(url)
+
+    assert result.status_code == 200
+    assert "provider/summary_detail.html" in [template.name for template in result.templates]
+    # Full page has breadcrumb context
+    assert "breadcrumb_url" in result.context
+    assert "breadcrumb_text" in result.context
+
+
+@pytest.mark.django_db
 def test_summary_card_shows_different_statuses(provider: User, organization: Organization, patient) -> None:
     pending_summary = SummaryFactory.create(
         patient=patient,
@@ -253,7 +305,7 @@ def test_summary_card_shows_different_statuses(provider: User, organization: Org
 
 @pytest.mark.e2e
 @pytest.mark.django_db
-def test_summary_workflow_end_to_end(
+def test_summary_workflow_end_to_end(  # noqa: PLR0915
     live_server, provider_page: Page, organization: Organization, provider: User, encounter: Encounter
 ) -> None:
     """
@@ -364,44 +416,69 @@ def test_summary_workflow_end_to_end(
 
     # Click the summary card
     summary_card.click()
-    provider_page.wait_for_load_state("networkidle")
+    provider_page.wait_for_timeout(500)  # Wait for HTMX to load modal
 
-    # 9. Verify we're on the summary detail page
-    expected_url = (
-        f"{live_server.url}"
-        f"{reverse('providers:summary_detail', kwargs={'organization_id': organization.id, 'summary_id': summary.id})}"
-    )
-    assert provider_page.url == expected_url
+    # 9. Verify modal is displayed (not navigated to new page)
+    modal = provider_page.locator("#summary-modal")
+    expect(modal).to_be_visible()
 
-    # 10. Verify summary content is displayed
-    page_title = provider_page.locator("h1", has_text="Patient Visit Summary")
-    expect(page_title).to_be_visible()
+    # Verify modal contains summary title
+    modal_title = modal.locator("h3", has_text="Visit Summary")
+    expect(modal_title).to_be_visible()
 
-    # Verify patient name is in the content
-    patient_name_text = provider_page.locator(f"text={patient.first_name} {patient.last_name}")
-    expect(patient_name_text.first).to_be_visible()
+    # Verify patient name is in the modal
+    patient_name_in_modal = modal.locator(f"text={patient.first_name} {patient.last_name}")
+    expect(patient_name_in_modal).to_be_visible()
 
-    # Verify chief complaint is displayed
-    chief_complaint_text = provider_page.locator("text=Severe headache")
-    expect(chief_complaint_text.first).to_be_visible()
+    # Verify chief complaint is displayed in modal
+    chief_complaint_in_modal = modal.locator("text=Severe headache")
+    expect(chief_complaint_in_modal).to_be_visible()
 
-    # Verify symptoms are displayed
-    symptoms_text = provider_page.locator("text=Throbbing pain on left side of head for 2 days")
-    expect(symptoms_text.first).to_be_visible()
+    # Verify symptoms are displayed in modal
+    symptoms_in_modal = modal.locator("text=Throbbing pain on left side of head for 2 days")
+    expect(symptoms_in_modal).to_be_visible()
 
-    # 11. Verify breadcrumb navigation
-    breadcrumb_link = provider_page.locator("a", has_text="Back to encounter")
-    expect(breadcrumb_link).to_be_visible()
+    # 10. Test "Open Full Page" button in modal
+    open_full_page_btn = modal.locator("a.btn-primary", has_text="Open Full Page")
+    expect(open_full_page_btn).to_be_visible()
 
-    # Click breadcrumb to go back to encounter
-    breadcrumb_link.click()
-    provider_page.wait_for_load_state("networkidle")
+    # Open in new context to test full page (simulates opening in new tab)
+    with provider_page.context.new_page() as new_page:
+        detail_path = reverse(
+            "providers:summary_detail", kwargs={"organization_id": organization.id, "summary_id": summary.id}
+        )
+        full_page_url = f"{live_server.url}{detail_path}"
+        new_page.goto(full_page_url)
+        new_page.wait_for_load_state("networkidle")
 
-    # Verify we're back on the encounter details page
-    # Since summary has encounter context, breadcrumb should go to encounter page
-    expected_encounter_url = reverse(
-        "providers:encounter", kwargs={"organization_id": organization.id, "encounter_id": encounter.id}
-    )
-    assert expected_encounter_url in provider_page.url, (
-        f"Expected to navigate to encounter page but got: {provider_page.url}"
-    )
+        # Verify we're on the summary detail page
+        assert new_page.url == full_page_url
+
+        # Verify full page content is displayed
+        page_title = new_page.locator("h1", has_text="Patient Visit Summary")
+        expect(page_title).to_be_visible()
+
+        # 11. Verify breadcrumb navigation on full page
+        breadcrumb_link = new_page.locator("a", has_text="Back to encounter")
+        expect(breadcrumb_link).to_be_visible()
+
+        # Click breadcrumb to go back to encounter
+        breadcrumb_link.click()
+        new_page.wait_for_load_state("networkidle")
+
+        # Verify we're back on the encounter details page
+        expected_encounter_url = reverse(
+            "providers:encounter", kwargs={"organization_id": organization.id, "encounter_id": encounter.id}
+        )
+        assert expected_encounter_url in new_page.url, (
+            f"Expected to navigate to encounter page but got: {new_page.url}"
+        )
+
+    # 12. Back on original page, close the modal
+    close_button = modal.locator("button.btn-circle")
+    expect(close_button).to_be_visible()
+    close_button.click()
+
+    # Verify modal is closed/removed
+    provider_page.wait_for_timeout(300)
+    expect(modal).not_to_be_visible()

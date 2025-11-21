@@ -117,7 +117,7 @@ urlpatterns = [
         summary_template_delete,
         name="summary_template_delete",
     ),
-    # Summary detail endpoint
+    # Summary detail endpoint (returns modal for HTMX requests, full page otherwise)
     path(
         "organization/<uuid:organization_id>/summary/<uuid:summary_id>",
         summary_detail,
