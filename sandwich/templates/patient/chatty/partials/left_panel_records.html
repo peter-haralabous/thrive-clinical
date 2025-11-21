@@ -7,6 +7,12 @@
 {% block header_title %}{{ left_panel_title }}{% endblock header_title %}
 {# djlint:on #}
 {% block panel_content %}
+  {% if left_panel_refresh_url %}
+    <div hx-get="{{ left_panel_refresh_url }}"
+         hx-target="#left-panel"
+         hx-swap="outerHTML"
+         hx-trigger="sse:records_updated"></div>
+  {% endif %}
   <ul class="p-2">
     {% for item in left_panel_items %}
       <li>

@@ -118,6 +118,7 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
         "left_panel_title": left_panel_title,
         "left_panel_back_link": left_panel_back_link,
         "left_panel_items": items,
+        "left_panel_refresh_url": request.path,
     }
     if request.headers.get("HX-Target") == "left-panel":
         return render(request, "patient/chatty/partials/left_panel_records.html", context)
@@ -158,6 +159,7 @@ def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, cate
         "left_panel_title": left_panel_title,
         "left_panel_back_link": left_panel_back_link,
         "left_panel_items": items,
+        "left_panel_refresh_url": request.path,
     }
     if request.headers.get("HX-Target") == "left-panel":
         return render(request, "patient/chatty/partials/left_panel_records.html", context)

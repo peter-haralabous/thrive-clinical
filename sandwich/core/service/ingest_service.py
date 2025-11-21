@@ -5,6 +5,7 @@ from django.template import loader
 
 from sandwich.core.models import Document
 from sandwich.core.models import Patient
+from sandwich.core.service.chat_service.sse import send_records_updated
 from sandwich.core.service.ingest.extract_pdf import extract_facts_from_pdf
 from sandwich.core.service.ingest.extract_records import extract_records
 from sandwich.core.service.ingest.extract_text import extract_facts_from_text
@@ -12,7 +13,7 @@ from sandwich.core.service.llm import ModelName
 from sandwich.core.service.llm import get_llm
 from sandwich.core.service.sse_service import EventType
 from sandwich.core.service.sse_service import sse_patient_channel
-from sandwich.core.service.sse_service import sse_send
+from sandwich.core.service.sse_service import sse_send_html
 from sandwich.core.util.procrastinate import define_task
 
 logger = logging.getLogger(__name__)
@@ -67,6 +68,7 @@ def extract_records_from_document_job(document_id: str, document_context: Proces
     send_ingest_progress(patient, text=f"Processing {document.original_filename}...")
 
     records = extract_records(document)
+    send_records_updated(patient)
 
     send_ingest_progress(
         patient, text=f"Extracted {len(records)} records from {document.original_filename}", done=True
@@ -86,4 +88,4 @@ def send_ingest_progress(patient: Patient, *, text: str, done=False):
     logger.debug("Sending patient message", extra={"patient_id": str(patient.id)})
     context = {"text": text, "done": done}
     content = loader.render_to_string("patient/partials/ingest_progress.html", context)
-    sse_send(sse_patient_channel(patient), EventType.INGEST_PROGRESS, content)
+    sse_send_html(sse_patient_channel(patient), EventType.INGEST_PROGRESS, content)

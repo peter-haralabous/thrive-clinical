@@ -3,6 +3,7 @@ import logging
 from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import render
 from django.utils.datastructures import MultiValueDict
 from django.views.decorators.http import require_POST
@@ -11,6 +12,7 @@ from private_storage.views import PrivateStorageDetailView
 
 from sandwich.core.models.document import Document
 from sandwich.core.models.patient import Patient
+from sandwich.core.service.chat_service.sse import send_records_updated
 from sandwich.core.service.document_service import assign_default_document_permissions
 from sandwich.core.service.ingest_service import ProcessDocumentContext
 from sandwich.core.service.ingest_service import process_document_job
@@ -83,6 +85,7 @@ def document_upload_and_extract(request: AuthenticatedHttpRequest, patient: Pati
         if form.is_valid():
             document = form.save()
             assign_default_document_permissions(document)
+            transaction.on_commit(lambda: send_records_updated(patient))
             try:
                 process_document_job.defer(
                     document_id=str(document.id), document_context=form.cleaned_data.get("context")
