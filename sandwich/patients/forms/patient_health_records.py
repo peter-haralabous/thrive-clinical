@@ -1,12 +1,16 @@
+from datetime import date
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
+from pydantic import BaseModel
 
 from sandwich.core.models import Condition
 from sandwich.core.models import Document
 from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
+from sandwich.core.models.condition import ConditionStatus
 from sandwich.core.models.health_record import HealthRecord
 from sandwich.core.validators.date_time import not_in_future
 
@@ -48,11 +52,29 @@ class HealthRecordForm[M: HealthRecord](forms.ModelForm[M]):
         # encapsulated here to avoid lint exclusions everywhere it's called
         return cls.Meta.model._meta.verbose_name  # type: ignore[attr-defined] # noqa: SLF001
 
+    @staticmethod
+    def pydantic_schema() -> type[BaseModel]:
+        """Return a pydantic schema for the form's arguments.
+
+        This will define the interface for tools for creating or updating health records.
+        """
+        raise NotImplementedError("Subclasses must implement pydantic_schema")
+
 
 class ConditionForm(HealthRecordForm[Condition]):
     class Meta:
         model = Condition
         fields = ("name", "status", "onset", "abatement")
+
+    @staticmethod
+    def pydantic_schema() -> type[BaseModel]:
+        class ConditionFormSchema(BaseModel):
+            name: str
+            status: ConditionStatus
+            onset: date | None = None
+            abatement: date | None = None
+
+        return ConditionFormSchema
 
 
 class DocumentForm(HealthRecordForm[Document]):
@@ -65,6 +87,11 @@ class DocumentForm(HealthRecordForm[Document]):
         model = Document
         fields = ("original_filename", "content_type", "size", "date", "category")
 
+    @staticmethod
+    def pydantic_schema() -> type[BaseModel]:
+        """Document isn't a part of the LLM tools yet; need an exact use case to figure out the interface"""
+        raise NotImplementedError("Document doesn't do this yet")
+
 
 class ImmunizationForm(HealthRecordForm[Immunization]):
     def __init__(self, *args, **kwargs):
@@ -76,8 +103,23 @@ class ImmunizationForm(HealthRecordForm[Immunization]):
         model = Immunization
         fields = ("name", "date")
 
+    @staticmethod
+    def pydantic_schema() -> type[BaseModel]:
+        class ImmunizationFormSchema(BaseModel):
+            name: str
+            date: date
+
+        return ImmunizationFormSchema
+
 
 class PractitionerForm(HealthRecordForm[Practitioner]):
     class Meta:
         model = Practitioner
         fields = ("name",)
+
+    @staticmethod
+    def pydantic_schema() -> type[BaseModel]:
+        class PractitionerFormSchema(BaseModel):
+            name: str
+
+        return PractitionerFormSchema
