@@ -2,6 +2,7 @@ from django.urls import path
 
 from .api import api
 from .views.chat import chat
+from .views.chat import clear_chat
 from .views.consent import patient_consent
 from .views.document import document_download
 from .views.document import document_upload_and_extract
@@ -27,6 +28,7 @@ app_name = "patients"
 urlpatterns = [
     path("", home, name="home"),
     path("chat/", chat, name="chat"),
+    path("patient/<uuid:patient_id>/chat/clear", clear_chat, name="clear_chat"),
     path("consent/", patient_consent, name="consent"),
     path("patient/add", patient_add, name="patient_add"),
     path("patient/onboarding/add", patient_onboarding_add, name="patient_onboarding_add"),

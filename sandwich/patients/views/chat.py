@@ -5,10 +5,14 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
 
+from sandwich.core.models import Patient
+from sandwich.core.service.agent_service.memory import purge_thread
 from sandwich.core.service.chat_service.chat import ChatContext
 from sandwich.core.service.chat_service.chat import UserMessageEvent
 from sandwich.core.service.chat_service.chat import receive_chat_event
 from sandwich.core.service.chat_service.sse import send_user_message
+from sandwich.core.service.permissions_service import ObjPerm
+from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.patients.forms.chat import ChatForm
 
@@ -32,3 +36,20 @@ def chat(request: AuthenticatedHttpRequest) -> HttpResponse:
 
     context = {"chat_form": form}
     return render(request, "patient/chatty/partials/chat_form.html", context)
+
+
+@login_required
+@require_POST
+@authorize_objects([ObjPerm(Patient, "patient_id", ["change_patient"])])
+def clear_chat(request: AuthenticatedHttpRequest, patient: Patient) -> HttpResponse:
+    # Create context to get the thread_id
+    context = ChatContext(patient_id=str(patient.id))
+
+    # Purge the thread
+    purge_thread(context.thread_id)
+    logging.warning("Chat cleared for patient", extra={"patient_id": patient.id})
+
+    # Return HX-Refresh header to reload the page
+    response = HttpResponse()
+    response["HX-Refresh"] = "true"
+    return response

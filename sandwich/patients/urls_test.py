@@ -28,24 +28,25 @@ def get_patient_urls() -> list[UrlRegistration]:
 
 # List of urls which are other http verbs (e.g. POST) or redirect (non HTTP 200)
 EXCLUDED_URL_NAMES = {
-    "home",  # Redirect
     "accept_invite",  # POST
     "chat",  # POST
+    "clear_chat",  # POST
     "document_upload_and_extract",  # POST
-    "task",  # POST
-    "patient_onboarding_add",  # redirects if there's already a patient for the user
     "health_records_add",  # needs record type in the url; covered in `health_records_test.py`
+    "home",  # Redirect
+    "patient_onboarding_add",  # redirects if there's already a patient for the user
     "regenerate_health_summary",  # POST
+    "task",  # POST
     # Ninja api routes below
     "patients-api:api-root",
-    "patients-api:openapi-json",
-    "patients-api:openapi-view",
     "patients-api:get_formio_form",
     "patients-api:get_formio_form_submission",
     "patients-api:list_formio_form_submissions",
+    "patients-api:openapi-json",
+    "patients-api:openapi-view",
     "patients-api:save_draft_form",
-    "patients-api:submit_formio_form",
     "patients-api:submit_form",
+    "patients-api:submit_formio_form",
     "patients-api:update_formio_form_submission_with_id",
     "patients-api:update_formio_form_submission_without_id",
 }

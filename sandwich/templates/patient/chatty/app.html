@@ -23,6 +23,24 @@
             <div class="flex-1 px-2">
               <span class="font-semibold text-lg">Assistant</span>
             </div>
+            <div class="flex-none pr-2">
+              <div class="dropdown dropdown-end">
+                <button tabindex="0" role="button" class="btn btn-ghost btn-sm btn-square">
+                  {% lucide "ellipsis-vertical" class="size-5" %}
+                </button>
+                <ul tabindex="0"
+                    class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300">
+                  <li>
+                    <button hx-post="{% url 'patients:clear_chat' patient_id=patient.id %}"
+                            hx-confirm="Are you sure you want to clear your chat history? This cannot be undone."
+                            class="text-error">
+                      {% lucide "trash-2" class="size-4" %}
+                      Clear my chat
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </header>
           <main id="chat-messages" class="flex-1 overflow-y-auto h-full p-4">
             <template id="user-message-template" class="hidden">
