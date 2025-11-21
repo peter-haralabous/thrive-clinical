@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 from _pytest.fixtures import FixtureRequest
+from filelock import FileLock
 from pytest_django.fixtures import SettingsWrapper
 
 
@@ -28,8 +29,19 @@ def all_webpack_files_exist(settings: SettingsWrapper) -> bool:
     return all(_webpack_path(settings, static_file).exists() for static_file in static_files)
 
 
+@pytest.fixture(scope="session")
+def webpack_build_lock(tmp_path_factory):
+    """Provide a file lock to ensure only one test worker builds webpack assets at a time.
+
+    This prevents multiple parallel webpack builds from running simultaneously,
+    which can cause OOM errors and race conditions.
+    """
+    lock_file = tmp_path_factory.getbasetemp().parent / "webpack_build.lock"
+    return FileLock(str(lock_file))
+
+
 @pytest.fixture(autouse=True)
-def conditional_webpack(request: FixtureRequest, settings: SettingsWrapper):
+def conditional_webpack(request: FixtureRequest, settings: SettingsWrapper, webpack_build_lock: FileLock):
     """For e2e tests, remove the test configuration of the webpack loader class to use the real webpack assets.
 
     See:
@@ -38,8 +50,11 @@ def conditional_webpack(request: FixtureRequest, settings: SettingsWrapper):
         https://django-webpack-loader.readthedocs.io/en/latest/#loader_class
     """
     if is_e2e(request):
-        if not all_webpack_files_exist(settings):
-            subprocess.run(["make", "collectstatic"], check=True, cwd=settings.BASE_DIR)  # noqa: S607
+        # Use a file lock to ensure only one worker builds at a time
+        with webpack_build_lock:
+            # Check again after acquiring lock in case another worker built it
+            if not all_webpack_files_exist(settings):
+                subprocess.run(["make", "collectstatic"], check=True, cwd=settings.BASE_DIR)  # noqa: S607
 
         if "DEFAULT" in settings.WEBPACK_LOADER and "LOADER_CLASS" in settings.WEBPACK_LOADER["DEFAULT"]:
             # This should always be set from the test settings, but wasn't in at CI test run

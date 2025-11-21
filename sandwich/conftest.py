@@ -41,6 +41,7 @@ from sandwich.fixtures.other import other_provider
 from sandwich.fixtures.other import other_task
 from sandwich.fixtures.other import other_user
 from sandwich.fixtures.webpack import conditional_webpack
+from sandwich.fixtures.webpack import webpack_build_lock
 from sandwich.users.factories import UserFactory
 from sandwich.users.models import User
 
@@ -73,6 +74,7 @@ __all__ = [
     "provider",
     "task",
     "user",
+    "webpack_build_lock",
 ]
 
 
