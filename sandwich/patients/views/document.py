@@ -1,6 +1,5 @@
 import logging
 
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
@@ -14,12 +13,12 @@ from sandwich.core.models.document import Document
 from sandwich.core.models.patient import Patient
 from sandwich.core.service.chat_service.sse import send_records_updated
 from sandwich.core.service.document_service import assign_default_document_permissions
-from sandwich.core.service.ingest_service import ProcessDocumentContext
 from sandwich.core.service.ingest_service import process_document_job
 from sandwich.core.service.ingest_service import send_ingest_progress
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
+from sandwich.patients.forms.document import DocumentForm
 
 logger = logging.getLogger(__name__)
 
@@ -42,34 +41,6 @@ class DocumentDownloadView(PrivateStorageDetailView):
 
 
 document_download = login_required(DocumentDownloadView.as_view())
-
-SUPPORTED_FILE_TYPES = ["application/pdf", "text/plain"]
-
-
-class DocumentForm(forms.ModelForm):
-    context = forms.ChoiceField(widget=forms.HiddenInput, required=False, choices=ProcessDocumentContext.choices)
-
-    class Meta:
-        model = Document
-        fields = ("file", "patient", "encounter")
-
-    def clean_file(self):
-        file = self.cleaned_data.get("file")
-        if getattr(file, "content_type", None) not in SUPPORTED_FILE_TYPES:
-            msg = "Unsupported file type."
-            raise forms.ValidationError(msg)
-        return file
-
-    def save(self, commit=True):  # noqa: FBT002
-        instance = super().save(commit=False)
-        file = self.cleaned_data.get("file")
-        if file:
-            instance.content_type = getattr(file, "content_type", "")
-            instance.size = getattr(file, "size", None)
-            instance.original_filename = getattr(file, "name", "")
-        if commit:
-            instance.save()
-        return instance
 
 
 @require_POST
