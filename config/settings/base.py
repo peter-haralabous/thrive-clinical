@@ -478,3 +478,6 @@ EVENTSTREAM_REDIS = {
     "ssl": env.bool("REDIS_SSL", default=False),
 }
 EVENTSTREAM_CHANNELMANAGER_CLASS = "sandwich.core.eventstream.ChannelManager"
+
+# API keys for API-driven form inputs
+GOOGLE_API_KEY = env.str("GOOGLE_API_KEY", default=None)

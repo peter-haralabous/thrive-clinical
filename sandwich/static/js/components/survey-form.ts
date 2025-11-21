@@ -173,21 +173,18 @@ export class SurveyForm extends LitElement {
     this.model.onChoicesLazyLoad.add((_, options) => {
       if (options.question.getType() !== 'dropdown') return;
 
-      // Try LazyLoading for Address Autocomplete
+      // LazyLoad Choices for Address Autocomplete
       // https://surveyjs.io/form-library/examples/lazy-loading-dropdown/vanillajs#content-code
       // https://surveyjs.answerdesk.io/ticket/details/t16719/autocomplete-choicesbyurl-based-on-entered-text
       if (options.question.name === 'suggested_addresses') {
         if (!this._addressAutocompleteUrl) {
-          // TODO: Do we need a UI message here?
-          console.log('No address autocomplete URL configured.');
+          console.warn('No address autocomplete URL configured.');
           return;
         }
 
-        console.log('Loading address suggestions for:', options.filter);
         if (options.filter) {
           const url = `${this._addressAutocompleteUrl}?query=${encodeURIComponent(options.filter)}`;
           this.fetchAddressSuggestions(url, (data) => {
-            console.log('Received address suggestions:', data);
             if (data.length) {
               options.setItems(data, data.length);
             }
