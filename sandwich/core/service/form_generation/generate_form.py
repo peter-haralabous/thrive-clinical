@@ -67,24 +67,6 @@ def _split_pdf_into_pages(pdf_content: bytes) -> list[bytes]:
         raise
 
 
-def _invoke_form_gen_agent(form: Form, document: dict, text_prompt: str, thread_id: str) -> None:
-    with form_gen_agent(form) as agent:
-        agent.invoke(
-            input={
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {"text": text_prompt},
-                            document,
-                        ],
-                    }
-                ]
-            },
-            config=configure(thread_id),
-        )
-
-
 def generate_form_schema_from_reference_file(form: Form, doc_type: DocType, text_prompt: str) -> None:
     """
     Generate a form schema from a file.
@@ -94,28 +76,55 @@ def generate_form_schema_from_reference_file(form: Form, doc_type: DocType, text
     doc_bytes = form.reference_file.read()
     thread_id = f"{form.id!s}_{uuid4()}"
 
-    match doc_type:
-        case DocType.PDF:
-            pdf_pages = _split_pdf_into_pages(doc_bytes)
-            for i in range(len(pdf_pages)):
-                page = pdf_pages[i]
-                logger.info(
-                    "Form generator processing PDF page.",
-                    extra={"page_number": i + 1, "file_name": form.reference_file.name},
-                )
-                document = {
-                    "type": "file",
-                    "base64": base64.b64encode(page).decode(),
-                    "mime_type": "application/pdf",
-                    "name": "form_reference_file",
-                }
-                _invoke_form_gen_agent(form, document, text_prompt, thread_id)
+    with form_gen_agent(form) as agent:
+        match doc_type:
+            case DocType.PDF:
+                pdf_pages = _split_pdf_into_pages(doc_bytes)
+                for i in range(len(pdf_pages)):
+                    page = pdf_pages[i]
+                    logger.info(
+                        "Form generator processing PDF page.",
+                        extra={"page_number": i + 1, "file_name": form.reference_file.name},
+                    )
+                    document = {
+                        "type": "file",
+                        "base64": base64.b64encode(page).decode(),
+                        "mime_type": "application/pdf",
+                        "name": f"form_reference_file_page{i + 1}",
+                    }
+                    agent.invoke(
+                        input={
+                            "messages": [
+                                {
+                                    "role": "user",
+                                    "content": [
+                                        {"text": text_prompt},
+                                        document,
+                                    ],
+                                }
+                            ]
+                        },
+                        config=configure(thread_id),
+                    )
 
-        case DocType.CSV:
-            document = {
-                "text": f"CSV data: \n{doc_bytes.decode()}",
-            }
-            _invoke_form_gen_agent(form, document, text_prompt, thread_id)
+            case DocType.CSV:
+                document = {
+                    "text": f"CSV data: \n{doc_bytes.decode()}",
+                }
+                agent.invoke(
+                    input={
+                        "messages": [
+                            {
+                                "role": "user",
+                                "content": [
+                                    {"text": text_prompt},
+                                    document,
+                                ],
+                            }
+                        ]
+                    },
+                    config=configure(thread_id),
+                )
 
 
 @define_task
