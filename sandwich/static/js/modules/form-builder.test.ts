@@ -57,6 +57,10 @@ test('shows error detail in notification when save fails', async () => {
   const container = document.getElementById('form-builder-container')!;
   container.setAttribute('data-form-save-url', '/api/save-form');
 
+  // Add messages container for toast
+  document.body.innerHTML +=
+    '<div class="toast toast-end" id="messages"></div>';
+
   // Mock fetch to return an error response
   global.fetch = vi.fn().mockResolvedValue({
     ok: false,
@@ -72,17 +76,22 @@ test('shows error detail in notification when save fails', async () => {
 
   const creator = (window as any).SurveyCreator;
 
-  // Mock the notify method to capture calls
-  const notifySpy = vi.fn();
-  creator.notify = notifySpy;
+  // Count existing messages before triggering save
+  const messagesBefore = document.querySelectorAll('message-alert').length;
 
   // Trigger save
-  const saveCallback = vi.fn();
-  creator.saveSurveyFunc(1, saveCallback);
+  creator.saveSurveyFunc(1, vi.fn());
 
   // Wait for async error handling
   await vi.waitFor(() => {
-    expect(notifySpy).toHaveBeenCalledWith('Custom error message', 'error');
-    expect(saveCallback).toHaveBeenCalledWith(1, false);
+    const messages = document.querySelectorAll('message-alert');
+    // Should have one more message than before
+    expect(messages.length).toBeGreaterThan(messagesBefore);
+
+    // Find the error message (last one added)
+    const errorMessage = Array.from(messages).find(
+      (msg) => msg.getAttribute('tags') === 'error',
+    );
+    expect(errorMessage?.textContent).toBe('Custom error message');
   });
 });

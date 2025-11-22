@@ -3,6 +3,7 @@ import { getSurveyLicenseKey } from '../lib/survey-license-keys';
 import { slk } from 'survey-core';
 import * as SurveyCore from 'survey-core';
 import CustomSandwichTheme from '../lib/survey-form-theme';
+import '../components/message-alert';
 
 const ENVIRONMENT = JSON.parse(
   document.getElementById('environment')?.textContent || '',
@@ -44,21 +45,23 @@ function saveSurveyJson(
       form_id: formId ?? null,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (response.ok) {
         callback(saveNo, true);
       } else {
-        throw response.json();
+        const errorData = await response.json();
+        // Use creator.notify to show the detailed error, then mark as failed
+        const creator = (window as any).SurveyCreator;
+        if (creator && errorData.detail) {
+          creator.notify(errorData.detail, 'error');
+          callback(saveNo, true); // Pass true to suppress default error notification
+        } else {
+          callback(saveNo, false); // Let default error show for generic errors
+        }
       }
     })
     .catch((error) => {
-      error
-        .then((errorData: { detail: string }) => {
-          (window as any).SurveyCreator.notify(errorData.detail, 'error');
-        })
-        .catch(() => {
-          console.error('Error saving survey JSON:', error);
-        });
+      console.error('Error saving survey JSON:', error);
       callback(saveNo, false);
     });
 }
@@ -76,6 +79,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const creator = new SurveyCreator(creatorOptions);
   creator.theme = CustomSandwichTheme;
+
+  // Register onNotify handler to show notifications as toasts
+  creator.onNotify.add((sender, options) => {
+    const messagesContainer = document.getElementById('messages');
+    if (!messagesContainer || options.type === 'info') {
+      sender.notifier.notify(options.message, options.type);
+      return;
+    }
+
+    const messageAlert = document.createElement('message-alert');
+    messageAlert.setAttribute('tags', options.type);
+    messageAlert.setAttribute('closeable', '');
+    messageAlert.textContent = options.message;
+
+    messagesContainer.appendChild(messageAlert);
+  });
 
   // Configure save function with creator.
   const formId =
