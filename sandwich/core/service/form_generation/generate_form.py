@@ -3,15 +3,13 @@ import logging
 from enum import StrEnum
 from io import BytesIO
 from pathlib import Path
-from typing import Any
 from uuid import uuid4
 
-import pydantic
-from pydantic.fields import Field
 from pypdf import PdfReader
 from pypdf import PdfWriter
 
 from sandwich.core.models.form import Form
+from sandwich.core.models.form import FormStatus
 from sandwich.core.service.agent_service.config import configure
 from sandwich.core.service.form_generation.agent import form_gen_agent
 from sandwich.core.service.form_generation.prompt import form_from_csv
@@ -19,21 +17,6 @@ from sandwich.core.service.form_generation.prompt import form_from_pdf
 from sandwich.core.util.procrastinate import define_task
 
 logger = logging.getLogger(__name__)
-
-
-class SurveySchema(pydantic.BaseModel):
-    """
-    When using structured output, this model allows the LLM to decide whether
-    a multipage or single page assessment is best.
-    """
-
-    title: str = Field(description="The form name")
-    pages: list[dict[str, Any]] | None = Field(
-        description="List of elements separated into their respective pages. Used at top level for multipage forms."
-    )
-    elements: list[dict[str, Any]] | None = Field(
-        description="List of form elements. Used at top level for single page forms."
-    )
 
 
 class DocType(StrEnum):
@@ -135,8 +118,6 @@ def generate_form_schema(form_id: str, description: str | None = None) -> None:
     file = form.reference_file
     ext = Path(file.name).suffix
 
-    # TODO(MM): Process multipage PDFs one page at a time.The current
-    # implementation times out with large, multipage PDFs.
     if ext == ".pdf":
         prompt = form_from_pdf(description)
         doc_type = DocType.PDF
@@ -148,6 +129,14 @@ def generate_form_schema(form_id: str, description: str | None = None) -> None:
     else:
         raise ValueError(f"Unsupported file type: {file.content_type}")
 
-    generate_form_schema_from_reference_file(form=form, doc_type=doc_type, text_prompt=prompt)
+    try:
+        generate_form_schema_from_reference_file(form=form, doc_type=doc_type, text_prompt=prompt)
+        form.refresh_from_db()
+        form.status = FormStatus.ACTIVE
 
-    # TODO(MM): Add navigation for multipage forms and other defaults
+    except Exception:
+        # TODO(MM): Report failure to users
+        form.status = FormStatus.FAILED
+        logger.exception("Unexpected error generating form", extra={"form_id": form_id})
+
+    form.save()

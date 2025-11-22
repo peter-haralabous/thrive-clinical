@@ -21,6 +21,7 @@ from guardian.shortcuts import get_objects_for_user
 from sandwich.core.decorators import surveyjs_csp
 from sandwich.core.models import Form
 from sandwich.core.models import Organization
+from sandwich.core.models.form import FormStatus
 from sandwich.core.service.form_generation.generate_form import generate_form_schema
 from sandwich.core.service.form_service import assign_default_form_permissions
 from sandwich.core.service.permissions_service import ObjPerm
@@ -68,7 +69,9 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form list",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    organization_forms = Form.objects.filter(organization=organization).order_by("name")
+    organization_forms = (
+        Form.objects.filter(organization=organization).exclude(status=FormStatus.FAILED).order_by("name")
+    )
     authorized_org_forms = get_objects_for_user(request.user, ["view_form"], organization_forms)
 
     page = request.GET.get("page", 1)
@@ -247,19 +250,22 @@ def form_file_upload(request: AuthenticatedHttpRequest, organization: Organizati
             form, created = Form.objects.get_or_create(
                 name=form_name,
                 organization=organization,
-                defaults={"reference_file": reference_file, "schema": {"title": form_name}},
+                defaults={
+                    "status": FormStatus.GENERATING,
+                    "reference_file": reference_file,
+                    "schema": {"title": form_name},
+                },
             )
             if created:
                 assign_default_form_permissions(form)
                 generate_form_schema.defer(form_id=str(form.id))
-
                 res = HttpResponse(status=HTTPStatus.OK)
+
                 res["HX-Redirect"] = reverse(
                     "providers:form_templates_list", kwargs={"organization_id": organization.id}
                 )
                 return res
 
-            # Form already exists
             upload_reference_form.add_error("title", "A form with this title already exists.")
 
     else:
