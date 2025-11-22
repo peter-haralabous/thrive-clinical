@@ -771,12 +771,12 @@ def test_inline_edit_custom_attribute_on_encounter_details_page(
     # Check that the Priority attribute is visible on the page
     expect(page.locator("text=Priority")).to_be_visible()
 
-    # Find the table row with Priority header
-    priority_row = page.locator('tr:has(th:has-text("Priority"))')
-    expect(priority_row).to_be_visible()
+    # Find the specific tr element containing the Priority label
+    priority_container = page.locator('tr.flex.flex-col.gap-y-1:has(th.text-sm:text("Priority"))')
+    expect(priority_container).to_be_visible()
 
-    # Find the inline edit cell in that row showing "Low"
-    priority_cell = priority_row.locator("td.inline-edit-cell")
+    # Find the inline edit cell in that container showing "Low"
+    priority_cell = priority_container.locator("td.inline-edit-cell")
     expect(priority_cell).to_contain_text("Low")
 
     # Click to enter edit mode
@@ -786,7 +786,7 @@ def test_inline_edit_custom_attribute_on_encounter_details_page(
     page.wait_for_timeout(500)
 
     # Wait for the Choices.js dropdown to appear within the inline-edit-field
-    inline_edit = priority_row.locator("inline-edit-field")
+    inline_edit = priority_container.locator("inline-edit-field")
     inline_edit.wait_for(state="attached", timeout=3000)
 
     choices_container = inline_edit.locator(".choices")
@@ -802,7 +802,7 @@ def test_inline_edit_custom_attribute_on_encounter_details_page(
 
     # Verify the display was updated to show "High"
     page.wait_for_timeout(1000)  # Give time for the swap to complete
-    expect(priority_row.locator("td.inline-edit-cell")).to_contain_text("High")
+    expect(priority_container.locator("td.inline-edit-cell")).to_contain_text("High")
 
     # Verify the database was updated
     encounter.refresh_from_db()
@@ -886,12 +886,12 @@ def test_inline_edit_custom_attribute_in_encounter_slideout(
     # Wait for the Encounter Details heading to ensure content is loaded
     expect(slideout.locator('h3:has-text("Encounter Details")')).to_be_visible(timeout=5000)
 
-    # Find the table row with Urgency header within the slideout
-    urgency_row = slideout.locator('tr:has(th:has-text("Urgency"))')
-    expect(urgency_row).to_be_visible(timeout=5000)
+    # Find the specific tr element containing the Urgency label within the slideout
+    urgency_container = slideout.locator('tr.flex.flex-col.gap-y-1:has(th.text-sm:text("Urgency"))')
+    expect(urgency_container).to_be_visible(timeout=5000)
 
-    # Find the inline edit cell in that row showing "Routine"
-    urgency_cell = urgency_row.locator("td.inline-edit-cell")
+    # Find the inline edit cell in that container showing "Routine"
+    urgency_cell = urgency_container.locator("td.inline-edit-cell")
     expect(urgency_cell).to_contain_text("Routine")
 
     # Click to enter edit mode
@@ -901,7 +901,7 @@ def test_inline_edit_custom_attribute_in_encounter_slideout(
     page.wait_for_timeout(500)
 
     # Wait for the Choices.js dropdown to appear within the inline-edit-field
-    inline_edit = urgency_row.locator("inline-edit-field")
+    inline_edit = urgency_container.locator("inline-edit-field")
     inline_edit.wait_for(state="attached", timeout=3000)
 
     choices_container = inline_edit.locator(".choices")
@@ -917,7 +917,7 @@ def test_inline_edit_custom_attribute_in_encounter_slideout(
 
     # Verify the display was updated to show "Urgent"
     page.wait_for_timeout(1000)  # Give time for the swap to complete
-    expect(urgency_row.locator("td.inline-edit-cell")).to_contain_text("Urgent")
+    expect(urgency_container.locator("td.inline-edit-cell")).to_contain_text("Urgent")
 
     # Verify the database was updated
     encounter.refresh_from_db()

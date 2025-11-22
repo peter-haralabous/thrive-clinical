@@ -21,8 +21,8 @@
     <div>{% include 'provider/partials/patient_details_action_menu.html' %}</div>
   </div>
   {% if pending_invitation %}
-    <div class="mb-4 space-y-2">
-      <h2>Invitation</h2>
+    <div class="card card-border bg-base-100 px-6 py-4 space-y-2 mb-6">
+      <h2 class="m-0">Invitation</h2>
       <p>
         <strong>Status:</strong> {{ pending_invitation.get_status_display }}, last sent at {{ pending_invitation.last_invited_at }}
       </p>
@@ -34,7 +34,6 @@
       </form>
     </div>
   {% endif %}
-  <hr />
   <div class="flex justify-between items-center mb-4">
     <h3 class="m-0">Encounters</h3>
     <form action="{% url "providers:patient_add_encounter" organization_id=organization.id patient_id=patient.id %}"
@@ -79,8 +78,8 @@
       </tbody>
     </table>
   </div>
-  <hr />
-  {% include 'provider/partials/summaries_section.html' %}
-  <hr />
-  {% include 'provider/partials/forms_section.html' %}
+  <div class="mt-6 space-y-6">
+    {% include 'provider/partials/summaries_section.html' %}
+    {% include 'provider/partials/forms_section.html' %}
+  </div>
 {% endblock content %}
