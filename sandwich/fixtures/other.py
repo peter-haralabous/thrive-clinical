@@ -1,15 +1,21 @@
 import pytest
 from django.core.files.base import ContentFile
 
+from sandwich.core.factories.condition import ConditionFactory
+from sandwich.core.factories.encounter import EncounterFactory
+from sandwich.core.factories.immunization import ImmunizationFactory
 from sandwich.core.factories.organization import OrganizationFactory
 from sandwich.core.factories.patient import PatientFactory
+from sandwich.core.factories.practitioner import PractitionerFactory
 from sandwich.core.middleware import ConsentMiddleware
+from sandwich.core.models import Condition
 from sandwich.core.models import Document
 from sandwich.core.models import Encounter
+from sandwich.core.models import Immunization
 from sandwich.core.models import Organization
 from sandwich.core.models import Patient
+from sandwich.core.models import Practitioner
 from sandwich.core.models import Task
-from sandwich.core.models.encounter import EncounterStatus
 from sandwich.core.models.role import RoleName
 from sandwich.core.models.task import TaskStatus
 from sandwich.users.factories import UserFactory
@@ -57,6 +63,11 @@ def other_owner(db, other_organization: Organization) -> User:
 
 
 @pytest.fixture
+def other_condition(other_patient: Patient, other_encounter: Encounter) -> Condition:
+    return ConditionFactory.create(patient=other_patient, encounter=other_encounter)
+
+
+@pytest.fixture
 def other_document(other_patient: Patient, other_encounter: Encounter) -> Document:
     return Document.objects.create(
         patient=other_patient,
@@ -67,9 +78,17 @@ def other_document(other_patient: Patient, other_encounter: Encounter) -> Docume
 
 @pytest.fixture
 def other_encounter(other_patient, other_organization):
-    return Encounter.objects.create(
-        patient=other_patient, organization=other_organization, status=EncounterStatus.IN_PROGRESS
-    )
+    return EncounterFactory.create(patient=other_patient, organization=other_organization)
+
+
+@pytest.fixture
+def other_immunization(other_patient: Patient, other_encounter: Encounter) -> Immunization:
+    return ImmunizationFactory.create(patient=other_patient, encounter=other_encounter)
+
+
+@pytest.fixture
+def other_practitioner(other_patient: Patient) -> Practitioner:
+    return PractitionerFactory.create(patient=other_patient, encounter=None)
 
 
 @pytest.fixture

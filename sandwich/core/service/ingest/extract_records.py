@@ -123,8 +123,9 @@ def _save_records(document: Document, records: RecordsResponse) -> None:
             # TODO: update onset/abatement dates if the record already exists
             Condition.objects.get_or_create(
                 patient=document.patient,
-                name=condition_data.name,
+                name__iexact=condition_data.name,
                 defaults={
+                    "name": condition_data.name,
                     "status": condition_data.status,
                     "onset": condition_data.onset,
                     "abatement": condition_data.abatement,
@@ -135,14 +136,22 @@ def _save_records(document: Document, records: RecordsResponse) -> None:
         for immunization_data in records.immunizations:
             Immunization.objects.get_or_create(
                 patient=document.patient,
-                name=immunization_data.name,
+                name__iexact=immunization_data.name,
                 date=immunization_data.date,
-                defaults={"unattested": True},
+                defaults={
+                    "name": immunization_data.name,
+                    "unattested": True,
+                },
             )
 
         for practitioner_data in records.practitioners:
             Practitioner.objects.get_or_create(
-                patient=document.patient, name=practitioner_data.name, defaults={"unattested": True}
+                patient=document.patient,
+                name__iexact=practitioner_data.name,
+                defaults={
+                    "name": practitioner_data.name,
+                    "unattested": True,
+                },
             )
 
         if records.update_document(document):

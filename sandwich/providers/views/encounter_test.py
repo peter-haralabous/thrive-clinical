@@ -23,6 +23,7 @@ from sandwich.core.models.invitation import Invitation
 from sandwich.core.models.invitation import InvitationStatus
 from sandwich.core.models.organization import Organization
 from sandwich.core.service.list_preference_service import save_list_view_preference
+from sandwich.core.types import EMPTY_VALUE_DISPLAY
 from sandwich.users.models import User
 
 
@@ -108,13 +109,13 @@ def test_encounter_details_includes_custom_attributes(
 
     assert result.status_code == 200
     assert result.context is not None
-    assert "formatted_attributes" in result.context
+    assert "enriched_attributes" in result.context
 
-    formatted_attrs = result.context["formatted_attributes"]
-    assert len(formatted_attrs) == 2
+    enriched_attrs = result.context["enriched_attributes"]
+    assert len(enriched_attrs) == 2
 
     # Check that both attributes are present with correct values
-    attr_dict = {attr["name"]: attr["value"] for attr in formatted_attrs}
+    attr_dict = {attr["name"]: attr["value"] for attr in enriched_attrs}
     assert attr_dict["Follow-up Date"] == "2025-12-31"
     assert attr_dict["Priority"] == "High"
 
@@ -123,7 +124,7 @@ def test_encounter_details_includes_custom_attributes(
 def test_encounter_details_shows_custom_attributes_with_no_value(
     provider: User, organization: Organization, encounter: Encounter
 ) -> None:
-    """Test that custom attributes without values show None in context."""
+    """Test that custom attributes without values show EMPTY_VALUE_DISPLAY in context."""
 
     # Create a custom attribute but don't set a value
     content_type = ContentType.objects.get_for_model(Encounter)
@@ -141,12 +142,12 @@ def test_encounter_details_shows_custom_attributes_with_no_value(
 
     assert result.status_code == 200
     assert result.context is not None
-    formatted_attrs = result.context["formatted_attributes"]
+    enriched_attrs = result.context["enriched_attributes"]
 
     # Find the Notes attribute
-    notes_attr = next((a for a in formatted_attrs if a["name"] == "Notes"), None)
+    notes_attr = next((a for a in enriched_attrs if a["name"] == "Notes"), None)
     assert notes_attr is not None
-    assert notes_attr["value"] is None
+    assert notes_attr["value"] == EMPTY_VALUE_DISPLAY
 
 
 @pytest.mark.django_db
@@ -281,24 +282,43 @@ def test_encounter_slideout_closes_when_clicking_outside(  # noqa: PLR0913
     page.goto(url)
     page.wait_for_load_state("networkidle")
 
-    first_patient_link = page.locator('label[for^="encounter-details-modal-"]').first
-    first_patient_link.click()
+    patient_anchor = page.locator(
+        f"a.link:has-text('{encounter.patient.last_name}, {encounter.patient.first_name}')"
+    ).first
+    patient_anchor.wait_for(state="visible", timeout=5000)
+    patient_anchor.click()
 
-    for_attr = first_patient_link.get_attribute("for")
-    assert for_attr is not None, "Label should have a 'for' attribute"
-    encounter_id = for_attr.replace("encounter-details-modal-", "")
+    slideout = page.locator("[id^='encounter-details-modal-']").first
+    slideout.wait_for(state="attached", timeout=5000)
+    backdrop = page.locator("[id^='encounter-details-backdrop-']").first
+    backdrop.wait_for(state="attached", timeout=5000)
 
-    slideout = page.locator(f"#encounter-details-modal-{encounter_id}")
-    page.wait_for_timeout(300)
-    assert slideout.is_checked()
+    modal_id = slideout.get_attribute("id")
+    assert modal_id is not None, "Modal id missing"
+    assert modal_id.startswith("encounter-details-modal-"), f"Unexpected modal id: {modal_id}"
+    encounter_id = modal_id.replace("encounter-details-modal-", "")
 
-    # Click outside (on the backdrop) to close
-    backdrop = page.locator(f'label[for="encounter-details-modal-{encounter_id}"]').first
-    backdrop.click(force=True)
+    page.wait_for_timeout(500)
 
-    page.wait_for_timeout(300)
+    assert backdrop.evaluate("el => el.classList.contains('opacity-100')"), "Backdrop should be visible"
+    assert backdrop.evaluate("el => el.classList.contains('pointer-events-auto')"), "Backdrop should be clickable"
+    assert not slideout.evaluate("el => el.classList.contains('translate-x-full')"), "Slideout should be visible"
 
-    assert not slideout.is_checked()
+    backdrop.click(position={"x": 10, "y": 10})
+
+    page.wait_for_function(
+        f"document.querySelector('#encounter-details-backdrop-{encounter_id}').classList.contains('opacity-0')"
+    )
+    page.wait_for_function(
+        f"document.querySelector('#encounter-details-backdrop-{encounter_id}').classList.contains('pointer-events-none')"
+    )
+    page.wait_for_function(
+        f"document.querySelector('#encounter-details-modal-{encounter_id}').classList.contains('translate-x-full')"
+    )
+
+    assert backdrop.evaluate("el => el.classList.contains('opacity-0')"), "Backdrop should be hidden"
+    assert backdrop.evaluate("el => el.classList.contains('pointer-events-none')"), "Backdrop should not be clickable"
+    assert slideout.evaluate("el => el.classList.contains('translate-x-full')"), "Slideout should be hidden"
 
 
 @pytest.mark.e2e
@@ -674,3 +694,233 @@ def test_kebab_menu_visible_in_table(
     encounter_details = dropdown.locator("text=Encounter Details")
     expect(patient_details).to_be_visible()
     expect(encounter_details).to_be_visible()
+
+
+@pytest.mark.e2e
+@pytest.mark.django_db(transaction=True)
+def test_inline_edit_custom_attribute_on_encounter_details_page(
+    live_server, page: Page, provider: User, organization: Organization, encounter: Encounter
+) -> None:
+    """Test that inline editing custom attributes works on the full encounter details page."""
+    # Create a custom attribute for encounters
+    content_type = ContentType.objects.get_for_model(Encounter)
+    enum_attr = CustomAttribute.objects.create(
+        organization=organization,
+        content_type=content_type,
+        name="Priority",
+        data_type=CustomAttribute.DataType.ENUM,
+    )
+
+    high_priority = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="High",
+        value="high",
+    )
+
+    low_priority = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="Low",
+        value="low",
+    )
+
+    # Set initial value
+    encounter.attributes.create(
+        attribute=enum_attr,
+        value_enum=low_priority,
+    )
+
+    # Create auth cookies for the provider
+    session = SessionStore()
+    session[SESSION_KEY] = str(provider.pk)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = provider.get_session_auth_hash()
+    session.save()
+
+    parsed = urlparse(live_server.url)
+    domain = parsed.hostname or "localhost"
+
+    session_key = session.session_key
+    assert session_key is not None, "Session key should not be None"
+
+    page.context.add_cookies(
+        [
+            {
+                "name": settings.SESSION_COOKIE_NAME,
+                "value": session_key,
+                "domain": domain,
+                "path": "/",
+                "httpOnly": True,
+            }
+        ]
+    )
+
+    # Navigate to encounter details page
+    url = f"{live_server.url}" + reverse(
+        "providers:encounter",
+        kwargs={
+            "organization_id": organization.id,
+            "encounter_id": encounter.id,
+        },
+    )
+    page.goto(url)
+    page.wait_for_load_state("networkidle")
+
+    # Wait for the Encounter Details section to be visible
+    expect(page.locator('h3:has-text("Encounter Details")')).to_be_visible(timeout=10000)
+
+    # Check that the Priority attribute is visible on the page
+    expect(page.locator("text=Priority")).to_be_visible()
+
+    # Find the specific tr element containing the Priority label
+    priority_container = page.locator('tr.flex.flex-col.gap-y-1:has(th.text-sm:text("Priority"))')
+    expect(priority_container).to_be_visible()
+
+    # Find the inline edit cell in that container showing "Low"
+    priority_cell = priority_container.locator("td.inline-edit-cell")
+    expect(priority_cell).to_contain_text("Low")
+
+    # Click to enter edit mode
+    priority_cell.click()
+
+    # Wait for HTMX to swap the cell content with the form
+    page.wait_for_timeout(500)
+
+    # Wait for the Choices.js dropdown to appear within the inline-edit-field
+    inline_edit = priority_container.locator("inline-edit-field")
+    inline_edit.wait_for(state="attached", timeout=3000)
+
+    choices_container = inline_edit.locator(".choices")
+    choices_container.wait_for(state="visible", timeout=5000)
+
+    # Click on the dropdown option for High priority
+    dropdown_item = choices_container.locator(".choices__item--choice", has_text="High")
+    dropdown_item.wait_for(state="visible", timeout=2000)
+    dropdown_item.click()
+
+    # Wait for HTMX to process the form submission and update the display
+    choices_container.wait_for(state="hidden", timeout=3000)
+
+    # Verify the display was updated to show "High"
+    page.wait_for_timeout(1000)  # Give time for the swap to complete
+    expect(priority_container.locator("td.inline-edit-cell")).to_contain_text("High")
+
+    # Verify the database was updated
+    encounter.refresh_from_db()
+    value = encounter.attributes.filter(attribute=enum_attr).first()
+    assert value is not None
+    assert value.value_enum == high_priority
+
+
+@pytest.mark.e2e
+@pytest.mark.django_db(transaction=True)
+def test_inline_edit_custom_attribute_in_encounter_slideout(
+    live_server, page: Page, provider: User, organization: Organization, encounter: Encounter
+) -> None:
+    """Test that inline editing custom attributes works in the encounter details slideout."""
+    # Create a custom attribute for encounters
+    content_type = ContentType.objects.get_for_model(Encounter)
+    enum_attr = CustomAttribute.objects.create(
+        organization=organization,
+        content_type=content_type,
+        name="Urgency",
+        data_type=CustomAttribute.DataType.ENUM,
+    )
+
+    urgent = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="Urgent",
+        value="urgent",
+    )
+
+    routine = CustomAttributeEnum.objects.create(
+        attribute=enum_attr,
+        label="Routine",
+        value="routine",
+    )
+
+    # Set initial value
+    encounter.attributes.create(
+        attribute=enum_attr,
+        value_enum=routine,
+    )
+
+    # Create auth cookies for the provider
+    session = SessionStore()
+    session[SESSION_KEY] = str(provider.pk)
+    session[BACKEND_SESSION_KEY] = "django.contrib.auth.backends.ModelBackend"
+    session[HASH_SESSION_KEY] = provider.get_session_auth_hash()
+    session.save()
+
+    parsed = urlparse(live_server.url)
+    domain = parsed.hostname or "localhost"
+
+    session_key = session.session_key
+    assert session_key is not None, "Session key should not be None"
+
+    page.context.add_cookies(
+        [
+            {
+                "name": settings.SESSION_COOKIE_NAME,
+                "value": session_key,
+                "domain": domain,
+                "path": "/",
+                "httpOnly": True,
+            }
+        ]
+    )
+
+    # Navigate to encounter list
+    url = f"{live_server.url}{reverse('providers:encounter_list', kwargs={'organization_id': organization.id})}"
+    page.goto(url)
+    page.wait_for_load_state("networkidle")
+
+    # Find and click on the patient name to open the slideout
+    patient_name = f"{encounter.patient.last_name}, {encounter.patient.first_name}"
+    patient_link = page.locator(f'a.link:has-text("{patient_name}")').first
+    patient_link.click()
+
+    # Wait for slideout to appear and content to load
+    slideout = page.locator(f"#encounter-details-modal-{encounter.id}")
+    expect(slideout).to_be_visible(timeout=10000)
+
+    # Wait for the Encounter Details heading to ensure content is loaded
+    expect(slideout.locator('h3:has-text("Encounter Details")')).to_be_visible(timeout=5000)
+
+    # Find the specific tr element containing the Urgency label within the slideout
+    urgency_container = slideout.locator('tr.flex.flex-col.gap-y-1:has(th.text-sm:text("Urgency"))')
+    expect(urgency_container).to_be_visible(timeout=5000)
+
+    # Find the inline edit cell in that container showing "Routine"
+    urgency_cell = urgency_container.locator("td.inline-edit-cell")
+    expect(urgency_cell).to_contain_text("Routine")
+
+    # Click to enter edit mode
+    urgency_cell.click()
+
+    # Wait for HTMX to swap the cell content with the form
+    page.wait_for_timeout(500)
+
+    # Wait for the Choices.js dropdown to appear within the inline-edit-field
+    inline_edit = urgency_container.locator("inline-edit-field")
+    inline_edit.wait_for(state="attached", timeout=3000)
+
+    choices_container = inline_edit.locator(".choices")
+    choices_container.wait_for(state="visible", timeout=5000)
+
+    # Click on the dropdown option for Urgent
+    dropdown_item = choices_container.locator(".choices__item--choice", has_text="Urgent")
+    dropdown_item.wait_for(state="visible", timeout=2000)
+    dropdown_item.click()
+
+    # Wait for HTMX to process the form submission and update the display
+    choices_container.wait_for(state="hidden", timeout=3000)
+
+    # Verify the display was updated to show "Urgent"
+    page.wait_for_timeout(1000)  # Give time for the swap to complete
+    expect(urgency_container.locator("td.inline-edit-cell")).to_contain_text("Urgent")
+
+    # Verify the database was updated
+    encounter.refresh_from_db()
+    value = encounter.attributes.filter(attribute=enum_attr).first()
+    assert value is not None
+    assert value.value_enum == urgent

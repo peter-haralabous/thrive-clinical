@@ -4,12 +4,12 @@
 {% load lucide %}
 
 {% block body %}
-  <div class="grid grid-rows-[auto_1fr_auto] h-screen">
+  <div class="grid grid-rows-[auto_1fr_auto] h-screen"
+       sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}">
     {% include 'patient/chatty/partials/topnav.html' %}
     <div class="overflow-hidden">
       {# The sse-swap here is misleading; messages include a hx-swap-oob with their real target #}
-      <div sse-connect="{% url "core:events" %}?channel=patient/{{ patient.id }}"
-           sse-swap="assistant_message,assistant_thinking,user_message,ingest_progress"></div>
+      <div sse-swap="assistant_message,assistant_thinking,user_message,ingest_progress"></div>
       <div class="flex flex-row gap-2 p-1 lg:p-6 h-full">
         {# Left Panel #}
         {% block left_panel %}
@@ -23,11 +23,26 @@
             <div class="flex-1 px-2">
               <span class="font-semibold text-lg">Assistant</span>
             </div>
+            <div class="flex-none pr-2">
+              <div class="dropdown dropdown-end">
+                <button tabindex="0" role="button" class="btn btn-ghost btn-sm btn-square">
+                  {% lucide "ellipsis-vertical" class="size-5" %}
+                </button>
+                <ul tabindex="0"
+                    class="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow-lg border border-base-300">
+                  <li>
+                    <button hx-post="{% url 'patients:clear_chat' patient_id=patient.id %}"
+                            hx-confirm="Are you sure you want to clear your chat history? This cannot be undone."
+                            class="text-error">
+                      {% lucide "trash-2" class="size-4" %}
+                      Clear my chat
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </header>
           <main id="chat-messages" class="flex-1 overflow-y-auto h-full p-4">
-            <template id="user-message-template" class="hidden">
-              {% include "patient/chatty/partials/user_message.html" %}
-            </template>
             {% for message in chat_messages %}{{ message }}{% endfor %}
           </main>
           <footer class="p-4 bg-base-100 border-t border-base-300 rounded-b-xl flex flex-col items-center">
@@ -81,7 +96,6 @@
       const chatMessages = chatPanel.querySelector('#chat-messages');
       const chatInput = chatPanel.querySelector("textarea");
       const chatAttach = document.getElementById('chat-attach');
-      const chatUserMessageTemplate = chatPanel.querySelector('#user-message-template');
 
       // Mobile navigation
       const mobileNavItems = document.querySelectorAll('.mobile-nav-item');

@@ -1,0 +1,23 @@
+{% extends "provider/base.html" %}
+
+{% load lucide %}
+
+{% block content %}
+  <a class="space-x-2 flex items-center text-gray-800 mb-6 link"
+     href="{{ breadcrumb_url }}">
+    {% lucide "chevron-left" class="size-4" %}
+    {{ breadcrumb_text }}
+  </a>
+  <div class="mb-6">
+    <div class="card bg-base-100 border border-base-200 shadow-sm mb-6">
+      <div class="card-body">
+        {% include 'provider/partials/summary_content.html' with title_tag='h1' badge_size='md' %}
+      </div>
+    </div>
+    <div class="card bg-base-100 border border-base-200 shadow-sm">
+      <div class="card-body">
+        <div class="prose max-w-none">{{ summary.body|safe }}</div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

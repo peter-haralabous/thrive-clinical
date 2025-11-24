@@ -1,72 +1,28 @@
 import logging
-from datetime import date
 
-from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Div
-from crispy_forms.layout import Layout
-from crispy_forms.layout import Submit
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
+from sandwich.core.forms import DeleteConfirmationForm
+from sandwich.core.models import Condition
+from sandwich.core.models import Document
+from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
+from sandwich.core.models import Practitioner
+from sandwich.core.service.ingest_service import process_document_job
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
-from sandwich.core.validators.date_of_birth import valid_date_of_birth
-from sandwich.core.validators.phn import clean_phn
 from sandwich.core.validators.phn import phn_attr_for_province
+from sandwich.patients.forms.patient_edit import PatientEdit
 from sandwich.patients.views.patient import _patient_context
 
 logger = logging.getLogger(__name__)
-
-
-class PatientEdit(forms.ModelForm[Patient]):
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
-        self.fields["province"].widget.attrs.update(
-            {
-                "hx-get": reverse("patients:get_phn_validation"),
-                "hx-target": "#div_id_phn",
-                "hx-trigger": "change",
-            }
-        )
-        self.helper = FormHelper()
-        self.helper.layout = Layout(
-            Div("first_name", "last_name", css_class="flex gap-4"),
-            "date_of_birth",
-            "province",
-            "phn",
-            Submit("submit", "Submit"),
-        )
-
-    def clean_date_of_birth(self) -> date:
-        dob = self.cleaned_data["date_of_birth"]
-        return valid_date_of_birth(dob)
-
-    def clean_phn(self):
-        """Custom validation for the BC PHN field."""
-        province = self.cleaned_data.get("province")
-        phn = str(self.cleaned_data.get("phn"))
-        if not province or not phn:
-            return phn
-        cleaned_phn = clean_phn(province, phn)
-        if cleaned_phn is not None:
-            return cleaned_phn
-        error_message = "Invalid phn"
-        raise forms.ValidationError(error_message)
-
-    class Meta:
-        model = Patient
-        fields = ("first_name", "last_name", "date_of_birth", "province", "phn")
-
-        widgets = {
-            "date_of_birth": forms.DateInput(attrs={"type": "date", "max": "9999-12-31"}),
-        }
 
 
 @login_required
@@ -112,3 +68,79 @@ def get_phn_validation(request: AuthenticatedHttpRequest) -> HttpResponse:
     )
 
     return render(request, "patient/partials/phn_input.html", {"form": form})
+
+
+@login_required
+@authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient", "change_patient"])])
+def patient_delete_health_records(request: AuthenticatedHttpRequest, patient: Patient) -> HttpResponse:
+    """Delete all health records for a patient, including documents."""
+    if request.method == "POST":
+        logger.info("Processing health records deletion", extra={"user_id": request.user.id, "patient_id": patient.id})
+        form = DeleteConfirmationForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                # Delete all health records (includes documents, conditions, immunizations, practitioners)
+                Document.objects.filter(patient=patient).delete()
+                Condition.objects.filter(patient=patient).delete()
+                Immunization.objects.filter(patient=patient).delete()
+                Practitioner.objects.filter(patient=patient).delete()
+
+                logger.info(
+                    "All health records deleted successfully",
+                    extra={"user_id": request.user.id, "patient_id": patient.id},
+                )
+            messages.add_message(request, messages.SUCCESS, "All health records have been deleted successfully.")
+            return HttpResponseRedirect(reverse("patients:patient_edit", kwargs={"patient_id": patient.id}))
+
+    form = DeleteConfirmationForm(
+        form_action=reverse("patients:patient_delete_health_records", kwargs={"patient_id": patient.id})
+    )
+    context = {"form": form, "patient": patient}
+    return render(request, "patient/partials/delete_health_records_modal.html", context)
+
+
+@login_required
+@authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient", "change_patient"])])
+def patient_delete_and_reprocess(request: AuthenticatedHttpRequest, patient: Patient) -> HttpResponse:
+    """Delete non-document health records and re-process all documents."""
+    if request.method == "POST":
+        logger.info(
+            "Processing health records deletion and reprocessing",
+            extra={"user_id": request.user.id, "patient_id": patient.id},
+        )
+        form = DeleteConfirmationForm(request.POST)
+        if form.is_valid():
+            with transaction.atomic():
+                # Delete non-document health records
+                Condition.objects.filter(patient=patient).delete()
+                Immunization.objects.filter(patient=patient).delete()
+                Practitioner.objects.filter(patient=patient).delete()
+
+                # Queue all documents for re-processing
+                documents = Document.objects.filter(patient=patient)
+                document_count = documents.count()
+
+                for document in documents:
+                    process_document_job.defer(document_id=str(document.id))
+
+                logger.info(
+                    "Health records deleted and documents queued for reprocessing",
+                    extra={
+                        "user_id": request.user.id,
+                        "patient_id": patient.id,
+                        "document_count": document_count,
+                    },
+                )
+
+            messages.add_message(
+                request,
+                messages.SUCCESS,
+                f"Health records deleted and {document_count} document(s) queued for re-processing.",
+            )
+            return HttpResponseRedirect(reverse("patients:patient_edit", kwargs={"patient_id": patient.id}))
+
+    form = DeleteConfirmationForm(
+        form_action=reverse("patients:patient_delete_and_reprocess", kwargs={"patient_id": patient.id})
+    )
+    context = {"form": form, "patient": patient}
+    return render(request, "patient/partials/delete_and_reprocess_modal.html", context)

@@ -5,6 +5,7 @@ from anymail.signals import EventType
 from anymail.signals import tracking
 from django.conf import settings
 from django.dispatch import receiver
+from django.template.loader import render_to_string
 
 from sandwich.core.models import Email
 from sandwich.core.models import Invitation
@@ -13,17 +14,20 @@ from sandwich.core.models import Task
 from sandwich.core.models.email import EmailStatus
 from sandwich.core.models.email import EmailType
 from sandwich.core.models.invitation import InvitationStatus
-from sandwich.core.service.template_service import render
 from sandwich.core.types import HtmlStr
 
 logger = logging.getLogger(__name__)
 ANYMAIL_INSTALLED = "anymail" in settings.INSTALLED_APPS
 
 
+def _format_subject(subject: str) -> str:
+    # subject _must_ not contain newlines, else mail sending will fail
+    return " ".join(subject.splitlines()).strip()
+
+
 def send_templated_email(  # noqa: PLR0913
     to: str,
-    subject_template: str,
-    body_template: str,
+    template: str,
     context: dict[str, object],
     email_type=EmailType.task,
     organization: Organization | None = None,
@@ -32,14 +36,11 @@ def send_templated_email(  # noqa: PLR0913
     task: Task | None = None,
 ):
     context.setdefault("app_url", settings.APP_URL)
-    subject = render(
-        template_name=subject_template,
-        organization=organization,
-        language=language,
+    subject = render_to_string(
+        template_name=f"{template}_subject.txt",
         context=context,
-        as_markdown=False,
     )
-    body = render(template_name=body_template, organization=organization, language=language, context=context)
+    body = render_to_string(template_name=f"{template}_body.html", context={**context, "subject": subject})
     send_email(to, subject, body, email_type=email_type, invitation=invitation, task=task)
 
 
@@ -66,7 +67,7 @@ def send_email(  # noqa: PLR0913
         return
 
     msg = AnymailMessage(
-        subject=subject,
+        subject=_format_subject(subject),
         body=body,
         from_email=None,
         to=[to],

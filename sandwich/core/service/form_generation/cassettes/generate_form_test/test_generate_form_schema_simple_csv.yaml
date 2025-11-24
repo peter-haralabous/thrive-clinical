@@ -1,42 +1,43 @@
 interactions:
   - request:
       body:
-        '{"messages": [{"role": "user", "content": [{"document": {"name": "form
-        reference file", "format": "csv", "source": {"bytes": "CiAgICB0aXRsZSxTaW1wbGUgRm9ybQogICAgcTEsIEZpcnN0IG5hbWUsIHRleHRmaWVsZAogICAg"}}},
-        {"text": "\n    You are a helpful assistant that converts CSV documents into
-        JSON form\n    schemas compatible with SurveyJS.\n\n    Attached is a CSV text
-        document that describes a medical assessment form.\n    Preserving it''s questions
-        and wording, convert the document into a\n    SurveyJS form.\n\n    \n    "}]}],
-        "system": [], "inferenceConfig": {}, "toolConfig": {"tools": [{"toolSpec": {"name":
-        "SurveySchema", "description": "When using structured output, this model allows
-        the LLM to decide whether\na multipage or single page assessment is best.",
-        "inputSchema": {"json": {"properties": {"title": {"description": "The form name",
-        "type": "string"}, "pages": {"anyOf": [{"items": {"additionalProperties": true,
-        "type": "object"}, "type": "array"}, {"type": "null"}], "description": "List
-        of elements separated into their respective pages. Used at top level for mult-page
-        forms."}, "elements": {"anyOf": [{"items": {"additionalProperties": true, "type":
-        "object"}, "type": "array"}, {"type": "null"}], "description": "List of form
-        elements. Used at top level for single page forms."}}, "required": ["title",
-        "pages", "elements"], "type": "object"}}}}], "toolChoice": {"tool": {"name":
-        "SurveySchema"}}}}'
+        '{"messages": [{"role": "user", "content": [{"text": "\n    Attached is
+        a CSV text document that describes a medical assessment form.\n    Preserving
+        it''s questions and wording, convert the document into a\n    SurveyJS form.\n\n    \n    "},
+        {"text": "CSV data: \n\n    title,Simple Form\n    q1, First name, textfield\n    "}]}],
+        "system": [{"text": "\nYou are diligent form generation assistant specializing
+        in turning PDFs and\nCSVs into SurveyJS form schema.\n\nYou will be given file
+        contents, use the provided tools to write the contents\nto the form schema.\n\nThe
+        order in which the form is built is important, for complex operations\nrequiring
+        multiple tool calls, break the steps down and execute one at a time.\n"}], "inferenceConfig":
+        {}, "toolConfig": {"tools": [{"toolSpec": {"name": "add_new_page_to_schema",
+        "description": "Adds a new page to the SurveyJS form schema.", "inputSchema":
+        {"json": {"properties": {"page_name": {"type": "string"}, "page_title": {"type":
+        "string"}, "elements": {"anyOf": [{"items": {"additionalProperties": true, "type":
+        "object"}, "type": "array"}, {"type": "null"}], "default": null}}, "required":
+        ["page_name", "page_title"], "type": "object"}}}}, {"toolSpec": {"name": "append_elements_to_existing_page",
+        "description": "Append elements to an existing page in the form schema.", "inputSchema":
+        {"json": {"properties": {"page_name": {"type": "string"}, "elements": {"anyOf":
+        [{"items": {"additionalProperties": true, "type": "object"}, "type": "array"},
+        {"type": "null"}], "default": null}}, "required": ["page_name"], "type": "object"}}}}]}}'
       headers:
         Content-Length:
-          - '1420'
+          - '1590'
         Content-Type:
           - !!binary |
             YXBwbGljYXRpb24vanNvbg==
         User-Agent:
           - !!binary |
             Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjcgbWQvcHlpbXBsI0NQeXRob24gbS9ELFos
-            YiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
+            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjcgbWQvcHlpbXBsI0NQeXRob24gbS9ELGIs
+            WiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
             cms6bGFuZ2NoYWluLWF3cw==
         X-Amz-Date:
           - !!binary |
-            MjAyNTExMThUMDMwNjQ3Wg==
+            MjAyNTExMjFUMjM0NjIxWg==
         amz-sdk-invocation-id:
           - !!binary |
-            YjM0ZTExZmUtOTZhMC00MTdiLWFjMmEtOGFjOThkYTEyZmFh
+            ODAzZmNmMWMtMWZmMC00Nzk5LWEzOTctMGQyYzE1MWZkNzQz
         amz-sdk-request:
           - !!binary |
             YXR0ZW1wdD0x
@@ -45,19 +46,22 @@ interactions:
     response:
       body:
         string:
-          '{"metrics":{"latencyMs":2691},"output":{"message":{"content":[{"toolUse":{"input":{"title":"Simple
-          Form","pages":null,"elements":[{"type":"text","name":"q1","title":"First name"}]},"name":"SurveySchema","toolUseId":"tooluse_npRQxHPHRfyLED01hmHjug","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":947,"outputTokens":89,"serverToolUsage":{},"totalTokens":1036}}'
+          '{"metrics":{"latencyMs":3784},"output":{"message":{"content":[{"text":"I''ll
+          convert this CSV document into a SurveyJS form. Based on the data, I can see:\n-
+          Title: \"Simple Form\"\n- One question (q1): \"First name\" as a text field\n\nLet
+          me create this form:"},{"toolUse":{"input":{"page_name":"page1","page_title":"Simple
+          Form","elements":[{"type":"text","name":"q1","title":"First name"}]},"name":"add_new_page_to_schema","toolUseId":"tooluse_RoiR3DzwShO5RMPW-G21Sw","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":901,"outputTokens":189,"serverToolUsage":{},"totalTokens":1090}}'
       headers:
         Connection:
           - keep-alive
         Content-Length:
-          - '510'
+          - '734'
         Content-Type:
           - application/json
         Date:
-          - Tue, 18 Nov 2025 03:06:50 GMT
+          - Fri, 21 Nov 2025 23:47:25 GMT
         x-amzn-RequestId:
-          - f77494a6-4094-4b00-8984-117cdfb4a614
+          - a415b51b-d92e-4d3b-a3dd-5192e2998e07
       status:
         code: 200
         message: OK
@@ -66,38 +70,48 @@ interactions:
         '{"messages": [{"role": "user", "content": [{"text": "\n    Attached is
         a CSV text document that describes a medical assessment form.\n    Preserving
         it''s questions and wording, convert the document into a\n    SurveyJS form.\n\n    \n    "},
-        {"text": "CSV data: \n\n    title,Simple Form\n    q1, First name, textfield\n    "}]}],
-        "system": [{"text": "\nYou are diligent form generation assistant specializing
-        in turning PDFs and\nCSVs into SurveyJS form schema.\n"}], "inferenceConfig":
-        {}, "toolConfig": {"tools": [{"toolSpec": {"name": "SurveySchema", "description":
-        "\nWhen using structured output, this model allows the LLM to decide whether\na
-        multipage or single page assessment is best.\n", "inputSchema": {"json": {"properties":
-        {"title": {"description": "The form name", "type": "string"}, "pages": {"anyOf":
+        {"text": "CSV data: \n\n    title,Simple Form\n    q1, First name, textfield\n    "}]},
+        {"role": "assistant", "content": [{"text": "I''ll convert this CSV document
+        into a SurveyJS form. Based on the data, I can see:\n- Title: \"Simple Form\"\n-
+        One question (q1): \"First name\" as a text field\n\nLet me create this form:"},
+        {"toolUse": {"toolUseId": "tooluse_RoiR3DzwShO5RMPW-G21Sw", "input": {"page_name":
+        "page1", "page_title": "Simple Form", "elements": [{"type": "text", "name":
+        "q1", "title": "First name"}]}, "name": "add_new_page_to_schema"}}]}, {"role":
+        "user", "content": [{"toolResult": {"content": [{"text": "null"}], "toolUseId":
+        "tooluse_RoiR3DzwShO5RMPW-G21Sw", "status": "success"}}]}], "system": [{"text":
+        "\nYou are diligent form generation assistant specializing in turning PDFs and\nCSVs
+        into SurveyJS form schema.\n\nYou will be given file contents, use the provided
+        tools to write the contents\nto the form schema.\n\nThe order in which the form
+        is built is important, for complex operations\nrequiring multiple tool calls,
+        break the steps down and execute one at a time.\n"}], "inferenceConfig": {},
+        "toolConfig": {"tools": [{"toolSpec": {"name": "add_new_page_to_schema", "description":
+        "Adds a new page to the SurveyJS form schema.", "inputSchema": {"json": {"properties":
+        {"page_name": {"type": "string"}, "page_title": {"type": "string"}, "elements":
+        {"anyOf": [{"items": {"additionalProperties": true, "type": "object"}, "type":
+        "array"}, {"type": "null"}], "default": null}}, "required": ["page_name", "page_title"],
+        "type": "object"}}}}, {"toolSpec": {"name": "append_elements_to_existing_page",
+        "description": "Append elements to an existing page in the form schema.", "inputSchema":
+        {"json": {"properties": {"page_name": {"type": "string"}, "elements": {"anyOf":
         [{"items": {"additionalProperties": true, "type": "object"}, "type": "array"},
-        {"type": "null"}], "description": "List of elements separated into their respective
-        pages. Used at top level for mult-page forms."}, "elements": {"anyOf": [{"items":
-        {"additionalProperties": true, "type": "object"}, "type": "array"}, {"type":
-        "null"}], "description": "List of form elements. Used at top level for single
-        page forms."}}, "required": ["title", "pages", "elements"], "type": "object"}}}}],
-        "toolChoice": {"any": {}}}}'
+        {"type": "null"}], "default": null}}, "required": ["page_name"], "type": "object"}}}}]}}'
       headers:
         Content-Length:
-          - '1329'
+          - '2204'
         Content-Type:
           - !!binary |
             YXBwbGljYXRpb24vanNvbg==
         User-Agent:
           - !!binary |
             Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjcgbWQvcHlpbXBsI0NQeXRob24gbS9ELFos
-            YiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
+            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjcgbWQvcHlpbXBsI0NQeXRob24gbS9ELGIs
+            WiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
             cms6bGFuZ2NoYWluLWF3cw==
         X-Amz-Date:
           - !!binary |
-            MjAyNTExMTlUMTgzODQ3Wg==
+            MjAyNTExMjFUMjM0NzI1Wg==
         amz-sdk-invocation-id:
           - !!binary |
-            ZTY4NTJiM2QtMGFmYS00MzU5LWI4ZjYtNDRlYWI4ODFiYWRl
+            NzAzMTlkMzItMDE3Ny00NTYzLTljZmItZDNhMjYxNjFhODhm
         amz-sdk-request:
           - !!binary |
             YXR0ZW1wdD0x
@@ -106,207 +120,22 @@ interactions:
     response:
       body:
         string:
-          '{"metrics":{"latencyMs":5375},"output":{"message":{"content":[{"toolUse":{"input":{"title":"Simple
-          Form","pages":null,"elements":[{"type":"text","name":"q1","title":"First name"}]},"name":"SurveySchema","toolUseId":"tooluse_wMW6PhWNRUixLLTIPVRq7Q","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":907,"outputTokens":109,"serverToolUsage":{},"totalTokens":1016}}'
+          '{"metrics":{"latencyMs":2930},"output":{"message":{"content":[{"text":"Perfect!
+          I''ve successfully converted the CSV document into a SurveyJS form with:\n\n-
+          **Page Title**: \"Simple Form\"\n- **Question 1 (q1)**: \"First name\" - configured
+          as a text input field\n\nThe form is now ready and preserves the exact wording
+          from your CSV document."}],"role":"assistant"}},"stopReason":"end_turn","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":1090,"outputTokens":73,"serverToolUsage":{},"totalTokens":1163}}'
       headers:
         Connection:
           - keep-alive
         Content-Length:
-          - '511'
+          - '589'
         Content-Type:
           - application/json
         Date:
-          - Wed, 19 Nov 2025 18:38:52 GMT
+          - Fri, 21 Nov 2025 23:47:29 GMT
         x-amzn-RequestId:
-          - 797100c8-bddd-4a24-8545-f73ac69b9892
-      status:
-        code: 200
-        message: OK
-  - request:
-      body:
-        '{"messages": [{"role": "user", "content": [{"text": "\n    Attached is
-        a CSV text document that describes a medical assessment form.\n    Preserving
-        it''s questions and wording, convert the document into a\n    SurveyJS form.\n\n    \n    "},
-        {"text": "CSV data: \n\n    title,Simple Form\n    q1, First name, textfield\n    "}]}],
-        "system": [{"text": "\nYou are diligent form generation assistant specializing
-        in turning PDFs and\nCSVs into SurveyJS form schema.\n"}], "inferenceConfig":
-        {}, "toolConfig": {"tools": [{"toolSpec": {"name": "SurveySchema", "description":
-        "\nWhen using structured output, this model allows the LLM to decide whether\na
-        multipage or single page assessment is best.\n", "inputSchema": {"json": {"properties":
-        {"title": {"description": "The form name", "type": "string"}, "pages": {"anyOf":
-        [{"items": {"additionalProperties": true, "type": "object"}, "type": "array"},
-        {"type": "null"}], "description": "List of elements separated into their respective
-        pages. Used at top level for mult-page forms."}, "elements": {"anyOf": [{"items":
-        {"additionalProperties": true, "type": "object"}, "type": "array"}, {"type":
-        "null"}], "description": "List of form elements. Used at top level for single
-        page forms."}}, "required": ["title", "pages", "elements"], "type": "object"}}}}],
-        "toolChoice": {"any": {}}}}'
-      headers:
-        Content-Length:
-          - '1329'
-        Content-Type:
-          - !!binary |
-            YXBwbGljYXRpb24vanNvbg==
-        User-Agent:
-          - !!binary |
-            Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjcgbWQvcHlpbXBsI0NQeXRob24gbS9iLFos
-            RCBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
-            cms6bGFuZ2NoYWluLWF3cw==
-        X-Amz-Date:
-          - !!binary |
-            MjAyNTExMTlUMTg0MDA5Wg==
-        amz-sdk-invocation-id:
-          - !!binary |
-            NGU0MDRiYjYtMzVmZC00YzM0LThjYzUtOTE2MjliN2M1Zjgy
-        amz-sdk-request:
-          - !!binary |
-            YXR0ZW1wdD0x
-      method: POST
-      uri: https://bedrock-runtime.ca-central-1.amazonaws.com/model/global.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse
-    response:
-      body:
-        string:
-          '{"metrics":{"latencyMs":2990},"output":{"message":{"content":[{"toolUse":{"input":{"title":"Simple
-          Form","pages":[{"name":"page1","elements":[{"type":"text","name":"q1","title":"First
-          name"}]}],"elements":null},"name":"SurveySchema","toolUseId":"tooluse_dhVjbW42QlSgSeieP-N4DA","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":907,"outputTokens":133,"serverToolUsage":{},"totalTokens":1040}}'
-      headers:
-        Connection:
-          - keep-alive
-        Content-Length:
-          - '541'
-        Content-Type:
-          - application/json
-        Date:
-          - Wed, 19 Nov 2025 18:40:13 GMT
-        x-amzn-RequestId:
-          - 52e85484-ca31-4b19-9f10-e876a0ca7df5
-      status:
-        code: 200
-        message: OK
-  - request:
-      body:
-        '{"messages": [{"role": "user", "content": [{"text": "\n    Attached is
-        a CSV text document that describes a medical assessment form.\n    Preserving
-        it''s questions and wording, convert the document into a\n    SurveyJS form.\n\n    Do
-        your best to infer whether the form needs to be single or multipage.\n    Single
-        page forms use the `elements` array at the top-level, multipage\n    forms use
-        `pages`.\n\n    \n    "}, {"text": "CSV data: \n\n    title,Simple Form\n    q1,
-        First name, textfield\n    "}]}], "system": [{"text": "\nYou are diligent form
-        generation assistant specializing in turning PDFs and\nCSVs into SurveyJS form
-        schema.\n"}], "inferenceConfig": {}, "toolConfig": {"tools": [{"toolSpec": {"name":
-        "SurveySchema", "description": "\nWhen using structured output, this model allows
-        the LLM to decide whether\na multipage or single page assessment is best.\n",
-        "inputSchema": {"json": {"properties": {"title": {"description": "The form name",
-        "type": "string"}, "pages": {"anyOf": [{"items": {"additionalProperties": true,
-        "type": "object"}, "type": "array"}, {"type": "null"}], "description": "List
-        of elements separated into their respective pages. Used at top level for mult-page
-        forms."}, "elements": {"anyOf": [{"items": {"additionalProperties": true, "type":
-        "object"}, "type": "array"}, {"type": "null"}], "description": "List of form
-        elements. Used at top level for single page forms."}}, "required": ["title",
-        "pages", "elements"], "type": "object"}}}}], "toolChoice": {"any": {}}}}'
-      headers:
-        Content-Length:
-          - '1508'
-        Content-Type:
-          - !!binary |
-            YXBwbGljYXRpb24vanNvbg==
-        User-Agent:
-          - !!binary |
-            Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjcgbWQvcHlpbXBsI0NQeXRob24gbS9iLFos
-            RCBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
-            cms6bGFuZ2NoYWluLWF3cw==
-        X-Amz-Date:
-          - !!binary |
-            MjAyNTExMTlUMTg0MjA5Wg==
-        amz-sdk-invocation-id:
-          - !!binary |
-            NGNiZjk1NDgtZGQ4Ni00M2U5LWI0YTItNDc0Mzk0Y2RkOWU2
-        amz-sdk-request:
-          - !!binary |
-            YXR0ZW1wdD0x
-      method: POST
-      uri: https://bedrock-runtime.ca-central-1.amazonaws.com/model/global.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse
-    response:
-      body:
-        string:
-          '{"metrics":{"latencyMs":3094},"output":{"message":{"content":[{"toolUse":{"input":{"title":"Simple
-          Form","pages":null,"elements":[{"type":"text","name":"q1","title":"First name"}]},"name":"SurveySchema","toolUseId":"tooluse_CmVY28axSJCx-GtTIup-Jg","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":952,"outputTokens":109,"serverToolUsage":{},"totalTokens":1061}}'
-      headers:
-        Connection:
-          - keep-alive
-        Content-Length:
-          - '511'
-        Content-Type:
-          - application/json
-        Date:
-          - Wed, 19 Nov 2025 18:42:13 GMT
-        x-amzn-RequestId:
-          - b8eddcdf-5f3d-46a6-9d52-51dd34be63b0
-      status:
-        code: 200
-        message: OK
-  - request:
-      body:
-        '{"messages": [{"role": "user", "content": [{"text": "\n    Attached is
-        a CSV text document that describes a medical assessment form.\n    Preserving
-        it''s questions and wording, convert the document into a\n    SurveyJS form.\n\n    Do
-        your best to infer whether the form needs to be single or multipage.\n    Single
-        page forms use the `elements` array at the top-level, multipage\n    forms use
-        `pages`.\n\n    \n    "}, {"text": "CSV data: \n\n    title,Simple Form\n    q1,
-        First name, textfield\n    "}]}], "system": [{"text": "\nYou are diligent form
-        generation assistant specializing in turning PDFs and\nCSVs into SurveyJS form
-        schema.\n"}], "inferenceConfig": {}, "toolConfig": {"tools": [{"toolSpec": {"name":
-        "SurveySchema", "description": "\nWhen using structured output, this model allows
-        the LLM to decide whether\na multipage or single page assessment is best.\n",
-        "inputSchema": {"json": {"properties": {"title": {"description": "The form name",
-        "type": "string"}, "pages": {"anyOf": [{"items": {"additionalProperties": true,
-        "type": "object"}, "type": "array"}, {"type": "null"}], "description": "List
-        of elements separated into their respective pages. Used at top level for multipage
-        forms."}, "elements": {"anyOf": [{"items": {"additionalProperties": true, "type":
-        "object"}, "type": "array"}, {"type": "null"}], "description": "List of form
-        elements. Used at top level for single page forms."}}, "required": ["title",
-        "pages", "elements"], "type": "object"}}}}], "toolChoice": {"any": {}}}}'
-      headers:
-        Content-Length:
-          - '1508'
-        Content-Type:
-          - !!binary |
-            YXBwbGljYXRpb24vanNvbg==
-        User-Agent:
-          - !!binary |
-            Qm90bzMvMS40MC4yNiBtZC9Cb3RvY29yZSMxLjQwLjI2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
-            bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjEzLjcgbWQvcHlpbXBsI0NQeXRob24gbS9iLFos
-            RCBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40MC4yNiB4LWNsaWVudC1mcmFtZXdv
-            cms6bGFuZ2NoYWluLWF3cw==
-        X-Amz-Date:
-          - !!binary |
-            MjAyNTExMTlUMTg0NDA5Wg==
-        amz-sdk-invocation-id:
-          - !!binary |
-            MTY2Zjc5ZTEtNTYwOS00MjViLWFiMTEtZDcwZGFkNjMyZDBj
-        amz-sdk-request:
-          - !!binary |
-            YXR0ZW1wdD0x
-      method: POST
-      uri: https://bedrock-runtime.ca-central-1.amazonaws.com/model/global.anthropic.claude-sonnet-4-5-20250929-v1%3A0/converse
-    response:
-      body:
-        string:
-          '{"metrics":{"latencyMs":2729},"output":{"message":{"content":[{"toolUse":{"input":{"title":"Simple
-          Form","pages":null,"elements":[{"type":"text","name":"q1","title":"First name"}]},"name":"SurveySchema","toolUseId":"tooluse_wRKrjW6xSo6BnbNxMtY0_A","type":"tool_use"}}],"role":"assistant"}},"stopReason":"tool_use","usage":{"cacheReadInputTokenCount":0,"cacheReadInputTokens":0,"cacheWriteInputTokenCount":0,"cacheWriteInputTokens":0,"inputTokens":951,"outputTokens":109,"serverToolUsage":{},"totalTokens":1060}}'
-      headers:
-        Connection:
-          - keep-alive
-        Content-Length:
-          - '511'
-        Content-Type:
-          - application/json
-        Date:
-          - Wed, 19 Nov 2025 18:44:12 GMT
-        x-amzn-RequestId:
-          - 76af0684-66e8-49e7-9304-ff515dd3a2c1
+          - 4d8b3dc2-a340-4d37-ab3d-9625574dcb01
       status:
         code: 200
         message: OK

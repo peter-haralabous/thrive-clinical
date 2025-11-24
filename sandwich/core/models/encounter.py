@@ -4,6 +4,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.search import SearchRank
 from django.db import models
 from django.db.models import F
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_enum import EnumField
 
@@ -32,14 +33,14 @@ class EncounterStatus(models.TextChoices):
     UNKNOWN = "unknown", _("Unknown")
 
 
-def terminal_encounter_status(status: EncounterStatus) -> bool:
-    return status in [
-        EncounterStatus.CANCELLED,
-        EncounterStatus.COMPLETED,
-        EncounterStatus.DISCHARGED,
-        EncounterStatus.DISCONTINUED,
-        EncounterStatus.ENTERED_IN_ERROR,
-    ]
+TERMINAL_ENCOUNTER_STATUSES = [
+    EncounterStatus.CANCELLED,
+    EncounterStatus.COMPLETED,
+    EncounterStatus.DISCHARGED,
+    EncounterStatus.DISCONTINUED,
+    EncounterStatus.ENTERED_IN_ERROR,
+]
+ACTIVE_ENCOUNTER_STATUSES = [s for s in EncounterStatus if s not in TERMINAL_ENCOUNTER_STATUSES]
 
 
 class EncounterQuerySet(models.QuerySet):
@@ -110,4 +111,9 @@ class Encounter(BaseModel):
 
     @property
     def active(self) -> bool:
-        return not terminal_encounter_status(self.status)
+        return self.status in ACTIVE_ENCOUNTER_STATUSES
+
+    def get_absolute_url(self) -> str:
+        return reverse(
+            "providers:encounter", kwargs={"organization_id": self.organization.id, "encounter_id": self.id}
+        )

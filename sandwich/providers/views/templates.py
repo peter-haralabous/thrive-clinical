@@ -1,4 +1,5 @@
 import logging
+from datetime import date
 from http import HTTPStatus
 
 from crispy_forms.helper import FormHelper
@@ -20,7 +21,9 @@ from guardian.shortcuts import get_objects_for_user
 from sandwich.core.decorators import surveyjs_csp
 from sandwich.core.models import Form
 from sandwich.core.models import Organization
-from sandwich.core.service.form_generation.generate_form import generate_form_schema_from_reference_file
+from sandwich.core.models.form import FormStatus
+from sandwich.core.service.form_generation.generate_form import generate_form_schema
+from sandwich.core.service.form_service import assign_default_form_permissions
 from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.util.http import AuthenticatedHttpRequest
@@ -29,6 +32,11 @@ logger = logging.getLogger(__name__)
 
 
 class UploadReferenceForm(forms.Form):
+    name = forms.CharField(
+        label="Form Name",
+        required=True,
+        widget=forms.TextInput(),
+    )
     file = forms.FileField(
         required=True,
         label="Upload File",
@@ -61,7 +69,9 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form list",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    organization_forms = Form.objects.filter(organization=organization).order_by("name")
+    organization_forms = (
+        Form.objects.filter(organization=organization).exclude(status=FormStatus.FAILED).order_by("name")
+    )
     authorized_org_forms = get_objects_for_user(request.user, ["view_form"], organization_forms)
 
     page = request.GET.get("page", 1)
@@ -79,8 +89,51 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
     )
 
 
+@login_required
+@authorize_objects(
+    [
+        ObjPerm(Organization, "organization_id", ["view_organization"]),
+        ObjPerm(Form, "form_id", ["change_form"]),
+    ]
+)
+def form_template_restore(
+    request: AuthenticatedHttpRequest, organization: Organization, form: Form, form_version_id: int
+):
+    """
+    Restores a form version to make it the current form
+    """
+
+    if request.method == "POST":
+        logger.info(
+            "Restoring a form version of a specific form",
+            extra={
+                "user_id": request.user.id,
+                "organization_id": organization.id,
+                "form_id": form.id,
+                "form_version_pgh_id": form_version_id,
+            },
+        )
+
+        form.restore_to(form_version_id)
+
+        return redirect(
+            reverse("providers:form_template", kwargs={"organization_id": organization.id, "form_id": form.id})
+        )
+
+    version_number = request.GET.get("version_number")
+    modal_context = {
+        "form": form,
+        "organization": organization,
+        "form_version_id": form_version_id,
+        "version_number": version_number,
+    }
+
+    return render(request, "provider/partials/restore_form_template_modal.html", modal_context)
+
+
 @require_GET
 @login_required
+@surveyjs_csp
 @authorize_objects(
     [
         ObjPerm(Organization, "organization_id", ["view_organization"]),
@@ -152,11 +205,10 @@ def form_edit(request: AuthenticatedHttpRequest, organization: Organization, for
         extra={"user_id": request.user.id, "organization_id": organization.id, "form_id": form.id},
     )
     url = reverse("providers:providers-api:save_form", kwargs={"organization_id": organization.id})
-    success_redirect_url = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
     return render(
         request,
         "provider/form_builder.html",
-        {"organization": organization, "form": form, "form_save_url": url, "success_url": success_redirect_url},
+        {"organization": organization, "form": form, "form_save_url": url},
     )
 
 
@@ -169,12 +221,11 @@ def form_builder(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form builder page",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    url = reverse("providers:providers-api:save_form", kwargs={"organization_id": organization.id})
-    success_redirect_url = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
-    return render(
-        request,
-        "provider/form_builder.html",
-        {"organization": organization, "form_save_url": url, "success_url": success_redirect_url},
+
+    form = Form.objects.create(organization=organization, name=f"unnamed form created on {date.today().isoformat()}")  # noqa: DTZ011
+
+    return redirect(
+        reverse("providers:form_template_edit", kwargs={"organization_id": organization.id, "form_id": form.id})
     )
 
 
@@ -191,21 +242,32 @@ def form_file_upload(request: AuthenticatedHttpRequest, organization: Organizati
 
         if upload_reference_form.is_valid():
             messages.add_message(request, messages.SUCCESS, "Form upload successful, processing document.")
+            form_name = upload_reference_form.cleaned_data.get("name")
             reference_file = upload_reference_form.cleaned_data.get("file")
             assert isinstance(reference_file, InMemoryUploadedFile)
             assert reference_file.name, "Uploaded file has no name"
 
-            form_title = reference_file.name.split(".")[0]
-            form = Form.objects.create(
-                name=form_title,  # placeholder title
+            form, created = Form.objects.get_or_create(
+                name=form_name,
                 organization=organization,
-                reference_file=reference_file,
+                defaults={
+                    "status": FormStatus.GENERATING,
+                    "reference_file": reference_file,
+                    "schema": {"title": form_name},
+                },
             )
-            generate_form_schema_from_reference_file.defer(form_id=str(form.id))
+            if created:
+                assign_default_form_permissions(form)
+                generate_form_schema.defer(form_id=str(form.id))
+                res = HttpResponse(status=HTTPStatus.OK)
 
-            res = HttpResponse(status=HTTPStatus.OK)
-            res["HX-Redirect"] = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
-            return res
+                res["HX-Redirect"] = reverse(
+                    "providers:form_templates_list", kwargs={"organization_id": organization.id}
+                )
+                return res
+
+            upload_reference_form.add_error("title", "A form with this title already exists.")
+
     else:
         upload_reference_form = UploadReferenceForm()
         form_post_url = reverse("providers:form_file_upload", kwargs={"organization_id": organization.id})

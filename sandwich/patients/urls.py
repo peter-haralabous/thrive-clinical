@@ -2,6 +2,7 @@ from django.urls import path
 
 from .api import api
 from .views.chat import chat
+from .views.chat import clear_chat
 from .views.consent import patient_consent
 from .views.document import document_download
 from .views.document import document_upload_and_extract
@@ -10,7 +11,10 @@ from .views.invitation import accept_invite
 from .views.patient.add import patient_add
 from .views.patient.add import patient_onboarding_add
 from .views.patient.details import patient_details
+from .views.patient.details import regenerate_health_summary
 from .views.patient.edit import get_phn_validation
+from .views.patient.edit import patient_delete_and_reprocess
+from .views.patient.edit import patient_delete_health_records
 from .views.patient.edit import patient_edit
 from .views.patient.health_records import condition_edit
 from .views.patient.health_records import document_edit
@@ -26,11 +30,23 @@ app_name = "patients"
 urlpatterns = [
     path("", home, name="home"),
     path("chat/", chat, name="chat"),
+    path("patient/<uuid:patient_id>/chat/clear", clear_chat, name="clear_chat"),
     path("consent/", patient_consent, name="consent"),
     path("patient/add", patient_add, name="patient_add"),
     path("patient/onboarding/add", patient_onboarding_add, name="patient_onboarding_add"),
     path("patient/<uuid:patient_id>", patient_details, name="patient_details"),
     path("patient/<uuid:patient_id>/edit", patient_edit, name="patient_edit"),
+    path(
+        "patient/<uuid:patient_id>/delete_health_records",
+        patient_delete_health_records,
+        name="patient_delete_health_records",
+    ),
+    path(
+        "patient/<uuid:patient_id>/delete_and_reprocess",
+        patient_delete_and_reprocess,
+        name="patient_delete_and_reprocess",
+    ),
+    path("patient/<uuid:patient_id>/regenerate_summary", regenerate_health_summary, name="regenerate_health_summary"),
     path("patient/<uuid:patient_id>/records", patient_records, name="patient_records"),
     path("patient/<uuid:patient_id>/records/<str:record_type>", patient_records, name="patient_records"),
     path("patient/<uuid:patient_id>/repository", patient_repository, name="patient_repository"),

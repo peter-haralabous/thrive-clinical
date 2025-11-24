@@ -1,0 +1,23 @@
+{% load i18n %}
+
+<dialog id="restore-modal-{{ form_version_id }}" class="modal" open>
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Restore v{{ version_number }}</h3>
+    <p class="py-4">
+      This will create a new version of the form based on the content of v{{ version_number }}. Are you sure you want to proceed?
+    </p>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn">Cancel</button>
+      </form>
+      <form method="post"
+            action="{% url 'providers:form_template_restore' organization_id=organization.id form_id=form.id form_version_id=form_version_id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Confirm</button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>

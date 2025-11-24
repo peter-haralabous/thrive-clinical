@@ -10,6 +10,10 @@
 {% block expand_icon %}{% lucide "panel-left-open" class="size-6" %}{% endblock expand_icon %}
 {# djlint:on #}
 {% block panel_content %}
+  <div hx-get="{% url "patients:patient_details" patient.id %}"
+       hx-target="#left-panel"
+       hx-swap="outerHTML"
+       hx-trigger="sse:records_updated"></div>
   <nav class="p-4 grid grid-cols-2 gap-4">
     <a href="{% url 'patients:patient_records' patient_id=patient.id %}"
        hx-get="{% url 'patients:patient_records' patient_id=patient.id %}"

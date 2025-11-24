@@ -7,9 +7,7 @@ from .views.custom_attribute import custom_attribute_edit
 from .views.custom_attribute import custom_attribute_enum_fields
 from .views.custom_attribute import custom_attribute_list
 from .views.encounter import encounter_archive
-from .views.encounter import encounter_create
 from .views.encounter import encounter_create_search
-from .views.encounter import encounter_create_select_patient
 from .views.encounter import encounter_details
 from .views.encounter import encounter_edit_field
 from .views.encounter import encounter_list
@@ -32,15 +30,19 @@ from .views.organization import organization_add
 from .views.organization import organization_delete
 from .views.organization import organization_edit
 from .views.patient import patient_add
-from .views.patient import patient_add_modal
+from .views.patient import patient_add_encounter
 from .views.patient import patient_add_task
-from .views.patient import patient_archive
 from .views.patient import patient_cancel_task
 from .views.patient import patient_details
 from .views.patient import patient_edit
 from .views.patient import patient_list
 from .views.patient import patient_resend_invite
 from .views.search import search
+from .views.summary import summary_detail
+from .views.summary_templates import summary_template_add
+from .views.summary_templates import summary_template_delete
+from .views.summary_templates import summary_template_edit
+from .views.summary_templates import summary_template_list
 from .views.task import task
 from .views.templates import form_builder
 from .views.templates import form_details
@@ -48,6 +50,7 @@ from .views.templates import form_edit
 from .views.templates import form_file_upload
 from .views.templates import form_list
 from .views.templates import form_template_preview
+from .views.templates import form_template_restore
 
 app_name = "providers"
 urlpatterns = [
@@ -79,27 +82,53 @@ urlpatterns = [
     path("organization/<uuid:organization_id>/templates/forms", form_list, name="form_templates_list"),
     path("organization/<uuid:organization_id>/templates/form/<uuid:form_id>", form_details, name="form_template"),
     path(
-        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/form_version/<int:form_version_id>/preview",
+        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/version/<int:form_version_id>/preview",
         form_template_preview,
         name="form_template_preview",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/version/<int:form_version_id>/restore",
+        form_template_restore,
+        name="form_template_restore",
     ),
     path(
         "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/edit", form_edit, name="form_template_edit"
     ),
     path("organization/<uuid:organization_id>/templates/form/file_upload", form_file_upload, name="form_file_upload"),
     path("organization/<uuid:organization_id>/templates/forms/builder", form_builder, name="form_template_builder"),
+    # Summary template management endpoints
+    path(
+        "organization/<uuid:organization_id>/templates/summary",
+        summary_template_list,
+        name="summary_template_list",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/summary/add",
+        summary_template_add,
+        name="summary_template_add",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/summary/<uuid:template_id>/edit",
+        summary_template_edit,
+        name="summary_template_edit",
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/summary/<uuid:template_id>/delete",
+        summary_template_delete,
+        name="summary_template_delete",
+    ),
+    # Summary detail endpoint (returns modal for HTMX requests, full page otherwise)
+    path(
+        "organization/<uuid:organization_id>/summary/<uuid:summary_id>",
+        summary_detail,
+        name="summary_detail",
+    ),
     path("organization/<uuid:organization_id>/encounters", encounter_list, name="encounter_list"),
     path(
         "organization/<uuid:organization_id>/encounter/create/search",
         encounter_create_search,
         name="encounter_create_search",
     ),
-    path(
-        "organization/<uuid:organization_id>/encounter/create/select-patient/<uuid:patient_id>",
-        encounter_create_select_patient,
-        name="encounter_create_select_patient",
-    ),
-    path("organization/<uuid:organization_id>/encounter/create", encounter_create, name="encounter_create"),
     path("organization/<uuid:organization_id>/encounter/<uuid:encounter_id>", encounter_details, name="encounter"),
     path(
         "organization/<uuid:organization_id>/encounter/<uuid:encounter_id>/edit/<str:field_name>",
@@ -114,9 +143,9 @@ urlpatterns = [
     path("organization/<uuid:organization_id>/patient/<uuid:patient_id>", patient_details, name="patient"),
     path("organization/<uuid:organization_id>/patient/<uuid:patient_id>/edit", patient_edit, name="patient_edit"),
     path(
-        "organization/<uuid:organization_id>/patient/<uuid:patient_id>/archive",
-        patient_archive,
-        name="patient_archive",
+        "organization/<uuid:organization_id>/patient/<uuid:patient_id>/add_encounter",
+        patient_add_encounter,
+        name="patient_add_encounter",
     ),
     path(
         "organization/<uuid:organization_id>/patient/<uuid:patient_id>/add_task",
@@ -136,7 +165,6 @@ urlpatterns = [
     ),
     path("organization/<uuid:organization_id>/patients", patient_list, name="patient_list"),
     path("organization/<uuid:organization_id>/patient/add", patient_add, name="patient_add"),
-    path("organization/<uuid:organization_id>/patient/add-modal", patient_add_modal, name="patient_add_modal"),
     # List preference management endpoints
     path(
         "organization/<uuid:organization_id>/preferences/<str:list_type>/settings",

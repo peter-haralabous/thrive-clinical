@@ -91,8 +91,7 @@ def resend_patient_invitation_email(patient: Patient) -> None:
 
     send_templated_email(
         to=invitation.patient.email,
-        subject_template="email/invitation/resend_patient_invitation_subject",
-        body_template="email/invitation/resend_patient_invitation_body",
+        template="email/invitation/resend_patient_invitation",
         context={"invitation": invitation, "task_url": task_url},
         organization=patient.organization,
         language=None,

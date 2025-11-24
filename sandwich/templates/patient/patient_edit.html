@@ -8,6 +8,36 @@ NOTE: This is extending the *USERS* base template, since it's assumed that you'l
 {% load crispy_forms_tags %}
 
 {% block content %}
+  <div id="delete-modal-container"></div>
   <h1 class="mb-4">Edit Patient</h1>
   {% crispy form %}
+  <!-- Danger Zone -->
+  <div class="mt-8 border border-gray-300 rounded-lg p-6 bg-gray-200">
+    <h2 class="text-xl font-bold text-error mb-4">Danger Zone</h2>
+    <p class="text-sm text-base-content/70 mb-4">These actions are irreversible. Please be certain before proceeding.</p>
+    <div class="space-y-4">
+      <!-- Delete and Re-process -->
+      <div class="flex items-start justify-between p-4 border border-base-300 rounded bg-base-100">
+        <div class="flex-1">
+          <h3 class="font-semibold">Delete and Re-process Health Records</h3>
+          <p class="text-sm text-base-content/70 mt-1">
+            Delete all extracted health records and re-process all documents to generate new records.
+          </p>
+        </div>
+        <button class="btn btn-warning ml-4"
+                hx-get="{% url 'patients:patient_delete_and_reprocess' patient_id=patient.id %}"
+                hx-target="#delete-modal-container">Delete & Re-process</button>
+      </div>
+      <!-- Delete All -->
+      <div class="flex items-start justify-between p-4 border border-error rounded bg-base-100">
+        <div class="flex-1">
+          <h3 class="font-semibold text-error">Delete All Health Records</h3>
+          <p class="text-sm text-base-content/70 mt-1">Permanently delete all health records. This cannot be undone.</p>
+        </div>
+        <button class="btn btn-error ml-4"
+                hx-get="{% url 'patients:patient_delete_health_records' patient_id=patient.id %}"
+                hx-target="#delete-modal-container">Delete All</button>
+      </div>
+    </div>
+  </div>
 {% endblock content %}

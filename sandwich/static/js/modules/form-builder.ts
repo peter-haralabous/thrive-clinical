@@ -2,6 +2,8 @@ import { SurveyCreator } from 'survey-creator-js';
 import { getSurveyLicenseKey } from '../lib/survey-license-keys';
 import { slk } from 'survey-core';
 import * as SurveyCore from 'survey-core';
+import CustomSandwichTheme from '../lib/survey-form-theme';
+import '../components/message-alert';
 
 const ENVIRONMENT = JSON.parse(
   document.getElementById('environment')?.textContent || '',
@@ -35,10 +37,6 @@ function saveSurveyJson(
     headers['X-CSRFToken'] = csrfToken;
   }
 
-  const successRedirectUrl = document
-    .getElementById('form-builder-container')
-    ?.getAttribute('data-success-url')!;
-
   fetch(url, {
     method: 'POST',
     headers,
@@ -47,12 +45,19 @@ function saveSurveyJson(
       form_id: formId ?? null,
     }),
   })
-    .then((response) => {
+    .then(async (response) => {
       if (response.ok) {
         callback(saveNo, true);
-        window.location.replace(successRedirectUrl);
       } else {
-        callback(saveNo, false);
+        const errorData = await response.json();
+        // Use creator.notify to show the detailed error, then mark as failed
+        const creator = (window as any).SurveyCreator;
+        if (creator && errorData.detail) {
+          creator.notify(errorData.detail, 'error');
+          callback(saveNo, true); // Pass true to suppress default error notification
+        } else {
+          callback(saveNo, false); // Let default error show for generic errors
+        }
       }
     })
     .catch((error) => {
@@ -73,6 +78,23 @@ document.addEventListener('DOMContentLoaded', () => {
   if (licenseKey) slk(licenseKey);
 
   const creator = new SurveyCreator(creatorOptions);
+  creator.theme = CustomSandwichTheme;
+
+  // Register onNotify handler to show notifications as toasts
+  creator.onNotify.add((sender, options) => {
+    const messagesContainer = document.getElementById('messages');
+    if (!messagesContainer || options.type === 'info') {
+      sender.notifier.notify(options.message, options.type);
+      return;
+    }
+
+    const messageAlert = document.createElement('message-alert');
+    messageAlert.setAttribute('tags', options.type);
+    messageAlert.setAttribute('closeable', '');
+    messageAlert.textContent = options.message;
+
+    messagesContainer.appendChild(messageAlert);
+  });
 
   // Configure save function with creator.
   const formId =
@@ -125,47 +147,5 @@ document.addEventListener('DOMContentLoaded', () => {
       childList: true,
       subtree: true,
     });
-  }
-
-  // Create an action that opens a file picker and hooks into the above handler
-  const fileToSurveyAction = new SurveyCore.Action({
-    id: 'file-to-survey',
-    title: 'Upload File',
-    iconName: 'icon-folder-24x24',
-    visible: new SurveyCore.ComputedUpdater(
-      () => creator.activeTab === 'designer',
-    ),
-    action: () => openUploadChooser(),
-  });
-
-  // Helper to open the hidden form's file chooser and submit on change.
-  function openUploadChooser() {
-    const form = document.getElementById(
-      'file-upload-form',
-    ) as HTMLFormElement | null;
-    if (!form) {
-      creator.notify('File upload form not found on the page.', 'error');
-      return;
-    }
-
-    const fileInput = form.querySelector(
-      'input[type=file]',
-    ) as HTMLInputElement | null;
-    if (!fileInput) {
-      creator.notify('File upload input not found on the page.', 'error');
-      return;
-    }
-
-    fileInput.addEventListener('change', () => form.requestSubmit());
-
-    fileInput.click();
-  }
-
-  // Add the action to the creator toolbars if available
-  if (creator.toolbar && Array.isArray(creator.toolbar.actions)) {
-    creator.toolbar.actions.push(fileToSurveyAction);
-  }
-  if (creator.footerToolbar && Array.isArray(creator.footerToolbar.actions)) {
-    creator.footerToolbar.actions.push(fileToSurveyAction);
   }
 });

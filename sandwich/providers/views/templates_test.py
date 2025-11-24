@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+import pytest
 from django.test import Client
 from django.urls import reverse
 from guardian.shortcuts import remove_perm
@@ -8,6 +9,7 @@ from sandwich.core.factories.form import FormFactory
 from sandwich.core.models import Organization
 from sandwich.core.models import Patient
 from sandwich.core.models.role import RoleName
+from sandwich.core.service.organization_service import assign_organization_role
 from sandwich.users.models import User
 
 
@@ -93,11 +95,18 @@ def test_form_builder_deny_staff_access(client: Client, provider: User, organiza
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
+@pytest.mark.django_db
 def test_form_builder(client: Client, owner: User, organization: Organization) -> None:
     client.force_login(owner)
     url = reverse("providers:form_template_builder", kwargs={"organization_id": organization.id})
     response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
+    created_form = organization.form_set.order_by("-created_at").first()
+    assert created_form is not None
+    assert response.status_code == HTTPStatus.FOUND
+    expected_url = reverse(
+        "providers:form_template_edit", kwargs={"organization_id": organization.id, "form_id": created_form.id}
+    )
+    assert response.url == expected_url  # type: ignore[attr-defined]
 
 
 def test_form_template_preview(client: Client, provider: User, organization: Organization) -> None:
@@ -155,3 +164,76 @@ def test_form_template_preview_older_versions(client: Client, provider: User, or
 
     assert response.context["form_schema"] == original_schema
     assert response.context["form_schema"] != updated_schema
+
+
+def test_form_template_restore_modal_get_renders_correctly(
+    client: Client, provider: User, organization: Organization
+) -> None:
+    client.force_login(provider)
+    assign_organization_role(organization, RoleName.OWNER, provider)
+    form = FormFactory.create(organization=organization, schema={"v1": "initial"})
+    form.refresh_from_db()
+    current_version = form.get_current_version()
+
+    url = reverse(
+        "providers:form_template_restore",
+        kwargs={"organization_id": organization.id, "form_id": form.id, "form_version_id": current_version.pgh_id},
+    )
+    response = client.get(url)
+
+    assert response.status_code == HTTPStatus.OK
+
+    assert response.context["form"] == form
+    assert response.context["organization"] == organization
+    assert response.context["form_version_id"] == current_version.pgh_id
+
+
+def test_form_template_restore_post_reverts_data(client: Client, provider: User, organization: Organization) -> None:
+    client.force_login(provider)
+    assign_organization_role(organization, RoleName.OWNER, provider)
+    schema_v1 = {"title1": "version1"}
+    form = FormFactory.create(organization=organization, schema=schema_v1)
+    form.refresh_from_db()
+    version_1 = form.get_current_version()
+
+    schema_v2 = {"title2": "version2"}
+    form.schema = schema_v2
+    form.save()
+    form.refresh_from_db()
+
+    assert form.schema == schema_v2
+
+    url = reverse(
+        "providers:form_template_restore",
+        kwargs={"organization_id": organization.id, "form_id": form.id, "form_version_id": version_1.pgh_id},
+    )
+    response = client.post(url)
+
+    assert response.status_code == HTTPStatus.FOUND
+
+    expected_redirect = reverse(
+        "providers:form_template", kwargs={"organization_id": organization.id, "form_id": form.id}
+    )
+    assert response["Location"] == expected_redirect
+
+    form.refresh_from_db()
+    assert form.schema == schema_v1
+    assert form.schema != schema_v2
+
+
+def test_form_template_restore_deny_access(client: Client, provider: User, organization: Organization) -> None:
+    client.force_login(provider)
+    form = FormFactory.create()
+    form.refresh_from_db()
+    version = form.get_current_version()
+
+    url = reverse(
+        "providers:form_template_restore",
+        kwargs={"organization_id": organization.id, "form_id": form.id, "form_version_id": version.pgh_id},
+    )
+
+    response_get = client.get(url)
+    assert response_get.status_code == HTTPStatus.NOT_FOUND
+
+    response_post = client.post(url)
+    assert response_post.status_code == HTTPStatus.NOT_FOUND

@@ -4,6 +4,7 @@ from typing import Annotated
 from typing import cast
 
 import ninja
+from django.db import transaction
 from django.http import JsonResponse
 from ninja.errors import HttpError
 from ninja.security import SessionAuth
@@ -12,6 +13,7 @@ from sandwich.core.models.form_submission import FormSubmission
 from sandwich.core.models.form_submission import FormSubmissionStatus
 from sandwich.core.models.task import Task
 from sandwich.core.service.permissions_service import get_authorized_object_or_404
+from sandwich.core.service.summary_service import trigger_summary_generation
 from sandwich.core.service.task_service import complete_task
 from sandwich.core.util.http import AuthenticatedHttpRequest
 
@@ -67,24 +69,26 @@ def submit_form(
         },
     )
 
-    # checks if submission is already completed
     if submission.status == FormSubmissionStatus.COMPLETED:
         raise HttpError(400, "This form has already been submitted")
 
-    # extract data, submit submission, task gets changed to completed
-    submission.data = payload
-    submission.submit(user=request.user)
-    complete_task(task)
-    logger.debug(
-        "Form submission submitted",
-        extra={
-            "user_id": request.user.id,
-            "patient_id": task.patient.id,
-            "task_id": task.id,
-            "submission_status": submission.status,
-            "submitted_by": submission.submitted_by_id,
-        },
-    )
+    # Use transaction to ensure atomicity of submission and summary creation
+    with transaction.atomic():
+        submission.data = payload
+        submission.submit(user=request.user)
+        complete_task(task)
+        trigger_summary_generation(submission)
+        logger.debug(
+            "Form submission submitted",
+            extra={
+                "user_id": request.user.id,
+                "patient_id": task.patient.id,
+                "task_id": task.id,
+                "submission_status": submission.status,
+                "submitted_by": submission.submitted_by_id,
+            },
+        )
+
     return FormSubmitResponse.success(submission=submission)
 
 

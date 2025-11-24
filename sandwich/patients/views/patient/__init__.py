@@ -5,7 +5,7 @@ from sandwich.core.service.agent_service.config import configure
 from sandwich.core.service.chat_service.chat import load_chat_messages
 from sandwich.core.service.ingest_service import ProcessDocumentContext
 from sandwich.core.util.http import AuthenticatedHttpRequest
-from sandwich.patients.views.chat import ChatForm
+from sandwich.patients.forms.chat import ChatForm
 
 
 def _patient_context(request: AuthenticatedHttpRequest, patient: Patient | None = None) -> dict[str, Any]:

@@ -2,6 +2,7 @@ import os
 from collections.abc import Iterable
 from urllib.parse import urlparse
 
+import factory
 import pytest
 from django.conf import settings
 from django.contrib.auth import BACKEND_SESSION_KEY
@@ -12,26 +13,35 @@ from django.core.management import call_command
 from syrupy.extensions.single_file import SingleFileSnapshotExtension
 from syrupy.extensions.single_file import WriteMode
 
+from sandwich.core.factories.providers.condition import ConditionProvider
+from sandwich.core.factories.providers.immunization import ImmunizationProvider
 from sandwich.core.util.testing import UserRequestFactory
+from sandwich.fixtures.default import condition
 from sandwich.fixtures.default import document
 from sandwich.fixtures.default import encounter
+from sandwich.fixtures.default import immunization
 from sandwich.fixtures.default import organization
 from sandwich.fixtures.default import owner
 from sandwich.fixtures.default import patient
+from sandwich.fixtures.default import practitioner
 from sandwich.fixtures.default import provider
 from sandwich.fixtures.default import task
 from sandwich.fixtures.default import user
 from sandwich.fixtures.knowledge_graph import patient_entity
 from sandwich.fixtures.knowledge_graph import patient_knowledge_graph
+from sandwich.fixtures.other import other_condition
 from sandwich.fixtures.other import other_document
 from sandwich.fixtures.other import other_encounter
+from sandwich.fixtures.other import other_immunization
 from sandwich.fixtures.other import other_organization
 from sandwich.fixtures.other import other_owner
 from sandwich.fixtures.other import other_patient
+from sandwich.fixtures.other import other_practitioner
 from sandwich.fixtures.other import other_provider
 from sandwich.fixtures.other import other_task
 from sandwich.fixtures.other import other_user
 from sandwich.fixtures.webpack import conditional_webpack
+from sandwich.fixtures.webpack import webpack_build_lock
 from sandwich.users.factories import UserFactory
 from sandwich.users.models import User
 
@@ -39,16 +49,20 @@ from sandwich.users.models import User
 os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 
 __all__ = [
+    "condition",
     "conditional_webpack",
     "document",
     "encounter",
+    "immunization",
     "organization",
+    "other_condition",
     "other_document",
     "other_encounter",
-    "other_organization",
+    "other_immunization",
     "other_organization",
     "other_owner",
     "other_patient",
+    "other_practitioner",
     "other_provider",
     "other_task",
     "other_user",
@@ -56,10 +70,19 @@ __all__ = [
     "patient",
     "patient_entity",
     "patient_knowledge_graph",
+    "practitioner",
     "provider",
     "task",
     "user",
+    "webpack_build_lock",
 ]
+
+
+# Install custom providers
+# https://faker.readthedocs.io/en/master/#how-to-create-a-provider
+# https://factoryboy.readthedocs.io/en/stable/reference.html#faker
+factory.Faker.add_provider(ConditionProvider)
+factory.Faker.add_provider(ImmunizationProvider)
 
 
 @pytest.fixture(autouse=True)

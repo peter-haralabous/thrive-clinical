@@ -1,6 +1,6 @@
 import { LitElement, html, type TemplateResult } from 'lit';
 import { Model } from 'survey-core';
-import CustomSandwichTheme from './survey-form-theme';
+import CustomSandwichTheme from '../lib/survey-form-theme';
 
 type SurveyJson = Record<string, unknown> | Array<unknown>;
 
@@ -155,6 +155,10 @@ export class SurveyForm extends LitElement {
       this.setLoadingHidden();
     });
 
+    // If multipage form, show side page navigation
+    if ('pages' in json && Array.isArray(json.pages) && json.pages.length > 1) {
+      this.model.showTOC = true;
+    }
     this.model.applyTheme(CustomSandwichTheme);
     this.model.readOnly = this.isReadOnly();
     this.model.data = this._loadInitialData();
