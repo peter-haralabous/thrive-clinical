@@ -48,7 +48,26 @@ document_download = login_required(DocumentDownloadView.as_view())
 @authorize_objects([ObjPerm(Patient, "patient_id", ["view_patient", "create_document"])])
 def document_upload_and_extract(request: AuthenticatedHttpRequest, patient: Patient):
     files = request.FILES.getlist("file")
+    logger.info(
+        "Starting document upload",
+        extra={
+            "patient_id": str(patient.id),
+            "file_count": len(files),
+            "user_id": str(request.user.id),
+        },
+    )
+
     for file in files:
+        logger.debug(
+            "Processing uploaded file",
+            extra={
+                "patient_id": str(patient.id),
+                "content_type": file.content_type,
+                "size_bytes": file.size,
+                "user_id": str(request.user.id),
+            },
+        )
+
         form = DocumentForm(
             MultiValueDict({**request.POST, "patient": [patient.id]}),  # type: ignore[dict-item]
             MultiValueDict({"file": [file]}),
@@ -57,16 +76,50 @@ def document_upload_and_extract(request: AuthenticatedHttpRequest, patient: Pati
             document = form.save()
             assign_default_document_permissions(document)
             transaction.on_commit(lambda: send_records_updated(patient))
+
+            logger.info(
+                "Document saved successfully",
+                extra={
+                    "document_id": str(document.id),
+                    "patient_id": str(patient.id),
+                    "content_type": document.content_type,
+                    "user_id": str(request.user.id),
+                },
+            )
+
             try:
                 process_document_job.defer(
                     document_id=str(document.id), document_context=form.cleaned_data.get("context")
                 )
                 send_ingest_progress(patient, text=f"Uploaded {document.original_filename}...")
+                logger.info(
+                    "Document processing job enqueued",
+                    extra={
+                        "document_id": str(document.id),
+                        "patient_id": str(patient.id),
+                        "context": form.cleaned_data.get("context"),
+                    },
+                )
             except RuntimeError:
-                logger.warning("Failed to enqueue document analysis", exc_info=True)
+                logger.warning(
+                    "Failed to enqueue document analysis",
+                    extra={
+                        "document_id": str(document.id),
+                        "patient_id": str(patient.id),
+                        "user_id": str(request.user.id),
+                    },
+                    exc_info=True,
+                )
                 messages.add_message(request, messages.ERROR, "Failed to enqueue document analysis")
         else:
-            logger.info("Invalid document upload form")
+            logger.warning(
+                "Invalid document upload form",
+                extra={
+                    "patient_id": str(patient.id),
+                    "errors": form.errors.as_json(),
+                    "user_id": str(request.user.id),
+                },
+            )
             error = ", ".join([str(e) for e in form.errors.get("file", [])])
             messages.add_message(request, messages.ERROR, f"Failed to upload document: {error}")
 

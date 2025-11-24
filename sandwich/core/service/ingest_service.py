@@ -25,6 +25,10 @@ class ProcessDocumentContext(models.TextChoices):
 
 @define_task
 def process_document_job(document_id: str, document_context: ProcessDocumentContext | None = None):
+    logger.info(
+        "Starting document processing job",
+        extra={"document_id": document_id, "context": document_context},
+    )
     extract_facts_from_document_job.defer(document_id=document_id)
     extract_records_from_document_job.defer(document_id=document_id, document_context=document_context)
 
@@ -39,17 +43,39 @@ def extract_facts_from_document_job(document_id: str, llm_name: str = ModelName.
     patient = document.patient
     llm_client = get_llm(ModelName(llm_name))
 
+    logger.info(
+        "Starting fact extraction from document",
+        extra={
+            "document_id": str(document_id),
+            "patient_id": str(patient.id),
+            "content_type": document.content_type,
+            "llm_name": llm_name,
+        },
+    )
+
     try:
         with document.file.open("rb") as f:
             content = f.read()
+        logger.debug(
+            "Document file loaded",
+            extra={"document_id": str(document_id), "size_bytes": len(content)},
+        )
     except Exception:
         logger.exception("Failed to read document file", extra={"document_id": str(document_id)})
         return
 
     if document.content_type == "application/pdf":
         extract_facts_from_pdf(content, llm_client, patient=patient, document=document)
+        logger.info(
+            "Completed PDF fact extraction",
+            extra={"document_id": str(document_id), "patient_id": str(patient.id)},
+        )
     elif document.content_type == "text/plain":
         extract_facts_from_text(content, llm_client, patient=patient, document=document)
+        logger.info(
+            "Completed text fact extraction",
+            extra={"document_id": str(document_id), "patient_id": str(patient.id)},
+        )
     else:
         logger.warning(
             "Unsupported document content type",
@@ -65,15 +91,41 @@ def extract_records_from_document_job(document_id: str, document_context: Proces
 
     document = Document.objects.get(id=document_id)
     patient = document.patient
+
+    logger.info(
+        "Starting record extraction from document",
+        extra={
+            "document_id": str(document_id),
+            "patient_id": str(patient.id),
+        },
+    )
+
     send_ingest_progress(patient, text=f"Processing {document.original_filename}...")
 
     records = extract_records(document)
     send_records_updated(patient)
 
+    logger.info(
+        "Extracted records from document",
+        extra={
+            "document_id": str(document_id),
+            "patient_id": str(patient.id),
+            "record_count": len(records),
+        },
+    )
+
     send_ingest_progress(
         patient, text=f"Extracted {len(records)} records from {document.original_filename}", done=True
     )
     if document_context and document_context == ProcessDocumentContext.PATIENT_CHAT:
+        logger.info(
+            "Sending file upload event to chat",
+            extra={
+                "document_id": str(document_id),
+                "patient_id": str(patient.id),
+                "context": document_context,
+            },
+        )
         receive_chat_event(
             FileUploadEvent(
                 context=ChatContext(patient_id=str(patient.id)),
