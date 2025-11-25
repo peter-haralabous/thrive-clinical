@@ -2,7 +2,7 @@
  * Handle copy-to-clipboard functionality for summary content
  */
 
-function setupCopyButtons() {
+export function setupCopyButtons() {
   document
     .querySelectorAll<HTMLButtonElement>('.js-copy-summary')
     .forEach((button) => {
@@ -14,17 +14,18 @@ function setupCopyButtons() {
         if (!textToCopy) return;
 
         try {
-          await navigator.clipboard.writeText(textToCopy);
-          const originalText = button.textContent;
-          button.textContent = 'Copied!';
+          const originalHTML = button.innerHTML;
           button.disabled = true;
+          await navigator.clipboard.writeText(textToCopy);
+          button.textContent = 'Copied!';
 
           setTimeout(() => {
-            button.textContent = originalText;
+            button.innerHTML = originalHTML;
             button.disabled = false;
           }, 2000);
         } catch (err) {
           console.error('Failed to copy text:', err);
+          button.disabled = false;
         }
       });
     });
