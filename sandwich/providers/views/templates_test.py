@@ -8,6 +8,7 @@ from guardian.shortcuts import remove_perm
 from sandwich.core.factories.form import FormFactory
 from sandwich.core.models import Organization
 from sandwich.core.models import Patient
+from sandwich.core.models.form import FormStatus
 from sandwich.core.models.role import RoleName
 from sandwich.core.service.organization_service import assign_organization_role
 from sandwich.users.models import User
@@ -237,3 +238,55 @@ def test_form_template_restore_deny_access(client: Client, provider: User, organ
 
     response_post = client.post(url)
     assert response_post.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_form_generation_success_shows_toast(client: Client, provider: User, organization: Organization) -> None:
+    """Test that a successfully generated form shows a success message on next HTMX poll."""
+    client.force_login(provider)
+
+    # Create a generating form
+    form = FormFactory.create(organization=organization, name="Test Form", status=FormStatus.GENERATING)
+
+    # Simulate HTMX polling with the generating form ID
+    url = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
+    url_with_params = f"{url}?generating_ids={form.id}"
+
+    # Complete the form generation
+    form.status = FormStatus.ACTIVE
+    form.save()
+
+    # Poll with HTMX request
+    response = client.get(url_with_params, HTTP_HX_REQUEST="true")
+
+    assert response.status_code == HTTPStatus.OK
+    messages = list(response.context["messages"])
+    assert len(messages) == 1
+    assert "Test Form" in messages[0].message
+    assert "generation successful" in messages[0].message
+    assert messages[0].level_tag == "success"
+
+
+def test_form_generation_failure_shows_toast(client: Client, provider: User, organization: Organization) -> None:
+    """Test that a failed form generation shows an error message on next HTMX poll."""
+    client.force_login(provider)
+
+    # Create a generating form
+    form = FormFactory.create(organization=organization, name="Failed Form", status=FormStatus.GENERATING)
+
+    # Simulate HTMX polling with the generating form ID
+    url = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
+    url_with_params = f"{url}?generating_ids={form.id}"
+
+    # Fail the form generation
+    form.status = FormStatus.FAILED
+    form.save()
+
+    # Poll with HTMX request
+    response = client.get(url_with_params, HTTP_HX_REQUEST="true")
+
+    assert response.status_code == HTTPStatus.OK
+    messages = list(response.context["messages"])
+    assert len(messages) == 1
+    assert "Failed Form" in messages[0].message
+    assert "generation failed" in messages[0].message
+    assert messages[0].level_tag == "error"

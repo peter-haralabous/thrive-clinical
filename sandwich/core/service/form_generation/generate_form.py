@@ -68,6 +68,7 @@ def generate_form_schema_from_reference_file(form: Form, doc_type: DocType, text
                         "Form generator processing PDF page.",
                         extra={"page_number": i + 1, "file_name": form.reference_file.name},
                     )
+
                     document = {
                         "type": "file",
                         "base64": base64.b64encode(page).decode(),
@@ -133,10 +134,13 @@ def generate_form_schema(form_id: str, description: str | None = None) -> None:
         generate_form_schema_from_reference_file(form=form, doc_type=doc_type, text_prompt=prompt)
         form.refresh_from_db()
         form.status = FormStatus.ACTIVE
+        logger.info("Form generation completed successfully", extra={"form_id": form_id, "form_name": form.name})
 
-    except Exception:
-        # TODO(MM): Report failure to users
+    except Exception as e:
         form.status = FormStatus.FAILED
-        logger.exception("Unexpected error generating form", extra={"form_id": form_id})
+        error_msg = str(e)
+        logger.exception(
+            "Form generation failed", extra={"form_id": form_id, "form_name": form.name, "error": error_msg}
+        )
 
     form.save()

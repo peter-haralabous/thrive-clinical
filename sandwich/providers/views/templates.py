@@ -68,14 +68,31 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form list",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    organization_forms = (
-        Form.objects.filter(organization=organization).exclude(status=FormStatus.FAILED).order_by("-created_at")
-    )
+    organization_forms = Form.objects.filter(organization=organization).order_by("-created_at")
     authorized_org_forms = get_objects_for_user(request.user, ["view_form"], organization_forms)
 
     page = request.GET.get("page", 1)
     paginator = Paginator(authorized_org_forms, 25)
     forms_page = paginator.get_page(page)
+
+    # Show notifications for forms that just completed
+    if request.headers.get("HX-Request"):
+        generating_ids = request.GET.get("generating_ids", "")
+        if generating_ids:
+            form_ids = [fid.strip() for fid in generating_ids.split(",") if fid.strip()]
+            completed_forms = Form.objects.filter(organization=organization, id__in=form_ids).exclude(
+                status=FormStatus.GENERATING
+            )
+
+            for form in completed_forms:
+                if form.status == FormStatus.ACTIVE:
+                    messages.add_message(request, messages.SUCCESS, f"Form '{form.name}' generation successful.")
+                elif form.status == FormStatus.FAILED:
+                    messages.add_message(
+                        request, messages.ERROR, f"Form '{form.name}' generation failed, you can try again."
+                    )
+
+    has_generating_forms = any(form.is_generating for form in forms_page)
 
     return render(
         request,
@@ -83,6 +100,7 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         {
             "organization": organization,
             "forms": forms_page,
+            "has_generating_forms": has_generating_forms,
         },
     )
 
