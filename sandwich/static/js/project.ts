@@ -1,24 +1,23 @@
-import "../css/project.css";
-import "choices.js/public/assets/styles/choices.css";
-import "./components/chat-form";
-import "./components/command-palette";
-import "./components/enum-formset";
-import "./components/htmx-loading-bar";
-import "./components/inline-edit-field";
-import "./components/message-alert";
-import "./components/sortable-columns";
-import "./components/toggle-container";
-import "./copy-summary";
-import "./components/wysiwyg-editor";
-import { initializeDatadog } from "./lib/datadog";
+import '../css/project.css';
+import 'choices.js/public/assets/styles/choices.css';
+import './components/chat-form';
+import './components/command-palette';
+import './components/enum-formset';
+import './components/htmx-loading-bar';
+import './components/inline-edit-field';
+import './components/message-alert';
+import './components/sortable-columns';
+import './components/toggle-container';
+import './copy-summary';
+import { initializeDatadog } from './lib/datadog';
 
 /* Project specific Javascript goes here. */
 
 const ENVIRONMENT = JSON.parse(
-  document.getElementById("environment")?.textContent || ""
+  document.getElementById('environment')?.textContent || '',
 );
 const APP_VERSION = JSON.parse(
-  document.getElementById("app_version")?.textContent || ""
+  document.getElementById('app_version')?.textContent || '',
 );
 
 initializeDatadog(ENVIRONMENT, APP_VERSION);
