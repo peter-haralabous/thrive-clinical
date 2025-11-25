@@ -156,6 +156,21 @@
         }
       });
 
+      document.addEventListener("htmx:oobBeforeSwap", (event) => {
+        // Listen for out-of-band swaps that have the data-hx-swap-oob-replace-if-exists attribute
+        const replaceTargetId = event.detail.fragment.dataset.hxSwapOobReplaceIfExists;
+        if (replaceTargetId) {
+          const existingElement = document.getElementById(replaceTargetId)
+          const newElement = event.detail.fragment.querySelector(`#${replaceTargetId}`)
+          if (newElement && existingElement) {
+            // Replace existing item instead of adding a duplicate
+            existingElement.replaceWith(newElement);
+            // Prevent default swap behavior
+            event.detail.shouldSwap = false;
+          }
+        }
+      });
+
       document.addEventListener("htmx:oobAfterSwap", (event) => {
         if (event.detail.target?.id === "chat-messages") {
           event.detail.target.children[event.detail.target.children.length - 1]?.scrollIntoView({
