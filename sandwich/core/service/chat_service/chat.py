@@ -126,8 +126,15 @@ def user_message(
     return render_to_string("patient/chatty/partials/user_message.html", context)
 
 
-def assistant_message(content: str, buttons: "list[Button]", timestamp: datetime.datetime | None) -> SafeString:
-    context = {"message": markdown_to_html(content), "buttons": buttons, "timestamp": timestamp}
+def assistant_message(
+    content: str,
+    buttons: "list[Button]",
+    timestamp: datetime.datetime | None,
+    context: ContextDict | dict[str, Any] | None = None,
+) -> SafeString:
+    if context is None:
+        context = {}
+    context.update({"message": markdown_to_html(content), "buttons": buttons, "timestamp": timestamp})
     return render_to_string("patient/chatty/partials/assistant_message.html", context)
 
 
