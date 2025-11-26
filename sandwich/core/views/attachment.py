@@ -43,8 +43,8 @@ def attachment_upload(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 @require_http_methods(["DELETE"])
 @login_required
-def attachment_delete(request: AuthenticatedHttpRequest, attachment_id: str) -> HttpResponse:
-    attachment = Attachment.objects.get(id=attachment_id)
+@authorize_objects([ObjPerm(Attachment, "attachment_id", ["delete_attachment"])])
+def attachment_delete(request: AuthenticatedHttpRequest, attachment: Attachment) -> HttpResponse:
     if request.user.id == attachment.uploaded_by.id and attachment.uploaded_by.has_perm(
         "delete_attachment", attachment
     ):
