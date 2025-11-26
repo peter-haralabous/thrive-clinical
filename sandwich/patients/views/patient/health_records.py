@@ -133,7 +133,7 @@ def patient_records(request: AuthenticatedHttpRequest, patient: Patient, record_
 def patient_repository(request: AuthenticatedHttpRequest, patient: Patient, category: str | None = None):
     if category is None:
         counts = get_document_count_by_category(patient)
-        left_panel_title = "Repository"
+        left_panel_title = "Documents"
         left_panel_back_link = reverse("patients:patient_details", kwargs={"patient_id": patient.id})
         items = [
             NavItem(
