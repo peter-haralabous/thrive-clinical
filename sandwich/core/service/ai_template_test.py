@@ -292,6 +292,57 @@ Based on the above data, provide a clinical assessment:
 
 
 class TestAiTemplateErrorHandling:
+    def test_duplicate_ai_block_titles_raises_error(self):
+        """Test that duplicate AI block titles raise ValueError."""
+        template_text = """
+        {% load ai_tags %}
+        {% ai "Summary" %}
+        First summary content
+        {% endai %}
+
+        Some other content
+
+        {% ai "Summary" %}
+        Second summary content with same title
+        {% endai %}
+        """
+
+        template = AiTemplate(template_text)
+
+        with pytest.raises(
+            ValueError,
+            match=r"Duplicate AI block titles found: 'Summary' \(2x\)\.",
+        ) as exc_info:
+            template.render({})
+
+        error_message = str(exc_info.value)
+        assert "'Summary' (2x)" in error_message
+        assert "{% ai %}" in error_message
+
+    def test_multiple_duplicate_ai_block_titles_raises_error(self):
+        """Test that multiple duplicate AI block titles are all reported."""
+        template_text = """
+        {% load ai_tags %}
+        {% ai "Summary" %}First{% endai %}
+        {% ai "Assessment" %}First{% endai %}
+        {% ai "Summary" %}Second{% endai %}
+        {% ai "Assessment" %}Second{% endai %}
+        {% ai "Summary" %}Third{% endai %}
+        """
+
+        template = AiTemplate(template_text)
+
+        with pytest.raises(
+            ValueError, match=r"Duplicate AI block titles found: 'Assessment' \(2x\), 'Summary' \(3x\)\."
+        ) as exc_info:
+            template.render({})
+
+        error_message = str(exc_info.value)
+        assert "Duplicate AI block titles found" in error_message
+        # Both duplicate titles should be mentioned with counts
+        assert "'Assessment' (2x)" in error_message
+        assert "'Summary' (3x)" in error_message
+
     def test_ai_tag_without_title_raises_error(self):
         template_text = """
         {% load ai_tags %}
@@ -342,6 +393,53 @@ class TestAiTemplateErrorHandling:
             AiTemplate(template_text)
 
         assert "Unclosed tag" in str(exc_info.value) or "endai" in str(exc_info.value)
+
+
+class TestDuplicateTitleValidation:
+    """Test validation of unique AI block titles."""
+
+    @pytest.mark.vcr
+    @pytest.mark.django_db
+    def test_unique_titles_render_successfully(self, snapshot):
+        """Test that AI blocks with unique titles render successfully."""
+        template_text = """{% load ai_tags %}
+# Medical Report
+
+{% ai "Section 1" %}
+Summarize section 1 content
+{% endai %}
+
+{% ai "Section 2" %}
+Summarize section 2 content
+{% endai %}
+
+{% ai "Section 3" %}
+Summarize section 3 content
+{% endai %}
+"""
+        template = AiTemplate(template_text)
+        result = template.render({})
+
+        # Should render without raising ValueError
+        assert result == snapshot
+
+    def test_duplicate_titles_in_conditional_blocks_raises_error(self):
+        """Test that duplicate titles in conditional blocks are caught."""
+        template_text = """{% load ai_tags %}
+{% if condition %}
+{% ai "Analysis" %}Content A{% endai %}
+{% else %}
+{% ai "Analysis" %}Content B{% endai %}
+{% endif %}
+"""
+        template = AiTemplate(template_text)
+
+        # AST traversal finds both blocks regardless of runtime execution
+        with pytest.raises(ValueError, match=r"Duplicate AI block titles found: 'Analysis' \(2x\)\.") as exc_info:
+            template.render({"condition": True})
+
+        assert "'Analysis' (2x)" in str(exc_info.value)
+        assert "{% ai %}" in str(exc_info.value)
 
 
 class TestFindAiBlocks:

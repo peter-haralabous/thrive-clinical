@@ -75,10 +75,8 @@ def do_ai(parser: Parser, token: Token) -> AiBlockNode:
             f"{token.contents.split()[0]} tag requires exactly one argument: the block title"
         ) from e
 
-    # Remove quotes from title
-    if title_arg[0] == title_arg[-1] and title_arg[0] in ('"', "'"):
-        title = title_arg[1:-1]
-    else:
+    title = title_arg.strip("\"'")
+    if title == title_arg:
         raise template.TemplateSyntaxError(f"{token.contents.split()[0]} tag title argument must be a quoted string")
 
     if not title:

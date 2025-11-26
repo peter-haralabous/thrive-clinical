@@ -65,6 +65,15 @@ def _batch_generate_ai_responses(
     Maps request titles to their corresponding responses, maintaining the AiRequest reference
     for access to title and prompt information.
     """
+    # Check for duplicate titles
+    titles = [request.title for request in ai_requests]
+    if len(titles) != len(set(titles)):
+        duplicates = sorted({title for title in titles if titles.count(title) > 1})
+        duplicate_details = ", ".join(f"'{title}' ({titles.count(title)}x)" for title in duplicates)
+        raise ValueError(
+            f"Duplicate AI block titles found: {duplicate_details}. Each {{% ai %}} block must have a unique title."
+        )
+
     ai_responses_markdown = batch_generate_summaries(ai_requests)
 
     requests_by_title = {request.title: request for request in ai_requests}
