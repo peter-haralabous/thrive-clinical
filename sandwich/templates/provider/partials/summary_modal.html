@@ -38,4 +38,11 @@
 <script nonce="{{ request.csp_nonce }}" type="module">
   const modal = document.getElementById("summary-modal");
   modal.showModal();
+
+  // Remove the modal from DOM when it closes to prevent stale modals from accumulating
+  modal.addEventListener("close", () => {
+    modal.remove();
+  }, {
+    once: true
+  });
 </script>
