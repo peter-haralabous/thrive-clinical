@@ -196,6 +196,7 @@ def test_edit_custom_attribute_validation(live_server, owner_page: Page, organiz
     submit_button.click()
 
     type_error = owner_page.locator("#error_1_id_input_type")
+    type_error.wait_for(state="visible", timeout=5000)
     assert type_error.is_visible()
 
     # Add new option and verify that forms save, but only latest option exists
