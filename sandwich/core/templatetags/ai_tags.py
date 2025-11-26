@@ -6,6 +6,10 @@ from django import template
 from django.template.base import Node
 from django.template.base import Parser
 from django.template.base import Token
+from django.template.loader import render_to_string
+from django.utils.safestring import mark_safe
+
+from sandwich.core.service.markdown_service import markdown_to_html
 
 logger = logging.getLogger(__name__)
 
@@ -30,19 +34,28 @@ class AiBlockNode(Node):
 
     def render(self, context: template.Context) -> str:
         """
-        Render the AI block by fetching the pre-generated response from the preprocessor.
+        Render the AI block from pre-generated response, wrapped in a styled container
         """
-        ai_responses_dict = context.get("_ai_responses")
-        response = ""
-        if ai_responses_dict is not None:
-            response = ai_responses_dict.get(self.title, "")
+        ai_responses = context.get("_ai_responses") or {}
+        ai_response_obj = ai_responses.get(self.title)
+        html_content = (
+            markdown_to_html(ai_response_obj.markdown_content, preset="commonmark")
+            if ai_response_obj
+            else mark_safe("")
+        )
+        timestamp = ai_response_obj.timestamp if ai_response_obj else None
 
         logger.debug(
             "Rendering AI response from context",
-            extra={"title": self.title, "response_length": len(response)},
+            extra={"title": self.title, "response_length": len(html_content), "has_timestamp": timestamp is not None},
         )
 
-        return response
+        return render_to_string(
+            "component/ai_block.html",
+            {
+                "ai_content": html_content,
+            },
+        )
 
 
 @register.tag(name="ai")

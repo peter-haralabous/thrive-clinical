@@ -25,6 +25,8 @@ Example Template Usage:
 
 import logging
 from dataclasses import dataclass
+from datetime import UTC
+from datetime import datetime
 
 from django.template import Context
 from django.template import Template
@@ -43,6 +45,40 @@ class AiRequest:
 
     title: str
     prompt: str
+
+
+@dataclass
+class AiResponse:
+    """Represents an AI-generated response with metadata."""
+
+    request: AiRequest
+    markdown_content: str
+    timestamp: datetime
+
+
+def _batch_generate_ai_responses(
+    ai_requests: list[AiRequest],
+) -> dict[str, AiResponse]:
+    """
+    Batch generate AI responses for multiple requests into a dictionary of AiResponse objects.
+
+    Maps request titles to their corresponding responses, maintaining the AiRequest reference
+    for access to title and prompt information.
+    """
+    ai_responses_markdown = batch_generate_summaries(ai_requests)
+
+    requests_by_title = {request.title: request for request in ai_requests}
+
+    ai_responses: dict[str, AiResponse] = {}
+    for title, markdown_content in ai_responses_markdown.items():
+        request = requests_by_title[title]
+        ai_responses[title] = AiResponse(
+            request=request,
+            markdown_content=markdown_content,
+            timestamp=datetime.now(tz=UTC),
+        )
+
+    return ai_responses
 
 
 class AiTemplate(Template):
@@ -96,7 +132,7 @@ class AiTemplate(Template):
             context_obj.template = self
 
         ai_requests = self.find_ai_blocks(context_obj)
-        ai_responses = batch_generate_summaries(ai_requests)
+        ai_responses = _batch_generate_ai_responses(ai_requests)
 
         context_obj.update(
             {
