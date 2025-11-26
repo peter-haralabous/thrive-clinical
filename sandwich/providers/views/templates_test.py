@@ -321,3 +321,53 @@ def test_upload_reference_form_rejects_unsupported_files() -> None:
     assert not form.is_valid()
     assert "file" in form.errors
     assert form.errors["file"] == ["File extension “png” is not allowed. Allowed extensions are: pdf, csv."]
+
+
+def test_form_dismiss(client: Client, owner: User, organization: Organization) -> None:
+    """Test that dismissing a failed form sets its status to DISMISSED."""
+    client.force_login(owner)
+
+    # Create a failed form
+    form = FormFactory.create(organization=organization, name="Failed Form", status=FormStatus.FAILED)
+
+    # Dismiss the form
+    url = reverse("providers:form_template_dismiss", kwargs={"organization_id": organization.id, "form_id": form.id})
+    response = client.delete(url)
+
+    assert response.status_code == HTTPStatus.OK
+    form.refresh_from_db()
+    assert form.status == FormStatus.DISMISSED
+
+
+def test_form_dismiss_requires_delete_permission(client: Client, provider: User, organization: Organization) -> None:
+    """Test that users without delete_form permission cannot dismiss forms."""
+    # Provider has STAFF role which doesn't have delete_form permission
+    client.force_login(provider)
+
+    form = FormFactory.create(organization=organization, status=FormStatus.FAILED)
+
+    url = reverse("providers:form_template_dismiss", kwargs={"organization_id": organization.id, "form_id": form.id})
+    response = client.delete(url)
+
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    form.refresh_from_db()
+    assert form.status == FormStatus.FAILED
+
+
+def test_dismissed_forms_excluded_from_list(client: Client, provider: User, organization: Organization) -> None:
+    """Test that dismissed forms do not appear in the form list."""
+    client.force_login(provider)
+
+    # Create forms with different statuses
+    FormFactory.create(organization=organization, name="Active Form", status=FormStatus.ACTIVE)
+    FormFactory.create(organization=organization, name="Failed Form", status=FormStatus.FAILED)
+    dismissed_form = FormFactory.create(organization=organization, name="Dismissed Form", status=FormStatus.DISMISSED)
+
+    url = reverse("providers:form_templates_list", kwargs={"organization_id": organization.id})
+    response = client.get(url)
+
+    assert response.status_code == HTTPStatus.OK
+    form_names = [form.name for form in response.context["forms"]]
+    assert "Active Form" in form_names
+    assert "Failed Form" in form_names
+    assert dismissed_form.name not in form_names

@@ -17,6 +17,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
 from guardian.shortcuts import get_objects_for_user
 
 from sandwich.core.decorators import surveyjs_csp
@@ -85,7 +86,9 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form list",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    organization_forms = Form.objects.filter(organization=organization).order_by("-created_at")
+    organization_forms = (
+        Form.objects.filter(organization=organization).exclude(status=FormStatus.DISMISSED).order_by("-created_at")
+    )
     authorized_org_forms = get_objects_for_user(request.user, ["view_form"], organization_forms)
 
     page = request.GET.get("page", 1)
@@ -111,6 +114,10 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
 
     # Collect currently generating form IDs for continued polling
     generating_form_id_list = [str(form.id) for form in forms_page if form.is_generating]
+
+    # Annotate each form with whether user can delete it
+    for form in forms_page:
+        form.user_can_delete = request.user.has_perm("delete_form", form)  # type: ignore[attr-defined]
 
     return render(
         request,
@@ -196,6 +203,21 @@ def form_template_preview(
     return render(
         request, "provider/form_preview.html", {"organization": organization, "form": form, "form_schema": form_schema}
     )
+
+
+@require_http_methods(["DELETE"])
+@login_required
+@authorize_objects(
+    [
+        ObjPerm(Organization, "organization_id", ["view_organization"]),
+        ObjPerm(Form, "form_id", ["delete_form"]),
+    ]
+)
+def form_dismiss(request: AuthenticatedHttpRequest, organization: Organization, form: Form):
+    """Dismiss a failed form."""
+    form.status = FormStatus.DISMISSED
+    form.save()
+    return HttpResponse("")
 
 
 @require_GET

@@ -46,6 +46,7 @@ from .views.summary_templates import summary_template_list
 from .views.task import task
 from .views.templates import form_builder
 from .views.templates import form_details
+from .views.templates import form_dismiss
 from .views.templates import form_edit
 from .views.templates import form_file_upload
 from .views.templates import form_list
@@ -93,6 +94,11 @@ urlpatterns = [
     ),
     path(
         "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/edit", form_edit, name="form_template_edit"
+    ),
+    path(
+        "organization/<uuid:organization_id>/templates/form/<uuid:form_id>/dismiss",
+        form_dismiss,
+        name="form_template_dismiss",
     ),
     path("organization/<uuid:organization_id>/templates/form/file_upload", form_file_upload, name="form_file_upload"),
     path("organization/<uuid:organization_id>/templates/forms/builder", form_builder, name="form_template_builder"),

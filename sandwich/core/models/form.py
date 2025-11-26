@@ -23,6 +23,8 @@ class FormStatus(models.TextChoices):
     GENERATING = "generating"
     # Form failed AI generation
     FAILED = "failed"
+    # Failed form dismissed by user
+    DISMISSED = "dismissed"
 
 
 @pghistory.track()

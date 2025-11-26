@@ -42,6 +42,18 @@
           </td>
           <td>{{ form.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
           <td>{{ form.updated_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
+          <td class="text-right">
+            {% if form.status == "failed" and form.user_can_delete %}
+              <button class="btn btn-ghost btn-sm"
+                      type="button"
+                      hx-delete="{% url 'providers:form_template_dismiss' organization_id=organization.id form_id=form.id %}"
+                      hx-target="closest tr"
+                      hx-swap="outerHTML swap:0.5s"
+                      aria-label="Dismiss failed form {{ form.name }}">
+                {% lucide "trash-2" class="h-4 w-4 text-red-500" %}
+              </button>
+            {% endif %}
+          </td>
         </tr>
       {% empty %}
         <tr>
