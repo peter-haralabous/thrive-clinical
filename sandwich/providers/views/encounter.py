@@ -1,6 +1,9 @@
 import logging
 from typing import TYPE_CHECKING
 
+from csp.constants import UNSAFE_INLINE
+from csp.decorators import csp_update
+
 if TYPE_CHECKING:
     from uuid import UUID
 
@@ -184,6 +187,8 @@ def encounter_details(
     return render(request, "provider/encounter_details.html", context)
 
 
+# Need to be able to apply styles to attribute chips
+@csp_update({"style-src-attr": UNSAFE_INLINE})
 @login_required
 @authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization"])])
 def encounter_list(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:

@@ -29,7 +29,7 @@
       <td>{{ encounter.updated_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
     {% elif col.is_custom %}
       {% with annotation_name=col.value|custom_attr_name %}
-        {% include "provider/partials/inline_edit_display.html" with cell_id="encounter-"|add:encounter.id|stringformat:"s"|add:"-"|add:col.value field_name=col.value display_value=encounter|get_attr:annotation_name|default:EMPTY_VALUE_DISPLAY can_edit=True encounter=encounter organization=organization %}
+        {% include "provider/partials/inline_edit_display.html" with cell_id="encounter-"|add:encounter.id|stringformat:"s"|add:"-"|add:col.value field_name=col.value display_value=encounter|get_attr:annotation_name|default:EMPTY_VALUE_DISPLAY annotation_name=annotation_name can_edit=True encounter=encounter organization=organization %}
       {% endwith %}
     {% endif %}
   {% endfor %}

@@ -52,7 +52,7 @@ def get_attr(obj: Any, attr_name: str) -> Any:
                     ).select_related("value_enum")
 
                     labels = [av.value_enum.label for av in attr_values if av.value_enum]
-                    return ", ".join(labels) if labels else ""
+                    return labels if labels else None
                 if attribute.data_type == CustomAttribute.DataType.DATE:
                     # For date attributes, format consistently as YYYY-MM-DD
                     if isinstance(value, date):
@@ -63,7 +63,7 @@ def get_attr(obj: Any, attr_name: str) -> Any:
                 # Not a multi-select attribute or attribute not found, use annotated value
                 pass
             else:
-                return value
+                return [value]
     except (AttributeError, TypeError):
         return ""
 
