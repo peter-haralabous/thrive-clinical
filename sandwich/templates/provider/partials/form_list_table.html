@@ -1,4 +1,4 @@
-{% load sortable %}
+{% load lucide sortable %}
 
 {% include "partials/messages_oob.html" %}
 <div class="overflow-x-auto rounded-box border border-base-200 bg-base-100">
@@ -15,8 +15,14 @@
       {% for form in forms %}
         <tr {% if form.is_generating %}class="bg-gray-100"{% elif form.status == "failed" %}class="bg-error/10"{% endif %}>
           <td {% if form.is_generating %}class="text-gray-400"{% elif form.status == "failed" %}class="text-error"{% endif %}>
-            {% if form.is_generating or form.status == "failed" %}
+            {% if form.is_generating %}
+              <span class="loading loading-spinner loading-xs" slot="icon"></span>
               {{ form.name }}
+            {% elif form.status == "failed" %}
+              <span class="flex items-center gap-1">
+                {% lucide "x" class="size-4" %}
+                {{ form.name }}
+              </span>
             {% else %}
               <a class="link"
                  href="{% url "providers:form_template_edit" organization_id=organization.id form_id=form.id %}">{{ form.name }}</a>
@@ -24,7 +30,6 @@
           </td>
           <td {% if form.is_generating %}class="text-gray-400"{% elif form.status == "failed" %}class="text-error"{% endif %}>
             {% if form.is_generating %}
-              <span class="loading loading-spinner loading-xs" slot="icon"></span>
               <i>Generating...</i>
             {% elif form.status == "failed" %}
               <i>Generation failed</i>
