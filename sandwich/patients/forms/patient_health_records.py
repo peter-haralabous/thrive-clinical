@@ -2,6 +2,8 @@ import logging
 from datetime import date
 
 from crispy_forms.helper import FormHelper
+from crispy_forms.layout import HTML
+from crispy_forms.layout import Layout
 from crispy_forms.layout import Submit
 from django import forms
 from pydantic import BaseModel
@@ -101,6 +103,23 @@ class ConditionForm(HealthRecordForm[Condition]):
 class DocumentForm(HealthRecordForm[Document]):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+
+        self.helper.layout = Layout(
+            "original_filename",
+            HTML("""
+            {% load lucide %}
+            <div class="-mt-2 pb-2 text-xs text-blue-600">
+                <a target="_blank" href="{% url "patients:document_download" instance.pk %}">
+                    View file {% lucide "external-link" size=12 class="inline align-top" %}
+                </a>
+            </div>
+            """),
+            "content_type",
+            "size",
+            "date",
+            "category",
+        )
+
         for field in ("original_filename", "content_type", "size"):
             self.fields[field].disabled = True
 
