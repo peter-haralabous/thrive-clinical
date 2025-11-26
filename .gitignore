@@ -290,3 +290,4 @@ tsconfig.tsbuildinfo
 # Local Claude settings
 .claude/settings.local.json
 .clauderc
+.vscode/settings.json
