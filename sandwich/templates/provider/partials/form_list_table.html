@@ -20,7 +20,7 @@
               {{ form.name }}
             {% elif form.status == "failed" %}
               <span class="flex items-center gap-1">
-                {% lucide "x" class="size-4" %}
+                {% lucide "circle-alert" class="size-4" %}
                 {{ form.name }}
               </span>
             {% else %}
@@ -42,7 +42,7 @@
           </td>
           <td>{{ form.created_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
           <td>{{ form.updated_at|date:DJANGO_DATE_TIME_FORMAT }}</td>
-          <td class="text-right">
+          <td class="text-right p-2">
             {% if form.status == "failed" and form.user_can_delete %}
               <button class="btn btn-ghost btn-sm"
                       type="button"
