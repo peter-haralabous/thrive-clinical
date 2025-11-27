@@ -201,7 +201,14 @@ def form_template_preview(
     form_schema = form_version.schema if form_version.schema else {}
 
     return render(
-        request, "provider/form_preview.html", {"organization": organization, "form": form, "form_schema": form_schema}
+        request,
+        "provider/form_preview.html",
+        {
+            "organization": organization,
+            "form": form,
+            "form_schema": form_schema,
+            "address_autocomplete_url": reverse("core:address_search"),
+        },
     )
 
 
