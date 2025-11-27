@@ -18,7 +18,7 @@ from sandwich.core.models import Immunization
 from sandwich.core.models import Patient
 from sandwich.core.models import Practitioner
 from sandwich.core.models.health_record import HealthRecordType
-from sandwich.core.service.llm import ModelName
+from sandwich.core.service.chat_service.sse import send_records_updated
 from sandwich.core.service.tool_service.response import ErrorResponse
 from sandwich.core.service.tool_service.types import ModelDict  # noqa: TC001
 from sandwich.users.models import User
@@ -106,6 +106,7 @@ def build_write_patient_record_tool(user: User, patient: Patient, type_: HealthR
                 obj = form.save(patient=patient, commit=False)
                 obj.unattested = True  # The tool is making the update on behalf of the user.
                 obj.save()
+                send_records_updated(patient)
                 return PythonSerializer().serialize([obj])[0]
         return ErrorResponse(errors=form.errors)
 
@@ -139,6 +140,7 @@ def build_update_patient_record_tool(user: User, patient: Patient, type_: Health
                 conversation=runtime.config["configurable"]["thread_id"],
             ):
                 obj = form.save(patient=patient)
+            send_records_updated(patient)
             return PythonSerializer().serialize([obj])[0]
         return {"errors": form.errors}
 
