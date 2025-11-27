@@ -66,7 +66,10 @@ DATABASES["default"]["OPTIONS"] = {
         "max_size": 8,
     },
 }
-DATABASES["default"]["ATOMIC_REQUESTS"] = True
+
+# Note(WF): Testing turning off atomic requests, as it may be hogging database connections.
+# DATABASES["default"]["ATOMIC_REQUESTS"] = True
+
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
