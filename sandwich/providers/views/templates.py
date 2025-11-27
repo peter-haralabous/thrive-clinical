@@ -271,7 +271,12 @@ def form_edit(request: AuthenticatedHttpRequest, organization: Organization, for
     return render(
         request,
         "provider/form_builder.html",
-        {"organization": organization, "form": form, "form_save_url": url},
+        {
+            "organization": organization,
+            "form": form,
+            "form_save_url": url,
+            "address_autocomplete_url": reverse("core:address_search"),
+        },
     )
 
 
@@ -288,7 +293,13 @@ def form_builder(request: AuthenticatedHttpRequest, organization: Organization):
     form = Form.objects.create(organization=organization, name=f"unnamed form created on {date.today().isoformat()}")  # noqa: DTZ011
 
     return redirect(
-        reverse("providers:form_template_edit", kwargs={"organization_id": organization.id, "form_id": form.id})
+        reverse(
+            "providers:form_template_edit",
+            kwargs={
+                "organization_id": organization.id,
+                "form_id": form.id,
+            },
+        )
     )
 
 

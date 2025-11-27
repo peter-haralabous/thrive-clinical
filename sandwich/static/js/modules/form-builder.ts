@@ -4,6 +4,7 @@ import { slk } from 'survey-core';
 import * as SurveyCore from 'survey-core';
 import CustomSandwichTheme from '../lib/survey-form-theme';
 import { registerCustomComponents } from '../components/forms/custom-components';
+import { setupAddressAutocomplete } from '../lib/address-autocomplete';
 import '../components/message-alert';
 
 const ENVIRONMENT = JSON.parse(
@@ -83,6 +84,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const creator = new SurveyCreator(creatorOptions);
   creator.theme = CustomSandwichTheme;
+
+  const _addressAutocompleteUrl = document
+    .getElementById('form-builder-container')
+    ?.getAttribute('data-address-url');
+
+  creator.onSurveyInstanceSetupHandlers.add((sender, options) => {
+    if (options.area !== 'preview-tab') return;
+    setupAddressAutocomplete(options.survey, _addressAutocompleteUrl ?? null);
+  });
 
   // Register onNotify handler to show notifications as toasts
   creator.onNotify.add((sender, options) => {
