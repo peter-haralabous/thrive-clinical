@@ -39,5 +39,5 @@ def exception_handling(
                 }
             },
         )
-        return ToolMessage(content=f"An error occurred: {exc_info!s}")
+        raise
     return response
