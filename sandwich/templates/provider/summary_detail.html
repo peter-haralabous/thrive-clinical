@@ -3,10 +3,10 @@
 {% load lucide %}
 
 {% block content %}
-  <a class="space-x-2 flex items-center text-gray-800 mb-6 link"
+  <a class="inline-flex items-center gap-2 text-gray-800 mb-6 link"
      href="{{ breadcrumb_url }}">
     {% lucide "chevron-left" class="size-4" %}
-    {{ breadcrumb_text }}
+    <span>{{ breadcrumb_text }}</span>
   </a>
   <div class="mb-6">
     <div class="card bg-base-100 border border-base-200 shadow-sm mb-6">
