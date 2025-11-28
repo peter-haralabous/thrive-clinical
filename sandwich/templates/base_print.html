@@ -14,8 +14,8 @@
     </title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     {% block css %}
-      {# Print-specific CSS bundle #}
-      {% render_bundle 'print' 'css' %}
+      {# Use main project CSS - can create separate print.css later if needed #}
+      {% render_bundle 'project' 'css' %}
     {% endblock css %}
   </head>
   <body>

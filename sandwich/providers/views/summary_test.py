@@ -716,9 +716,9 @@ def test_summary_detail_page_has_print_button(
     result = client.get(url)
 
     content = result.content.decode("utf-8")
-    assert "js-print-summary" in content
+    assert "js-print" in content
     assert "Print Summary" in content
-    assert "data-print-summary-url" in content
+    assert "data-print-url" in content
 
 
 @pytest.mark.django_db
@@ -742,6 +742,6 @@ def test_summary_modal_has_print_button(
     result = client.get(url, headers={"HX-Request": "true"})
 
     content = result.content.decode("utf-8")
-    assert "js-print-summary" in content
+    assert "js-print" in content
     assert "Print Summary" in content
-    assert "data-print-summary-url" in content
+    assert "data-print-url" in content
