@@ -17,6 +17,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
 from guardian.shortcuts import get_objects_for_user
 
 from sandwich.core.decorators import surveyjs_csp
@@ -85,7 +86,9 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         "Accessing organization form list",
         extra={"user_id": request.user.id, "organization_id": organization.id},
     )
-    organization_forms = Form.objects.filter(organization=organization).order_by("-created_at")
+    organization_forms = (
+        Form.objects.filter(organization=organization).exclude(status=FormStatus.DISMISSED).order_by("-created_at")
+    )
     authorized_org_forms = get_objects_for_user(request.user, ["view_form"], organization_forms)
 
     page = request.GET.get("page", 1)
@@ -97,8 +100,8 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         generating_ids = request.GET.get("generating_ids", "")
         if generating_ids:
             form_ids = [fid.strip() for fid in generating_ids.split(",") if fid.strip()]
-            completed_forms = Form.objects.filter(organization=organization, id__in=form_ids).exclude(
-                status=FormStatus.GENERATING
+            completed_forms = Form.objects.filter(
+                organization=organization, id__in=form_ids, status__in=[FormStatus.ACTIVE, FormStatus.FAILED]
             )
 
             for form in completed_forms:
@@ -109,7 +112,12 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
                         request, messages.ERROR, f"Form '{form.name}' generation failed, you can try again."
                     )
 
-    has_generating_forms = any(form.is_generating for form in forms_page)
+    # Collect currently generating form IDs for continued polling
+    generating_form_id_list = [str(form.id) for form in forms_page if form.is_generating]
+
+    # Annotate each form with whether user can delete it
+    for form in forms_page:
+        form.user_can_delete = request.user.has_perm("delete_form", form)  # type: ignore[attr-defined]
 
     return render(
         request,
@@ -117,7 +125,7 @@ def form_list(request: AuthenticatedHttpRequest, organization: Organization):
         {
             "organization": organization,
             "forms": forms_page,
-            "has_generating_forms": has_generating_forms,
+            "generating_form_id_list": generating_form_id_list,
         },
     )
 
@@ -193,8 +201,30 @@ def form_template_preview(
     form_schema = form_version.schema if form_version.schema else {}
 
     return render(
-        request, "provider/form_preview.html", {"organization": organization, "form": form, "form_schema": form_schema}
+        request,
+        "provider/form_preview.html",
+        {
+            "organization": organization,
+            "form": form,
+            "form_schema": form_schema,
+            "address_autocomplete_url": reverse("core:address_search"),
+        },
     )
+
+
+@require_http_methods(["DELETE"])
+@login_required
+@authorize_objects(
+    [
+        ObjPerm(Organization, "organization_id", ["view_organization"]),
+        ObjPerm(Form, "form_id", ["delete_form"]),
+    ]
+)
+def form_dismiss(request: AuthenticatedHttpRequest, organization: Organization, form: Form):
+    """Dismiss a failed form."""
+    form.status = FormStatus.DISMISSED
+    form.save()
+    return HttpResponse("")
 
 
 @require_GET
@@ -241,7 +271,12 @@ def form_edit(request: AuthenticatedHttpRequest, organization: Organization, for
     return render(
         request,
         "provider/form_builder.html",
-        {"organization": organization, "form": form, "form_save_url": url},
+        {
+            "organization": organization,
+            "form": form,
+            "form_save_url": url,
+            "address_autocomplete_url": reverse("core:address_search"),
+        },
     )
 
 
@@ -258,7 +293,13 @@ def form_builder(request: AuthenticatedHttpRequest, organization: Organization):
     form = Form.objects.create(organization=organization, name=f"unnamed form created on {date.today().isoformat()}")  # noqa: DTZ011
 
     return redirect(
-        reverse("providers:form_template_edit", kwargs={"organization_id": organization.id, "form_id": form.id})
+        reverse(
+            "providers:form_template_edit",
+            kwargs={
+                "organization_id": organization.id,
+                "form_id": form.id,
+            },
+        )
     )
 
 

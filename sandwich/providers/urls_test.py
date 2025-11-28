@@ -46,6 +46,8 @@ EXCLUDED_URL_NAMES = {
     "remove_filter",
     "clear_all_filters",
     "save_current_filters",
+    # DELETE-only endpoints
+    "form_template_dismiss",
     # GET endpoints that require query parameters we can't easily provide
     "get_filter_options",
     "get_filter_options_with_id",

@@ -41,7 +41,7 @@
         </div>
       {% endif %}
       {% lucide "folder" class="size-5" %}
-      <h3 class="font-medium">Repository</h3>
+      <h3 class="font-medium">Documents</h3>
     </a>
     <a href="{% url 'patients:patient_tasks' patient_id=patient.id %}"
        hx-get="{% url 'patients:patient_tasks' patient_id=patient.id %}"

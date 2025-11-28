@@ -481,3 +481,10 @@ EVENTSTREAM_CHANNELMANAGER_CLASS = "sandwich.core.eventstream.ChannelManager"
 
 # API keys for API-driven form inputs
 GOOGLE_API_KEY = env.str("GOOGLE_API_KEY", default=None)
+DRUGBANK_API_KEY = env.str("DRUGBANK_API_KEY", default=None)
+
+
+if ENVIRONMENT not in {"not set", "production"}:
+    LOGGING["loggers"]["psycopg.pool"] = {  # type: ignore[index]
+        "level": "INFO",
+    }

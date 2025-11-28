@@ -49,8 +49,8 @@ urlpatterns = [
     path("patient/<uuid:patient_id>/regenerate_summary", regenerate_health_summary, name="regenerate_health_summary"),
     path("patient/<uuid:patient_id>/records", patient_records, name="patient_records"),
     path("patient/<uuid:patient_id>/records/<str:record_type>", patient_records, name="patient_records"),
-    path("patient/<uuid:patient_id>/repository", patient_repository, name="patient_repository"),
-    path("patient/<uuid:patient_id>/repository/<str:category>", patient_repository, name="patient_repository"),
+    path("patient/<uuid:patient_id>/documents", patient_repository, name="patient_repository"),
+    path("patient/<uuid:patient_id>/documents/<str:category>", patient_repository, name="patient_repository"),
     path("patient/<uuid:patient_id>/tasks", patient_tasks, name="patient_tasks"),
     path(
         "patient/<uuid:patient_id>/health_records/<str:record_type>/add", health_records_add, name="health_records_add"

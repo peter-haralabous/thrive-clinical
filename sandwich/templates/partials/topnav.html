@@ -75,9 +75,9 @@
             </li>
             <hr class="!my-1" />
             <li>
-              <form action="{% url 'account_logout' %}" method="post">
+              <form class="block" action="{% url 'account_logout' %}" method="post">
                 {% csrf_token %}
-                <button type="submit">Sign Out</button>
+                <button class="w-full text-left" type="submit">Sign Out</button>
               </form>
             </li>
           </ul>

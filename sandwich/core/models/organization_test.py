@@ -12,3 +12,9 @@ def test_organization_create_assigns_permissions() -> None:
     with patch("sandwich.core.service.organization_service.create_default_roles_and_perms") as mock_create:
         created = Organization.objects.create(name="test org", slug="is_this_unique")
         mock_create.assert_called_once_with(created)
+
+
+@pytest.mark.django_db
+def test_new_organization_is_unverified() -> None:
+    new_org = Organization.objects.create(name="test org", slug="is_this_unique")
+    assert new_org.verified is False
