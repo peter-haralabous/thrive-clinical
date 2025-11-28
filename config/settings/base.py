@@ -64,10 +64,7 @@ DATABASES["default"]["OPTIONS"] = {
     # see https://www.psycopg.org/psycopg3/docs/api/pool.html#psycopg_pool.ConnectionPool for pool config options
     "pool": {"min_size": 1, "max_size": 10, "max_idle": 300},
 }
-
-# Note(WF): Testing turning off atomic requests, as it may be hogging database connections.
-# DATABASES["default"]["ATOMIC_REQUESTS"] = True
-
+DATABASES["default"]["ATOMIC_REQUESTS"] = True
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
