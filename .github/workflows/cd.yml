@@ -36,16 +36,16 @@ jobs:
     uses: ./.github/workflows/run-smoke-test.yml
     with:
       environment: integration
-
-  deploy-production:
-    needs: smoketest-integration
-    uses: ./.github/workflows/run-deploy.yml
-    with:
-      environment: production
-      image_tag: integration
-
-  smoketest-production:
-    needs: deploy-production
-    uses: ./.github/workflows/run-smoke-test.yml
-    with:
-      environment: production
+# TODO(WF): re-wire up once we're happy with integration again
+#  deploy-production:
+#    needs: smoketest-integration
+#    uses: ./.github/workflows/run-deploy.yml
+#    with:
+#      environment: production
+#      image_tag: integration
+#
+#  smoketest-production:
+#    needs: deploy-production
+#    uses: ./.github/workflows/run-smoke-test.yml
+#    with:
+#      environment: production
