@@ -11,13 +11,35 @@ register = template.Library()
 @register.simple_tag()
 def attribute_chip(attribute_name, label):
     attr_id = _parse_custom_attribute_id(attribute_name.replace("attr_", "").replace("_", "-"))
-    if not attr_id:
-        return None
+    if attr_id:
+        attribute = CustomAttribute.objects.get(id=attr_id)
+        attr_enum = CustomAttributeEnum.objects.filter(attribute=attribute, label=label).first()
+        if attr_enum:
+            color_tag = attr_enum.color_code
 
-    attribute = CustomAttribute.objects.get(id=attr_id)
-    attr_enum = CustomAttributeEnum.objects.filter(attribute=attribute, label=label).first()
-    color_tag = ""
-    if attr_enum:
-        color_tag = attr_enum.color_code
+            if color_tag:
+                return format_html(
+                    """<div style="background-color: #{};" class="w-fit rounded m-1">
+                        <div style="mix-blend-mode: color-burn;"
+                            class="m-2 text-center min-w-12">{}
+                        </div>
+                    </div>""",
+                    color_tag,
+                    label,
+                )
 
-    return format_html('<div style="background-color: #{}">{}</div>', color_tag, label)
+        return format_html(
+            """<div style="background-color: #{};" class="w-fit rounded m-1">
+                <div style="color: #{}; mix-blend-mode: plus-lighter;" class="m-2 text-center min-w-12">{}</div>
+            </div>""",
+            color_tag,
+            color_tag,
+            label,
+        )
+
+    return format_html(
+        """<div class="w-fit rounded m-1">
+            <div class="m-2 text-center min-w-12">{}</div>
+        </div>""",
+        label,
+    )
