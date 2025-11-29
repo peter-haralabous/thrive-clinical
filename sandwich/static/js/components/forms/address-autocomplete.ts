@@ -21,14 +21,11 @@ export function registerAddressComponent() {
     title: 'Address',
     defaultQuestionTitle: 'Enter your address',
     iconName: 'icon-map-pin',
-    elementsJSON: [
-      {
-        type: 'dropdown',
-        name: 'suggested_addresses',
-        title: 'Address',
-        choicesLazyLoadEnabled: true,
-        resetValueIf: '{option.filter} empty',
-      },
-    ],
+    questionJSON: {
+      type: 'dropdown',
+      name: 'suggested_addresses',
+      choicesLazyLoadEnabled: true,
+      resetValueIf: '{option.filter} empty',
+    },
   });
 }
