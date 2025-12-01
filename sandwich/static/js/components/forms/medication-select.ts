@@ -3,7 +3,7 @@ import { ComponentCollection, SvgRegistry } from 'survey-core';
 export function registerMedicationComponent() {
   // Check if already registered to avoid errors in test environments
   if (
-    ComponentCollection.Instance.getCustomQuestionByName('addressautocomplete')
+    ComponentCollection.Instance.getCustomQuestionByName('medicationselect')
   ) {
     return;
   }
