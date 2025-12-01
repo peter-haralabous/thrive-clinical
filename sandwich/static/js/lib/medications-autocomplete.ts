@@ -7,11 +7,11 @@ interface MedicationResult {
 }
 
 interface ItemOptions {
-  name: string;
+  text: string;
   value: string;
 }
 
-async function fetchMedicationsSuggestions(
+export async function fetchMedicationsSuggestions(
   url: string,
 ): Promise<MedicationResult[]> {
   try {
@@ -39,7 +39,7 @@ function medicationResultsToOptions(
 ): ItemOptions[] {
   return results.map((r) => {
     return {
-      name: r.display_name || r.name,
+      text: r.display_name || r.name,
       value: r.name,
     };
   });
