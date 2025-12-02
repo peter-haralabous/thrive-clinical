@@ -1,4 +1,9 @@
-import { ComponentCollection, SvgRegistry } from 'survey-core';
+import {
+  ComponentCollection,
+  Serializer,
+  SvgRegistry,
+  SurveyModel,
+} from 'survey-core';
 
 export function registerMedicationComponent() {
   // Check if already registered to avoid errors in test environments
