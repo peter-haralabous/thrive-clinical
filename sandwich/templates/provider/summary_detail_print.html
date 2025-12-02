@@ -7,12 +7,11 @@
 {% endblock title %}
 {% block content %}
   <div class="max-w-4xl mx-auto p-8">
-    {# Summary metadata #}
-    <div class="mb-6">{% include 'provider/partials/summary_content.html' with title_tag='h1' badge_size='md' %}</div>
-    {# Summary body #}
+    {# Summary metadata and body #}
     {% if summary.status == "succeeded" %}
-      <div class="prose max-w-none">{{ summary.body|safe }}</div>
+      {% include 'provider/partials/summary_content.html' with title_tag='h1' badge_size='md' hide_actions=True %}
     {% else %}
+      <h1>{{ summary.title }}</h1>
       <p class="text-gray-600">Summary is not available for printing.</p>
     {% endif %}
   </div>
