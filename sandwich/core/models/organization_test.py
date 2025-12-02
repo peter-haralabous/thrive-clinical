@@ -3,6 +3,8 @@ from unittest.mock import patch
 import pytest
 
 from sandwich.core.models import Organization
+from sandwich.core.models import OrganizationVerification
+from sandwich.users.models import User
 
 
 @pytest.mark.django_db
@@ -18,3 +20,13 @@ def test_organization_create_assigns_permissions() -> None:
 def test_new_organization_is_unverified() -> None:
     new_org = Organization.objects.create(name="test org", slug="is_this_unique")
     assert new_org.verified is False
+
+
+@pytest.mark.django_db
+def test_organization_can_be_verified() -> None:
+    new_org = Organization.objects.create(name="test org", slug="is_this_unique")
+    staff_user = User.objects.create(is_staff=True)
+
+    assert new_org.verified is False
+    OrganizationVerification.objects.create(organization=new_org, approver=staff_user)
+    assert new_org.verified is True

@@ -60,10 +60,6 @@ class Organization(BaseModel):  # type: ignore[django-manager-missing] # see doc
         default=VerificationType.DATE_OF_BIRTH,
     )
 
-    verified = models.BooleanField(
-        default=False, help_text="Specifies an organization is authorized to interact with patients"
-    )
-
     objects = OrganizationManager()
 
     def __str__(self) -> str:
@@ -94,6 +90,15 @@ class Organization(BaseModel):  # type: ignore[django-manager-missing] # see doc
 
     def natural_key(self) -> tuple[object, ...]:
         return (self.slug,)
+
+    @property
+    def verified(self) -> bool:
+        try:
+            _ = self.organizationverification
+        except AttributeError:
+            return False
+        else:
+            return True
 
     class Meta:
         permissions = (
