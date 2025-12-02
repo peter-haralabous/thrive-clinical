@@ -704,16 +704,6 @@ class TestModelFieldFilters:
         filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         assert list(filtered.values_list("id", flat=True)) == [enc1.id]
 
-        # Test gte operator
-        filters = {"model_fields": {"ended_at": {"type": "date", "operator": "gte", "value": date(2024, 2, 1)}}}
-        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
-        assert len(filtered) == 2
-
-        # Test lte operator
-        filters = {"model_fields": {"ended_at": {"type": "date", "operator": "lte", "value": date(2024, 2, 28)}}}
-        filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
-        assert len(filtered) == 2
-
     def test_filter_model_field_with_date_range(self, organization, patient):
         content_type = ContentType.objects.get_for_model(Encounter)
         tz = ZoneInfo("UTC")
@@ -741,7 +731,14 @@ class TestModelFieldFilters:
 
         # Test with _range suffix (from URL parsing)
         filters = {
-            "model_fields": {"ended_at_range": {"type": "date", "start": date(2024, 1, 10), "end": date(2024, 2, 28)}}
+            "model_fields": {
+                "ended_at_range": {
+                    "type": "date",
+                    "operator": "range",
+                    "start": date(2024, 1, 10),
+                    "end": date(2024, 2, 28),
+                }
+            }
         }
         filtered = apply_filters_with_custom_attributes(encounters, filters, organization, content_type)
         results = list(filtered.values_list("id", flat=True))

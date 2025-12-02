@@ -3,7 +3,7 @@
 {% crispy form %}
 <script>
   (() => {
-    const operatorSelect = document.getElementById("date-operator");
+    const operatorToggle = document.getElementById("date-operator");
     const rangeInputs = document.getElementById("date-range-inputs");
     const singleInput = document.getElementById("date-single-input");
     const presetButtons = document.getElementById("date-preset-buttons");
@@ -12,7 +12,7 @@
     const valueInput = document.querySelector("input[name='value']");
 
     function toggleDateInputs() {
-      const isRange = operatorSelect.value === "range";
+      const isRange = operatorToggle.checked;
 
       if (isRange) {
         rangeInputs.classList.remove("hidden");
@@ -24,7 +24,7 @@
         rangeInputs.classList.add("hidden");
         singleInput.classList.remove("hidden");
         presetButtons?.classList.add("hidden");
-        valueInput.setAttribute("aria-label", `Date for ${operatorSelect.selectedOptions[0].text} filter`);
+        valueInput.setAttribute("aria-label", "Date for exact date filter");
       }
     }
 
@@ -55,7 +55,7 @@
           return;
       }
 
-      operatorSelect.value = "range";
+      operatorToggle.checked = true;
       startInput.value = start.toISOString().split("T")[0];
       endInput.value = end.toISOString().split("T")[0];
       toggleDateInputs();
@@ -70,7 +70,7 @@
       targetButton.classList.add("btn-primary");
     }
 
-    operatorSelect.addEventListener("change", toggleDateInputs);
+    operatorToggle.addEventListener("change", toggleDateInputs);
 
     document.querySelectorAll("[data-preset]").forEach((button) => {
       button.addEventListener("click", function(event) {
