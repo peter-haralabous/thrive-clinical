@@ -28,7 +28,11 @@ describe('medication-select', () => {
     loadSchemaScript({
       title: 'Test Survey',
       elements: [
-        { name: 'medications', title: 'Medications', type: 'medicationselect' },
+        {
+          name: 'medications',
+          title: 'Medications',
+          type: 'medication-multi-select',
+        },
       ],
     });
     loadSurveyComponent();
@@ -65,7 +69,11 @@ describe('medication-select', () => {
     loadSchemaScript({
       title: 'Test Survey',
       elements: [
-        { name: 'medications', title: 'Medications', type: 'medicationselect' },
+        {
+          name: 'medications',
+          title: 'Medications',
+          type: 'medication-multi-select',
+        },
       ],
     });
     const surveyEl = loadSurveyComponent();
@@ -109,7 +117,11 @@ describe('medication-select', () => {
     loadSchemaScript({
       title: 'Test Survey',
       elements: [
-        { name: 'medications', title: 'Medications', type: 'medicationselect' },
+        {
+          name: 'medications',
+          title: 'Medications',
+          type: 'medication-multi-select',
+        },
       ],
     });
     loadInitialDataScript({
@@ -136,7 +148,11 @@ describe('medication-select', () => {
     loadSchemaScript({
       title: 'Test Survey',
       elements: [
-        { name: 'medications', title: 'Medications', type: 'medicationselect' },
+        {
+          name: 'medications',
+          title: 'Medications',
+          type: 'medication-multi-select',
+        },
       ],
     });
     loadSurveyComponent();

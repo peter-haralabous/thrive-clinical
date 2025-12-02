@@ -63,18 +63,18 @@ export function setupMedicationsAutocomplete(
 ) {
   survey.onChoicesLazyLoad.add(async (_survey, options) => {
     if (
-      options.question.getType() !== 'tagbox' ||
-      options.question.name !== 'medication_select' ||
-      options.filter === ''
+      options.question.getType() === 'tagbox' ||
+      options.question.name === 'medication_multi_select' ||
+      options.question.getType() === 'dropdown' ||
+      options.question.name === 'medication_select' ||
+      options.filter !== ''
     ) {
-      return;
+      const url = `${medicationsAutocompleteUrl}?query=${encodeURIComponent(options.filter)}`;
+      const data = await fetchMedicationsSuggestions(url);
+
+      const medicationOptions = medicationResultsToOptions(data);
+      options.setItems(medicationOptions, medicationOptions.length);
     }
-
-    const url = `${medicationsAutocompleteUrl}?query=${encodeURIComponent(options.filter)}`;
-    const data = await fetchMedicationsSuggestions(url);
-
-    const medicationOptions = medicationResultsToOptions(data);
-    options.setItems(medicationOptions, medicationOptions.length);
   });
 
   /*
@@ -87,17 +87,17 @@ export function setupMedicationsAutocomplete(
    */
   survey.onGetChoiceDisplayValue.add((_survey, options) => {
     if (
-      options.question.getType() !== 'tagbox' ||
-      options.question.name !== 'medication_select'
+      options.question.getType() === 'tagbox' ||
+      options.question.name === 'medication_multi_select' ||
+      options.question.getType() === 'dropdown' ||
+      options.question.name === 'medication_select'
     ) {
-      return;
+      const displayValues = options.values.map((r: MedicationResult) => {
+        // Not all drugbank entries have display_name
+        return r.display_name || r.name;
+      });
+
+      options.setItems(displayValues);
     }
-
-    const displayValues = options.values.map((r: MedicationResult) => {
-      // Not all drugbank entries have display_name
-      return r.display_name || r.name;
-    });
-
-    options.setItems(displayValues);
   });
 }
