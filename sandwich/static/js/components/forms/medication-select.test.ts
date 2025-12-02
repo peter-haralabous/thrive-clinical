@@ -1,5 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { loadSchemaScript, loadSurveyComponent } from './surveyFormTestUtils';
+import {
+  loadInitialDataScript,
+  loadSchemaScript,
+  loadSurveyComponent,
+} from './surveyFormTestUtils';
 import userEvent from '@testing-library/user-event';
 import { getByLabelText, getByText } from '@testing-library/dom';
 import '@testing-library/jest-dom/vitest';
@@ -53,6 +57,77 @@ describe('medication-select', () => {
       expect(
         getByText(document.body, 'tylenol extra strength'),
       ).toBeInTheDocument();
+    });
+  });
+
+  it('stores complex medication info as value', async () => {
+    const user = userEvent.setup();
+    loadSchemaScript({
+      title: 'Test Survey',
+      elements: [
+        { name: 'medications', title: 'Medications', type: 'medicationselect' },
+      ],
+    });
+    const surveyEl = loadSurveyComponent();
+
+    const medicationApiData = [
+      { name: 'tylenol', display_name: 'Tylenol', drugbank_id: 'drug_id1' },
+      {
+        name: 'acetylsalicylic acid',
+        display_name: 'Aspirin',
+        drugbank_id: 'drug_id2',
+      },
+    ];
+    const fetchSpy = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => medicationApiData,
+    });
+    vi.stubGlobal('fetch', fetchSpy);
+
+    await vi.waitFor(() => getByText(document.body, 'Test Survey'));
+
+    // Does not point to an input, but a container
+    const medicationsContainer = getByLabelText(document.body, 'Medications');
+    // Find medications input within the container
+    const input: HTMLInputElement | null =
+      medicationsContainer.querySelector('input');
+    expect(input).toBeInTheDocument();
+    await user.type(input!, 'tylen');
+
+    await vi.waitFor(() => {
+      expect(getByText(document.body, 'Tylenol')).toBeInTheDocument();
+    });
+    await user.click(getByText(document.body, 'Tylenol'));
+    // Selected drug value stored
+    expect(surveyEl.model?.getValue('medications')).toEqual([
+      medicationApiData[0],
+    ]);
+  });
+
+  it('can load existing medication object value and render display value', async () => {
+    const user = userEvent.setup();
+    loadSchemaScript({
+      title: 'Test Survey',
+      elements: [
+        { name: 'medications', title: 'Medications', type: 'medicationselect' },
+      ],
+    });
+    loadInitialDataScript({
+      // Simulate draft data or form submission
+      medications: [
+        {
+          name: 'tylenol',
+          display_name: 'Tylenol',
+          drugbank_id: 'drug_id1',
+        },
+      ],
+    });
+    loadSurveyComponent();
+
+    await vi.waitFor(() => getByText(document.body, 'Test Survey'));
+
+    await vi.waitFor(() => {
+      expect(getByText(document.body, 'Tylenol')).toBeInTheDocument();
     });
   });
 
