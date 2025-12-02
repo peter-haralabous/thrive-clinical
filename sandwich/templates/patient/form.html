@@ -46,7 +46,7 @@
               data-medications-url="{{ medications_autocomplete_url }}"
               data-file-upload-url="{% url 'core:attachment_upload' %}"
               data-file-delete-url="{% url 'core:attachment_delete' %}"
-              data-file-fetch-url="{% url 'core:attachment_by_name' %}"
+              data-file-fetch-url="{% url 'core:attachment_get' %}"
               {% if read_only %}readonly{% endif %}
             />
             {# djlint:on #}

@@ -67,7 +67,7 @@ def test_attachment_delete(user: User):
         file=SimpleUploadedFile("to_delete.txt", b"delete me"),
     )
 
-    url = reverse("core:attachment_delete", query={"name": attachment.original_filename})
+    url = reverse("core:attachment_delete", query={"id": str(attachment.pk)})
     client = Client()
     client.force_login(user)
 
@@ -85,7 +85,7 @@ def test_attachment_get_by_id(user: User) -> None:
         file=SimpleUploadedFile("fetch_me.txt", b"fetch me"),
     )
 
-    url = reverse("core:attachment_by_name", query={"name": attachment.original_filename})
+    url = reverse("core:attachment_get", query={"id": str(attachment.pk)})
     client = Client()
     client.force_login(user)
     response = client.get(url)
@@ -93,3 +93,37 @@ def test_attachment_get_by_id(user: User) -> None:
     assert response.status_code == 200
     assert response.content == b"fetch me"
     assert response["Content-Disposition"] == 'inline; filename="fetch_me.txt"'
+
+
+@pytest.mark.django_db
+def test_attachment_delete_with_invalid_id(user: User) -> None:
+    """Test that deleting with 'undefined' or invalid UUID returns 400."""
+    client = Client()
+    client.force_login(user)
+
+    # Test with 'undefined'
+    url = reverse("core:attachment_delete", query={"id": "undefined"})
+    response = client.delete(url)
+    assert response.status_code == 400
+
+    # Test with invalid UUID
+    url = reverse("core:attachment_delete", query={"id": "not-a-uuid"})
+    response = client.delete(url)
+    assert response.status_code == 403  # ValueError caught, returns 403
+
+
+@pytest.mark.django_db
+def test_attachment_get_with_invalid_id(user: User) -> None:
+    """Test that fetching with 'undefined' or invalid UUID returns 400."""
+    client = Client()
+    client.force_login(user)
+
+    # Test with 'undefined'
+    url = reverse("core:attachment_get", query={"id": "undefined"})
+    response = client.get(url)
+    assert response.status_code == 400
+
+    # Test with invalid UUID
+    url = reverse("core:attachment_get", query={"id": "not-a-uuid"})
+    response = client.get(url)
+    assert response.status_code == 403  # ValueError caught, returns 403

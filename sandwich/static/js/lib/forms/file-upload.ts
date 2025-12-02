@@ -1,6 +1,13 @@
 import type { Model } from 'survey-core';
 import { fetchJson } from '../fetchJson';
 
+interface UploadedFile {
+  id?: string;
+  name: string;
+  type: string;
+  content?: string;
+}
+
 const deleteFile = async (url: string, csrfToken: Args['csrfToken']) => {
   const resp = await fetch(url, {
     method: 'DELETE',
@@ -27,7 +34,6 @@ export function setupFileUploadInput(survey: Model, args: Args) {
   survey.onUploadFiles.add(async (_, options) => {
     const formData = new FormData();
     options.files.forEach((file) => {
-      console.log('file', { file });
       formData.append('file-upload', file);
     });
 
@@ -45,19 +51,20 @@ export function setupFileUploadInput(survey: Model, args: Args) {
           'X-CSRFToken': csrfToken || '',
         },
       });
-      options.callback(
-        options.files.map((file) => {
-          const resp = response.find(
-            (d: { original_filename: string }) =>
-              d.original_filename === file.name,
-          );
-          return {
-            file: file,
-            content: resp.url,
-            id: resp.id,
-          };
-        }),
-      );
+      const uploadedFiles = options.files.map((file) => {
+        const resp = response.find(
+          (d: { original_filename: string }) =>
+            d.original_filename === file.name,
+        );
+        // Store ID in the content field
+        return {
+          file: file,
+          content: resp.id,
+          name: file.name,
+          type: file.type,
+        };
+      });
+      options.callback(uploadedFiles);
     } catch (error) {
       console.error('Error: ', error);
       options.callback([], ['An error occurred during file upload.']);
@@ -69,15 +76,24 @@ export function setupFileUploadInput(survey: Model, args: Args) {
       return options.callback('success');
     }
     const filesToDelete = options.fileName
-      ? options.value.filter((item: File) => item.name === options.fileName)
+      ? options.value.filter(
+          (item: UploadedFile) => item.name === options.fileName,
+        )
       : options.value;
-    if (filesToDelete.length === 0) {
-      console.error(`File with name ${options.fileName} is not found`);
-      return options.callback('error');
+
+    // Only delete files that have been uploaded (content field contains the ID)
+    // Files being uploaded won't have IDs yet
+    const uploadedFiles = filesToDelete.filter(
+      (file: UploadedFile) => file.content && file.content !== 'undefined',
+    );
+
+    if (uploadedFiles.length === 0) {
+      return options.callback('success');
     }
+
     const results = await Promise.all(
-      filesToDelete.map((file: File) => {
-        const url = deleteUrl + `?name=${file.name}`;
+      uploadedFiles.map((file: UploadedFile) => {
+        const url = deleteUrl + `?id=${file.content}`;
         return deleteFile(url, csrfToken);
       }),
     );
@@ -90,7 +106,14 @@ export function setupFileUploadInput(survey: Model, args: Args) {
 
   survey.onDownloadFile.add(async (_, options) => {
     try {
-      const resp = await fetch(fetchUrl + `?name=${options.fileValue.name}`);
+      const fileId = options.fileValue.content;
+
+      if (!fileId || fileId === 'undefined') {
+        options.callback('error');
+        return;
+      }
+
+      const resp = await fetch(fetchUrl + `?id=${fileId}`);
       const blob = await resp.blob();
       const file = new File([blob], options.fileValue.name, {
         type: options.fileValue.type,
