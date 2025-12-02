@@ -105,6 +105,18 @@ def get_summary_url(summary: Summary) -> str:
             {},
             ["Temperature: 98.6", "BP: 120/80"],
         ),
+        # Medication select
+        (
+            "Medications: \n{% for medication in submission.data.medications %}\n- {{ medication.name }}\n{% endfor %}",  # noqa: E501
+            {
+                "medications": [
+                    {"name": "Acetaminophen [Tylenol]", "drugbank_id": "DBPC0055441", "display_name": "Tylenol"},
+                    {"name": "Acetylsalicylic acid", "drugbank_id": "DBPC0005793", "display_name": None},
+                ]
+            },
+            {},
+            ["Acetaminophen [Tylenol]", "Acetylsalicylic acid"],
+        ),
         # Empty data
         (
             "Patient: {{ patient.first_name }}\nData: {{ submission.data }}",
