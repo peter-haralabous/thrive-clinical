@@ -566,6 +566,7 @@ def encounter_edit_field(
             "form": form,
             "field_type": form_context["field_type"],
             "display_value": display_value,
+            "annotation_name": field_name,
         }
 
         return render(request, "provider/partials/inline_edit_form.html", context)
@@ -616,6 +617,7 @@ def encounter_edit_field(
         "cell_id": cell_id,
         "can_edit": True,
         "oob": False,
+        "annotation_name": field_name,
     }
 
     logger.info(

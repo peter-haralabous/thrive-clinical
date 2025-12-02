@@ -576,6 +576,10 @@ def test_inline_edit_custom_enum_updates_display(  # noqa: PLR0915
     assert initial_text is not None
     assert "Low" in initial_text, f"Expected 'Low' in cell but got: {initial_text}"
 
+    low_priority_chip_style = priority_cell.locator("div.badge").get_attribute("style")
+    assert low_priority_chip_style
+    assert low_priority_chip_style.__contains__("background-color: #00FF00")
+
     priority_cell.click()
 
     # Wait for HTMX to swap the cell content with the form
@@ -606,6 +610,10 @@ def test_inline_edit_custom_enum_updates_display(  # noqa: PLR0915
     assert updated_text is not None
     assert "High" in updated_text, f"Expected 'High' in cell after update but got: {updated_text}"
     assert "high" not in updated_text or "High" in updated_text, "Should show label 'High', not value 'high'"
+
+    high_priority_chip_style = updated_cell.locator("div.badge").get_attribute("style")
+    assert high_priority_chip_style
+    assert high_priority_chip_style.__contains__("background-color: #FF0000")
 
     encounter.refresh_from_db()
     attr_value = encounter.attributes.get(attribute=priority_attr)
@@ -901,7 +909,7 @@ def test_inline_edit_custom_attribute_in_encounter_slideout(  # noqa: PLR0915
     # Find the inline edit cell in that container showing "Routine"
     urgency_cell = urgency_container.locator("td.inline-edit-cell")
     expect(urgency_cell).to_contain_text("Routine")
-    chip_style = urgency_cell.locator("div.m-1").get_attribute("style")
+    chip_style = urgency_cell.locator("div.badge").get_attribute("style")
     assert chip_style
     assert chip_style.__contains__("background-color: #F0FF00")
 
