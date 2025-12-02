@@ -1,5 +1,6 @@
 """Template tags for list view helpers."""
 
+from datetime import date
 from typing import Any
 
 from django import template
@@ -9,6 +10,7 @@ from sandwich.core.models import CustomAttribute
 from sandwich.core.models import CustomAttributeValue
 from sandwich.core.service.custom_attribute_query import _get_annotation_field_name
 from sandwich.core.service.custom_attribute_query import _parse_custom_attribute_id
+from sandwich.core.types import DATE_DISPLAY_FORMAT
 
 register = template.Library()
 
@@ -51,6 +53,11 @@ def get_attr(obj: Any, attr_name: str) -> Any:
 
                     labels = [av.value_enum.label for av in attr_values if av.value_enum]
                     return ", ".join(labels) if labels else ""
+                if attribute.data_type == CustomAttribute.DataType.DATE:
+                    # For date attributes, format consistently as YYYY-MM-DD
+                    if isinstance(value, date):
+                        return value.strftime(DATE_DISPLAY_FORMAT)
+                    return value
 
             except (CustomAttribute.DoesNotExist, AttributeError):
                 # Not a multi-select attribute or attribute not found, use annotated value
