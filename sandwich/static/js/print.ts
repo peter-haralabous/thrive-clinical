@@ -42,8 +42,21 @@ async function handlePrintClick(this: Element, e: Event) {
     // Wait for styles to load, then print
     iframe.onload = () => {
       requestAnimationFrame(() => {
+        // Use browser local time for filename
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr =
+          now.toTimeString().split(' ')[0]?.slice(0, 5).replace(/:/g, '-') ||
+          '';
+        const baseTitle = iframeDoc.title || 'Print';
+        const newFileName = `${baseTitle}_${dateStr}_${timeStr}`;
+
+        const originalTitle = document.title;
+        document.title = newFileName;
+
         iframe.contentWindow?.focus();
         iframe.contentWindow?.print();
+        document.title = originalTitle;
       });
     };
   } catch (error) {
