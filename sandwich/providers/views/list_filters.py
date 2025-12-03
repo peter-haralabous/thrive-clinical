@@ -69,25 +69,26 @@ def _build_custom_attribute_filter(request: AuthenticatedHttpRequest, attribute:
             return {"type": "enum", "operator": "in", "values": values}
 
     if attribute.data_type == CustomAttribute.DataType.DATE:
-        operator = request.POST.get("operator", "range")
-        if operator == "range":
+        is_range = request.POST.get("operator") == "on"
+        if is_range:
             if date_range := _build_date_range_filter(request):
                 return {"type": "date", "operator": "range", **date_range}
         elif value := request.POST.get("value"):
-            return {"type": "date", "operator": operator, "value": value}
+            return {"type": "date", "operator": "exact", "value": value}
 
     return {}
 
 
 def _build_model_field_date_filter(request: AuthenticatedHttpRequest, field_id: str) -> dict[str, Any]:
     """Build date filter for model field."""
-    operator = request.POST.get("operator", "range")
+    # Toggle: True = range, False/absent = exact
+    is_range = request.POST.get("operator") == "on"
 
-    if operator == "range":
+    if is_range:
         if date_range := _build_date_range_filter(request):
             return {field_id: date_range}
     elif value := request.POST.get("value"):
-        return {field_id: {"operator": operator, "value": value}}
+        return {field_id: {"operator": "exact", "value": value}}
 
     return {}
 
@@ -288,20 +289,15 @@ class FilterFieldSelectForm(forms.Form):
 class DateFilterForm(forms.Form):
     """Form for date range or comparison filters."""
 
-    operator = forms.ChoiceField(
-        label=_("Filter type"),
-        choices=[
-            ("exact", _("Exact date")),
-            ("range", _("Date range")),
-            ("gte", _("On or after")),
-            ("lte", _("On or before")),
-        ],
-        initial="exact",
-        widget=forms.Select(
+    operator = forms.BooleanField(
+        label=_("Date range"),
+        required=False,
+        initial=False,
+        widget=forms.CheckboxInput(
             attrs={
-                "class": "select select-bordered mb-3",
+                "class": "toggle toggle-primary",
                 "id": "date-operator",
-                "aria-label": "Select date filter type",
+                "aria-label": "Toggle between exact date and date range",
             }
         ),
     )
@@ -347,7 +343,13 @@ class DateFilterForm(forms.Form):
         self.helper = FormHelper(self)
         self.helper.form_tag = False
         self.helper.layout = Layout(
-            Field("operator"),
+            HTML(
+                '<label class="label cursor-pointer mb-3">'
+                f'<span class="label-text">{_("Use date range")}</span>'
+                '<input type="checkbox" name="operator" id="date-operator" class="toggle toggle-primary" '
+                'aria-label="Toggle between exact date and date range" />'
+                "</label>"
+            ),
             Div(
                 Field("start"),
                 Field("end"),

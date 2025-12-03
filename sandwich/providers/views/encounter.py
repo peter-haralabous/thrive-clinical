@@ -1,6 +1,9 @@
 import logging
 from typing import TYPE_CHECKING
 
+from csp.constants import UNSAFE_INLINE
+from csp.decorators import csp_update
+
 if TYPE_CHECKING:
     from uuid import UUID
 
@@ -44,7 +47,6 @@ from sandwich.core.service.permissions_service import ObjPerm
 from sandwich.core.service.permissions_service import authorize_objects
 from sandwich.core.service.task_service import ordered_tasks_for_encounter
 from sandwich.core.types import DATE_DISPLAY_FORMAT
-from sandwich.core.types import EMPTY_VALUE_DISPLAY
 from sandwich.core.util.http import AuthenticatedHttpRequest
 from sandwich.core.util.http import validate_sort
 from sandwich.providers.forms.inline_edit import FormContext
@@ -57,7 +59,7 @@ logger = logging.getLogger(__name__)
 
 def _get_paginated_summaries(encounter: Encounter, page_num: int, items_per_page: int):
     """Get paginated summaries for an encounter."""
-    summaries_qs = encounter.summary_set.all().select_related("template", "patient")
+    summaries_qs = encounter.summary_set.all().select_related("template", "patient").order_by("-created_at")
     paginator = Paginator(summaries_qs, items_per_page)
     return paginator.get_page(page_num)
 
@@ -108,11 +110,11 @@ def _get_enriched_attributes(encounter: Encounter, organization: Organization) -
         attr_values = values_by_attr.get(attr.id, [])
 
         # Format the display value based on attribute type
-        display_value = EMPTY_VALUE_DISPLAY
+        display_value: str | list[str] | None = None
         if attr_values:
             if attr.data_type == CustomAttribute.DataType.ENUM and attr.is_multi:
                 labels = sorted([av.value_enum.label for av in attr_values if av.value_enum])
-                display_value = ", ".join(labels) if labels else EMPTY_VALUE_DISPLAY
+                display_value = labels if labels else None
             elif attr.data_type == CustomAttribute.DataType.ENUM and attr_values[0].value_enum:
                 display_value = attr_values[0].value_enum.label
             elif attr.data_type == CustomAttribute.DataType.DATE and attr_values[0].value_date:
@@ -184,6 +186,8 @@ def encounter_details(
     return render(request, "provider/encounter_details.html", context)
 
 
+# Need to be able to apply styles to attribute chips
+@csp_update({"style-src-attr": UNSAFE_INLINE})
 @login_required
 @authorize_objects([ObjPerm(Organization, "organization_id", ["view_organization"])])
 def encounter_list(request: AuthenticatedHttpRequest, organization: Organization) -> HttpResponse:
@@ -349,7 +353,7 @@ def encounter_create_search(request: AuthenticatedHttpRequest, organization: Org
 
 def _get_custom_attribute_value_display(
     encounter: Encounter, attribute: CustomAttribute, content_type: ContentType
-) -> str:
+) -> str | list[str] | None:
     """Get display value for a custom attribute."""
     if attribute.data_type == CustomAttribute.DataType.ENUM and attribute.is_multi:
         attr_values = CustomAttributeValue.objects.filter(
@@ -359,8 +363,8 @@ def _get_custom_attribute_value_display(
         )
         if attr_values.exists():
             labels = sorted([av.value_enum.label for av in attr_values if av.value_enum])
-            return ", ".join(labels) if labels else EMPTY_VALUE_DISPLAY
-        return EMPTY_VALUE_DISPLAY
+            return labels if labels else None
+        return None
 
     try:
         attr_value = CustomAttributeValue.objects.get(
@@ -373,8 +377,8 @@ def _get_custom_attribute_value_display(
         if attribute.data_type == CustomAttribute.DataType.DATE and attr_value.value_date:
             return attr_value.value_date.strftime(DATE_DISPLAY_FORMAT)
     except CustomAttributeValue.DoesNotExist:
-        return EMPTY_VALUE_DISPLAY
-    return EMPTY_VALUE_DISPLAY
+        return None
+    return None
 
 
 def _get_custom_attribute(field_name: str, organization: Organization) -> CustomAttribute | None:
@@ -389,7 +393,9 @@ def _get_custom_attribute(field_name: str, organization: Organization) -> Custom
         return None
 
 
-def _get_field_display_value(encounter: Encounter, field_name: str, organization: Organization) -> str:
+def _get_field_display_value(
+    encounter: Encounter, field_name: str, organization: Organization
+) -> str | list[str] | None:
     """Helper to get the display value for a field.
 
     Args:
@@ -401,12 +407,12 @@ def _get_field_display_value(encounter: Encounter, field_name: str, organization
         The formatted display value or a placeholder
     """
     if field_name == "status":
-        return encounter.get_status_display() or EMPTY_VALUE_DISPLAY
+        return encounter.get_status_display()
 
     # Custom attribute
     attribute = _get_custom_attribute(field_name, organization)
     if not attribute:
-        return EMPTY_VALUE_DISPLAY
+        return None
 
     content_type = ContentType.objects.get_for_model(Encounter)
     return _get_custom_attribute_value_display(encounter, attribute, content_type)
@@ -560,6 +566,7 @@ def encounter_edit_field(
             "form": form,
             "field_type": form_context["field_type"],
             "display_value": display_value,
+            "annotation_name": field_name,
         }
 
         return render(request, "provider/partials/inline_edit_form.html", context)
@@ -610,6 +617,7 @@ def encounter_edit_field(
         "cell_id": cell_id,
         "can_edit": True,
         "oob": False,
+        "annotation_name": field_name,
     }
 
     logger.info(

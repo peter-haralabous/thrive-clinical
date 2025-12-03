@@ -19,10 +19,6 @@
           ...
         {% endif %}
       </span>
-    {% elif filter_config.operator == "gte" %}
-      <span>≥ {{ filter_config.value }}</span>
-    {% elif filter_config.operator == "lte" %}
-      <span>≤ {{ filter_config.value }}</span>
     {% else %}
       <span>{{ filter_config.value }}</span>
     {% endif %}

@@ -1,14 +1,18 @@
 import { LitElement, html, type TemplateResult } from 'lit';
-import { Model } from 'survey-core';
-import CustomSandwichTheme from '../lib/survey-form-theme';
+import { Model, Serializer } from 'survey-core';
+import CustomSandwichTheme from '../lib/forms/survey-form-theme';
 import { registerCustomComponents } from './forms/custom-components';
-import { setupAddressAutocomplete } from '../lib/address-autocomplete';
-import { setupMedicationsAutocomplete } from '../lib/medications-autocomplete';
+import { setupAddressAutocomplete } from '../lib/forms/address-autocomplete';
+import { setupMedicationsAutocomplete } from '../lib/forms/medications-autocomplete';
+import { fetchJson } from '../lib/fetchJson';
+import { setupFileUploadInput } from '../lib/forms/file-upload';
 
 type SurveyJson = Record<string, unknown> | Array<unknown>;
 
 export class SurveyForm extends LitElement {
-  private _containerId = `survey-form-${Math.random().toString(36).slice(2, 9)}-container`;
+  private _containerId = `survey-form-${Math.random()
+    .toString(36)
+    .slice(2, 9)}-container`;
   private _completeUrl: string | null = null; // URL to go to after completion
   private _submitUrl: string | null = null; // URL to submit form data to
   private _saveDraftUrl: string | null = null; // URL to save draft data to
@@ -164,6 +168,9 @@ export class SurveyForm extends LitElement {
     // Register custom components before initializing the survey.
     registerCustomComponents();
 
+    // Force file inputs to store data as binary by default.
+    Serializer.findProperty('file', 'storeDataAsText').defaultValue = false;
+
     // SurveyJS Model expects a loosely-typed config; cast from our safer
     // SurveyJson to `any` for the library boundary.
     this.model = new Model(json as any);
@@ -173,103 +180,11 @@ export class SurveyForm extends LitElement {
     setupMedicationsAutocomplete(this.model, this._medicationsAutocompleteUrl);
 
     // File upload event listeners
-    this.model.onUploadFiles.add((_, options) => {
-      const formData = new FormData();
-      options.files.forEach((file) => {
-        formData.append('file-upload', file);
-      });
-
-      if (!this._fileUploadUrl) {
-        return;
-      }
-
-      this.fetchJson(this._fileUploadUrl, {
-        method: 'POST',
-        body: formData,
-        // Override headers to exclude 'Content-Type' so
-        // the browser sets the multipart boundary
-        headers: {
-          'X-CSRFToken': this._csrfToken || '',
-        },
-      })
-        .then((data) => {
-          options.callback(
-            options.files.map((file) => {
-              const resp = data.find(
-                (d: { original_filename: string }) =>
-                  d.original_filename === file.name,
-              );
-              return {
-                file: file,
-                content: resp.url,
-                id: resp.id,
-              };
-            }),
-          );
-        })
-        .catch((error) => {
-          console.error('Error: ', error);
-          options.callback([], ['An error occurred during file upload.']);
-        });
-    });
-
-    const deleteFile = (url: string) => {
-      return fetch(url, {
-        method: 'DELETE',
-        headers: {
-          'X-CSRFToken': this._csrfToken || '',
-        },
-      }).then((resp) => {
-        if (resp.ok) {
-          return 'success';
-        }
-      });
-    };
-
-    this.model.onClearFiles.add(async (_, options) => {
-      if (!options.value || options.value.length === 0) {
-        return options.callback('success');
-      }
-      const filesToDelete = options.fileName
-        ? options.value.filter((item: File) => item.name === options.fileName)
-        : options.value;
-      if (filesToDelete.length === 0) {
-        console.error(`File with name ${options.fileName} is not found`);
-        return options.callback('error');
-      }
-      const results = await Promise.all(
-        filesToDelete.map((file: File) => {
-          const url = this._fileDeleteUrl + `?name=${file.name}`;
-          return deleteFile(url);
-        }),
-      );
-      if (results.every((res) => res === 'success')) {
-        options.callback('success');
-      } else {
-        options.callback('error');
-      }
-    });
-
-    this.model.onDownloadFile.add(async (_, options) => {
-      try {
-        const resp = await fetch(
-          this._fileFetchUrl + `?name=${options.fileValue.name}`,
-        );
-        const blob = await resp.blob();
-        const file = new File([blob], options.fileValue.name, {
-          type: options.fileValue.type,
-        });
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          if (e?.target) {
-            options.callback('success', e.target.result);
-          }
-        };
-        reader.readAsDataURL(file);
-      } catch (error) {
-        console.error('Error: ', error);
-        options.callback('error');
-      }
+    setupFileUploadInput(this.model, {
+      uploadUrl: this._fileUploadUrl,
+      deleteUrl: this._fileDeleteUrl,
+      fetchUrl: this._fileFetchUrl,
+      csrfToken: this._csrfToken,
     });
 
     this.model.onAfterRenderSurvey.add(() => {
@@ -300,8 +215,12 @@ export class SurveyForm extends LitElement {
           if (!this._submitUrl) return;
           isCompleting = true; // Mark as completing to avoid re-entrance
           try {
-            await this.fetchJson(this._submitUrl, {
+            await fetchJson(this._submitUrl, {
               body: JSON.stringify(sender.data),
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': this._csrfToken || '',
+              },
             });
             isCompleting = true; // Mark as completing to avoid re-entrance
             sender.doComplete();
@@ -323,8 +242,12 @@ export class SurveyForm extends LitElement {
         (async () => {
           if (!this._saveDraftUrl) return;
           try {
-            await this.fetchJson(this._saveDraftUrl, {
+            await fetchJson(this._saveDraftUrl, {
               body: JSON.stringify(sender.data),
+              headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': this._csrfToken || '',
+              },
             });
             // Successfully saved draft
             sender.notify('Draft saved.', 'info');
@@ -343,38 +266,6 @@ export class SurveyForm extends LitElement {
     this.model.render(targetEl);
 
     return this.model;
-  }
-
-  /* Fetch JSON helper with error handling and defaults. */
-  private async fetchJson(
-    input: RequestInfo,
-    init?: RequestInit,
-  ): Promise<any> {
-    const defaults: RequestInit = {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': this._csrfToken || '',
-      },
-    };
-
-    const initWithDefaults: RequestInit = { ...defaults, ...(init || {}) };
-
-    const res = await fetch(input, initWithDefaults);
-
-    try {
-      if (!res.ok) {
-        const errorText = await res.text();
-        throw new Error(
-          `HTTP error ${res.status}: ${res.statusText} - ${errorText}`,
-        );
-      }
-      return res.json();
-    } catch (e) {
-      console.error('[survey-form] fetchJson error:', e);
-      throw e;
-    }
   }
 
   /**

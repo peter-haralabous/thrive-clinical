@@ -130,7 +130,7 @@ def _validate_date_filter(filter_config: dict[str, Any]) -> dict[str, str]:
     errors = {}
     operator = filter_config.get("operator", "exact")
 
-    if operator not in ("exact", "gte", "lte", "range"):
+    if operator not in ("exact", "range"):
         errors["operator"] = f"Invalid date operator: {operator}"
         return errors
 

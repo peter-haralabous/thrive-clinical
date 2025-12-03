@@ -24,6 +24,7 @@ from .list_preference import ListViewPreference
 from .list_preference import ListViewType
 from .list_preference import PreferenceScope
 from .organization import Organization
+from .organization_verification import OrganizationVerification
 from .patient import Patient
 from .personal_summary import PersonalSummary
 from .personal_summary import PersonalSummaryType
@@ -61,6 +62,7 @@ __all__ = [
     "ListViewPreference",
     "ListViewType",
     "Organization",
+    "OrganizationVerification",
     "Patient",
     "PersonalSummary",
     "PersonalSummaryType",

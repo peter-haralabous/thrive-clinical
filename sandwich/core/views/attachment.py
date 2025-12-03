@@ -1,5 +1,6 @@
 import logging
 
+from django.core.exceptions import ValidationError
 from django.http import HttpResponse
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseForbidden
@@ -49,11 +50,14 @@ def attachment_upload(request: AuthenticatedHttpRequest) -> HttpResponse:
 @require_http_methods(["DELETE"])
 @login_required
 def attachment_delete(request: AuthenticatedHttpRequest) -> HttpResponse:
-    attachment_name = request.GET.get("name")
-    if not attachment_name:
-        return HttpResponseBadRequest("Missing 'name' query parameter.")
+    attachment_id = request.GET.get("id")
+    if not attachment_id or attachment_id == "undefined":
+        return HttpResponseBadRequest("Missing or invalid 'id' query parameter.")
 
-    attachment = Attachment.objects.get(original_filename=attachment_name, uploaded_by=request.user)
+    try:
+        attachment = Attachment.objects.get(pk=attachment_id, uploaded_by=request.user)
+    except (Attachment.DoesNotExist, ValidationError):
+        return HttpResponseForbidden()
 
     if request.user.id == attachment.uploaded_by.id and attachment.uploaded_by.has_perm(
         "delete_attachment", attachment
@@ -66,12 +70,15 @@ def attachment_delete(request: AuthenticatedHttpRequest) -> HttpResponse:
 
 @require_GET
 @login_required
-def attachment_by_name(request: AuthenticatedHttpRequest) -> HttpResponse:
-    attachment_name = request.GET.get("name")
-    if not attachment_name:
-        return HttpResponseBadRequest("Missing 'name' query parameter.")
+def attachment_get(request: AuthenticatedHttpRequest) -> HttpResponse:
+    attachment_id = request.GET.get("id")
+    if not attachment_id or attachment_id == "undefined":
+        return HttpResponseBadRequest("Missing or invalid 'id' query parameter.")
 
-    attachment = Attachment.objects.get(original_filename=attachment_name, uploaded_by=request.user)
+    try:
+        attachment = Attachment.objects.get(pk=attachment_id, uploaded_by=request.user)
+    except (Attachment.DoesNotExist, ValidationError):
+        return HttpResponseForbidden()
 
     if attachment.uploaded_by.has_perm("view_attachment", attachment):
         response = HttpResponse(attachment.file.read(), content_type=attachment.content_type)

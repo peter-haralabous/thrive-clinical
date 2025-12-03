@@ -1,11 +1,13 @@
 import { SurveyCreator } from 'survey-creator-js';
-import { getSurveyLicenseKey } from '../lib/survey-license-keys';
-import { slk } from 'survey-core';
+import { getSurveyLicenseKey } from '../lib/forms/survey-license-keys';
+import { Serializer, slk } from 'survey-core';
 import * as SurveyCore from 'survey-core';
-import CustomSandwichTheme from '../lib/survey-form-theme';
+import CustomSandwichTheme from '../lib/forms/survey-form-theme';
 import { registerCustomComponents } from '../components/forms/custom-components';
-import { setupAddressAutocomplete } from '../lib/address-autocomplete';
+import { setupAddressAutocomplete } from '../lib/forms/address-autocomplete';
 import '../components/message-alert';
+import { setupMedicationsAutocomplete } from '../lib/forms/medications-autocomplete';
+import { setupFileUploadInput } from '../lib/forms/file-upload';
 
 const ENVIRONMENT = JSON.parse(
   document.getElementById('datadog_vars')?.textContent || '{}',
@@ -82,16 +84,45 @@ document.addEventListener('DOMContentLoaded', () => {
   // Register custom components before initializing the creator.
   registerCustomComponents();
 
+  // Force file inputs to store data as binary by default.
+  Serializer.findProperty('file', 'storeDataAsText').defaultValue = false;
+
   const creator = new SurveyCreator(creatorOptions);
   creator.theme = CustomSandwichTheme;
 
   const _addressAutocompleteUrl = document
     .getElementById('form-builder-container')
     ?.getAttribute('data-address-url');
+  const _medicationsAutocompleteUrl = document
+    .getElementById('form-builder-container')
+    ?.getAttribute('data-medications-url');
+  const _fileUploadUrl = document
+    .getElementById('form-builder-container')
+    ?.getAttribute('data-file-upload-url');
+  const _fileDeleteUrl = document
+    .getElementById('form-builder-container')
+    ?.getAttribute('data-file-delete-url');
+  const _fileFetchUrl = document
+    .getElementById('form-builder-container')
+    ?.getAttribute('data-file-fetch-url');
+  const _csrfToken = document
+    .getElementById('form-builder-container')
+    ?.getAttribute('data-csrf-token')
+    ?.toString();
 
-  creator.onSurveyInstanceSetupHandlers.add((sender, options) => {
+  creator.onSurveyInstanceSetupHandlers.add((_sender, options) => {
     if (options.area !== 'preview-tab') return;
     setupAddressAutocomplete(options.survey, _addressAutocompleteUrl ?? null);
+    setupMedicationsAutocomplete(
+      options.survey,
+      _medicationsAutocompleteUrl ?? null,
+    );
+    setupFileUploadInput(options.survey, {
+      uploadUrl: _fileUploadUrl ?? null,
+      deleteUrl: _fileDeleteUrl ?? null,
+      fetchUrl: _fileFetchUrl ?? null,
+      csrfToken: _csrfToken ?? null,
+    });
   });
 
   // Register onNotify handler to show notifications as toasts

@@ -25,7 +25,6 @@ from sandwich.core.models.invitation import Invitation
 from sandwich.core.models.invitation import InvitationStatus
 from sandwich.core.models.organization import Organization
 from sandwich.core.service.list_preference_service import save_list_view_preference
-from sandwich.core.types import EMPTY_VALUE_DISPLAY
 from sandwich.users.models import User
 
 
@@ -123,10 +122,10 @@ def test_encounter_details_includes_custom_attributes(
 
 
 @pytest.mark.django_db
-def test_encounter_details_shows_custom_attributes_with_no_value(
+def test_encounter_details_shows_none_for_custom_attributes_with_no_value(
     provider: User, organization: Organization, encounter: Encounter
 ) -> None:
-    """Test that custom attributes without values show EMPTY_VALUE_DISPLAY in context."""
+    """Test that custom attributes without values return None."""
 
     # Create a custom attribute but don't set a value
     content_type = ContentType.objects.get_for_model(Encounter)
@@ -149,7 +148,7 @@ def test_encounter_details_shows_custom_attributes_with_no_value(
     # Find the Notes attribute
     notes_attr = next((a for a in enriched_attrs if a["name"] == "Notes"), None)
     assert notes_attr is not None
-    assert notes_attr["value"] == EMPTY_VALUE_DISPLAY
+    assert notes_attr["value"] is None
 
 
 @pytest.mark.django_db
@@ -577,6 +576,10 @@ def test_inline_edit_custom_enum_updates_display(  # noqa: PLR0915
     assert initial_text is not None
     assert "Low" in initial_text, f"Expected 'Low' in cell but got: {initial_text}"
 
+    low_priority_chip_style = priority_cell.locator("div.badge").get_attribute("style")
+    assert low_priority_chip_style
+    assert "background-color: #00FF00" in low_priority_chip_style
+
     priority_cell.click()
 
     # Wait for HTMX to swap the cell content with the form
@@ -607,6 +610,10 @@ def test_inline_edit_custom_enum_updates_display(  # noqa: PLR0915
     assert updated_text is not None
     assert "High" in updated_text, f"Expected 'High' in cell after update but got: {updated_text}"
     assert "high" not in updated_text or "High" in updated_text, "Should show label 'High', not value 'high'"
+
+    high_priority_chip_style = updated_cell.locator("div.badge").get_attribute("style")
+    assert high_priority_chip_style
+    assert "background-color: #FF0000" in high_priority_chip_style
 
     encounter.refresh_from_db()
     attr_value = encounter.attributes.get(attribute=priority_attr)
@@ -835,9 +842,7 @@ def test_inline_edit_custom_attribute_in_encounter_slideout(  # noqa: PLR0915
     )
 
     routine = CustomAttributeEnum.objects.create(
-        attribute=enum_attr,
-        label="Routine",
-        value="routine",
+        attribute=enum_attr, label="Routine", value="routine", color_code="F0FF00"
     )
 
     # Set initial value
@@ -904,6 +909,9 @@ def test_inline_edit_custom_attribute_in_encounter_slideout(  # noqa: PLR0915
     # Find the inline edit cell in that container showing "Routine"
     urgency_cell = urgency_container.locator("td.inline-edit-cell")
     expect(urgency_cell).to_contain_text("Routine")
+    chip_style = urgency_cell.locator("div.badge").get_attribute("style")
+    assert chip_style
+    assert "background-color: #F0FF00" in chip_style
 
     # Click to enter edit mode
     urgency_cell.click()

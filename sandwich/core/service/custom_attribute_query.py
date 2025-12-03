@@ -252,20 +252,13 @@ def _build_date_filter_conditions(
     Returns (operator, date_filters_dict) where date_filters_dict contains
     the normalized dates with their filter suffixes.
     """
-    operator = filter_config.get("operator", "range")
+    operator = filter_config.get("operator", "exact")
     date_filters = {}
 
-    operator_map = {
-        "exact": ("", "value"),
-        "gte": ("__gte", "value"),
-        "lte": ("__lte", "value"),
-    }
-
-    if operator in operator_map:
-        suffix, key = operator_map[operator]
-        normalized_date = _normalize_date(filter_config.get(key))
+    if operator == "exact":
+        normalized_date = _normalize_date(filter_config.get("value"))
         if normalized_date:
-            date_filters[suffix] = normalized_date
+            date_filters[""] = normalized_date
     elif operator == "range":
         start_date = _normalize_date(filter_config.get("start"))
         end_date = _normalize_date(filter_config.get("end"))
@@ -332,7 +325,7 @@ def _build_date_filter(
     field_name: str,
     filter_config: dict[str, Any],
 ) -> Q:
-    """Build Q filter for DATE model fields supporting exact, gte, lte, and range operators."""
+    """Build Q filter for DATE model fields supporting exact and range operators."""
     operator, date_filters = _build_date_filter_conditions(filter_config)
     include_null = filter_config.get("include_null", False)
 

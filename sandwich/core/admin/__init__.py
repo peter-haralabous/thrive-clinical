@@ -16,6 +16,7 @@ from .entity import EntityAdmin as EntityAdmin
 from .fact import FactAdmin as FactAdmin
 from .list_preference import ListViewPreferenceAdmin as ListViewPreferenceAdmin
 from .organization import OrganizationAdmin as OrganizationAdmin
+from .organization_verification import OrganizationVerificationAdmin as OrganizationVerificationAdmin
 from .patient import PatientAdmin as PatientAdmin
 from .predicate import PredicateAdmin as PredicateAdmin
 from .summary import SummaryAdmin as SummaryAdmin
