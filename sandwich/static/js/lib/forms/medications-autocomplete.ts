@@ -62,13 +62,17 @@ export function setupMedicationsAutocomplete(
   medicationsAutocompleteUrl: string | null,
 ) {
   survey.onChoicesLazyLoad.add(async (_survey, options) => {
-    if (
-      options.question.getType() === 'tagbox' ||
-      options.question.name === 'medication_multi_select' ||
-      options.question.getType() === 'dropdown' ||
-      options.question.name === 'medication_select' ||
-      options.filter !== ''
-    ) {
+    if (!options.filter) {
+      return;
+    }
+    const isMedicationSelect =
+      options.question.getType() === 'tagbox' &&
+      options.question.name === 'medication_multi_select';
+    const isMedicationMultiSelect =
+      options.question.getType() === 'dropdown' &&
+      options.question.name === 'medication_select';
+
+    if (isMedicationSelect || isMedicationMultiSelect) {
       const url = `${medicationsAutocompleteUrl}?query=${encodeURIComponent(options.filter)}`;
       const data = await fetchMedicationsSuggestions(url);
 
@@ -86,12 +90,14 @@ export function setupMedicationsAutocomplete(
    * as well as custom medication metadata.
    */
   survey.onGetChoiceDisplayValue.add((_survey, options) => {
-    if (
-      options.question.getType() === 'tagbox' ||
-      options.question.name === 'medication_multi_select' ||
-      options.question.getType() === 'dropdown' ||
-      options.question.name === 'medication_select'
-    ) {
+    const isMedicationSelect =
+      options.question.getType() === 'tagbox' &&
+      options.question.name === 'medication_multi_select';
+    const isMedicationMultiSelect =
+      options.question.getType() === 'dropdown' &&
+      options.question.name === 'medication_select';
+
+    if (isMedicationSelect || isMedicationMultiSelect) {
       const displayValues = options.values.map((r: MedicationResult) => {
         // Not all drugbank entries have display_name
         return r.display_name || r.name;
