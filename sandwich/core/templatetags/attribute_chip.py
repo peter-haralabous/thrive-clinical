@@ -1,5 +1,5 @@
 from django import template
-from django.utils.html import format_html
+from django.template.loader import render_to_string
 
 from sandwich.core.models.custom_attribute import CustomAttribute
 from sandwich.core.models.custom_attribute import CustomAttributeEnum
@@ -18,27 +18,17 @@ def attribute_chip(attribute_name, label):
             color_tag = attr_enum.color_code
 
             if color_tag:
-                return format_html(
-                    """
-                    <div class="tooltip" data-tip="{}">
-                        <div style="background-color: #{};" class="badge w-fit">
-                            <div class="mix-blend-color-burn m-2 text-sm text-center min-w-10 max-w-18 truncate">{}
-                            </div>
-                        </div>
-                    </div>""",
-                    label,
-                    color_tag,
-                    label,
+                return render_to_string(
+                    "component/attribute_chip.html",
+                    {
+                        "label": label,
+                        "color_tag": f"background-color: #{color_tag}",
+                    },
                 )
 
-    return format_html(
-        """
-        <div class="tooltip" data-tip="{}">
-            <div class="w-fit">
-                <div class="m-2 text-sm text-center min-w-10 max-w-18 truncate">{}</div>
-            </div>
-        </div>
-        """,
-        label,
-        label,
+    return render_to_string(
+        "component/attribute_chip.html",
+        {
+            "label": label,
+        },
     )
