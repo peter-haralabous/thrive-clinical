@@ -1,0 +1,169 @@
+@import 'tailwindcss';
+@import './_google-button.css';
+@import './choicesjs.css';
+@import './components/htmx-loading-bar.css';
+
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  themes: corporate --default;
+}
+
+@theme {
+  /* Custom animations */
+  --animate-gelatine: gelatine 1s ease-in-out 1;
+  --animate-tada: tada 1s;
+
+  @keyframes gelatine {
+    from,
+    to {
+      transform: scale(1, 1);
+    }
+    25% {
+      transform: scale(0.9, 1.1);
+    }
+    50% {
+      transform: scale(1.1, 0.9);
+    }
+    75% {
+      transform: scale(0.95, 1.05);
+    }
+  }
+
+  @keyframes tada {
+    0% {
+      transform: scale3d(1, 1, 1);
+    }
+    10%,
+    20% {
+      transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg);
+    }
+    30%,
+    50%,
+    70%,
+    90% {
+      transform: scale3d(1.2, 1.2, 1.2) rotate3d(0, 0, 1, 3deg);
+    }
+    40%,
+    60%,
+    80% {
+      transform: scale3d(1.2, 1.2, 1.2) rotate3d(0, 0, 1, -3deg);
+    }
+    100% {
+      transform: scale3d(1, 1, 1);
+    }
+  }
+}
+
+/* base.html generates alert variants at runtime */
+@source inline("alert-{success,danger,warning,info}");
+
+/* bring back some default styling */
+@layer base {
+  h1 {
+    @apply text-2xl;
+    @apply font-bold;
+  }
+
+  h2 {
+    @apply text-xl;
+    @apply font-semibold;
+  }
+
+  h3 {
+    @apply text-lg;
+    @apply font-semibold;
+  }
+}
+
+/* django-jsonform styles don't really match anything in the app */
+.django-jsonform-container {
+  input {
+    @apply input;
+  }
+}
+
+/* Error pages */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+.float-animation {
+  animation: float 3s ease-in-out infinite;
+}
+
+@layer utility {
+  /* Fix for Safari chat bubble overlap issue with DaisyUI chat component.
+   * This has been reported and will likely be fixed by a future DaisyUI
+   * release: https://github.com/saadeghi/daisyui/issues/3712#issuecomment-3599503502 */
+  .chat {
+    @apply auto-rows-min;
+  }
+
+  /* Update DaisyUI prose styling to match desired typography */
+  .prose {
+    line-height: 1.4;
+
+    h2 {
+      margin: 1em 0;
+    }
+
+    hr {
+      margin: 1em 0;
+      height: 1px;
+    }
+  }
+
+  hr {
+    border-top: none;
+    @apply divider;
+    height: 1px;
+  }
+
+  /* Fix alignment on checkboxes */
+  .checkbox_wrapper {
+    div {
+      display: grid;
+      grid-template-columns: 0fr 1fr;
+      grid-template-rows: 0fr 0fr;
+
+      input {
+        margin-right: 0.5em;
+        grid-column: 1;
+        grid-row: 1 / 2;
+      }
+
+      label {
+        grid-column: 2;
+        grid-row: 1;
+      }
+
+      small {
+        grid-column: 2;
+        grid-row: 2;
+      }
+    }
+  }
+
+  /* Prevent calendar icon overlap in date inputs */
+  inline-edit-field input[type='date'] {
+    padding-right: 1.5rem;
+  }
+
+  /* Health summary loading overlay */
+  .summary-loading-overlay {
+    display: none;
+    z-index: 10;
+
+    &.htmx-request {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      pointer-events: auto;
+    }
+  }
+}

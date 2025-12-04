@@ -1,0 +1,20 @@
+{% load lucide %}
+
+{# Desktop view: show all buttons inline #}
+<div class="hidden lg:flex gap-2 flex-wrap">
+  <a href="{% url "providers:patient_edit" organization_id=organization.id patient_id=patient.id %}"
+     class="btn btn-primary">Edit Patient Record</a>
+</div>
+{# Mobile view: kebab menu dropdown #}
+<div class="lg:hidden dropdown dropdown-end">
+  <button tabindex="0"
+          class="btn btn-ghost btn-sm rounded-full cursor-pointer"
+          aria-label="Patient actions menu">{% lucide "ellipsis-vertical" class="size-6" %}</button>
+  <ul tabindex="0"
+      class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
+    <li>
+      <a href="{% url "providers:patient_edit" organization_id=organization.id patient_id=patient.id %}"
+         class="flex items-center gap-2">{% lucide "square-pen" class="size-4" %} Edit Patient Record</a>
+    </li>
+  </ul>
+</div>

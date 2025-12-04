@@ -1,0 +1,25 @@
+{% load lucide %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+  <div class="dropdown dropdown-end">
+    <button class="btn btn-ghost btn-sm rounded-full cursor-pointer"
+            aria-label="Encounter actions menu">{% lucide "ellipsis-vertical" class="size-4" %}</button>
+    <ul class="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-52 mt-2">
+      <li>
+        <a href="{% url 'providers:form_template_preview' organization_id=organization.id form_id=form.id form_version_id=form_version.pgh_id %}">
+          {% lucide "eye" class="size-4" %} View
+        </a>
+      </li>
+      {% if not most_recent_version %}
+        <li>
+          <button class="btn-ghost"
+                  type="button"
+                  hx-get="{% url 'providers:form_template_restore' organization_id=organization.id form_id=form.id form_version_id=form_version.pgh_id %}?version_number={{ version_number }}"
+                  hx-target="body"
+                  hx-swap="beforeend">Restore this version</button>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+{% endblock content %}

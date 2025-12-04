@@ -1,0 +1,74 @@
+{% load lucide %}
+
+{% with title_tag=title_tag|default:"h1" badge_size=badge_size|default:"md" %}
+  <div class="flex items-start gap-4 mb-4">
+    <{{ title_tag }} class="{{ title_class|default:"" }} flex-1 m-0">{{ summary.title }}</{{ title_tag }}>
+    {% include 'provider/partials/summary_status_badge.html' with summary=summary size=badge_size %}
+  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mb-4">
+    <div class="flex items-start gap-2">
+      {% lucide "user" class="size-4 text-base-content/60 mt-0.5 flex-shrink-0" %}
+      <div>
+        <span class="font-medium text-base-content/70">Patient:</span>
+        <a href="{% url 'providers:patient' organization_id=summary.organization.id patient_id=patient.id %}"
+           class="link">{{ patient.last_name }}, {{ patient.first_name }}</a>
+      </div>
+    </div>
+    {% if summary.template %}
+      <div class="flex items-start gap-2">
+        {% lucide "layout-template" class="size-4 text-base-content/60 mt-0.5 flex-shrink-0" %}
+        <div>
+          <span class="font-medium text-base-content/70">Summary Template:</span>
+          <a href="{% url 'providers:summary_template_edit' organization_id=summary.organization.id template_id=summary.template.id %}"
+             class="link">{{ summary.template.name }}</a>
+        </div>
+      </div>
+    {% endif %}
+    {% if encounter %}
+      <div class="flex items-start gap-2">
+        {% lucide "calendar" class="size-4 text-base-content/60 mt-0.5 flex-shrink-0" %}
+        <div>
+          <span class="font-medium text-base-content/70">Encounter:</span>
+          <span class="text-base-content">{{ encounter.created_at|date:DJANGO_DATE_TIME_FORMAT }}</span>
+        </div>
+      </div>
+    {% endif %}
+    {% if summary.submission.task %}
+      <div class="flex items-start gap-2">
+        {% lucide "file-text" class="size-4 text-base-content/60 mt-0.5 flex-shrink-0" %}
+        <div>
+          <span class="font-medium text-base-content/70">Form Submission:</span>
+          <a href="{% url 'providers:task' organization_id=summary.organization.id patient_id=patient.id task_id=summary.submission.task.id %}"
+             class="link">{{ summary.submission.task.form_version.name }}</a>
+        </div>
+      </div>
+    {% endif %}
+    <div class="flex items-start gap-2">
+      {% lucide "clock" class="size-4 text-base-content/60 mt-0.5 flex-shrink-0" %}
+      <div>
+        <span class="font-medium text-base-content/70">Generated:</span>
+        <span class="text-base-content">{{ summary.created_at|date:DJANGO_DATE_TIME_FORMAT }}</span>
+      </div>
+    </div>
+  </div>
+  <div class="divider my-4"></div>
+  {% if summary.status == "succeeded" %}
+    {% if not hide_actions %}
+      <div class="flex justify-end gap-2 mb-4">
+        <button class="btn btn-sm btn-outline btn-primary js-copy-summary"
+                data-copy-text="{{ summary.body }}">
+          {% lucide "copy" class="size-4" %}
+          Copy Summary
+        </button>
+        <button class="btn btn-sm btn-outline btn-primary js-print"
+                data-print-url="{% url 'providers:summary_detail' organization_id=summary.organization.id summary_id=summary.id %}?print=true">
+          {% lucide "printer" class="size-4" %}
+          Print Summary
+        </button>
+      </div>
+    {% endif %}
+    <div class="rounded-lg border border-base-300 bg-base-50 p-6">
+      <div class="prose prose-sm max-w-none">{{ summary.body|safe }}</div>
+    </div>
+  {% endif %}
+{% endwith %}

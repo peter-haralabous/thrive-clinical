@@ -1,0 +1,19 @@
+{% load lucide %}
+
+<div class="space-y-6" data-tab-label="{{ task.name }}">
+  {# Header with title and status #}
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <h2 class="text-xl font-bold text-gray-900">{{ task.name }}</h2>
+      {% include 'provider/partials/task_status_badge.html' with task=task size='md' %}
+    </div>
+  </div>
+  {# Form container - matches standalone task.html structure #}
+  <div class="container mx-auto">
+    {% if initial_data %}{{ initial_data | json_script:data_id }}{% endif %}
+    {{ form_schema | json_script:schema_id }}
+    <survey-form data-schema-id="{{ schema_id }}" data-initial-data-id="{{ data_id }}"
+    {% if read_only %}readonly{% endif %}
+    data-submit-url="{{ submit_url }}" data-csrf-token="{{ csrf_token }}" data-complete-url="{{ complete_url }}" data-save-draft-url="{{ save_draft_url }}" />
+  </div>
+</div>

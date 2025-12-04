@@ -1,0 +1,7 @@
+{% extends "email/base.html" %}
+{% block text %}
+Hi {{ invitation.patient.first_name }}, {{ invitation.patient.organization.name }} has assigned you a task to complete.
+{% endblock text %}
+
+{% block cta_link %}{{ task_url }}{% endblock cta_link %}
+{% block cta_text %}Click to get started{% endblock cta_text %}
