@@ -54,7 +54,6 @@ main {
   padding: 16px;
   background: var(--card);
   border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(11, 18, 32, 0.04);
 }
 
 /* Global fixed header styles */
@@ -70,7 +69,6 @@ main {
   align-items: center;
   z-index: 60;
   padding: 0 20px;
-  box-shadow: 0 2px 8px rgba(11, 18, 32, 0.04);
 }
 .global-header__inner {
   margin: 0 auto;
