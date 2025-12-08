@@ -32,11 +32,7 @@ nav.site-nav a {
   text-decoration: none;
   font-weight: 600;
 }
-main {
-  max-width: 900px;
-  margin: 36px auto;
-  padding: 20px;
-}
+
 .hub-links {
   display: flex;
   gap: 12px;

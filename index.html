@@ -272,10 +272,26 @@
       }
     </style>
   </head>
-  <body>
-    <header id="site-header"></header>
+  <body class="has-global-header">
+    <header class="global-header">
+      <div class="global-header__inner">
+        <a href="/github-pages/" class="brand">
+          <span class="logo">HC</span>
+          <span class="brand-name">HealthConnect</span>
+        </a>
+        <div class="search">
+          <input type="search" placeholder="Type a command or search..." aria-label="Search" />
+        </div>
+        <div class="actions" style="display: flex; align-items: center; gap: 12px">
+          <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
+            <span class="material-symbols-outlined"></span>
+          </button>
+          <div class="user" title="JD">JD</div>
+        </div>
+      </div>
+    </header>
 
-    <div class="page-container">
+    <main class="page-container">
       <div class="page-header">
         <h1 class="page-title">Patient Encounters</h1>
         <button class="btn-primary">New Encounter</button>
@@ -402,11 +418,6 @@
         <span class="pagination-info">Page 1 of 1</span>
         <button disabled>Next »</button>
       </div>
-    </div>
-
-    <script type="module">
-      import { initNav } from './shared/navigation.js';
-      initNav(document.getElementById('site-header'));
-    </script>
+    </main>
   </body>
 </html>
