@@ -1,91 +1,73 @@
-# thrive-prototypes
+# React + TypeScript + Vite
 
-Thrive Health prototypes and experimental features - a Django + HTMX application for rapid healthcare solution development.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Quickstart
+Currently, two official plugins are available:
 
-```shell
-make dev
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the ESLint configuration
+
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+
+```js
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+
+      // Remove tseslint.configs.recommended and replace with this
+      tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
+
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-The application will be available at http://localhost:3000
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-All emails that the app sends will be viewable at http://localhost:8025
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## Settings
-
-Moved to [settings](https://cookiecutter-django.readthedocs.io/en/latest/1-getting-started/settings.html).
-
-## Basic Commands
-
-### Setting Up Your Users
-
-- To create a **normal user account**, just go to Sign Up and fill out the form. Once you submit it, you'll see a
-  "Verify Your E-mail Address" page. Go to [mailpit](http://localhost:8025) to see the emailed message. Follow the verification link and
-  the user will be ready to go.
-
-- To create a **superuser account**, use this command:
-
-      uv run python manage.py createsuperuser
-
-For convenience, you can keep your normal user logged in on Chrome and your superuser logged in on Firefox (or similar),
-so that you can see how the site behaves for both kinds of users.
-
-## Essential Commands
-
-**`make dev`** - Start development environment
-Sets up everything you need and launches the dev server with hot reload.
-
-**`make test`** - Run all tests
-Executes both unit tests and end-to-end tests to verify your code works.
-
-**`make test-unit`** - Run unit tests only
-Quick feedback loop for testing your Python code changes.
-
-**`make test-e2e`** - Run end-to-end tests
-Full browser testing to ensure the complete application works correctly.
-
-**`make test-frontend`** - Run frontend unit tests
-Quick feedback loop for testing your TypeScript code changes.
-
-## Setup & Maintenance
-
-**`make init`** - Initialize project
-Sets up Python virtual environment, installs dependencies, and configures git hooks.
-
-**`make lint`** - Check code quality
-Runs formatting and linting tools to keep your code clean and consistent.
-
-**`make coverage`** - Generate test coverage report
-Shows which parts of your code are tested and opens the report in your browser.
-
-## Utilities
-
-**`make migrate`** - Apply database migrations
-Updates your database schema with any pending changes.
-
-**`make collectstatic`** - Prepare static files
-Gathers CSS, JS, and other static assets for deployment.
-
-### Testing Docker builds
-
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
-docker compose up --build sandwich
-```
-
-## Testing outputs of an LLM
-
-To run tests that use a real LLM (and record/replay HTTP interactions with VCR):
-
-```sh
-pytest --record-mode=all sandwich/core/services/ingest/extract_text_test.py
-```
-
-- The first run will record cassettes for all LLM calls.
-- Subsequent runs will replay the recorded responses for fast, deterministic tests **without hitting the LLM again**.
-- This avoids unnecessary API costs, rate limits, and unpredictable outputs from the LLM.
-- To re-record, delete the cassette files or use `--record-mode=all` again.
-
-See `extract_text_test.py` for example test cases and assertions.
-
-## End
