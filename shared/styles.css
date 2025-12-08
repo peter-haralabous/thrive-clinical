@@ -139,12 +139,37 @@ body.has-global-header {
   font-size: 20px;
 }
 
+/* Back button for child pages */
+.global-header .back-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #0b1220;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+.global-header .back-button:hover {
+  background-color: rgba(11, 18, 32, 0.04);
+}
+.global-header .back-button .material-symbols-outlined {
+  font-size: 20px;
+}
+.global-header .back-button .back-text {
+  font-size: 15px;
+}
+
 @media (max-width: 640px) {
   .global-header {
     padding: 0 12px;
     height: 56px;
   }
   .global-header .brand-name {
+    display: none;
+  }
+  .global-header .back-button .back-text {
     display: none;
   }
   .global-header .search {
