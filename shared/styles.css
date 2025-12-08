@@ -1,10 +1,159 @@
-:root{--accent:#0366d6;--bg:#f6f8fa;--card:#ffffff}
-*{box-sizing:border-box}
-body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;margin:0;background:var(--bg);color:#0b1220}
-header{background:linear-gradient(90deg,rgba(3,102,214,0.08),transparent);padding:12px 20px}
-nav.site-nav{display:flex;gap:12px;align-items:center}
-nav.site-nav a{color:var(--accent);text-decoration:none;font-weight:600}
-main{max-width:900px;margin:36px auto;padding:20px}
-.hub-links{display:flex;gap:12px;flex-wrap:wrap}
-.hub-links a{background:var(--card);padding:10px 14px;border-radius:8px;color:var(--accent);text-decoration:none;border:1px solid rgba(11,18,32,0.06)}
-.container{padding:16px;background:var(--card);border-radius:8px;box-shadow:0 6px 18px rgba(11,18,32,0.04)}
+:root {
+  --accent: #0366d6;
+  --bg: #f6f8fa;
+  --card: #ffffff;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Arial;
+  margin: 0;
+  background: var(--bg);
+  color: #0b1220;
+}
+header {
+  background: linear-gradient(90deg, rgba(3, 102, 214, 0.08), transparent);
+  padding: 12px 20px;
+}
+nav.site-nav {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+nav.site-nav a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+main {
+  max-width: 900px;
+  margin: 36px auto;
+  padding: 20px;
+}
+.hub-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.hub-links a {
+  background: var(--card);
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--accent);
+  text-decoration: none;
+  border: 1px solid rgba(11, 18, 32, 0.06);
+}
+.container {
+  padding: 16px;
+  background: var(--card);
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(11, 18, 32, 0.04);
+}
+
+/* Global fixed header styles */
+.global-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid rgba(11, 18, 32, 0.06);
+  display: flex;
+  align-items: center;
+  z-index: 60;
+  padding: 0 20px;
+  box-shadow: 0 2px 8px rgba(11, 18, 32, 0.04);
+}
+.global-header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.global-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: #0b1220;
+}
+.global-header .brand .logo {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #e6f0ff, #ffffff);
+  color: #135bec;
+  font-weight: 700;
+}
+.global-header .search {
+  flex: 1;
+  max-width: 520px;
+  margin: 0 20px;
+}
+.global-header .search input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(11, 18, 32, 0.06);
+}
+.global-header .user {
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  background: #111;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* Add top padding to pages that include the global header so content isn't hidden */
+body.has-global-header {
+  padding-top: 64px;
+}
+
+/* Small tweaks and responsive behavior for the global header */
+.global-header .brand-name {
+  font-weight: 700;
+}
+.global-header .icon-btn {
+  background: transparent;
+  border: 0;
+  padding: 6px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.global-header .icon-btn .material-symbols-outlined {
+  font-size: 20px;
+}
+
+@media (max-width: 640px) {
+  .global-header {
+    padding: 0 12px;
+    height: 56px;
+  }
+  .global-header .brand-name {
+    display: none;
+  }
+  .global-header .search {
+    display: none;
+  }
+  .global-header .logo {
+    width: 32px;
+    height: 32px;
+  }
+}

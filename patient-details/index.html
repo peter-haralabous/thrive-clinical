@@ -7,7 +7,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
         <link href="/shared/styles.css" rel="stylesheet" />
-        
+
         <script>
           tailwind.config = {
             darkMode: "class",
@@ -33,7 +33,7 @@
           };
         </script>
         <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-        
+
         <style>
           .material-symbols-outlined {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
@@ -45,7 +45,7 @@
       max-height: 100dvh;
       overflow: hidden;
     }
-    
+
     /* Vertical tab styling */
     .vertical-tab {
       transition: width 0.3s ease-in-out, min-width 0.3s ease-in-out, flex 0.3s ease-in-out;
@@ -54,49 +54,49 @@
       flex-direction: column;
       height: 100vh;
     }
-    
+
     /* Sidebar collapsed state */
     #sidebar.collapsed {
       width: 64px;
     }
-    
+
     #sidebar.collapsed .sidebar-title,
     #sidebar.collapsed .font-medium {
       display: none;
     }
-    
+
     #sidebar.collapsed .sidebar-collapse-btn {
       display: none;
     }
-    
+
     #sidebar.collapsed .sidebar-expand-btn {
       display: block !important;
     }
-    
+
     #sidebar.collapsed button {
       justify-content: center;
     }
-    
+
     #sidebar.collapsed button .flex {
       justify-content: center;
     }
-    
+
     /* Adjust tabs container margin when sidebar is collapsed */
     #tabs-container {
       margin-left: 256px;
       transition: margin-left 0.3s ease-in-out;
     }
-    
+
     #sidebar.collapsed ~ #tabs-container {
       margin-left: 64px;
     }
-    
+
     .vertical-tab.collapsed {
       width: 48px;
       min-width: 48px;
       flex: 0 0 48px;
     }
-    
+
     .vertical-tab.expanded {
       flex: 1;
       min-width: 320px;
@@ -113,29 +113,29 @@
     .vertical-tab.expanded .collapsed-only {
       display: none;
     }
-    
+
     .vertical-tab.collapsed .collapsed-only {
       display: flex;
       height: 100%;
     }
-    
+
     /* Collapsed tab hover behavior - swap icon with close button */
     .vertical-tab.collapsed .tab-icon {
       display: block;
     }
-    
+
     .vertical-tab.collapsed .close-on-hover {
       display: none;
     }
-    
+
     .vertical-tab.collapsed:hover .tab-icon {
       display: none;
     }
-    
+
     .vertical-tab.collapsed:hover .close-on-hover {
       display: block;
     }
-    
+
     /* Rotated label for collapsed state */
     .tab-label {
       writing-mode: vertical-rl;
@@ -143,12 +143,12 @@
       white-space: nowrap;
       transition: all 0.3s ease-in-out;
     }
-    
+
     .tab-label.expanded {
       writing-mode: horizontal-tb;
       text-orientation: upright;
     }
-    
+
     /* Smooth content transitions */
     .tab-content {
       opacity: 0;
@@ -158,38 +158,44 @@
       flex: 1;
       overflow-y: auto;
     }
-    
+
     .tab-content.visible {
       opacity: 1;
       display: flex;
     }
-    
+
     /* Chevron rotation for submenus */
     .chevron-icon {
       transition: transform 0.3s ease;
     }
-    
+
     .chevron-icon.rotated {
       transform: rotate(90deg);
     }
-    
+
     /* Active tab styling */
     .vertical-tab.active-tab {
       border-left: 4px solid #333;
       border-right: 4px solid #333;
     }
-    
+
     .vertical-tab.active-tab.expanded .sticky {
       background: linear-gradient(to right, rgba(19, 91, 236, 0.05), transparent);
     }
-    
+    .vertical-tab.active-tab.expanded .sticky > div {
+        background-color: white;
+    }
+
     .vertical-tab.active-tab.collapsed {
       background-color: rgba(19, 91, 236, 0.1);
     }
         </style>
     </head>
-    <body class="font-display bg-neutral-bg dark:bg-background-dark text-text-dark-gray dark:text-neutral-bg">
-        <div class="flex h-screen overflow-hidden">
+        <body class="font-display bg-neutral-bg dark:bg-background-dark text-text-dark-gray dark:text-neutral-bg">
+
+                <header id="site-header"></header>
+
+                <div class="flex h-screen overflow-hidden">
             <!-- Side Menu -->
             <aside id="sidebar"
                    class="w-64 bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 flex-shrink-0 fixed left-0 top-0 h-screen z-30 transition-all duration-300 flex flex-col">
@@ -658,7 +664,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                 <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Active Conditions</h3>
                                 <ul class="space-y-2 text-sm">
@@ -699,7 +705,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            
+
                             <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                 <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Past Medical History</h3>
                                 <ul class="space-y-2 text-sm">
@@ -712,7 +718,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            
+
                             <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                 <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Care Team</h3>
                                 <ul class="space-y-2 text-sm">
@@ -730,7 +736,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            
+
                             <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                 <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Recent Encounters</h3>
                                 <ul class="space-y-2 text-sm">
@@ -750,7 +756,7 @@
                                     </li>
                                 </ul>
                             </div>
-                            
+
                             <div>
                                 <h3 class="text-sm font-semibold text-text-dark-gray dark:text-neutral-bg mb-3">Recent activity</h3>
                                 <div class="space-y-2">
@@ -1578,8 +1584,8 @@
                                     <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                         <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Notes</h3>
                                         <p class="text-sm text-text-dark-gray dark:text-white">
-                                            Patient reports episodes of dizziness occurring 2-3 times per week, typically lasting 5-10 minutes. 
-                                            Episodes are sometimes associated with position changes. No loss of consciousness. Patient denies 
+                                            Patient reports episodes of dizziness occurring 2-3 times per week, typically lasting 5-10 minutes.
+                                            Episodes are sometimes associated with position changes. No loss of consciousness. Patient denies
                                             hearing loss or tinnitus. Symptoms have been stable over the past 3 months.
                                         </p>
                                     </div>
@@ -1654,9 +1660,9 @@
                                     <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                         <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Notes</h3>
                                         <p class="text-sm text-text-dark-gray dark:text-white">
-                                            Essential hypertension diagnosed after consistently elevated readings over 140/90 mmHg. Patient started on 
-                                            Lisinopril 10mg daily. Blood pressure has been well-controlled on current medication regimen with recent 
-                                            readings averaging 128/82 mmHg. Patient compliant with medication and lifestyle modifications including 
+                                            Essential hypertension diagnosed after consistently elevated readings over 140/90 mmHg. Patient started on
+                                            Lisinopril 10mg daily. Blood pressure has been well-controlled on current medication regimen with recent
+                                            readings averaging 128/82 mmHg. Patient compliant with medication and lifestyle modifications including
                                             reduced sodium intake and regular exercise.
                                         </p>
                                     </div>
@@ -1731,9 +1737,9 @@
                                     <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                         <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Notes</h3>
                                         <p class="text-sm text-text-dark-gray dark:text-white">
-                                            Stage 3a chronic kidney disease with eGFR ranging between 45-59 mL/min/1.73m². Secondary to long-standing 
-                                            hypertension and diabetes. Patient monitored with regular renal function tests every 3 months. Current eGFR 
-                                            stable at 52. No proteinuria on recent urinalysis. Patient educated on nephrotoxic medication avoidance and 
+                                            Stage 3a chronic kidney disease with eGFR ranging between 45-59 mL/min/1.73m². Secondary to long-standing
+                                            hypertension and diabetes. Patient monitored with regular renal function tests every 3 months. Current eGFR
+                                            stable at 52. No proteinuria on recent urinalysis. Patient educated on nephrotoxic medication avoidance and
                                             importance of blood pressure and glucose control. Nephrology consultation obtained for co-management.
                                         </p>
                                     </div>
@@ -1808,9 +1814,9 @@
                                     <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                         <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Notes</h3>
                                         <p class="text-sm text-text-dark-gray dark:text-white">
-                                            Right knee pain, medial aspect, consistent with osteoarthritis. Patient reports pain with prolonged standing 
-                                            and climbing stairs, rated 5-6/10 at worst. X-ray shows mild joint space narrowing and small osteophytes. 
-                                            Started on NSAIDs as needed and referred to physical therapy. After 8 weeks of PT, patient reports 
+                                            Right knee pain, medial aspect, consistent with osteoarthritis. Patient reports pain with prolonged standing
+                                            and climbing stairs, rated 5-6/10 at worst. X-ray shows mild joint space narrowing and small osteophytes.
+                                            Started on NSAIDs as needed and referred to physical therapy. After 8 weeks of PT, patient reports
                                             significant improvement with pain now 2-3/10. Continuing home exercise program and weight management.
                                         </p>
                                     </div>
@@ -1927,7 +1933,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Practitioner: Dr. Michael Chen Tab -->
                         <div id="tab-practitioner-chen"
                              class="vertical-tab collapsed bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 hidden flex flex-col">
@@ -2030,15 +2036,15 @@
                                     <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                         <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Notes</h3>
                                         <p class="text-sm text-text-dark-gray dark:text-white">
-                                            Quarterly monitoring of kidney function. Patient showing stable renal function with eGFR consistently 
-                                            in the 45-59 range. Emphasizing nephrotoxic medication avoidance and maintaining blood pressure control. 
+                                            Quarterly monitoring of kidney function. Patient showing stable renal function with eGFR consistently
+                                            in the 45-59 range. Emphasizing nephrotoxic medication avoidance and maintaining blood pressure control.
                                             Co-managing with primary care for optimal outcomes.
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Practitioner: Dr. Sarah Patel Tab -->
                         <div id="tab-practitioner-patel"
                              class="vertical-tab collapsed bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 hidden flex flex-col">
@@ -2145,15 +2151,15 @@
                                     <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                         <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Notes</h3>
                                         <p class="text-sm text-text-dark-gray dark:text-white">
-                                            Comprehensive cognitive assessment completed. Brain MRI scheduled to rule out structural abnormalities. 
-                                            Patient demonstrates mild cognitive impairment on neuropsychological testing. Follow-up in 3 months 
+                                            Comprehensive cognitive assessment completed. Brain MRI scheduled to rule out structural abnormalities.
+                                            Patient demonstrates mild cognitive impairment on neuropsychological testing. Follow-up in 3 months
                                             to reassess cognitive status and review imaging results. Family education provided on supportive strategies.
                                         </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Condition: Memory Issues Tab -->
                         <div id="tab-condition-memory"
                              class="vertical-tab collapsed bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 hidden flex flex-col">
@@ -2222,10 +2228,10 @@
                                     <div class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg">
                                         <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Notes</h3>
                                         <p class="text-sm text-text-dark-gray dark:text-white">
-                                            Patient and family report increased forgetfulness over the past 6 months, including difficulty remembering 
-                                            recent conversations and occasional confusion about dates. Mini-Mental State Examination (MMSE) score 26/30, 
-                                            suggesting mild cognitive impairment. Labs including B12, thyroid function, and metabolic panel within normal 
-                                            limits. Brain MRI ordered to rule out structural abnormalities. Referred to neurology for comprehensive 
+                                            Patient and family report increased forgetfulness over the past 6 months, including difficulty remembering
+                                            recent conversations and occasional confusion about dates. Mini-Mental State Examination (MMSE) score 26/30,
+                                            suggesting mild cognitive impairment. Labs including B12, thyroid function, and metabolic panel within normal
+                                            limits. Brain MRI ordered to rule out structural abnormalities. Referred to neurology for comprehensive
                                             cognitive assessment. Patient maintaining independence in daily activities.
                                         </p>
                                     </div>
@@ -2390,7 +2396,7 @@
     function showDirectory(directoryId) {
       // Hide root menu
       document.getElementById('root-menu').classList.add('hidden');
-      
+
       // Hide all directories
       document.getElementById('health-records-directory').classList.add('hidden');
       document.getElementById('conditions-directory').classList.add('hidden');
@@ -2400,7 +2406,7 @@
       document.getElementById('forms-directory').classList.add('hidden');
       document.getElementById('summaries-directory').classList.add('hidden');
       document.getElementById('documents-directory').classList.add('hidden');
-      
+
       // Show selected directory
       document.getElementById(directoryId + '-directory').classList.remove('hidden');
     }
@@ -2415,7 +2421,7 @@
       document.getElementById('forms-directory').classList.add('hidden');
       document.getElementById('summaries-directory').classList.add('hidden');
       document.getElementById('documents-directory').classList.add('hidden');
-      
+
       // Show root menu
       document.getElementById('root-menu').classList.remove('hidden');
     }
@@ -2425,31 +2431,31 @@
       const tabsContainer = document.getElementById('tabs-container');
       const label = tab.querySelector('.tab-label');
       const content = tab.querySelector('.tab-content');
-      
+
       openTabs.add(tabId);
       tabStates[tabId] = 'expanded';
-      
+
       // Remove active state from all tabs
       document.querySelectorAll('.vertical-tab').forEach(t => {
         t.classList.remove('active-tab');
       });
-      
+
       // Set this as the active tab
       activeTabId = tabId;
       tab.classList.add('active-tab');
-      
+
       // Move tab to the beginning of the container (leftmost position)
       tabsContainer.insertBefore(tab, tabsContainer.firstChild);
-      
+
       tab.classList.remove('hidden', 'collapsed');
       tab.classList.add('expanded');
       label.classList.add('expanded');
-      
+
       // Fade in content after expansion starts
       setTimeout(() => {
         content.classList.add('visible');
       }, 150);
-      
+
       // Scroll the tab into view
       setTimeout(() => {
         tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -2458,59 +2464,59 @@
 
     function setActiveTab(tabId) {
       const tab = document.getElementById(`tab-${tabId}`);
-      
+
       // If tab is not open at all, open it
       if (!openTabs.has(tabId)) {
         openTab(tabId);
         return;
       }
-      
+
       // Remove active state from all tabs
       document.querySelectorAll('.vertical-tab').forEach(t => {
         t.classList.remove('active-tab');
       });
-      
+
       // Set this as the active tab
       activeTabId = tabId;
       tab.classList.add('active-tab');
-      
+
       // Scroll into view
       tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
     }
-    
+
     function toggleTab(tabId) {
       const tab = document.getElementById(`tab-${tabId}`);
       const label = tab.querySelector('.tab-label');
       const content = tab.querySelector('.tab-content');
-      
+
       // If tab is not in openTabs at all, open it
       if (!openTabs.has(tabId)) {
         openTab(tabId);
         return;
       }
-      
+
       // If tab is collapsed, expand it and scroll into view
       if (tabStates[tabId] === 'collapsed') {
         tabStates[tabId] = 'expanded';
-        
+
         // Remove active state from all tabs
         document.querySelectorAll('.vertical-tab').forEach(t => {
           t.classList.remove('active-tab');
         });
-        
+
         // Set this as the active tab
         activeTabId = tabId;
         tab.classList.add('active-tab');
-        
+
         tab.classList.remove('collapsed');
         tab.classList.add('expanded');
         label.classList.add('expanded');
-        
+
         // Fade in content
         setTimeout(() => {
           content.classList.add('visible');
         }, 150);
-        
+
         // Scroll into view
         setTimeout(() => {
           tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
@@ -2521,11 +2527,11 @@
         document.querySelectorAll('.vertical-tab').forEach(t => {
           t.classList.remove('active-tab');
         });
-        
+
         // Set this as the active tab
         activeTabId = tabId;
         tab.classList.add('active-tab');
-        
+
         // Scroll into view
         tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
       }
@@ -2535,17 +2541,17 @@
       const tab = document.getElementById(`tab-${tabId}`);
       const label = tab.querySelector('.tab-label');
       const content = tab.querySelector('.tab-content');
-      
+
       tabStates[tabId] = 'collapsed';
-      
+
       // Keep active state even when collapsed
       // (don't remove active-tab class)
-      
+
       // Collapse the tab but keep it in openTabs
       tab.classList.remove('expanded');
       tab.classList.add('collapsed');
       label.classList.remove('expanded');
-      
+
       // Fade out content
       content.classList.remove('visible');
     }
@@ -2554,23 +2560,23 @@
       const tab = document.getElementById(`tab-${tabId}`);
       const label = tab.querySelector('.tab-label');
       const content = tab.querySelector('.tab-content');
-      
+
       // Remove from open tabs
       openTabs.delete(tabId);
       tabStates[tabId] = 'closed';
-      
+
       // Clear active state if this was the active tab
       if (activeTabId === tabId) {
         activeTabId = null;
       }
       tab.classList.remove('active-tab');
-      
+
       // Collapse first
       tab.classList.remove('expanded');
       tab.classList.add('collapsed');
       label.classList.remove('expanded');
       content.classList.remove('visible');
-      
+
       // Then hide completely after animation
       setTimeout(() => {
         if (!openTabs.has(tabId)) {
@@ -2578,11 +2584,17 @@
         }
       }, 300);
     }
-    
+
     function toggleSidebar() {
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('collapsed');
     }
-                </script>
-            </body>
-        </html>
+                                </script>
+
+        <script type="module">
+            import { initNav } from '/shared/navigation.js';
+            initNav(document.getElementById('site-header'));
+        </script>
+
+                        </body>
+                </html>
