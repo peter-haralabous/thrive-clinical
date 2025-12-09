@@ -1,26 +1,33 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Summary Templates - HealthConnect</title>
-    <link rel="stylesheet" href="../shared/styles.css" />
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Worklist Preferences - HealthConnect</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link href="../shared/styles.css" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <style>
+      body {
+        background: #f6f8fa;
+      }
+
       main {
         margin-left: 256px;
         padding-top: 0px;
         min-height: 100vh;
-        background: #f8f9fa;
       }
 
       .content-area {
-        max-width: 1400px;
         padding: 32px;
+        max-width: 1200px;
       }
 
       .page-title-section {
@@ -31,12 +38,12 @@
         font-size: 28px;
         font-weight: 700;
         color: #0b1220;
-        margin-bottom: 8px;
+        margin: 0 0 8px 0;
       }
 
       .page-title-section p {
-        font-size: 15px;
-        color: #6b7280;
+        color: #6c757d;
+        margin: 0;
       }
 
       .form-section {
@@ -51,48 +58,57 @@
         font-size: 18px;
         font-weight: 600;
         color: #0b1220;
-        margin-bottom: 8px;
+        margin: 0 0 8px 0;
       }
 
       .subtitle {
         font-size: 14px;
-        color: #6b7280;
+        color: #6c757d;
         margin-bottom: 24px;
       }
 
-      .empty-state {
-        text-align: center;
-        padding: 64px 32px;
-      }
-
-      .empty-state-icon {
-        font-size: 64px;
-        color: #d1d5db;
+      .preference-item {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 20px;
         margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
 
-      .empty-state h3 {
-        font-size: 18px;
+      .preference-item:hover {
+        border-color: #d1d5db;
+      }
+
+      .preference-info h3 {
+        font-size: 16px;
         font-weight: 600;
         color: #0b1220;
-        margin-bottom: 8px;
+        margin: 0 0 4px 0;
       }
 
-      .empty-state p {
+      .preference-info p {
         font-size: 14px;
         color: #6b7280;
-        margin-bottom: 24px;
+        margin: 0;
       }
 
-      .btn-primary {
-        background: #0f172a;
+      .btn-configure {
+        background: #0891b2;
         color: #ffffff;
         border: none;
-        padding: 10px 16px;
+        padding: 10px 20px;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
         font-size: 14px;
+        transition: background 0.2s;
+      }
+
+      .btn-configure:hover {
+        background: #0e7490;
       }
     </style>
   </head>
@@ -104,11 +120,7 @@
           <span class="brand-name">HealthConnect</span>
         </a>
         <div class="search">
-          <input
-            type="search"
-            placeholder="Search summary templates"
-            aria-label="Search summary templates"
-          />
+          <input type="search" placeholder="Search" aria-label="Search" />
         </div>
         <div class="actions" style="display: flex; align-items: center; gap: 12px">
           <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
@@ -179,9 +191,9 @@
           </a>
           <a
             href="./worklist-preferences.html"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-900 text-white font-medium text-sm"
           >
-            <span class="material-symbols-outlined text-lg text-gray-600">list</span>
+            <span class="material-symbols-outlined text-lg">list</span>
             Worklist Preferences
           </a>
           <a
@@ -200,9 +212,9 @@
           </a>
           <a
             href="./summary-templates.html"
-            class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-900 text-white font-medium text-sm"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
           >
-            <span class="material-symbols-outlined text-lg">summarize</span>
+            <span class="material-symbols-outlined text-lg text-gray-600">summarize</span>
             Summary Templates
           </a>
           <a
@@ -220,23 +232,50 @@
     <main>
       <div class="content-area">
         <div class="page-title-section">
-          <h1>Summary Templates</h1>
-          <p>Create reusable templates for clinical summaries and visit notes.</p>
+          <h1>Worklist Preferences</h1>
+          <p>Configure how worklists are displayed and organized in your system.</p>
         </div>
 
         <div class="form-section">
-          <div class="empty-state">
-            <span class="material-symbols-outlined empty-state-icon">summarize</span>
-            <h3>No summary templates yet</h3>
-            <p>Build templates to standardize clinical documentation and speed up note-taking.</p>
-            <button class="btn-primary">
-              <span
-                class="material-symbols-outlined"
-                style="vertical-align: middle; font-size: 18px"
-              >
-                add
-              </span>
-              Create Summary Template
+          <h2>List Preferences</h2>
+          <p class="subtitle">Customize the display and behavior of your worklists</p>
+
+          <div class="preference-item">
+            <div class="preference-info">
+              <h3>Encounters</h3>
+              <p>Configure columns, filters, and default views for the encounter list</p>
+            </div>
+            <button
+              class="btn-configure"
+              onclick="alert('Configure Encounter List - Feature coming soon')"
+            >
+              Configure
+            </button>
+          </div>
+
+          <div class="preference-item">
+            <div class="preference-info">
+              <h3>Referrals</h3>
+              <p>Configure columns, filters, and default views for the patient list</p>
+            </div>
+            <button
+              class="btn-configure"
+              onclick="alert('Configure Patient List - Feature coming soon')"
+            >
+              Configure
+            </button>
+          </div>
+
+          <div class="preference-item">
+            <div class="preference-info">
+              <h3>Walk-ins</h3>
+              <p>Configure columns, filters, and default views for the task list</p>
+            </div>
+            <button
+              class="btn-configure"
+              onclick="alert('Configure Task List - Feature coming soon')"
+            >
+              Configure
             </button>
           </div>
         </div>
