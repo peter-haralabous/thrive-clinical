@@ -225,7 +225,54 @@
           <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
             <span class="material-symbols-outlined"></span>
           </button>
-          <div class="user" title="JD">JD</div>
+          <div class="user-avatar-wrapper">
+            <div class="user-avatar" id="userAvatarBtn" onclick="toggleDropdown()">
+              <span class="material-symbols-outlined user-avatar-icon">account_circle</span>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar">
+                  <span class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
+                </div>
+                <div class="dropdown-user-info">
+                  <h3 class="dropdown-user-name">Dr. Smith</h3>
+                  <p class="dropdown-user-email">drsmith@email.com</p>
+                </div>
+              </div>
+
+              <a href="../settings/account-settings.html" class="dropdown-menu-item">
+                <span class="material-symbols-outlined">person</span>
+                <span>Account Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <h4 class="dropdown-section-title">Organization</h4>
+
+              <button class="dropdown-org-item" onclick="toggleOrgMenu()">
+                <span class="material-symbols-outlined dropdown-org-icon">apartment</span>
+                <span class="dropdown-org-name">Dr. Smith's Clinic</span>
+                <div class="dropdown-org-toggle">
+                  <span class="material-symbols-outlined">expand_more</span>
+                </div>
+              </button>
+
+              <a
+                href="../settings/organization-settings.html"
+                class="dropdown-menu-item"
+                style="display: none"
+                id="orgSettingsLink"
+              >
+                <span class="material-symbols-outlined">settings</span>
+                <span>Organization Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <button class="dropdown-menu-item dropdown-logout">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Log Out</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -3635,6 +3682,35 @@
         const sidebar = document.getElementById('sidebar');
         sidebar.classList.toggle('collapsed');
       }
+
+      function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+      }
+
+      function toggleOrgMenu() {
+        const orgSettings = document.getElementById('orgSettingsLink');
+        const toggleIcon = document.querySelector(
+          '.dropdown-org-toggle .material-symbols-outlined'
+        );
+
+        if (orgSettings.style.display === 'none' || orgSettings.style.display === '') {
+          orgSettings.style.display = 'flex';
+          toggleIcon.textContent = 'expand_less';
+        } else {
+          orgSettings.style.display = 'none';
+          toggleIcon.textContent = 'expand_more';
+        }
+      }
+
+      document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const avatarBtn = document.getElementById('userAvatarBtn');
+
+        if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
     </script>
   </body>
 </html>

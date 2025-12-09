@@ -16,154 +16,6 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
     <style>
-      .material-symbols-outlined {
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 400,
-          'GRAD' 0,
-          'opsz' 24;
-      }
-
-      body {
-        background: #f6f6f8;
-        font-family:
-          Inter,
-          system-ui,
-          -apple-system,
-          Segoe UI,
-          Roboto,
-          Arial;
-      }
-
-      .page-container {
-        padding: 24px;
-        max-width: 1600px;
-        margin: 0 auto;
-      }
-
-      .page-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 24px;
-      }
-
-      .page-title {
-        font-size: 28px;
-        font-weight: 700;
-        color: #0b1220;
-        margin: 0;
-      }
-
-      .btn-primary {
-        background: #1d7aec;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 14px;
-      }
-
-      .search-filter-bar {
-        background: white;
-        padding: 16px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        display: flex;
-        gap: 12px;
-        align-items: center;
-      }
-
-      .search-input-wrapper {
-        flex: 1;
-        max-width: 400px;
-        position: relative;
-      }
-
-      .search-input {
-        width: 100%;
-        padding: 10px 12px 10px 40px;
-        border: 1px solid rgba(11, 18, 32, 0.12);
-        border-radius: 8px;
-        font-size: 14px;
-        color: #6c757d;
-      }
-
-      .search-icon {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #6c757d;
-        font-size: 20px;
-      }
-
-      .btn-secondary {
-        background: #e9ecef;
-        color: #0b1220;
-        padding: 10px 20px;
-        border-radius: 8px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 14px;
-      }
-
-      .active-filters {
-        background: white;
-        padding: 12px 16px;
-        border-radius: 8px;
-        margin-bottom: 16px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      .filter-label {
-        font-weight: 600;
-        color: #0b1220;
-        font-size: 14px;
-      }
-
-      .filter-tag {
-        background: #e6f0ff;
-        color: #0b1220;
-        padding: 6px 12px;
-        border-radius: 6px;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 13px;
-      }
-
-      .filter-tag button {
-        background: none;
-        border: none;
-        padding: 0;
-        cursor: pointer;
-        color: #0b1220;
-        font-size: 16px;
-        line-height: 1;
-      }
-
-      .table-container {
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-      }
-
-      thead {
-        background: #f6f6f8;
-        border-bottom: 1px solid rgba(11, 18, 32, 0.06);
-      }
-
       th {
         padding: 14px 16px;
         text-align: left;
@@ -269,6 +121,97 @@
         font-size: 20px;
         cursor: pointer;
       }
+
+      .page-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px;
+      }
+
+      .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+      }
+
+      .page-title {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0b1220;
+        margin: 0;
+      }
+
+      .btn-primary {
+        background: #0f172a;
+        color: #ffffff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .search-filter-bar {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 20px;
+        align-items: center;
+      }
+
+      .search-input-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 400px;
+        border-radius: 12px;
+      }
+
+      .search-input-wrapper .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        font-size: 20px;
+        pointer-events: none;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 10px 12px 10px 44px;
+        font-size: 14px;
+      }
+
+      .btn-secondary {
+        background: #ffffff;
+        color: #0b1220;
+        border: 1px solid rgba(11, 18, 32, 0.1);
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .btn-secondary:hover {
+        background: #f6f6f8;
+      }
+
+      .table-container {
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .table-container.border {
+        border: 1px solid rgba(11, 18, 32, 0.06);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
     </style>
   </head>
   <body class="has-global-header">
@@ -285,7 +228,54 @@
           <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
             <span class="material-symbols-outlined"></span>
           </button>
-          <div class="user" title="JD">JD</div>
+          <div class="user-avatar-wrapper">
+            <div class="user-avatar" id="userAvatarBtn" onclick="toggleDropdown()">
+              <span class="material-symbols-outlined user-avatar-icon">account_circle</span>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar">
+                  <span class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
+                </div>
+                <div class="dropdown-user-info">
+                  <h3 class="dropdown-user-name">Dr. Smith</h3>
+                  <p class="dropdown-user-email">drsmith@email.com</p>
+                </div>
+              </div>
+
+              <a href="./settings/account-settings.html" class="dropdown-menu-item">
+                <span class="material-symbols-outlined">person</span>
+                <span>Account Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <h4 class="dropdown-section-title">Organization</h4>
+
+              <button class="dropdown-org-item" onclick="toggleOrgMenu()">
+                <span class="material-symbols-outlined dropdown-org-icon">apartment</span>
+                <span class="dropdown-org-name">Dr. Smith's Clinic</span>
+                <div class="dropdown-org-toggle">
+                  <span class="material-symbols-outlined">expand_more</span>
+                </div>
+              </button>
+
+              <a
+                href="./settings/organization-settings.html"
+                class="dropdown-menu-item"
+                style="display: none"
+                id="orgSettingsLink"
+              >
+                <span class="material-symbols-outlined">settings</span>
+                <span>Organization Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <button class="dropdown-menu-item dropdown-logout">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Log Out</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </header>
@@ -299,7 +289,11 @@
       <div class="search-filter-bar">
         <div class="search-input-wrapper">
           <span class="material-symbols-outlined search-icon">search</span>
-          <input type="text" class="search-input" placeholder="Search" />
+          <input
+            type="text"
+            class="search-input border border-gray-600 rounded-lg pl-12"
+            placeholder="Search"
+          />
         </div>
         <button class="btn-secondary">Search</button>
         <button class="btn-secondary">Filter</button>
@@ -430,5 +424,37 @@
         <button disabled>Next »</button>
       </div>
     </main>
+
+    <script>
+      function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+      }
+
+      function toggleOrgMenu() {
+        const orgSettings = document.getElementById('orgSettingsLink');
+        const toggleIcon = document.querySelector(
+          '.dropdown-org-toggle .material-symbols-outlined'
+        );
+
+        if (orgSettings.style.display === 'none' || orgSettings.style.display === '') {
+          orgSettings.style.display = 'flex';
+          toggleIcon.textContent = 'expand_less';
+        } else {
+          orgSettings.style.display = 'none';
+          toggleIcon.textContent = 'expand_more';
+        }
+      }
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const avatarBtn = document.getElementById('userAvatarBtn');
+
+        if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+    </script>
   </body>
 </html>

@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Organization Settings</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link href="../shared/styles.css" rel="stylesheet" />
+    <style>
+      body {
+        background: #f6f8fa;
+      }
+      .settings-shell {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 24px;
+        padding: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .settings-sidebar {
+        position: sticky;
+        top: 88px;
+        align-self: flex-start;
+        background: #ffffff;
+        border: 1px solid rgba(11, 18, 32, 0.06);
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .settings-sidebar h2 {
+        margin: 0 0 12px 0;
+        font-size: 14px;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #0b1220;
+        font-weight: 600;
+        transition:
+          background-color 0.2s ease,
+          color 0.2s ease;
+      }
+      .sidebar-link .material-symbols-outlined {
+        font-size: 20px;
+        color: #6c757d;
+      }
+      .sidebar-link:hover {
+        background: rgba(19, 91, 236, 0.08);
+        color: #0b1220;
+      }
+      .sidebar-link.active {
+        background: #0f172a;
+        color: #ffffff;
+      }
+      .sidebar-link.active .material-symbols-outlined {
+        color: #ffffff;
+      }
+      .settings-content {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      .page-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 18px 20px;
+        background: #ffffff;
+        border: 1px solid rgba(11, 18, 32, 0.06);
+        border-radius: 12px;
+      }
+      .page-head h1 {
+        margin: 0;
+        font-size: 22px;
+      }
+      .page-head p {
+        margin: 6px 0 0 0;
+        color: #6c757d;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(17, 24, 39, 0.08);
+        color: #0b1220;
+        font-weight: 600;
+        font-size: 12px;
+      }
+      .card {
+        background: #ffffff;
+        border: 1px solid rgba(11, 18, 32, 0.06);
+        border-radius: 12px;
+        padding: 18px 20px;
+        box-shadow: 0 8px 32px rgba(17, 24, 39, 0.04);
+      }
+      .card h3 {
+        margin: 0 0 12px 0;
+        font-size: 18px;
+      }
+      .card p.description {
+        margin: 0 0 16px 0;
+        color: #6c757d;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px 16px;
+      }
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-weight: 600;
+        color: #0b1220;
+        font-size: 14px;
+      }
+      input,
+      select,
+      textarea {
+        border-radius: 8px;
+        border: 1px solid rgba(11, 18, 32, 0.1);
+        padding: 10px 12px;
+        font-size: 14px;
+        background: #ffffff;
+      }
+      textarea {
+        min-height: 90px;
+        resize: vertical;
+      }
+      .card-actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+      .btn-primary {
+        background: #0f172a;
+        color: #ffffff;
+        border: none;
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .btn-secondary {
+        background: transparent;
+        color: #0b1220;
+        border: 1px solid rgba(11, 18, 32, 0.1);
+        padding: 10px 14px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .status-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(19, 91, 236, 0.1);
+        color: #0b1220;
+        font-weight: 700;
+        font-size: 13px;
+      }
+      .inline-list {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+      }
+      .inline-list li {
+        background: rgba(17, 24, 39, 0.08);
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 12px;
+      }
+      @media (max-width: 960px) {
+        .settings-shell {
+          grid-template-columns: 1fr;
+        }
+        .settings-sidebar {
+          position: relative;
+          top: auto;
+        }
+        .page-head {
+          flex-direction: column;
+        }
+        .status-row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body class="has-global-header">
+    <header class="global-header">
+      <div class="global-header__inner">
+        <a href="../index.html" class="brand">
+          <span class="logo">HC</span>
+          <span class="brand-name">HealthConnect</span>
+        </a>
+        <div class="search">
+          <input type="search" placeholder="Search organization" aria-label="Search organization" />
+        </div>
+        <div class="actions" style="display: flex; align-items: center; gap: 12px">
+          <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
+            <span class="material-symbols-outlined"></span>
+          </button>
+          <div class="user-avatar-wrapper">
+            <div class="user-avatar" id="userAvatarBtn" onclick="toggleDropdown()">
+              <span class="material-symbols-outlined user-avatar-icon">account_circle</span>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar">
+                  <span class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
+                </div>
+                <div class="dropdown-user-info">
+                  <h3 class="dropdown-user-name">Dr. Smith</h3>
+                  <p class="dropdown-user-email">drsmith@email.com</p>
+                </div>
+              </div>
+
+              <a href="./account-settings.html" class="dropdown-menu-item">
+                <span class="material-symbols-outlined">person</span>
+                <span>Account Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <h4 class="dropdown-section-title">Organization</h4>
+
+              <button class="dropdown-org-item" onclick="toggleOrgMenu()">
+                <span class="material-symbols-outlined dropdown-org-icon">apartment</span>
+                <span class="dropdown-org-name">Dr. Smith's Clinic</span>
+                <div class="dropdown-org-toggle">
+                  <span class="material-symbols-outlined">expand_more</span>
+                </div>
+              </button>
+
+              <a
+                href="./organization-settings.html"
+                class="dropdown-menu-item"
+                style="display: none"
+                id="orgSettingsLink"
+              >
+                <span class="material-symbols-outlined">settings</span>
+                <span>Organization Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <button class="dropdown-menu-item dropdown-logout">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Log Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="settings-shell">
+      <aside class="settings-sidebar">
+        <h2>Settings</h2>
+        <nav class="sidebar-nav">
+          <a class="sidebar-link" href="./account-settings.html">
+            <span class="material-symbols-outlined">person</span>
+            Account Settings
+          </a>
+          <a class="sidebar-link active" href="./organization-settings.html">
+            <span class="material-symbols-outlined">apartment</span>
+            Organization
+          </a>
+          <a class="sidebar-link" href="#teams">
+            <span class="material-symbols-outlined">group</span>
+            Teams
+          </a>
+          <a class="sidebar-link" href="#integrations">
+            <span class="material-symbols-outlined">hub</span>
+            Integrations
+          </a>
+          <a class="sidebar-link" href="#billing">
+            <span class="material-symbols-outlined">credit_card</span>
+            Billing
+          </a>
+        </nav>
+      </aside>
+
+      <section class="settings-content">
+        <div class="page-head">
+          <div>
+            <h1>Organization Settings</h1>
+            <p>Manage clinic details, teams, and integrations for Dr. Smith's Clinic.</p>
+          </div>
+          <div class="badge">
+            <span class="material-symbols-outlined">local_hospital</span>
+            Dr. Smith's Clinic
+          </div>
+        </div>
+
+        <div class="card" id="org-profile">
+          <h3>Clinic profile</h3>
+          <p class="description">Keep clinic information up to date for encounter paperwork.</p>
+          <div class="form-grid">
+            <label>
+              Organization name
+              <input type="text" value="Dr. Smith's Clinic" />
+            </label>
+            <label>
+              Time zone
+              <select>
+                <option selected>Pacific Time (PT)</option>
+                <option>Mountain Time (MT)</option>
+                <option>Central Time (CT)</option>
+                <option>Eastern Time (ET)</option>
+              </select>
+            </label>
+            <label>
+              Contact email
+              <input type="email" value="support@drsmithclinic.com" />
+            </label>
+            <label>
+              Contact phone
+              <input type="tel" value="(555) 201-2020" />
+            </label>
+          </div>
+          <label>
+            Address
+            <textarea>
+1250 Harbor Way
+San Francisco, CA 94123</textarea
+            >
+          </label>
+          <div class="card-actions">
+            <button class="btn-secondary">Discard</button>
+            <button class="btn-primary">Save clinic info</button>
+          </div>
+        </div>
+
+        <div class="card" id="teams">
+          <h3>Teams & roles</h3>
+          <p class="description">Control who can access encounters, billing, and analytics.</p>
+          <div class="status-row">
+            <div>
+              <strong>Active members</strong>
+              <div class="status-pill">
+                <span class="material-symbols-outlined">group</span>
+                8 members
+              </div>
+            </div>
+            <div>
+              <strong>Pending invites</strong>
+              <div class="status-pill">
+                <span class="material-symbols-outlined">mail</span>
+                2 invites
+              </div>
+            </div>
+          </div>
+          <div class="form-grid" style="margin-top: 12px">
+            <label>
+              Invite teammate
+              <input type="email" placeholder="teammate@clinic.com" />
+            </label>
+            <label>
+              Role
+              <select>
+                <option selected>Clinician</option>
+                <option>Admin</option>
+                <option>Billing</option>
+                <option>Viewer</option>
+              </select>
+            </label>
+          </div>
+          <div class="card-actions">
+            <button class="btn-secondary">Copy invite link</button>
+            <button class="btn-primary">Send invite</button>
+          </div>
+        </div>
+
+        <div class="card" id="integrations">
+          <h3>Integrations</h3>
+          <p class="description">Connect external services used by your clinic.</p>
+          <ul class="inline-list">
+            <li>FHIR feed</li>
+            <li>Claims clearinghouse</li>
+            <li>E-prescribing</li>
+            <li>Calendar sync</li>
+          </ul>
+          <div class="form-grid" style="margin-top: 14px">
+            <label>
+              New integration name
+              <input type="text" placeholder="e.g., Radiology vendor" />
+            </label>
+            <label>
+              Endpoint URL
+              <input type="url" placeholder="https://" />
+            </label>
+          </div>
+          <div class="card-actions">
+            <button class="btn-secondary">Cancel</button>
+            <button class="btn-primary">Add integration</button>
+          </div>
+        </div>
+
+        <div class="card" id="billing">
+          <h3>Billing</h3>
+          <p class="description">Plan, usage, and payment details for the clinic.</p>
+          <div class="form-grid">
+            <label>
+              Plan
+              <input type="text" value="Clinical Team" readonly />
+            </label>
+            <label>
+              Seats
+              <input type="text" value="8 of 12 used" readonly />
+            </label>
+            <label>
+              Next invoice
+              <input type="text" value="Sep 1, 2024" readonly />
+            </label>
+            <label>
+              Payment method
+              <input type="text" value="Visa •••• 4242" readonly />
+            </label>
+          </div>
+          <div class="card-actions">
+            <button class="btn-secondary">Update payment method</button>
+            <button class="btn-primary">Download latest invoice</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+      }
+
+      function toggleOrgMenu() {
+        const orgSettings = document.getElementById('orgSettingsLink');
+        const toggleIcon = document.querySelector(
+          '.dropdown-org-toggle .material-symbols-outlined'
+        );
+
+        if (orgSettings.style.display === 'none' || orgSettings.style.display === '') {
+          orgSettings.style.display = 'flex';
+          toggleIcon.textContent = 'expand_less';
+        } else {
+          orgSettings.style.display = 'none';
+          toggleIcon.textContent = 'expand_more';
+        }
+      }
+
+      document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const avatarBtn = document.getElementById('userAvatarBtn');
+
+        if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+    </script>
+  </body>
+</html>
