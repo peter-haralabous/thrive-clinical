@@ -286,14 +286,12 @@
                 type: 'text',
                 name: 'fullName',
                 title: 'Full Name',
-                isRequired: true,
               },
               {
                 type: 'text',
                 name: 'height',
                 title: 'Height (in inches)',
                 inputType: 'number',
-                isRequired: true,
                 validators: [
                   {
                     type: 'numeric',
@@ -308,7 +306,6 @@
                 name: 'weight',
                 title: 'Weight (in pounds)',
                 inputType: 'number',
-                isRequired: true,
                 validators: [
                   {
                     type: 'numeric',
@@ -317,6 +314,12 @@
                     text: 'Please enter a valid weight between 10 and 1000 pounds',
                   },
                 ],
+              },
+              {
+                type: 'text',
+                name: 'bmiScore',
+                title: 'BMI Score',
+                visible: false,
               },
               {
                 type: 'checkbox',
@@ -356,7 +359,6 @@
                 type: 'comment',
                 name: 'reasonForVisit',
                 title: 'What is the primary reason for your visit today?',
-                isRequired: true,
                 rows: 4,
               },
               {
@@ -367,12 +369,6 @@
                 rateMax: 10,
                 minRateDescription: 'No pain',
                 maxRateDescription: 'Worst pain',
-              },
-              {
-                type: 'text',
-                name: 'bmiScore',
-                title: 'BMI Score',
-                visible: false,
               },
             ],
           },
