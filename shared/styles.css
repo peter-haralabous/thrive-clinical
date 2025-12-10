@@ -86,6 +86,13 @@ nav.site-nav a {
 }
 
 /* Global fixed header styles */
+/* Fix for global header */
+global-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: block;
+}
 .global-header {
   position: fixed;
   top: 0;

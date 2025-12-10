@@ -8,16 +8,6 @@ class GlobalHeader extends HTMLElement {
   connectedCallback() {
     this.render();
     this.setupEventListeners();
-
-    // Add the body class for proper styling
-    if (!document.body.classList.contains('has-global-header')) {
-      document.body.classList.add('has-global-header');
-    }
-  }
-
-  disconnectedCallback() {
-    // Clean up when component is removed
-    document.body.classList.remove('has-global-header');
   }
 
   render() {
@@ -32,9 +22,6 @@ class GlobalHeader extends HTMLElement {
         .global-header {
           background: white;
           border-bottom: 1px solid rgba(11, 18, 32, 0.06);
-          position: sticky;
-          top: 0;
-          z-index: 100;
           width: 100%;
         }
 
