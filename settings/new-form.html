@@ -280,8 +280,7 @@
         description: 'Please complete this form before your appointment',
         pages: [
           {
-            name: 'demographics',
-            title: 'Patient Information',
+            name: 'page1',
             elements: [
               {
                 type: 'text',
@@ -291,67 +290,34 @@
               },
               {
                 type: 'text',
-                name: 'dateOfBirth',
-                title: 'Date of Birth',
-                inputType: 'date',
-                isRequired: true,
-              },
-              {
-                type: 'radiogroup',
-                name: 'gender',
-                title: 'Gender',
-                isRequired: true,
-                choices: ['Male', 'Female', 'Other', 'Prefer not to say'],
-              },
-              {
-                type: 'text',
-                name: 'email',
-                title: 'Email Address',
-                inputType: 'email',
+                name: 'height',
+                title: 'Height (in inches)',
+                inputType: 'number',
                 isRequired: true,
                 validators: [
                   {
-                    type: 'email',
+                    type: 'numeric',
+                    minValue: 24,
+                    maxValue: 96,
+                    text: 'Please enter a valid height between 24 and 96 inches',
                   },
                 ],
               },
               {
                 type: 'text',
-                name: 'phone',
-                title: 'Phone Number',
-                inputType: 'tel',
+                name: 'weight',
+                title: 'Weight (in pounds)',
+                inputType: 'number',
                 isRequired: true,
+                validators: [
+                  {
+                    type: 'numeric',
+                    minValue: 10,
+                    maxValue: 1000,
+                    text: 'Please enter a valid weight between 10 and 1000 pounds',
+                  },
+                ],
               },
-              {
-                type: 'text',
-                name: 'address',
-                title: 'Street Address',
-                isRequired: true,
-              },
-              {
-                type: 'text',
-                name: 'city',
-                title: 'City',
-                isRequired: true,
-              },
-              {
-                type: 'text',
-                name: 'state',
-                title: 'State',
-                isRequired: true,
-              },
-              {
-                type: 'text',
-                name: 'zipCode',
-                title: 'Zip Code',
-                isRequired: true,
-              },
-            ],
-          },
-          {
-            name: 'medical-history',
-            title: 'Medical History',
-            elements: [
               {
                 type: 'checkbox',
                 name: 'medicalConditions',
@@ -388,19 +354,6 @@
               },
               {
                 type: 'comment',
-                name: 'allergiesDetails',
-                title: 'Please provide details about your allergies:',
-                visibleIf: "{allergies} notempty and {allergies} notcontains 'No known allergies'",
-                rows: 3,
-              },
-            ],
-          },
-          {
-            name: 'reason-for-visit',
-            title: 'Reason for Visit',
-            elements: [
-              {
-                type: 'comment',
                 name: 'reasonForVisit',
                 title: 'What is the primary reason for your visit today?',
                 isRequired: true,
@@ -415,7 +368,21 @@
                 minRateDescription: 'No pain',
                 maxRateDescription: 'Worst pain',
               },
+              {
+                type: 'text',
+                name: 'bmiScore',
+                title: 'BMI Score',
+                visible: false,
+              },
             ],
+          },
+        ],
+        triggers: [
+          {
+            type: 'runexpression',
+            expression: '{height} notempty and {weight} notempty',
+            runExpression: '({weight} * 703) / ({height} * {height})',
+            setToName: 'bmiScore',
           },
         ],
       };
