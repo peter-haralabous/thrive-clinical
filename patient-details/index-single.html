@@ -1,0 +1,2213 @@
+<!doctype html>
+<html class="light" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Patient Details — Prototype</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link href="../shared/styles.css" rel="stylesheet" />
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#135bec',
+              'background-light': '#f6f6f8',
+              'background-dark': '#101622',
+              'primary-calm': '#A0C4FF',
+              'accent-warm': '#BDB2FF',
+              'neutral-bg': '#F8F9FA',
+              'text-dark-gray': '#495057',
+              'text-light-gray': '#6c757d',
+              'card-light': '#ffffff',
+              'card-dark': '#1a2230',
+            },
+            fontFamily: {
+              display: ['Inter', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+    <style>
+      .material-symbols-outlined {
+        font-variation-settings:
+          'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24;
+      }
+    </style>
+    <style>
+      body {
+        min-height: 100dvh;
+        max-height: 100dvh;
+        overflow: hidden;
+      }
+
+      /* Horizontal Tab Bar - Hidden for single page view */
+      .tabs-bar {
+        display: none;
+      }
+
+      /* Hide scrollbar but keep functionality */
+      .tabs-bar::-webkit-scrollbar {
+        height: 0px;
+      }
+
+      .tabs-list {
+        display: flex;
+        height: 100%;
+        align-items: stretch;
+      }
+
+      /* Individual tab styling */
+      .tab-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 16px;
+        background: transparent;
+        border: none;
+        border-right: 1px solid rgba(11, 18, 32, 0.06);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        color: #6c757d;
+        transition: all 0.15s ease;
+        min-width: fit-content;
+        white-space: nowrap;
+        position: relative;
+      }
+
+      .tab-item:hover {
+        background: #f8f9fa;
+      }
+
+      .tab-item.active {
+        color: #ffffff;
+        background: #1f2937;
+        border-bottom: 2px solid #1f2937;
+      }
+
+      .tab-item .material-symbols-outlined {
+        font-size: 18px;
+      }
+
+      .tab-close-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        padding: 0;
+        background: transparent;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        transition: all 0.15s ease;
+      }
+
+      .tab-close-btn:hover {
+        background: rgba(0, 0, 0, 0.1);
+        color: #0f172a;
+      }
+
+      .tab-close-btn .material-symbols-outlined {
+        font-size: 16px;
+      }
+
+      /* Tab content area */
+      .tab-content-area {
+        position: fixed;
+        top: 64px; /* Below header only (no tab bar) */
+        left: 256px;
+        right: 0;
+        bottom: 0;
+        padding: 32px;
+        overflow-y: auto;
+        background: #f6f6f8;
+        transition: left 0.3s ease-in-out;
+      }
+
+      /* Single content view styling */
+      .single-content-view {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .tab-pane {
+        display: none;
+        height: 100%;
+        padding: 24px;
+        animation: fadeIn 0.2s ease-in-out;
+        overflow-y: auto;
+      }
+
+      .tab-pane.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      /* Sidebar collapsed state */
+      #sidebar.collapsed {
+        width: 64px;
+      }
+
+      #sidebar.collapsed .sidebar-title,
+      #sidebar.collapsed .font-medium {
+        display: none;
+      }
+
+      #sidebar.collapsed button {
+        justify-content: center;
+      }
+
+      #sidebar.collapsed button .flex {
+        justify-content: center;
+      }
+
+      /* Adjust tabs and content when sidebar is collapsed */
+      #sidebar.collapsed ~ .tabs-bar {
+        left: 64px;
+      }
+
+      #sidebar.collapsed ~ .tab-content-area {
+        left: 64px;
+      }
+
+      /* Chevron rotation for submenus */
+      .chevron-icon {
+        transition: transform 0.3s ease;
+      }
+
+      .chevron-icon.rotated {
+        transform: rotate(90deg);
+      }
+
+      /* Modal styling */
+      #health-record-modal {
+        backdrop-filter: blur(4px);
+      }
+
+      #health-record-modal .bg-white {
+        animation: modalSlideIn 0.2s ease-out;
+      }
+
+      @keyframes modalSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body
+    class="font-display bg-neutral-bg dark:bg-background-dark text-text-dark-gray dark:text-neutral-bg"
+  >
+    <header class="global-header">
+      <div class="global-header__inner">
+        <a href="../index.html" class="back-button">
+          <span class="material-symbols-outlined">arrow_back</span>
+          <span class="back-text">Encounters List</span>
+        </a>
+        <div class="search">
+          <input type="search" placeholder="Search for a patient..." aria-label="Search" />
+        </div>
+        <div class="actions" style="display: flex; align-items: center; gap: 12px">
+          <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
+            <span class="material-symbols-outlined"></span>
+          </button>
+          <div class="user-avatar-wrapper">
+            <div class="user-avatar" id="userAvatarBtn" onclick="toggleDropdown()">
+              <span class="material-symbols-outlined user-avatar-icon">account_circle</span>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar">
+                  <span class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
+                </div>
+                <div class="dropdown-user-info">
+                  <h3 class="dropdown-user-name">Dr. Smith</h3>
+                  <p class="dropdown-user-email">drsmith@email.com</p>
+                </div>
+              </div>
+
+              <a href="../settings/account-settings.html" class="dropdown-menu-item">
+                <span class="material-symbols-outlined">person</span>
+                <span>Account Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <h4 class="dropdown-section-title">Organization</h4>
+
+              <button class="dropdown-org-item">
+                <span class="material-symbols-outlined dropdown-org-icon">apartment</span>
+                <span class="dropdown-org-name">Dr. Smith's Clinic</span>
+                <div class="dropdown-org-toggle">
+                  <span class="material-symbols-outlined">unfold_more</span>
+                </div>
+              </button>
+
+              <a href="../settings/organization-settings.html" class="dropdown-menu-item">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Organization Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <button class="dropdown-menu-item dropdown-logout">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Log Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex h-screen overflow-hidden pt-16">
+      <!-- Side Menu -->
+      <aside
+        id="sidebar"
+        class="w-64 bg-white dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 flex-shrink-0 fixed left-0 top-16 h-screen z-30 transition-all duration-300 flex flex-col"
+      >
+        <!-- Patient Header -->
+        <div class="p-4 border-b border-gray-200 dark:border-gray-700 sidebar-header">
+          <div class="flex items-start justify-between mb-3">
+            <h2 class="text-2xl font-bold text-text-dark-gray dark:text-neutral-bg">
+              Johnson, Maria
+            </h2>
+            <button class="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+              <span
+                class="material-symbols-outlined text-xl text-text-dark-gray dark:text-neutral-bg"
+              >
+                more_horiz
+              </span>
+            </button>
+          </div>
+          <div class="space-y-2 text-sm">
+            <div class="flex items-center gap-2 text-text-light-gray">
+              <span class="material-symbols-outlined text-lg">calendar_today</span>
+              <span>DOB: 2000-01-01</span>
+            </div>
+            <div class="flex items-center gap-2 text-text-light-gray">
+              <span class="material-symbols-outlined text-lg">badge</span>
+              <span>PHN: 12349000</span>
+            </div>
+            <div class="flex items-start gap-2 text-text-light-gray">
+              <span class="material-symbols-outlined text-lg">mail</span>
+              <span class="break-all">
+                <a
+                  href="/cdn-cgi/l/email-protection"
+                  class="__cf_email__"
+                  data-cfemail="6a1a0f1e0f1844020b180b060b08051f192a1e0218031c0f44020f0b061e02"
+                >
+                  [email&#160;protected]
+                </a>
+              </span>
+            </div>
+          </div>
+
+          <!-- Add Button with Dropdown -->
+          <div class="pt-4">
+            <div class="relative">
+              <button
+                onclick="toggleAddDropdown()"
+                class="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm"
+              >
+                <span class="material-symbols-outlined text-lg">add</span>
+                <span class="text-sm">Add</span>
+                <span class="material-symbols-outlined text-lg">expand_more</span>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div
+                id="add-dropdown"
+                class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
+              >
+                <button
+                  onclick="
+                    handleAddHealthRecord();
+                    toggleAddDropdown();
+                  "
+                  class="w-full flex items-start gap-3 px-4 py-3 hover:bg-neutral-bg dark:hover:bg-background-dark transition-colors text-left"
+                >
+                  <div
+                    class="flex-shrink-0 w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400">
+                      clinical_notes
+                    </span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-text-dark-gray dark:text-white">
+                      Health Record
+                    </div>
+                    <div class="text-xs text-text-light-gray">
+                      Medication, condition, or lab result
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onclick="
+                    handleAddNote();
+                    toggleAddDropdown();
+                  "
+                  class="w-full flex items-start gap-3 px-4 py-3 hover:bg-neutral-bg dark:hover:bg-background-dark transition-colors text-left"
+                >
+                  <div
+                    class="flex-shrink-0 w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-amber-600 dark:text-amber-400">
+                      chat_bubble
+                    </span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-text-dark-gray dark:text-white">
+                      Note
+                    </div>
+                    <div class="text-xs text-text-light-gray">Personal note or observation</div>
+                  </div>
+                </button>
+
+                <button
+                  onclick="
+                    handleAddDocument();
+                    toggleAddDropdown();
+                  "
+                  class="w-full flex items-start gap-3 px-4 py-3 hover:bg-neutral-bg dark:hover:bg-background-dark transition-colors text-left"
+                >
+                  <div
+                    class="flex-shrink-0 w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center"
+                  >
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400">
+                      upload_file
+                    </span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-text-dark-gray dark:text-white">
+                      Document
+                    </div>
+                    <div class="text-xs text-text-light-gray">Upload file, image, or PDF</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto">
+          <div class="p-4">
+            <!-- Root Menu -->
+            <nav id="root-menu">
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('overview')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">grid_view</span>
+                      <span class="font-medium sidebar-title">Overview</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+              <div
+                class="mt-6 mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Directories
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="showDirectory('health-records')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">medical_information</span>
+                        <span class="font-medium sidebar-title">Health Records</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('encounters')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">calendar_month</span>
+                        <span class="font-medium sidebar-title">Encounters</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('forms')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">description</span>
+                        <span class="font-medium sidebar-title">Forms</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('summaries')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">summarize</span>
+                        <span class="font-medium sidebar-title">Summaries</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('documents')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">folder</span>
+                        <span class="font-medium sidebar-title">Documents</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Health Records Directory -->
+            <nav id="health-records-directory" class="hidden">
+              <button
+                onclick="showRootMenu()"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Health Records
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="showDirectory('conditions')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                        <span class="sidebar-title">Conditions</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('practitioners')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">stethoscope</span>
+                        <span class="sidebar-title">Practitioners</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('immunizations')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">vaccines</span>
+                        <span class="sidebar-title">Immunizations</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('medications')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">medication</span>
+                        <span class="sidebar-title">Medications</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('allergies')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">emergency</span>
+                        <span class="sidebar-title">Allergies</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="showDirectory('lab-results')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">science</span>
+                        <span class="sidebar-title">Lab Results</span>
+                      </div>
+                      <span class="material-symbols-outlined text-xl sidebar-title">
+                        chevron_right
+                      </span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Conditions Directory -->
+            <nav id="conditions-directory" class="hidden">
+              <button
+                onclick="showDirectory('health-records')"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Conditions
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('condition-hypertension')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">Hypertension</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('condition-low-back-pain')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">Low back pain</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('condition-fibrocystic')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">Fibrocystic breast disease</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('condition-dizziness')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">Dizziness</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('condition-htn')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">HTN</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('condition-renal')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">Chronic Renal Insufficiency</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('condition-knee')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">Knee pain (right)</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('condition-memory')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">health_and_safety</span>
+                      <span class="sidebar-title">Memory issues</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Practitioners Directory -->
+            <nav id="practitioners-directory" class="hidden">
+              <button
+                onclick="showDirectory('health-records')"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Practitioners
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('practitioner-carter')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">stethoscope</span>
+                      <span class="sidebar-title">Dr. Emily Carter</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('practitioner-chen')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">stethoscope</span>
+                      <span class="sidebar-title">Dr. Michael Chen</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('practitioner-patel')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">stethoscope</span>
+                      <span class="sidebar-title">Dr. Sarah Patel</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Immunizations Directory -->
+            <nav id="immunizations-directory" class="hidden">
+              <button
+                onclick="showDirectory('health-records')"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Immunizations
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('immunization-covid')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">vaccines</span>
+                      <span class="sidebar-title">COVID-19 Vaccine (Moderna)</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('immunization-flu')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">vaccines</span>
+                      <span class="sidebar-title">Influenza Vaccine</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Medications Directory -->
+            <nav id="medications-directory" class="hidden">
+              <button
+                onclick="showDirectory('health-records')"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Medications
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('medication-warfarin')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">medication</span>
+                      <span class="sidebar-title">Warfarin 5mg</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('medication-metformin')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">medication</span>
+                      <span class="sidebar-title">Metformin 500mg</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('medication-lisinopril')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">medication</span>
+                      <span class="sidebar-title">Lisinopril 10mg</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('medication-atorvastatin')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">medication</span>
+                      <span class="sidebar-title">Atorvastatin 20mg</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Allergies Directory -->
+            <nav id="allergies-directory" class="hidden">
+              <button
+                onclick="showDirectory('health-records')"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Allergies
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('allergy-penicillin')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">emergency</span>
+                      <span class="sidebar-title">Penicillin</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('allergy-latex')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">emergency</span>
+                      <span class="sidebar-title">Latex</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Lab Results Directory -->
+            <nav id="lab-results-directory" class="hidden">
+              <button
+                onclick="showDirectory('health-records')"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Lab Results
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('lab-metabolic-panel')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">science</span>
+                      <span class="sidebar-title">Metabolic Panel - Oct 15, 2024</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Encounters Directory -->
+            <nav id="encounters-directory" class="hidden">
+              <button
+                onclick="showRootMenu()"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Encounters
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('encounter-1')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">calendar_month</span>
+                      <span class="sidebar-title">Encounter · 2025-11-21</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('encounter-2')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">calendar_month</span>
+                      <span class="sidebar-title">Encounter · 2025-11-14</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Forms Directory -->
+            <nav id="forms-directory" class="hidden">
+              <button
+                onclick="showRootMenu()"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Forms
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('intake-form')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">description</span>
+                      <span class="sidebar-title">Intake Form</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('follow-up-form')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">description</span>
+                      <span class="sidebar-title">Follow-up Form</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Summaries Directory -->
+            <nav id="summaries-directory" class="hidden">
+              <button
+                onclick="showRootMenu()"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Summaries
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('summary-intake')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">summarize</span>
+                      <span class="sidebar-title">Summary: Intake Form</span>
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onclick="toggleTab('summary-visit')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">summarize</span>
+                      <span class="sidebar-title">Summary: Follow up form</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            <!-- Documents Directory -->
+            <nav id="documents-directory" class="hidden">
+              <button
+                onclick="showRootMenu()"
+                class="w-full text-left px-4 py-3 mb-4 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+              >
+                <div class="flex items-center gap-3">
+                  <span class="material-symbols-outlined text-xl">arrow_back</span>
+                  <span class="font-medium sidebar-title">Back</span>
+                </div>
+              </button>
+              <div
+                class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
+              >
+                Documents
+              </div>
+              <ul class="space-y-1">
+                <li>
+                  <button
+                    onclick="toggleTab('document-lab')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">folder</span>
+                      <span class="sidebar-title">Lab Results</span>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Horizontal Tabs Bar -->
+      <div id="tabs-bar" class="tabs-bar">
+        <div class="tabs-list" id="tabs-list">
+          <!-- Tabs will be dynamically added here -->
+        </div>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div id="tab-content-area" class="tab-content-area">
+        <!-- Tab panes will be dynamically added here -->
+      </div>
+    </main>
+    <script
+      data-cfasync="false"
+      src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"
+    ></script>
+    <script>
+      // Tab management for horizontal layout
+      const openTabs = new Map(); // Map of tabId -> { title, icon, content }
+      let activeTabId = null;
+
+      // Tab data definitions - all possible tabs
+      const tabDefinitions = {
+        overview: {
+          title: 'Overview',
+          icon: 'grid_view',
+          content: generateOverviewContent(),
+        },
+        'encounter-1': {
+          title: 'Encounter · 2025-11-14',
+          icon: 'calendar_month',
+          content: generateEncounterContent('2025-11-14'),
+        },
+        'encounter-2': {
+          title: 'Encounter · 2025-11-21',
+          icon: 'calendar_month',
+          content: generateEncounterContent('2025-11-21'),
+        },
+        'condition-hypertension': {
+          title: 'Hypertension',
+          icon: 'health_and_safety',
+          content: generateConditionContent('Hypertension'),
+        },
+        'condition-low-back-pain': {
+          title: 'Low back pain',
+          icon: 'health_and_safety',
+          content: generateConditionContent('Low back pain'),
+        },
+        'condition-fibrocystic': {
+          title: 'Fibrocystic breast disease',
+          icon: 'health_and_safety',
+          content: generateConditionContent('Fibrocystic breast disease'),
+        },
+        'condition-dizziness': {
+          title: 'Dizziness',
+          icon: 'health_and_safety',
+          content: generateConditionContent('Dizziness'),
+        },
+        'condition-htn': {
+          title: 'HTN',
+          icon: 'health_and_safety',
+          content: generateConditionContent('HTN'),
+        },
+        'condition-renal': {
+          title: 'Chronic Renal Insufficiency',
+          icon: 'health_and_safety',
+          content: generateConditionContent('Chronic Renal Insufficiency'),
+        },
+        'condition-knee': {
+          title: 'Knee pain (right)',
+          icon: 'health_and_safety',
+          content: generateConditionContent('Knee pain (right)'),
+        },
+        'condition-memory': {
+          title: 'Memory issues',
+          icon: 'health_and_safety',
+          content: generateConditionContent('Memory issues'),
+        },
+        'practitioner-carter': {
+          title: 'Dr. Emily Carter',
+          icon: 'stethoscope',
+          content: generatePractitionerContent('Dr. Emily Carter'),
+        },
+        'practitioner-chen': {
+          title: 'Dr. Michael Chen',
+          icon: 'stethoscope',
+          content: generatePractitionerContent('Dr. Michael Chen'),
+        },
+        'practitioner-patel': {
+          title: 'Dr. Sarah Patel',
+          icon: 'stethoscope',
+          content: generatePractitionerContent('Dr. Sarah Patel'),
+        },
+        'immunization-covid': {
+          title: 'COVID-19 Vaccine',
+          icon: 'vaccines',
+          content: generateImmunizationContent('COVID-19 Vaccine'),
+        },
+        'immunization-flu': {
+          title: 'Influenza Vaccine',
+          icon: 'vaccines',
+          content: generateImmunizationContent('Influenza Vaccine'),
+        },
+        'medication-warfarin': {
+          title: 'Warfarin 5mg',
+          icon: 'medication',
+          content: generateMedicationContent('Warfarin 5mg'),
+        },
+        'medication-metformin': {
+          title: 'Metformin 500mg',
+          icon: 'medication',
+          content: generateMedicationContent('Metformin 500mg'),
+        },
+        'medication-lisinopril': {
+          title: 'Lisinopril 10mg',
+          icon: 'medication',
+          content: generateMedicationContent('Lisinopril 10mg'),
+        },
+        'medication-atorvastatin': {
+          title: 'Atorvastatin 20mg',
+          icon: 'medication',
+          content: generateMedicationContent('Atorvastatin 20mg'),
+        },
+        'allergy-penicillin': {
+          title: 'Penicillin Allergy',
+          icon: 'emergency',
+          content: generateAllergyContent('Penicillin'),
+        },
+        'allergy-latex': {
+          title: 'Latex Allergy',
+          icon: 'emergency',
+          content: generateAllergyContent('Latex'),
+        },
+        'lab-metabolic-panel': {
+          title: 'Metabolic Panel',
+          icon: 'science',
+          content: generateLabResultContent('Metabolic Panel'),
+        },
+        'intake-form': {
+          title: 'Intake Form',
+          icon: 'description',
+          content: generateFormContent('Intake Form'),
+        },
+        'follow-up-form': {
+          title: 'Follow-up Form',
+          icon: 'description',
+          content: generateFormContent('Follow-up Form'),
+        },
+        'summary-intake': {
+          title: 'Summary: Intake Form',
+          icon: 'summarize',
+          content: generateSummaryContent('Intake Form'),
+        },
+        'summary-visit': {
+          title: 'Summary: Follow up form',
+          icon: 'summarize',
+          content: generateSummaryContent('Follow up form'),
+        },
+        'document-lab': {
+          title: 'Lab Results Document',
+          icon: 'folder',
+          content: generateDocumentContent('Lab Results'),
+        },
+      };
+
+      // Open Overview tab by default, or a specific tab from URL params
+      window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+
+        if (tabParam && tabDefinitions[tabParam]) {
+          openTab(tabParam);
+        } else {
+          openTab('overview');
+        }
+      });
+
+      function openTab(tabId) {
+        // Legacy function - now using toggleTab with single content view
+        toggleTab(tabId);
+      }
+
+      function toggleTab(tabId) {
+        // Check if this is a health record item (condition, medication, lab, etc.)
+        if (isHealthRecordItem(tabId)) {
+          openInModal(tabId);
+        } else {
+          openInMainContent(tabId);
+        }
+      }
+
+      function isHealthRecordItem(tabId) {
+        // Health record items should open in modal
+        return (
+          tabId.startsWith('condition-') ||
+          tabId.startsWith('medication-') ||
+          tabId.startsWith('lab-') ||
+          tabId.startsWith('practitioner-')
+        );
+      }
+
+      function openInMainContent(tabId) {
+        const tabData = tabDefinitions[tabId];
+        if (!tabData) {
+          console.warn(`Tab definition not found for: ${tabId}`);
+          return;
+        }
+
+        activeTabId = tabId;
+
+        // Update sidebar active states
+        document.querySelectorAll('aside button').forEach((btn) => {
+          btn.classList.remove(
+            'bg-blue-50',
+            'dark:bg-blue-900/20',
+            'text-blue-600',
+            'dark:text-blue-400'
+          );
+        });
+
+        // Clear and render content in main area
+        const contentArea = document.getElementById('tab-content-area');
+        contentArea.innerHTML = `
+          <div class="single-content-view">
+            ${tabData.content}
+          </div>
+        `;
+      }
+
+      function openInModal(tabId) {
+        const tabData = tabDefinitions[tabId];
+        if (!tabData) {
+          console.warn(`Tab definition not found for: ${tabId}`);
+          return;
+        }
+
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'health-record-modal';
+        modal.className =
+          'fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50';
+        modal.innerHTML = `
+          <div class="bg-white dark:bg-card-dark rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+              <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-primary">${tabData.icon}</span>
+                <h2 class="text-xl font-semibold text-text-dark-gray dark:text-white">${tabData.title}</h2>
+              </div>
+              <button onclick="closeModal()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-6">
+              ${tabData.content}
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            closeModal();
+          }
+        });
+
+        // Close on Escape key
+        const escapeHandler = (e) => {
+          if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', escapeHandler);
+          }
+        };
+        document.addEventListener('keydown', escapeHandler);
+      }
+
+      function closeModal() {
+        const modal = document.getElementById('health-record-modal');
+        if (modal) {
+          modal.remove();
+        }
+      }
+
+      function setActiveTab(tabId) {
+        activeTabId = tabId;
+
+        // Update tab bar active states
+        document.querySelectorAll('.tab-item').forEach((tab) => {
+          if (tab.dataset.tabId === tabId) {
+            tab.classList.add('active');
+          } else {
+            tab.classList.remove('active');
+          }
+        });
+
+        // Update content pane active states
+        document.querySelectorAll('.tab-pane').forEach((pane) => {
+          if (pane.id === `pane-${tabId}`) {
+            pane.classList.add('active');
+          } else {
+            pane.classList.remove('active');
+          }
+        });
+
+        // Scroll tab into view if needed
+        const activeTab = document.querySelector(`.tab-item[data-tab-id="${tabId}"]`);
+        if (activeTab) {
+          activeTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }
+
+      function closeTab(tabId) {
+        // Don't close if it's the last tab
+        if (openTabs.size <= 1) {
+          return;
+        }
+
+        // Remove from open tabs
+        openTabs.delete(tabId);
+
+        // If closing the active tab, activate another tab
+        if (activeTabId === tabId) {
+          // Activate the first remaining tab
+          const firstTabId = openTabs.keys().next().value;
+          setActiveTab(firstTabId);
+        }
+
+        // Remove tab from DOM
+        const tabElement = document.querySelector(`.tab-item[data-tab-id="${tabId}"]`);
+        if (tabElement) {
+          tabElement.remove();
+        }
+
+        // Remove content pane from DOM
+        const paneElement = document.getElementById(`pane-${tabId}`);
+        if (paneElement) {
+          paneElement.remove();
+        }
+      }
+
+      function renderTabBar() {
+        const tabsList = document.getElementById('tabs-list');
+        tabsList.innerHTML = '';
+
+        // Render tabs in reverse order so newest appears first (leftmost)
+        const tabEntries = Array.from(openTabs.entries()).reverse();
+
+        tabEntries.forEach(([tabId, tabData]) => {
+          const tabButton = document.createElement('button');
+          tabButton.className = 'tab-item';
+          tabButton.dataset.tabId = tabId;
+          tabButton.onclick = () => setActiveTab(tabId);
+
+          tabButton.innerHTML = `
+            <span class="material-symbols-outlined">${tabData.icon}</span>
+            <span>${tabData.title}</span>
+            <button class="tab-close-btn" onclick="event.stopPropagation(); closeTab('${tabId}');" title="Close tab">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          `;
+
+          if (tabId === activeTabId) {
+            tabButton.classList.add('active');
+          }
+
+          tabsList.appendChild(tabButton);
+        });
+      }
+
+      function renderTabContent(tabId, tabData) {
+        const contentArea = document.getElementById('tab-content-area');
+
+        const pane = document.createElement('div');
+        pane.id = `pane-${tabId}`;
+        pane.className = 'tab-pane';
+        pane.innerHTML = tabData.content;
+
+        contentArea.appendChild(pane);
+      }
+
+      // Content generation functions
+      function generateOverviewContent() {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <div class="flex items-center gap-3 mb-3">
+                <span class="material-symbols-outlined text-primary">person</span>
+                <span class="font-semibold text-text-dark-gray dark:text-white">Patient Information</span>
+              </div>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-text-light-gray">Name:</span>
+                  <span class="text-text-dark-gray dark:text-white">H, Peter</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-text-light-gray">DOB:</span>
+                  <span class="text-text-dark-gray dark:text-white">2000-01-01</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-text-light-gray">PHN:</span>
+                  <span class="text-text-dark-gray dark:text-white">12349000</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-text-light-gray">Email:</span>
+                  <span class="text-text-dark-gray dark:text-white break-all">peter.haralabous@thrive.health</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Active Conditions</h3>
+              <ul class="space-y-2 text-sm">
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <div class="flex-1">
+                    <a href="#" onclick="toggleTab('condition-hypertension'); return false;" class="font-medium text-blue-600 hover:text-blue-800 hover:underline">Hypertension</a>
+                    <p class="text-text-light-gray mt-1">Onset: Jun 2001</p>
+                  </div>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <div class="flex-1">
+                    <a href="#" onclick="toggleTab('condition-low-back-pain'); return false;" class="font-medium text-blue-600 hover:text-blue-800 hover:underline">Low back pain</a>
+                  </div>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <div class="flex-1">
+                    <a href="#" onclick="toggleTab('condition-dizziness'); return false;" class="font-medium text-blue-600 hover:text-blue-800 hover:underline">Dizziness</a>
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Current Medications</h3>
+              <ul class="space-y-2 text-sm">
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <div class="flex-1">
+                    <a href="#" onclick="toggleTab('medication-warfarin'); return false;" class="font-medium text-blue-600 hover:text-blue-800 hover:underline">Warfarin 5mg</a>
+                    <span class="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-800 rounded ml-2">HIGH-RISK</span>
+                  </div>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <span class="text-text-dark-gray dark:text-white">Metformin 500mg</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <span class="text-text-dark-gray dark:text-white">Lisinopril 10mg</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <div class="flex items-center gap-2 mb-3">
+                <span class="material-symbols-outlined text-red-500">warning</span>
+                <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white">Allergies</h3>
+              </div>
+              <ul class="space-y-2 text-sm">
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <span class="font-medium text-text-dark-gray dark:text-white">Penicillin - Rash (Moderate)</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="text-text-light-gray mt-0.5">•</span>
+                  <span class="font-medium text-text-dark-gray dark:text-white">Latex - Contact dermatitis (Mild)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateEncounterContent(date) {
+        const isEncounter1 = date === '2025-11-14';
+        return `
+          <div class="space-y-4">
+            <!-- Encounter Details -->
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-text-dark-gray dark:text-white">Encounter Details</h2>
+                <span class="px-3 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">In Progress</span>
+              </div>
+              <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span class="text-text-light-gray block mb-1">Created</span>
+                  <span class="text-text-dark-gray dark:text-white font-medium">${date} 12:11</span>
+                </div>
+                <div>
+                  <span class="text-text-light-gray block mb-1">Updated</span>
+                  <span class="text-text-dark-gray dark:text-white font-medium">${date} 12:11</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Summaries -->
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 class="text-base font-semibold text-text-dark-gray dark:text-white mb-3">Summaries</h3>
+              <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <table class="w-full text-sm">
+                  <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th class="text-left px-4 py-2 font-semibold text-text-dark-gray dark:text-white">Summary Name</th>
+                      <th class="text-left px-4 py-2 font-semibold text-text-dark-gray dark:text-white">Type</th>
+                      <th class="text-left px-4 py-2 font-semibold text-text-dark-gray dark:text-white">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onclick="toggleTab('summary-intake')">
+                      <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-purple-600 text-lg">summarize</span>
+                          <span class="text-blue-600 hover:underline font-medium">Summary: Intake Form</span>
+                        </div>
+                      </td>
+                      <td class="px-4 py-3 text-text-dark-gray dark:text-white">Form Summary</td>
+                      <td class="px-4 py-3 text-text-light-gray">${date}</td>
+                    </tr>
+                    ${
+                      isEncounter1
+                        ? `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onclick="toggleTab('summary-visit')">
+                      <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-purple-600 text-lg">summarize</span>
+                          <span class="text-blue-600 hover:underline font-medium">Summary: Follow up form</span>
+                        </div>
+                      </td>
+                      <td class="px-4 py-3 text-text-dark-gray dark:text-white">Clinical Summary</td>
+                      <td class="px-4 py-3 text-text-light-gray">${date}</td>
+                    </tr>
+                    `
+                        : ''
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Forms -->
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 class="text-base font-semibold text-text-dark-gray dark:text-white mb-3">Forms</h3>
+              <div class="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <table class="w-full text-sm">
+                  <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                      <th class="text-left px-4 py-2 font-semibold text-text-dark-gray dark:text-white">Form Name</th>
+                      <th class="text-left px-4 py-2 font-semibold text-text-dark-gray dark:text-white">Status</th>
+                      <th class="text-left px-4 py-2 font-semibold text-text-dark-gray dark:text-white">Created</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onclick="toggleTab('intake-form')">
+                      <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-blue-600 text-lg">description</span>
+                          <span class="text-blue-600 hover:underline font-medium">Form "Intake Form"</span>
+                        </div>
+                      </td>
+                      <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                      </td>
+                      <td class="px-4 py-3 text-text-light-gray">2025-11-21</td>
+                    </tr>
+                    ${
+                      isEncounter1
+                        ? `
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer" onclick="toggleTab('intake-form')">
+                      <td class="px-4 py-3">
+                        <div class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-blue-600 text-lg">description</span>
+                          <span class="text-blue-600 hover:underline font-medium">Form "Intake Form"</span>
+                        </div>
+                      </td>
+                      <td class="px-4 py-3">
+                        <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                      </td>
+                      <td class="px-4 py-3 text-text-light-gray">2025-11-28</td>
+                    </tr>
+                    `
+                        : ''
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Activity -->
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 class="text-base font-semibold text-text-dark-gray dark:text-white mb-3">Activity</h3>
+              <div class="space-y-3">
+                <div class="flex gap-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                  <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-sm">check_circle</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-text-dark-gray dark:text-white">Form completed</p>
+                    <p class="text-xs text-text-light-gray mt-1">Intake Form submitted by patient</p>
+                    <p class="text-xs text-text-light-gray mt-1">${date} 14:30</p>
+                  </div>
+                </div>
+                <div class="flex gap-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                  <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-sm">send</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-text-dark-gray dark:text-white">Form sent</p>
+                    <p class="text-xs text-text-light-gray mt-1">Intake Form sent to patient by Dr. Smith</p>
+                    <p class="text-xs text-text-light-gray mt-1">${date} 09:15</p>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <div class="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-sm">add_circle</span>
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-text-dark-gray dark:text-white">Encounter created</p>
+                    <p class="text-xs text-text-light-gray mt-1">Created by Dr. Smith</p>
+                    <p class="text-xs text-text-light-gray mt-1">${date} 09:00</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateConditionContent(name) {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name}</h2>
+              <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Type:</span>
+                  <span class="text-text-dark-gray dark:text-white">Condition</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Status:</span>
+                  <span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">Chronic</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-3">Details</h3>
+              <p class="text-sm text-text-dark-gray dark:text-white">Detailed information about ${name} would appear here.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      function generatePractitionerContent(name) {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name}</h2>
+              <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Specialty:</span>
+                  <span class="text-text-dark-gray dark:text-white">Primary Care</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Phone:</span>
+                  <span class="text-text-dark-gray dark:text-white">(555) 123-4567</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateImmunizationContent(name) {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name}</h2>
+              <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Date:</span>
+                  <span class="text-text-dark-gray dark:text-white">Sep 22, 2024</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Status:</span>
+                  <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateMedicationContent(name) {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name}</h2>
+              <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Dosage:</span>
+                  <span class="text-text-dark-gray dark:text-white">Once daily</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Status:</span>
+                  <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateAllergyContent(name) {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border-l-4 border-red-500">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name} Allergy</h2>
+              <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Reaction:</span>
+                  <span class="text-text-dark-gray dark:text-white">Rash</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Severity:</span>
+                  <span class="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">Moderate</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateLabResultContent(name) {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name}</h2>
+              <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Date:</span>
+                  <span class="text-text-dark-gray dark:text-white">Oct 15, 2024</span>
+                </div>
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Status:</span>
+                  <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateFormContent(name) {
+        if (name === 'Intake Form') {
+          return `
+            <div class="space-y-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <h2 class="text-xl font-bold text-text-dark-gray dark:text-white">${name} Submission</h2>
+                  <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                </div>
+                <button class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                  Edit
+                </button>
+              </div>
+
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-4">Patient Information</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Full name</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Ely Smith</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Date of birth</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">July 3, 1956</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Email address</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">john.smith@email.com</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Phone number</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">(555) 123-4567</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-4">Medical History</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Primary concern</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Experiencing persistent lower back pain for the past 3 weeks. Pain is worse when sitting for long periods and improves with movement. Rating 6/10 on pain scale.</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Current medications</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Lisinopril 10mg daily, Metformin 500mg twice daily, Aspirin 81mg daily</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Known allergies</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Penicillin (rash), Latex (contact dermatitis)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Past surgeries or hospitalizations</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Appendectomy (2015), Cholecystectomy (2019)</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-4">Lifestyle</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Do you smoke?</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Never</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Exercise frequency</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Rarely (less than once per week)</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Alcohol consumption</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">1-2 drinks per week</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <p class="text-xs text-text-light-gray">Submitted on November 21, 2025 at 2:30 PM</p>
+              </div>
+            </div>
+          `;
+        } else if (name === 'Follow-up Form') {
+          return `
+            <div class="space-y-6">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <h2 class="text-xl font-bold text-text-dark-gray dark:text-white">${name} Submission</h2>
+                  <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                </div>
+                <button class="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-2">
+                  <span class="material-symbols-outlined text-lg">edit</span>
+                  Edit
+                </button>
+              </div>
+
+              <div class="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p class="text-sm text-text-dark-gray dark:text-white"><span class="font-semibold">Last visit:</span> November 14, 2025</p>
+                <p class="text-sm text-text-dark-gray dark:text-white mt-1"><span class="font-semibold">Provider:</span> Dr. Smith</p>
+              </div>
+
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-4">General Well-being</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">How are you feeling since your last visit?</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Feeling much better overall. The lower back pain has decreased significantly. I've been following the physical therapy exercises and they seem to be helping.</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Overall health rating</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Good</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-4">Symptoms</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Any new symptoms?</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">No new symptoms to report.</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Pain level (0-10)</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">2/10 (improved from 6/10)</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h3 class="text-sm font-semibold text-text-dark-gray dark:text-white mb-4">Treatment Adherence</h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Are you taking medications as prescribed?</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">Yes</p>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-medium text-text-light-gray mb-1">Physical therapy sessions completed</label>
+                    <p class="text-sm text-text-dark-gray dark:text-white">6 out of 8 sessions</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                <p class="text-xs text-text-light-gray">Submitted on November 28, 2025 at 10:15 AM</p>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name}</h2>
+              <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                  <span class="text-text-light-gray">Status:</span>
+                  <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateSummaryContent(name) {
+        if (name === 'Intake Form') {
+          return `
+            <div class="space-y-4">
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">Summary: ${name}</h2>
+                <div class="space-y-6 text-sm text-text-dark-gray dark:text-white">
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Chief Complaint</h3>
+                    <p>Patient reports experiencing persistent lower back pain for the past 3 weeks, rating 6/10 on pain scale. Pain worsens with prolonged sitting and improves with movement.</p>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Medical History</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                      <li>Hypertension (controlled with medication)</li>
+                      <li>Type 2 Diabetes (diagnosed 2018)</li>
+                      <li>No known drug allergies</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Current Medications</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                      <li>Lisinopril 10mg daily</li>
+                      <li>Metformin 500mg twice daily</li>
+                      <li>Aspirin 81mg daily</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Lifestyle</h3>
+                    <p>Non-smoker. Occasional alcohol use (1-2 drinks per week). Sedentary lifestyle due to desk job. No regular exercise routine.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (name === 'Follow up form') {
+          return `
+            <div class="space-y-4">
+              <div class="p-4 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
+                <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">Summary: ${name}</h2>
+                <div class="space-y-6 text-sm text-text-dark-gray dark:text-white">
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Follow-up Assessment</h3>
+                    <p>Patient returns for 2-week follow-up. Reports significant improvement in lower back pain, now rating 2/10. Physical therapy exercises have been helpful.</p>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Treatment Progress</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                      <li>Completed 6 physical therapy sessions</li>
+                      <li>Improved range of motion</li>
+                      <li>Reduced inflammation noted on examination</li>
+                      <li>Patient demonstrates proper lifting techniques</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Recommendations</h3>
+                    <p>Continue physical therapy for 4 more weeks. Patient advised to maintain daily stretching routine and avoid prolonged sitting. Consider ergonomic assessment of workstation.</p>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-base mb-2">Next Steps</h3>
+                    <p>Schedule follow-up in 4 weeks. Patient to monitor pain levels and report any increase in symptoms. Continue current medication regimen.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">Summary: ${name}</h2>
+              <p class="text-sm text-text-dark-gray dark:text-white">AI-generated summary content would appear here.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      function generateDocumentContent(name) {
+        return `
+          <div class="space-y-4">
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
+              <h2 class="text-xl font-bold text-text-dark-gray dark:text-white mb-4">${name}</h2>
+              <p class="text-sm text-text-dark-gray dark:text-white">Document viewer would appear here.</p>
+            </div>
+          </div>
+        `;
+      }
+
+      // Directory navigation
+      function showDirectory(directoryId) {
+        document.getElementById('root-menu').classList.add('hidden');
+        document
+          .querySelectorAll('[id$="-directory"]')
+          .forEach((dir) => dir.classList.add('hidden'));
+        document.getElementById(directoryId + '-directory').classList.remove('hidden');
+      }
+
+      function showRootMenu() {
+        document
+          .querySelectorAll('[id$="-directory"]')
+          .forEach((dir) => dir.classList.add('hidden'));
+        document.getElementById('root-menu').classList.remove('hidden');
+      }
+
+      // Initialize with Overview content
+      document.addEventListener('DOMContentLoaded', function () {
+        toggleTab('overview');
+      });
+
+      // Utility functions
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        sidebar.classList.toggle('collapsed');
+      }
+
+      function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+      }
+
+      function toggleAddDropdown() {
+        const dropdown = document.getElementById('add-dropdown');
+        dropdown.classList.toggle('hidden');
+      }
+
+      function handleAddHealthRecord() {
+        alert('Health Record creation coming soon!');
+      }
+
+      function handleAddNote() {
+        alert('Note creation coming soon!');
+      }
+
+      function handleAddDocument() {
+        alert('Document upload coming soon!');
+      }
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const avatarBtn = document.getElementById('userAvatarBtn');
+
+        if (
+          dropdown &&
+          avatarBtn &&
+          !dropdown.contains(event.target) &&
+          !avatarBtn.contains(event.target)
+        ) {
+          dropdown.classList.remove('show');
+        }
+
+        const addDropdown = document.getElementById('add-dropdown');
+        const addButton = event.target.closest('button[onclick*="toggleAddDropdown"]');
+
+        if (addDropdown && !addDropdown.contains(event.target) && !addButton) {
+          addDropdown.classList.add('hidden');
+        }
+      });
+    </script>
+  </body>
+</html>
