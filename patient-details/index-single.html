@@ -1772,6 +1772,58 @@
               </div>
             </div>
 
+            <!-- Notes -->
+            <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-base font-semibold text-text-dark-gray dark:text-white">Notes</h3>
+                <button class="px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 border border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors flex items-center gap-1">
+                  <span class="material-symbols-outlined text-lg">add</span>
+                  Add Note
+                </button>
+              </div>
+              <div class="space-y-3">
+                <div class="flex gap-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                  <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-sm">person</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="text-sm font-medium text-text-dark-gray dark:text-white">Dr. Smith</p>
+                      <span class="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800 rounded">Private</span>
+                    </div>
+                    <p class="text-sm text-text-dark-gray dark:text-white mb-2">Patient reports improvement in symptoms. Continue current treatment plan. Follow-up recommended in 2 weeks.</p>
+                    <p class="text-xs text-text-light-gray">${date} 15:45</p>
+                  </div>
+                </div>
+                <div class="flex gap-3 pb-3 border-b border-gray-200 dark:border-gray-700 last:border-0">
+                  <div class="flex-shrink-0 w-8 h-8 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-sm">patient_list</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="text-sm font-medium text-text-dark-gray dark:text-white">Maria Johnson (Patient)</p>
+                      <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Public</span>
+                    </div>
+                    <p class="text-sm text-text-dark-gray dark:text-white mb-2">I forgot to mention during my visit that I've also been experiencing occasional headaches in the morning. They usually go away after breakfast.</p>
+                    <p class="text-xs text-text-light-gray">${date} 14:30</p>
+                  </div>
+                </div>
+                <div class="flex gap-3">
+                  <div class="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-sm">person</span>
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <p class="text-sm font-medium text-text-dark-gray dark:text-white">Dr. Smith</p>
+                      <span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-800 rounded">Public</span>
+                    </div>
+                    <p class="text-sm text-text-dark-gray dark:text-white mb-2">Appointment scheduled for comprehensive exam. Please arrive 15 minutes early to complete intake paperwork.</p>
+                    <p class="text-xs text-text-light-gray">${date} 09:20</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Activity -->
             <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <h3 class="text-base font-semibold text-text-dark-gray dark:text-white mb-3">Activity</h3>
