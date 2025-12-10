@@ -12,6 +12,7 @@
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
       rel="stylesheet"
     />
+    <script type="module" src="../shared/global-header.js"></script>
     <link href="../shared/styles.css" rel="stylesheet" />
 
     <script>
@@ -213,65 +214,7 @@
   <body
     class="font-display bg-neutral-bg dark:bg-background-dark text-text-dark-gray dark:text-neutral-bg"
   >
-    <header class="global-header">
-      <div class="global-header__inner">
-        <a href="../index.html" class="back-button">
-          <span class="material-symbols-outlined">arrow_back</span>
-          <span class="back-text">Encounters List</span>
-        </a>
-        <div class="search">
-          <input type="search" placeholder="Search for a patient..." aria-label="Search" />
-        </div>
-        <div class="actions" style="display: flex; align-items: center; gap: 12px">
-          <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
-            <span class="material-symbols-outlined"></span>
-          </button>
-          <div class="user-avatar-wrapper">
-            <div class="user-avatar" id="userAvatarBtn" onclick="toggleDropdown()">
-              <span class="material-symbols-outlined user-avatar-icon">account_circle</span>
-            </div>
-            <div class="dropdown-menu" id="userDropdown">
-              <div class="dropdown-header">
-                <div class="dropdown-avatar">
-                  <span class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
-                </div>
-                <div class="dropdown-user-info">
-                  <h3 class="dropdown-user-name">Dr. Smith</h3>
-                  <p class="dropdown-user-email">drsmith@email.com</p>
-                </div>
-              </div>
-
-              <a href="../settings/account-settings.html" class="dropdown-menu-item">
-                <span class="material-symbols-outlined">person</span>
-                <span>Account Settings</span>
-                <span class="material-symbols-outlined chevron">chevron_right</span>
-              </a>
-
-              <h4 class="dropdown-section-title">Organization</h4>
-
-              <button class="dropdown-org-item">
-                <span class="material-symbols-outlined dropdown-org-icon">apartment</span>
-                <span class="dropdown-org-name">Dr. Smith's Clinic</span>
-                <div class="dropdown-org-toggle">
-                  <span class="material-symbols-outlined">unfold_more</span>
-                </div>
-              </button>
-
-              <a href="../settings/organization-settings.html" class="dropdown-menu-item">
-                <span class="material-symbols-outlined">settings</span>
-                <span>Organization Settings</span>
-                <span class="material-symbols-outlined chevron">chevron_right</span>
-              </a>
-
-              <button class="dropdown-menu-item dropdown-logout">
-                <span class="material-symbols-outlined">logout</span>
-                <span>Log Out</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </header>
+    <global-header home-url="../index.html" base-path=".."></global-header>
 
     <main class="flex h-screen overflow-hidden pt-16">
       <!-- Side Menu -->

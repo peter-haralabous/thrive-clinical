@@ -12,9 +12,14 @@ class GlobalHeader extends HTMLElement {
 
   render() {
     const homeUrl = this.getAttribute('home-url') || './index.html';
+    const basePath = this.getAttribute('base-path') || '.';
 
     this.shadowRoot.innerHTML = `
       <style>
+        * {
+          box-sizing: border-box;
+        }
+
         :host {
           display: block;
         }
@@ -137,11 +142,13 @@ class GlobalHeader extends HTMLElement {
           border-radius: 12px;
           box-shadow: 0 8px 24px rgba(11, 18, 32, 0.12);
           min-width: 280px;
+          max-width: 320px;
           opacity: 0;
           visibility: hidden;
           transform: translateY(-8px);
           transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
           z-index: 1000;
+          overflow: hidden;
         }
 
         .dropdown-menu.show {
@@ -298,7 +305,7 @@ class GlobalHeader extends HTMLElement {
         <div class="global-header__inner">
           <a href="${homeUrl}" class="brand">
             <span class="logo">HC</span>
-            <span class="brand-name">HealthConnect</span>
+            <span class="brand-name">Thrive Clinical</span>
           </a>
           <div class="search">
             <input type="search" placeholder="Search for a patient..." aria-label="Search" />
@@ -322,7 +329,7 @@ class GlobalHeader extends HTMLElement {
                   </div>
                 </div>
 
-                <a href="./settings/account-settings.html" class="dropdown-menu-item">
+                <a href="${basePath}/settings/account-settings.html" class="dropdown-menu-item">
                   <span class="material-symbols-outlined">person</span>
                   <span>Account Settings</span>
                   <span class="material-symbols-outlined chevron">chevron_right</span>
@@ -338,7 +345,7 @@ class GlobalHeader extends HTMLElement {
                   </div>
                 </button>
 
-                <a href="./settings/organization-settings.html" class="dropdown-menu-item">
+                <a href="${basePath}/settings/organization-settings.html" class="dropdown-menu-item">
                   <span class="material-symbols-outlined">settings</span>
                   <span>Organization Settings</span>
                   <span class="material-symbols-outlined chevron">chevron_right</span>

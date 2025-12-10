@@ -10,7 +10,7 @@ export function initNav(root = null) {
     <div class="global-header__inner flex w-full justify-between items-center">
       <a href="${homePath}" class="brand no-underline">
         <span class="logo">HC</span>
-        <span class="brand-name">HealthConnect</span>
+        <span class="brand-name">Thrive Clinical</span>
       </a>
       <div class="search" aria-hidden="true" class="mx-auto">
         <input type="search" placeholder="Search for a patient..." aria-label="Search" />
