@@ -14,6 +14,7 @@
     />
     <link href="../shared/styles.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" href="../shared/styles.css" />
     <style>
       body {
         background: #f6f8fa;
@@ -93,22 +94,6 @@
         font-size: 14px;
         color: #6b7280;
         margin: 0;
-      }
-
-      .btn-configure {
-        background: #0891b2;
-        color: #ffffff;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 14px;
-        transition: background 0.2s;
-      }
-
-      .btn-configure:hover {
-        background: #0e7490;
       }
     </style>
   </head>
@@ -246,7 +231,7 @@
               <p>Configure columns, filters, and default views for the encounter list</p>
             </div>
             <button
-              class="btn-configure"
+              class="btn-info"
               onclick="alert('Configure Encounter List - Feature coming soon')"
             >
               Configure
@@ -259,7 +244,7 @@
               <p>Configure columns, filters, and default views for the patient list</p>
             </div>
             <button
-              class="btn-configure"
+              class="btn-info"
               onclick="alert('Configure Patient List - Feature coming soon')"
             >
               Configure
@@ -271,10 +256,7 @@
               <h3>Intake</h3>
               <p>Configure columns, filters, and default views for the task list</p>
             </div>
-            <button
-              class="btn-configure"
-              onclick="alert('Configure Task List - Feature coming soon')"
-            >
+            <button class="btn-info" onclick="alert('Configure Task List - Feature coming soon')">
               Configure
             </button>
           </div>

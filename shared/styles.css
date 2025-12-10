@@ -52,6 +52,39 @@ nav.site-nav a {
   border-radius: 8px;
 }
 
+.btn-primary {
+  background: #0d6efd;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-primary:hover {
+  background: #0b5ed7;
+}
+
+.btn-info {
+  background: #0d6efd;
+  color: #ffffff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-info:hover {
+  background: #0b5ed7;
+}
+
 /* Global fixed header styles */
 .global-header {
   position: fixed;

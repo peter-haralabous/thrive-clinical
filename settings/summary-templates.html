@@ -94,6 +94,132 @@
         cursor: pointer;
         font-size: 14px;
       }
+
+      .search-section {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .search-input {
+        flex: 1;
+        padding: 10px 16px 10px 40px !important;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        background: #ffffff
+          url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%236b7280" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>')
+          no-repeat 12px center;
+      }
+
+      .search-button {
+        background: #0ea5e9;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .table-container {
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .templates-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .templates-table thead {
+        background: #f9fafb;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .templates-table th {
+        padding: 12px 24px;
+        text-align: left;
+        font-size: 13px;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .templates-table tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        transition: background 0.15s;
+      }
+
+      .templates-table tbody tr:hover {
+        background: #f9fafb;
+      }
+
+      .templates-table tbody tr:last-child {
+        border-bottom: none;
+      }
+
+      .templates-table td {
+        padding: 16px 24px;
+        font-size: 14px;
+        color: #0b1220;
+      }
+
+      .template-name {
+        color: #0f172a;
+        font-weight: 500;
+        text-decoration: none;
+      }
+
+      .template-name:hover {
+        text-decoration: underline;
+      }
+
+      .form-link {
+        color: #0f172a;
+        text-decoration: underline;
+      }
+
+      .form-link:hover {
+        color: #0ea5e9;
+      }
+
+      .description-text {
+        color: #6b7280;
+      }
+
+      .date-text {
+        color: #6b7280;
+        font-size: 13px;
+      }
+
+      .delete-btn {
+        color: #ef4444;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: background 0.15s;
+      }
+
+      .delete-btn:hover {
+        background: #fee;
+      }
+
+      .actions-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
     </style>
   </head>
   <body class="has-global-header">
@@ -219,26 +345,93 @@
     <!-- Main Content -->
     <main>
       <div class="content-area">
-        <div class="page-title-section">
-          <h1>Summary Templates</h1>
-          <p>Create reusable templates for clinical summaries and visit notes.</p>
+        <div class="actions-header">
+          <div>
+            <h1 style="font-size: 28px; font-weight: 700; color: #0b1220; margin-bottom: 8px">
+              Summary Templates
+            </h1>
+            <p style="font-size: 15px; color: #6b7280">
+              Create reusable templates for clinical summaries and visit notes.
+            </p>
+          </div>
+          <button class="btn-info">
+            <span class="material-symbols-outlined" style="font-size: 18px">add</span>
+            New Template
+          </button>
         </div>
 
-        <div class="form-section">
-          <div class="empty-state">
-            <span class="material-symbols-outlined empty-state-icon">summarize</span>
-            <h3>No summary templates yet</h3>
-            <p>Build templates to standardize clinical documentation and speed up note-taking.</p>
-            <button class="btn-primary">
-              <span
-                class="material-symbols-outlined"
-                style="vertical-align: middle; font-size: 18px"
-              >
-                add
-              </span>
-              Create Summary Template
-            </button>
-          </div>
+        <div class="search-section">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search templates by name or description..."
+          />
+          <button class="btn-info">Search</button>
+        </div>
+
+        <div class="table-container">
+          <table class="templates-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Form</th>
+                <th>Created ▼</th>
+                <th>Updated</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <a href="#" class="template-name">Summary: Intake Form</a>
+                </td>
+                <td>
+                  <span class="description-text">
+                    AI-powered comprehensive health assessment with patient intake information
+                  </span>
+                </td>
+                <td>
+                  <a href="./form-templates.html" class="form-link">Patient Intake Form</a>
+                </td>
+                <td>
+                  <span class="date-text">2025-12-03</span>
+                </td>
+                <td>
+                  <span class="date-text">2025-12-03</span>
+                </td>
+                <td>
+                  <button class="delete-btn" title="Delete template">
+                    <span class="material-symbols-outlined" style="font-size: 20px">delete</span>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <a href="#" class="template-name">Summary: Follow-up Form</a>
+                </td>
+                <td>
+                  <span class="description-text">
+                    Concise follow-up visit summary for ongoing patient care and monitoring
+                  </span>
+                </td>
+                <td>
+                  <a href="./form-templates.html" class="form-link">Follow-up Visit Form</a>
+                </td>
+                <td>
+                  <span class="date-text">2025-12-04</span>
+                </td>
+                <td>
+                  <span class="date-text">2025-12-04</span>
+                </td>
+                <td>
+                  <button class="delete-btn" title="Delete template">
+                    <span class="material-symbols-outlined" style="font-size: 20px">delete</span>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </main>
