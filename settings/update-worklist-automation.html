@@ -1,0 +1,451 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Update worklist status or alert - HealthConnect</title>
+    <link rel="stylesheet" href="../shared/styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      main {
+        margin-left: 256px;
+        padding-top: 0px;
+        min-height: 100vh;
+        background: #f8f9fa;
+      }
+
+      .content-area {
+        max-width: 1400px;
+        padding: 32px;
+      }
+
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: #1d7aec;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 24px;
+      }
+
+      .back-link:hover {
+        text-decoration: underline;
+      }
+
+      .page-title-section {
+        margin-bottom: 32px;
+      }
+
+      .page-title-section h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0b1220;
+        margin: 0 0 8px 0;
+      }
+
+      .page-title-section p {
+        font-size: 15px;
+        color: #6b7280;
+        margin: 0;
+      }
+
+      .workflow-builder {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 32px;
+        margin-bottom: 24px;
+      }
+
+      .workflow-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .workflow-label {
+        font-size: 15px;
+        font-weight: 500;
+        color: #374151;
+        min-width: 120px;
+      }
+
+      .workflow-select {
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0b1220;
+        background: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .workflow-select:hover {
+        border-color: #9ca3af;
+      }
+
+      .workflow-select:focus {
+        outline: none;
+        border-color: #1d7aec;
+        box-shadow: 0 0 0 3px rgba(29, 122, 236, 0.1);
+      }
+
+      .workflow-select.large {
+        min-width: 320px;
+      }
+
+      .workflow-select.medium {
+        min-width: 200px;
+      }
+
+      .workflow-select.small {
+        min-width: 160px;
+      }
+
+      .workflow-text {
+        font-size: 15px;
+        color: #374151;
+      }
+
+      .preview-section {
+        background: #eff6ff;
+        border: 1px solid #dbeafe;
+        border-radius: 12px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+      }
+
+      .preview-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .preview-icon {
+        color: #3b82f6;
+        font-size: 20px;
+      }
+
+      .preview-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e40af;
+      }
+
+      .preview-text {
+        font-size: 14px;
+        color: #1e40af;
+        line-height: 1.6;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 12px;
+      }
+
+      .btn-primary {
+        background: #1d7aec;
+        color: #ffffff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        background: #1565c0;
+      }
+
+      .btn-secondary {
+        background: #ffffff;
+        color: #374151;
+        border: 1px solid #d1d5db;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+      }
+
+      .btn-secondary:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+      }
+    </style>
+  </head>
+  <body class="has-global-header">
+    <header class="global-header">
+      <div class="global-header__inner">
+        <a href="../index.html" class="brand">
+          <span class="logo">HC</span>
+          <span class="brand-name">HealthConnect</span>
+        </a>
+        <div class="search">
+          <input type="search" placeholder="Search automations" aria-label="Search automations" />
+        </div>
+        <div class="actions" style="display: flex; align-items: center; gap: 12px">
+          <button class="icon-btn" aria-label="Open quick actions" title="Open quick actions">
+            <span class="material-symbols-outlined"></span>
+          </button>
+          <div class="user-avatar-wrapper">
+            <div class="user-avatar" id="userAvatarBtn" onclick="toggleDropdown()">
+              <span class="material-symbols-outlined user-avatar-icon">account_circle</span>
+            </div>
+            <div class="dropdown-menu" id="userDropdown">
+              <div class="dropdown-header">
+                <div class="dropdown-avatar">
+                  <span class="material-symbols-outlined dropdown-avatar-icon">account_circle</span>
+                </div>
+                <div class="dropdown-user-info">
+                  <h3 class="dropdown-user-name">Dr. Smith</h3>
+                  <p class="dropdown-user-email">drsmith@email.com</p>
+                </div>
+              </div>
+
+              <a href="./account-settings.html" class="dropdown-menu-item">
+                <span class="material-symbols-outlined">person</span>
+                <span>Account Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <h4 class="dropdown-section-title">Organization</h4>
+
+              <button class="dropdown-org-item">
+                <span class="material-symbols-outlined dropdown-org-icon">apartment</span>
+                <span class="dropdown-org-name">Dr. Smith's Clinic</span>
+                <div class="dropdown-org-toggle">
+                  <span class="material-symbols-outlined">unfold_more</span>
+                </div>
+              </button>
+
+              <a href="./organization-settings.html" class="dropdown-menu-item">
+                <span class="material-symbols-outlined">settings</span>
+                <span>Organization Settings</span>
+                <span class="material-symbols-outlined chevron">chevron_right</span>
+              </a>
+
+              <button class="dropdown-menu-item dropdown-logout">
+                <span class="material-symbols-outlined">logout</span>
+                <span>Log Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Fixed Left Sidebar -->
+    <aside
+      class="w-64 bg-white border-r border-gray-200 flex-shrink-0 fixed left-0 top-16 h-screen z-30 flex flex-col overflow-y-auto"
+    >
+      <div class="p-4">
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+          Organization
+        </h2>
+        <nav class="space-y-1">
+          <a
+            href="./organization-settings.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">apartment</span>
+            Organization Profile
+          </a>
+          <a
+            href="./worklist-preferences.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">list</span>
+            Worklist Preferences
+          </a>
+          <a
+            href="./custom-fields.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">tune</span>
+            Custom Fields
+          </a>
+          <a
+            href="./form-templates.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">description</span>
+            Form Templates
+          </a>
+          <a
+            href="./summary-templates.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">summarize</span>
+            Summary Templates
+          </a>
+          <a
+            href="./automations.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-900 text-white font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg">automation</span>
+            Automations
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main>
+      <div class="content-area">
+        <a href="./new-automation.html" class="back-link">
+          <span class="material-symbols-outlined" style="font-size: 18px">arrow_back</span>
+          Back to templates
+        </a>
+
+        <div class="page-title-section">
+          <h1>Update worklist status or alert</h1>
+          <p>Automatically flag important patient information</p>
+        </div>
+
+        <div class="workflow-builder">
+          <div class="workflow-row">
+            <span class="workflow-label">When</span>
+            <select class="workflow-select large">
+              <option value="">select form</option>
+              <option value="follow-up">Follow up form</option>
+              <option value="intake">Intake Form</option>
+            </select>
+            <span class="workflow-text">submitted,</span>
+          </div>
+
+          <div class="workflow-row">
+            <span class="workflow-label">if</span>
+            <select class="workflow-select medium">
+              <option value="">select question</option>
+              <option value="pain-level">Pain level</option>
+              <option value="blood-pressure">Blood pressure</option>
+              <option value="symptoms">Symptoms present</option>
+              <option value="medication">Current medication</option>
+              <option value="allergies">Known allergies</option>
+            </select>
+            <select class="workflow-select small">
+              <option value="">select operator</option>
+              <option value="equals">equals</option>
+              <option value="not-equals">not equals</option>
+              <option value="greater-than">greater than</option>
+              <option value="less-than">less than</option>
+              <option value="contains">contains</option>
+            </select>
+            <select class="workflow-select medium">
+              <option value="">select value</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+
+          <div class="workflow-row">
+            <span class="workflow-label">then update</span>
+            <select class="workflow-select medium">
+              <option value="">select column</option>
+              <option value="status">Status</option>
+              <option value="priority">Priority</option>
+              <option value="alert">Alert</option>
+              <option value="flag">Flag</option>
+            </select>
+            <span class="workflow-text">to</span>
+            <select class="workflow-select medium">
+              <option value="">select status</option>
+              <option value="urgent">Urgent</option>
+              <option value="needs-review">Needs Review</option>
+              <option value="follow-up-required">Follow-up Required</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="preview-section">
+          <div class="preview-header">
+            <span class="material-symbols-outlined preview-icon">play_arrow</span>
+            <span class="preview-title">Preview</span>
+          </div>
+          <p class="preview-text">
+            When [select form] submitted, if [select question] [select operator] [select value],
+            then update [select column] to [select status]
+          </p>
+        </div>
+
+        <div class="button-group">
+          <button class="btn-primary" onclick="saveAutomation()">Save Automation</button>
+          <button class="btn-secondary">Test Workflow</button>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      function saveAutomation() {
+        window.location.href = './automations.html';
+      }
+
+      function toggleDropdown() {
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.toggle('show');
+      }
+
+      document.addEventListener('click', function (event) {
+        const dropdown = document.getElementById('userDropdown');
+        const avatarBtn = document.getElementById('userAvatarBtn');
+
+        if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
+          dropdown.classList.remove('show');
+        }
+      });
+
+      // Update preview dynamically
+      const selects = document.querySelectorAll('.workflow-select');
+      const previewText = document.querySelector('.preview-text');
+
+      function updatePreview() {
+        const formSelect = document.querySelector('.workflow-row:nth-child(1) select');
+        const questionSelect = document.querySelector(
+          '.workflow-row:nth-child(2) select:nth-of-type(1)'
+        );
+        const operatorSelect = document.querySelector(
+          '.workflow-row:nth-child(2) select:nth-of-type(2)'
+        );
+        const valueSelect = document.querySelector(
+          '.workflow-row:nth-child(2) select:nth-of-type(3)'
+        );
+        const columnSelect = document.querySelector(
+          '.workflow-row:nth-child(3) select:nth-of-type(1)'
+        );
+        const statusSelect = document.querySelector(
+          '.workflow-row:nth-child(3) select:nth-of-type(2)'
+        );
+
+        const formText = formSelect.options[formSelect.selectedIndex].text;
+        const questionText = questionSelect.options[questionSelect.selectedIndex].text;
+        const operatorText = operatorSelect.options[operatorSelect.selectedIndex].text;
+        const valueText = valueSelect.options[valueSelect.selectedIndex].text;
+        const columnText = columnSelect.options[columnSelect.selectedIndex].text;
+        const statusText = statusSelect.options[statusSelect.selectedIndex].text;
+
+        previewText.textContent = `When ${formText} submitted, if ${questionText} ${operatorText} ${valueText}, then update ${columnText} to ${statusText}`;
+      }
+
+      selects.forEach((select) => {
+        select.addEventListener('change', updatePreview);
+      });
+    </script>
+  </body>
+</html>
