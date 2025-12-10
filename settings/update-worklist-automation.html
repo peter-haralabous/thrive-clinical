@@ -77,6 +77,13 @@
         min-width: 120px;
       }
 
+      #ifConditionContainer {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+      }
+
       .workflow-select {
         padding: 10px 12px;
         border: 1px solid #d1d5db;
@@ -99,15 +106,19 @@
       }
 
       .workflow-select.large {
-        min-width: 320px;
+        min-width: 240px;
       }
 
       .workflow-select.medium {
-        min-width: 200px;
+        min-width: 180px;
       }
 
       .workflow-select.small {
-        min-width: 160px;
+        min-width: 140px;
+      }
+
+      .workflow-select.xsmall {
+        min-width: 120px;
       }
 
       .workflow-text {
@@ -328,30 +339,12 @@
 
           <div class="workflow-row">
             <span class="workflow-label">if</span>
-            <select class="workflow-select medium">
-              <option value="">select question</option>
-              <option value="pain-level">Pain level</option>
-              <option value="blood-pressure">Blood pressure</option>
-              <option value="symptoms">Symptoms present</option>
-              <option value="medication">Current medication</option>
-              <option value="allergies">Known allergies</option>
+            <select class="workflow-select small" id="ifTypeSelect" onchange="toggleIfType()">
+              <option value="">select type</option>
+              <option value="question">question</option>
+              <option value="logic">logic</option>
             </select>
-            <select class="workflow-select small">
-              <option value="">select operator</option>
-              <option value="equals">equals</option>
-              <option value="not-equals">not equals</option>
-              <option value="greater-than">greater than</option>
-              <option value="less-than">less than</option>
-              <option value="contains">contains</option>
-            </select>
-            <select class="workflow-select medium">
-              <option value="">select value</option>
-              <option value="yes">Yes</option>
-              <option value="no">No</option>
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
-            </select>
+            <span id="ifConditionContainer"></span>
           </div>
 
           <div class="workflow-row">
@@ -411,21 +404,73 @@
         }
       });
 
+      // Toggle between question and logic types
+      function toggleIfType() {
+        const ifTypeSelect = document.getElementById('ifTypeSelect');
+        const container = document.getElementById('ifConditionContainer');
+        const selectedType = ifTypeSelect.value;
+
+        if (selectedType === 'question') {
+          container.innerHTML = `<select class="workflow-select medium" id="questionSelect" onchange="updatePreview()">
+              <option value="">select question</option>
+              <option value="pain-level">Pain level</option>
+              <option value="blood-pressure">Blood pressure</option>
+              <option value="symptoms">Symptoms present</option>
+              <option value="medication">Current medication</option>
+              <option value="allergies">Known allergies</option>
+            </select>
+            <select class="workflow-select xsmall" id="operatorSelect" onchange="updatePreview()">
+              <option value="">operator</option>
+              <option value="equals">equals</option>
+              <option value="not-equals">not equals</option>
+              <option value="greater-than">greater than</option>
+              <option value="less-than">less than</option>
+              <option value="contains">contains</option>
+            </select>
+            <select class="workflow-select small" id="valueSelect" onchange="updatePreview()">
+              <option value="">select value</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>`;
+        } else if (selectedType === 'logic') {
+          container.innerHTML = `<select class="workflow-select medium" id="logicSelect" onchange="updatePreview()">
+              <option value="">select logic</option>
+              <option value="bmi">BMI score</option>
+              <option value="risk-score">Risk score</option>
+              <option value="total-points">Total points</option>
+              <option value="calculated-value">Calculated value</option>
+            </select>
+            <select class="workflow-select xsmall" id="logicOperatorSelect" onchange="updatePreview()">
+              <option value="">operator</option>
+              <option value="equals">equals</option>
+              <option value="not-equals">not equals</option>
+              <option value="greater-than">greater than</option>
+              <option value="less-than">less than</option>
+              <option value="between">between</option>
+            </select>
+            <select class="workflow-select small" id="logicValueSelect" onchange="updatePreview()">
+              <option value="">select value</option>
+              <option value="18.5">18.5 (Underweight)</option>
+              <option value="25">25 (Normal)</option>
+              <option value="30">30 (Overweight)</option>
+              <option value="35">35 (Obese)</option>
+              <option value="custom">Custom value</option>
+            </select>`;
+        } else {
+          container.innerHTML = '';
+        }
+        updatePreview();
+      }
+
       // Update preview dynamically
-      const selects = document.querySelectorAll('.workflow-select');
       const previewText = document.querySelector('.preview-text');
 
       function updatePreview() {
         const formSelect = document.querySelector('.workflow-row:nth-child(1) select');
-        const questionSelect = document.querySelector(
-          '.workflow-row:nth-child(2) select:nth-of-type(1)'
-        );
-        const operatorSelect = document.querySelector(
-          '.workflow-row:nth-child(2) select:nth-of-type(2)'
-        );
-        const valueSelect = document.querySelector(
-          '.workflow-row:nth-child(2) select:nth-of-type(3)'
-        );
+        const ifTypeSelect = document.getElementById('ifTypeSelect');
         const columnSelect = document.querySelector(
           '.workflow-row:nth-child(3) select:nth-of-type(1)'
         );
@@ -434,17 +479,61 @@
         );
 
         const formText = formSelect.options[formSelect.selectedIndex].text;
-        const questionText = questionSelect.options[questionSelect.selectedIndex].text;
-        const operatorText = operatorSelect.options[operatorSelect.selectedIndex].text;
-        const valueText = valueSelect.options[valueSelect.selectedIndex].text;
-        const columnText = columnSelect.options[columnSelect.selectedIndex].text;
-        const statusText = statusSelect.options[statusSelect.selectedIndex].text;
+        const ifTypeText = ifTypeSelect.options[ifTypeSelect.selectedIndex].text;
+        const columnText =
+          columnSelect?.options[columnSelect.selectedIndex]?.text || '[select column]';
+        const statusText =
+          statusSelect?.options[statusSelect.selectedIndex]?.text || '[select status]';
 
-        previewText.textContent = `When ${formText} submitted, if ${questionText} ${operatorText} ${valueText}, then update ${columnText} to ${statusText}`;
+        let conditionText = '';
+
+        if (ifTypeSelect.value === 'question') {
+          const questionSelect = document.getElementById('questionSelect');
+          const operatorSelect = document.getElementById('operatorSelect');
+          const valueSelect = document.getElementById('valueSelect');
+
+          const questionText =
+            questionSelect?.options[questionSelect.selectedIndex]?.text || '[select question]';
+          const operatorText =
+            operatorSelect?.options[operatorSelect.selectedIndex]?.text || '[select operator]';
+          const valueText =
+            valueSelect?.options[valueSelect.selectedIndex]?.text || '[select value]';
+
+          conditionText = `${questionText} ${operatorText} ${valueText}`;
+        } else if (ifTypeSelect.value === 'logic') {
+          const logicSelect = document.getElementById('logicSelect');
+          const logicOperatorSelect = document.getElementById('logicOperatorSelect');
+          const logicValueSelect = document.getElementById('logicValueSelect');
+
+          const logicText =
+            logicSelect?.options[logicSelect.selectedIndex]?.text || '[select logic]';
+          const logicOperatorText =
+            logicOperatorSelect?.options[logicOperatorSelect.selectedIndex]?.text ||
+            '[select operator]';
+          const logicValueText =
+            logicValueSelect?.options[logicValueSelect.selectedIndex]?.text || '[select value]';
+
+          conditionText = `${logicText} ${logicOperatorText} ${logicValueText}`;
+        } else {
+          conditionText = `[${ifTypeText}] [select operator] [select value]`;
+        }
+
+        previewText.textContent = `When ${formText} submitted, if ${conditionText}, then update ${columnText} to ${statusText}`;
       }
 
-      selects.forEach((select) => {
-        select.addEventListener('change', updatePreview);
+      // Add event listener to form select and other selects
+      document.addEventListener('DOMContentLoaded', function () {
+        const formSelect = document.querySelector('.workflow-row:nth-child(1) select');
+        const columnSelect = document.querySelector(
+          '.workflow-row:nth-child(3) select:nth-of-type(1)'
+        );
+        const statusSelect = document.querySelector(
+          '.workflow-row:nth-child(3) select:nth-of-type(2)'
+        );
+
+        if (formSelect) formSelect.addEventListener('change', updatePreview);
+        if (columnSelect) columnSelect.addEventListener('change', updatePreview);
+        if (statusSelect) statusSelect.addEventListener('change', updatePreview);
       });
     </script>
   </body>
