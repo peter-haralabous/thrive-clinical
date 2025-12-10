@@ -9,7 +9,7 @@ export function initNav(root = null) {
   mount.innerHTML = `
     <div class="global-header__inner flex w-full justify-between items-center">
       <a href="${homePath}" class="brand no-underline">
-        <span class="logo">HC</span>
+        <span class="logo">TC</span>
         <span class="brand-name">Thrive Clinical</span>
       </a>
       <div class="search" aria-hidden="true" class="mx-auto">

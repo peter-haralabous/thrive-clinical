@@ -48,7 +48,7 @@ class GlobalHeader extends HTMLElement {
         }
 
         .logo {
-          background: #0f172a;
+          background: #1e40af;
           color: white;
           width: 36px;
           height: 36px;
@@ -304,7 +304,7 @@ class GlobalHeader extends HTMLElement {
       <header class="global-header">
         <div class="global-header__inner">
           <a href="${homeUrl}" class="brand">
-            <span class="logo">HC</span>
+            <span class="logo">TC</span>
             <span class="brand-name">Thrive Clinical</span>
           </a>
           <div class="search">
