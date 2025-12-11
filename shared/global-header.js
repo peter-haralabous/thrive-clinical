@@ -623,17 +623,17 @@ class GlobalHeader extends HTMLElement {
 
                   <!-- Profile Options -->
                   <div class="dropdown-profile-options" id="profileOptions">
-                    <button class="dropdown-profile-option" data-profile="personal">
-                      <div class="dropdown-profile-icon">
-                        <div class="icon">${icons.person}</div>
-                      </div>
-                      <span>Personal</span>
-                    </button>
                     <button class="dropdown-profile-option active" data-profile="provider">
                       <div class="dropdown-profile-icon">
                         <div class="icon">${icons.person}</div>
                       </div>
                       <span>Provider</span>
+                    </button>
+                    <button class="dropdown-profile-option" data-profile="personal">
+                      <div class="dropdown-profile-icon">
+                        <div class="icon">${icons.person}</div>
+                      </div>
+                      <span>Personal</span>
                     </button>
                   </div>
                 </div>
