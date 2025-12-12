@@ -17,6 +17,7 @@
     <script type="module" src="./shared/global-header.js"></script>
     <script type="module" src="./shared/encounter-slideout.js"></script>
     <script type="module" src="./shared/status-chip.js"></script>
+    <script type="module" src="./shared/list-preferences.js"></script>
 
     <style>
       th {
@@ -283,6 +284,8 @@
   </head>
   <body>
     <global-header home-url="./index.html" base-path="."></global-header>
+
+    <list-preferences id="listPreferences" style="display: none"></list-preferences>
 
     <main class="page-container">
       <div class="page-header">
@@ -833,6 +836,37 @@
             d.classList.remove('show');
           });
         });
+
+        // Handle settings icon click to show list preferences modal
+        const settingsIcon = document.querySelector('.settings-icon');
+        const listPreferences = document.getElementById('listPreferences');
+
+        if (settingsIcon && listPreferences) {
+          settingsIcon.style.cursor = 'pointer';
+
+          settingsIcon.addEventListener('click', () => {
+            // Get current table columns
+            const columns = [
+              'Name',
+              'Email',
+              'Date of Birth',
+              'Prototype Concept',
+              'Status',
+              'Created',
+              'Updated',
+            ];
+
+            listPreferences.setColumns(columns);
+            listPreferences.open();
+          });
+
+          // Listen for preferences saved event
+          listPreferences.addEventListener('preferences-saved', (e) => {
+            console.log('Preferences saved:', e.detail);
+            // Here you would typically save to localStorage or backend
+            // and update the table display accordingly
+          });
+        }
 
         // Handle dropdown menu item clicks
         document.querySelectorAll('.action-dropdown').forEach((dropdown) => {

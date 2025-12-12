@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <script type="module" src="../shared/global-header.js"></script>
+    <script type="module" src="../shared/list-preferences.js"></script>
     <link href="../shared/styles.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="../shared/styles.css" />
@@ -101,6 +102,8 @@
   <body>
     <global-header home-url="../index.html" base-path=".."></global-header>
 
+    <list-preferences id="listPreferences" style="display: none"></list-preferences>
+
     <!-- Fixed Left Sidebar -->
     <aside
       class="w-64 bg-white border-r border-gray-200 flex-shrink-0 fixed left-0 top-16 h-screen z-30 flex flex-col overflow-y-auto"
@@ -173,12 +176,7 @@
               <h3>Encounters</h3>
               <p>Configure columns, filters, and default views for the encounter list</p>
             </div>
-            <button
-              class="btn-info"
-              onclick="alert('Configure Encounter List - Feature coming soon')"
-            >
-              Configure
-            </button>
+            <button class="btn-info" data-list-type="encounters">Configure</button>
           </div>
 
           <div class="preference-item">
@@ -186,12 +184,7 @@
               <h3>Referrals</h3>
               <p>Configure columns, filters, and default views for the patient list</p>
             </div>
-            <button
-              class="btn-info"
-              onclick="alert('Configure Patient List - Feature coming soon')"
-            >
-              Configure
-            </button>
+            <button class="btn-info" data-list-type="referrals">Configure</button>
           </div>
 
           <div class="preference-item">
@@ -199,9 +192,7 @@
               <h3>Intake</h3>
               <p>Configure columns, filters, and default views for the task list</p>
             </div>
-            <button class="btn-info" onclick="alert('Configure Task List - Feature coming soon')">
-              Configure
-            </button>
+            <button class="btn-info" data-list-type="intake">Configure</button>
           </div>
         </div>
       </div>
@@ -220,6 +211,61 @@
         if (!dropdown.contains(event.target) && !avatarBtn.contains(event.target)) {
           dropdown.classList.remove('show');
         }
+      });
+
+      // Configure button handlers for list preferences
+      document.addEventListener('DOMContentLoaded', () => {
+        const listPreferences = document.getElementById('listPreferences');
+        const configureButtons = document.querySelectorAll('[data-list-type]');
+
+        // Define columns for each list type
+        const listColumns = {
+          encounters: [
+            'Name',
+            'Email',
+            'Date of Birth',
+            'Prototype Concept',
+            'Status',
+            'Created',
+            'Updated',
+          ],
+          referrals: [
+            'Patient Name',
+            'Email',
+            'Phone',
+            'Referral Source',
+            'Status',
+            'Priority',
+            'Date Received',
+            'Last Updated',
+          ],
+          intake: [
+            'Task Name',
+            'Assigned To',
+            'Patient',
+            'Status',
+            'Priority',
+            'Due Date',
+            'Created',
+            'Last Updated',
+          ],
+        };
+
+        configureButtons.forEach((button) => {
+          button.addEventListener('click', () => {
+            const listType = button.getAttribute('data-list-type');
+            const columns = listColumns[listType] || [];
+
+            listPreferences.setColumns(columns);
+            listPreferences.open();
+          });
+        });
+
+        // Listen for preferences saved event
+        listPreferences.addEventListener('preferences-saved', (e) => {
+          console.log('Preferences saved:', e.detail);
+          // Here you would typically save to localStorage or backend
+        });
       });
     </script>
   </body>
