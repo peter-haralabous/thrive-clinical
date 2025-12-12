@@ -103,6 +103,55 @@
         font-size: 20px;
       }
 
+      .action-menu-wrapper {
+        position: relative;
+      }
+
+      .action-dropdown {
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: white;
+        border: 1px solid rgba(11, 18, 32, 0.1);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        min-width: 200px;
+        z-index: 1000;
+        display: none;
+        overflow: hidden;
+      }
+
+      .action-dropdown.show {
+        display: block;
+      }
+
+      .action-dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        font-size: 14px;
+        color: #0b1220;
+        transition: background 0.2s;
+      }
+
+      .action-dropdown-item:hover {
+        background: #f8f9fa;
+      }
+
+      .action-dropdown-item.danger {
+        color: #dc3545;
+      }
+
+      .action-dropdown-item .material-symbols-outlined {
+        font-size: 20px;
+      }
+
       .pagination {
         background: white;
         padding: 12px 16px;
@@ -288,9 +337,25 @@
               <td>2025-11-21 09:36</td>
               <td>2025-11-21 09:36</td>
               <td class="row-actions">
-                <button class="action-menu-btn">
-                  <span class="material-symbols-outlined">more_vert</span>
-                </button>
+                <div class="action-menu-wrapper">
+                  <button class="action-menu-btn" data-patient-name="H, Jane">
+                    <span class="material-symbols-outlined">more_vert</span>
+                  </button>
+                  <div class="action-dropdown">
+                    <button class="action-dropdown-item view-patient">
+                      <span class="material-symbols-outlined">person</span>
+                      View Patient
+                    </button>
+                    <button class="action-dropdown-item send-form">
+                      <span class="material-symbols-outlined">send</span>
+                      Send Form
+                    </button>
+                    <button class="action-dropdown-item danger archive-encounter">
+                      <span class="material-symbols-outlined">archive</span>
+                      Archive Encounter
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -312,9 +377,25 @@
               <td>2025-11-19 14:40</td>
               <td>2025-11-19 14:40</td>
               <td class="row-actions">
-                <button class="action-menu-btn">
-                  <span class="material-symbols-outlined">more_vert</span>
-                </button>
+                <div class="action-menu-wrapper">
+                  <button class="action-menu-btn" data-patient-name="Smith, Ely">
+                    <span class="material-symbols-outlined">more_vert</span>
+                  </button>
+                  <div class="action-dropdown">
+                    <button class="action-dropdown-item view-patient">
+                      <span class="material-symbols-outlined">person</span>
+                      View Patient
+                    </button>
+                    <button class="action-dropdown-item send-form">
+                      <span class="material-symbols-outlined">send</span>
+                      Send Form
+                    </button>
+                    <button class="action-dropdown-item danger archive-encounter">
+                      <span class="material-symbols-outlined">archive</span>
+                      Archive Encounter
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -336,9 +417,25 @@
               <td>2025-11-18 11:22</td>
               <td>2025-11-18 11:22</td>
               <td class="row-actions">
-                <button class="action-menu-btn">
-                  <span class="material-symbols-outlined">more_vert</span>
-                </button>
+                <div class="action-menu-wrapper">
+                  <button class="action-menu-btn" data-patient-name="Johnson, Maria">
+                    <span class="material-symbols-outlined">more_vert</span>
+                  </button>
+                  <div class="action-dropdown">
+                    <button class="action-dropdown-item view-patient">
+                      <span class="material-symbols-outlined">person</span>
+                      View Patient
+                    </button>
+                    <button class="action-dropdown-item send-form">
+                      <span class="material-symbols-outlined">send</span>
+                      Send Form
+                    </button>
+                    <button class="action-dropdown-item danger archive-encounter">
+                      <span class="material-symbols-outlined">archive</span>
+                      Archive Encounter
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -358,9 +455,25 @@
               <td>2025-11-17 08:15</td>
               <td>2025-11-17 08:15</td>
               <td class="row-actions">
-                <button class="action-menu-btn">
-                  <span class="material-symbols-outlined">more_vert</span>
-                </button>
+                <div class="action-menu-wrapper">
+                  <button class="action-menu-btn" data-patient-url="./patient-details/index.html">
+                    <span class="material-symbols-outlined">more_vert</span>
+                  </button>
+                  <div class="action-dropdown">
+                    <button class="action-dropdown-item view-patient">
+                      <span class="material-symbols-outlined">person</span>
+                      View Patient
+                    </button>
+                    <button class="action-dropdown-item send-form">
+                      <span class="material-symbols-outlined">send</span>
+                      Send Form
+                    </button>
+                    <button class="action-dropdown-item danger archive-encounter">
+                      <span class="material-symbols-outlined">archive</span>
+                      Archive Encounter
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -380,9 +493,25 @@
               <td>2025-11-15 16:30</td>
               <td>2025-11-15 16:30</td>
               <td class="row-actions">
-                <button class="action-menu-btn">
-                  <span class="material-symbols-outlined">more_vert</span>
-                </button>
+                <div class="action-menu-wrapper">
+                  <button class="action-menu-btn" data-patient-url="./patient-details/index.html">
+                    <span class="material-symbols-outlined">more_vert</span>
+                  </button>
+                  <div class="action-dropdown">
+                    <button class="action-dropdown-item view-patient">
+                      <span class="material-symbols-outlined">person</span>
+                      View Patient
+                    </button>
+                    <button class="action-dropdown-item send-form">
+                      <span class="material-symbols-outlined">send</span>
+                      Send Form
+                    </button>
+                    <button class="action-dropdown-item danger archive-encounter">
+                      <span class="material-symbols-outlined">archive</span>
+                      Archive Encounter
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
             <tr>
@@ -398,9 +527,25 @@
               <td>2025-11-14 12:11</td>
               <td>2025-11-14 12:11</td>
               <td class="row-actions">
-                <button class="action-menu-btn">
-                  <span class="material-symbols-outlined">more_vert</span>
-                </button>
+                <div class="action-menu-wrapper">
+                  <button class="action-menu-btn" data-patient-url="./patient-details/index.html">
+                    <span class="material-symbols-outlined">more_vert</span>
+                  </button>
+                  <div class="action-dropdown">
+                    <button class="action-dropdown-item view-patient">
+                      <span class="material-symbols-outlined">person</span>
+                      View Patient
+                    </button>
+                    <button class="action-dropdown-item send-form">
+                      <span class="material-symbols-outlined">send</span>
+                      Send Form
+                    </button>
+                    <button class="action-dropdown-item danger archive-encounter">
+                      <span class="material-symbols-outlined">archive</span>
+                      Archive Encounter
+                    </button>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -658,6 +803,75 @@
               }
             });
           }
+        });
+
+        // Handle kebab menu dropdowns
+        const actionMenuBtns = document.querySelectorAll('.action-menu-btn');
+
+        actionMenuBtns.forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wrapper = btn.closest('.action-menu-wrapper');
+            const dropdown = wrapper.querySelector('.action-dropdown');
+            const isOpen = dropdown.classList.contains('show');
+
+            // Close all other dropdowns
+            document.querySelectorAll('.action-dropdown.show').forEach((d) => {
+              d.classList.remove('show');
+            });
+
+            // Toggle current dropdown
+            if (!isOpen) {
+              dropdown.classList.add('show');
+            }
+          });
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', () => {
+          document.querySelectorAll('.action-dropdown.show').forEach((d) => {
+            d.classList.remove('show');
+          });
+        });
+
+        // Handle dropdown menu item clicks
+        document.querySelectorAll('.action-dropdown').forEach((dropdown) => {
+          const wrapper = dropdown.closest('.action-menu-wrapper');
+          const menuBtn = wrapper.querySelector('.action-menu-btn');
+          const patientName = menuBtn.getAttribute('data-patient-name');
+
+          // View Patient
+          dropdown.querySelector('.view-patient').addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            // Get the detailsUrl from encountersData if available
+            if (patientName && encountersData[patientName]) {
+              window.location.href = encountersData[patientName].detailsUrl;
+            } else {
+              // Fallback for patients without encounter data
+              const row = wrapper.closest('tr');
+              const patientLink = row.querySelector('.patient-name');
+              if (patientLink) {
+                window.location.href = patientLink.getAttribute('href');
+              }
+            }
+          });
+
+          // Send Form
+          dropdown.querySelector('.send-form').addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Send Form clicked');
+            dropdown.classList.remove('show');
+            // TODO: Implement send form functionality
+          });
+
+          // Archive Encounter
+          dropdown.querySelector('.archive-encounter').addEventListener('click', (e) => {
+            e.stopPropagation();
+            console.log('Archive Encounter clicked');
+            dropdown.classList.remove('show');
+            // TODO: Implement archive encounter functionality
+          });
         });
       });
     </script>
