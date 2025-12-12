@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <script type="module" src="../shared/global-header.js"></script>
+    <script type="module" src="../shared/status-chip.js"></script>
     <link href="../shared/styles.css" rel="stylesheet" />
 
     <script>
@@ -2711,11 +2712,7 @@
                   <h3 class="text-base font-semibold text-text-dark-gray dark:text-white">
                     Encounter Details
                   </h3>
-                  <span
-                    class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full"
-                  >
-                    In Progress
-                  </span>
+                  <status-chip variant="active" value="Active" editable="true"></status-chip>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -2729,6 +2726,18 @@
                     <span class="text-text-dark-gray dark:text-white font-medium">
                       2025-11-21 12:11
                     </span>
+                  </div>
+                  <div>
+                    <span class="text-text-light-gray block mb-1">Concept</span>
+                    <status-chip variant="split-view" value="Split View"></status-chip>
+                  </div>
+                  <div>
+                    <span class="text-text-light-gray block mb-1">Status</span>
+                    <status-chip
+                      variant="in-progress"
+                      value="In Progress"
+                      editable="true"
+                    ></status-chip>
                   </div>
                 </div>
               </div>
@@ -4127,11 +4136,7 @@
                   <h3 class="text-base font-semibold text-text-dark-gray dark:text-white">
                     Encounter Details
                   </h3>
-                  <span
-                    class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full"
-                  >
-                    In Progress
-                  </span>
+                  <status-chip variant="archived" value="Archived" editable="true"></status-chip>
                 </div>
                 <div class="grid grid-cols-2 gap-4 text-sm">
                   <div>
@@ -4145,6 +4150,18 @@
                     <span class="text-text-dark-gray dark:text-white font-medium">
                       2025-11-14 12:11
                     </span>
+                  </div>
+                  <div>
+                    <span class="text-text-light-gray block mb-1">Concept</span>
+                    <status-chip variant="split-view" value="Split View"></status-chip>
+                  </div>
+                  <div>
+                    <span class="text-text-light-gray block mb-1">Status</span>
+                    <status-chip
+                      variant="in-progress"
+                      value="In Progress"
+                      editable="true"
+                    ></status-chip>
                   </div>
                 </div>
               </div>

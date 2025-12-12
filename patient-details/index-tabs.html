@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <script type="module" src="../shared/global-header.js"></script>
+    <script type="module" src="../shared/status-chip.js"></script>
     <link href="../shared/styles.css" rel="stylesheet" />
 
     <script>
@@ -1107,14 +1108,14 @@
           content: generateOverviewContent(),
         },
         'encounter-1': {
-          title: 'Encounter · 2025-11-14',
-          icon: 'calendar_month',
-          content: generateEncounterContent('2025-11-14'),
-        },
-        'encounter-2': {
           title: 'Encounter · 2025-11-21',
           icon: 'calendar_month',
           content: generateEncounterContent('2025-11-21'),
+        },
+        'encounter-2': {
+          title: 'Encounter · 2025-11-14',
+          icon: 'calendar_month',
+          content: generateEncounterContent('2025-11-14'),
         },
         'condition-hypertension': {
           title: 'Hypertension',
@@ -1479,6 +1480,9 @@
 
       function generateEncounterContent(date) {
         const isEncounter1 = date === '2025-11-14';
+        const isActive = date === '2025-11-21';
+        const statusVariant = isActive ? 'active' : 'archived';
+        const statusValue = isActive ? 'Active' : 'Archived';
         return `
           <div class="space-y-4">
             <h1 class="text-2xl font-bold text-text-dark-gray dark:text-white mb-4">Encounter · ${date}</h1>
@@ -1486,7 +1490,7 @@
             <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold text-text-dark-gray dark:text-white">Encounter Details</h2>
-                <span class="px-3 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">In Progress</span>
+                <status-chip variant="${statusVariant}" value="${statusValue}" editable="true"></status-chip>
               </div>
               <div class="grid grid-cols-2 gap-4 text-sm">
                 <div>
@@ -1496,6 +1500,14 @@
                 <div>
                   <span class="text-text-light-gray block mb-1">Updated</span>
                   <span class="text-text-dark-gray dark:text-white font-medium">${date} 12:11</span>
+                </div>
+                <div>
+                  <span class="text-text-light-gray block mb-1">Concept</span>
+                  <status-chip variant="tab-view" value="Tab View"></status-chip>
+                </div>
+                <div>
+                  <span class="text-text-light-gray block mb-1">Status</span>
+                  <status-chip variant="in-progress" value="In Progress" editable="true"></status-chip>
                 </div>
               </div>
             </div>

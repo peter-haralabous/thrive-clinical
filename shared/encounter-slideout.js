@@ -1,3 +1,6 @@
+// Import status-chip component
+import './status-chip.js';
+
 class EncounterSlideout extends HTMLElement {
   constructor() {
     super();
@@ -795,7 +798,7 @@ class EncounterSlideout extends HTMLElement {
       <div class="section">
         <div class="section-header">
           <h3 class="section-title">Encounter Details</h3>
-          <span class="status-badge ${this.getStatusClass(data.encounterStatus)}">${data.encounterStatus}</span>
+          <status-chip variant="${data.encounterType === 'Active' ? 'active' : 'archived'}" value="${data.encounterType}" editable="true"></status-chip>
         </div>
         <div class="detail-grid">
           <div class="detail-item">
@@ -806,6 +809,26 @@ class EncounterSlideout extends HTMLElement {
             <span class="detail-label">Updated</span>
             <span class="detail-value">${data.updated}</span>
           </div>
+          ${
+            data.concept
+              ? `
+            <div class="detail-item">
+              <span class="detail-label">Concept</span>
+              <status-chip variant="${this.getConceptVariant(data.concept)}" value="${data.concept}"></status-chip>
+            </div>
+          `
+              : ''
+          }
+          ${
+            data.status
+              ? `
+            <div class="detail-item">
+              <span class="detail-label">Status</span>
+              <status-chip variant="${this.getStatusVariant(data.status)}" value="${data.status}" editable="true"></status-chip>
+            </div>
+          `
+              : ''
+          }
         </div>
       </div>
 
@@ -958,13 +981,40 @@ class EncounterSlideout extends HTMLElement {
 
   getStatusClass(status) {
     const statusLower = status.toLowerCase().replace(/\s+/g, '-');
-    if (statusLower.includes('pending')) return 'status-pending';
-    if (statusLower.includes('active')) return 'status-active';
-    if (statusLower.includes('completed')) return 'status-completed';
-    if (statusLower.includes('failed')) return 'status-failed';
     if (statusLower.includes('not-started') || statusLower.includes('not started'))
       return 'status-not-started';
-    return 'status-pending';
+    if (statusLower.includes('in-progress') || statusLower.includes('in progress'))
+      return 'status-in-progress';
+    if (statusLower.includes('done') || statusLower.includes('completed'))
+      return 'status-completed';
+    if (statusLower.includes('pending')) return 'status-pending';
+    if (statusLower.includes('failed')) return 'status-failed';
+    return 'status-in-progress';
+  }
+
+  getEncounterStatusClass(status) {
+    const statusLower = status.toLowerCase();
+    if (statusLower.includes('active')) return 'status-active';
+    if (statusLower.includes('archived')) return 'status-archived';
+    return 'status-active';
+  }
+
+  getStatusVariant(status) {
+    const statusLower = status.toLowerCase().replace(/\s+/g, '-');
+    if (statusLower.includes('not-started') || statusLower.includes('not started'))
+      return 'not-started';
+    if (statusLower.includes('in-progress') || statusLower.includes('in progress'))
+      return 'in-progress';
+    if (statusLower.includes('done') || statusLower.includes('completed')) return 'completed';
+    return 'in-progress';
+  }
+
+  getConceptVariant(concept) {
+    const conceptLower = concept.toLowerCase();
+    if (conceptLower.includes('split')) return 'split-view';
+    if (conceptLower.includes('tab')) return 'tab-view';
+    if (conceptLower.includes('single')) return 'single-view';
+    return 'split-view';
   }
 }
 
