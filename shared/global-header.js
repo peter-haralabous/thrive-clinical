@@ -633,7 +633,7 @@ class GlobalHeader extends HTMLElement {
             </button>
             <div class="user-info">
               <p class="user-name">Dr. Smith</p>
-              <p class="user-org" id="headerOrgName">Dr. Smith's Clinic</p>
+              <p class="user-org" id="headerOrgName">Valley Health Clinic</p>
             </div>
             <div class="user-avatar-wrapper">
               <div class="user-avatar" id="userAvatarBtn">
@@ -702,7 +702,7 @@ class GlobalHeader extends HTMLElement {
                           <div class="icon icon-sm">${icons.apartment}</div>
                           <div class="dropdown-org-info">
                             <p class="dropdown-org-label">Organization</p>
-                            <p class="dropdown-org-name" id="currentOrgName">Dr. Smith's Clinic</p>
+                            <p class="dropdown-org-name" id="currentOrgName">Valley Health Clinic</p>
                           </div>
                         </div>
                         <div class="dropdown-toggle-icon">
@@ -718,7 +718,7 @@ class GlobalHeader extends HTMLElement {
                           <div class="dropdown-org-option-icon">
                             <div class="icon">${icons.apartment}</div>
                           </div>
-                          <span>Dr. Smith's Clinic</span>
+                          <span>Valley Health Clinic</span>
                         </button>
                         <button class="dropdown-org-option" data-org="clinic2">
                           <div class="dropdown-org-option-icon">
