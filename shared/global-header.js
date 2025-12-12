@@ -184,7 +184,7 @@ class GlobalHeader extends HTMLElement {
           padding: 16px;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 12px;
         }
 
         .dropdown-menu.show {
@@ -350,6 +350,10 @@ class GlobalHeader extends HTMLElement {
           margin-top: 8px;
           padding: 12px;
           padding-top: 0;
+        }
+        .dropdown-profile-options-list {
+          border: 1px solid #e5e7eb;
+          border-radius: 12px;
         }
 
         .dropdown-profile-options.show {
@@ -672,6 +676,7 @@ class GlobalHeader extends HTMLElement {
 
                   <!-- Profile Options -->
                   <div class="dropdown-profile-options" id="profileOptions">
+                  <div class="dropdown-profile-options-list">
                     <button class="dropdown-profile-option active" data-profile="provider">
                       <div class="dropdown-profile-icon">
                         <div class="icon">${icons.person}</div>
@@ -684,6 +689,7 @@ class GlobalHeader extends HTMLElement {
                       </div>
                       <span>Personal</span>
                     </button>
+                    </div>
                   </div>
                 </div>
 
@@ -745,7 +751,7 @@ class GlobalHeader extends HTMLElement {
 
 
                 <!-- Sign Out Card -->
-                <div class="dropdown-card">
+                <div class="dropdown-card" style="margin-top: 8px">
                   <button class="dropdown-logout" id="logoutBtn">
                     <div class="icon icon-sm">${icons.logout}</div>
                     <span>Sign out</span>
