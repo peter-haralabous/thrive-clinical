@@ -15,6 +15,7 @@
     <link href="./shared/styles.css" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script type="module" src="./shared/global-header.js"></script>
+    <script type="module" src="./shared/encounter-slideout.js"></script>
 
     <style>
       th {
@@ -379,5 +380,247 @@
         <button disabled>Next »</button>
       </div>
     </main>
+
+    <!-- Encounter Slideout -->
+    <encounter-slideout></encounter-slideout>
+
+    <script>
+      // Sample encounter data for the first 3 patients
+      const encountersData = {
+        'H, Jane': {
+          name: 'H, Jane',
+          dob: '2000-01-01',
+          phn: '12349000',
+          email: 'peter.haralabous@thrive.health',
+          detailsUrl: './patient-details/index.html?tab=encounter-1',
+          encounterStatus: 'In Progress',
+          created: '2025-11-21 12:11',
+          updated: '2025-11-21 12:11',
+          summaries: [
+            {
+              name: 'Summary: Intake Form',
+              type: 'Form Summary',
+              date: '2025-11-21',
+            },
+          ],
+          forms: [
+            {
+              name: 'Form "Intake Form"',
+              status: 'Completed',
+              date: '2025-11-21',
+            },
+          ],
+          notes: [
+            {
+              author: 'Dr. Smith',
+              visibility: 'Private',
+              text: 'Patient reports improvement in symptoms. Continue current treatment plan. Follow-up recommended in 2 weeks.',
+              time: '2025-11-21 15:45',
+              avatarColor: 'blue',
+            },
+            {
+              author: 'Maria Johnson (Patient)',
+              visibility: 'Public',
+              text: "I forgot to mention during my visit that I've also been experiencing occasional headaches in the morning. They usually go away after breakfast.",
+              time: '2025-11-21 14:30',
+              avatarColor: 'purple',
+            },
+            {
+              author: 'Dr. Smith',
+              visibility: 'Public',
+              text: 'Appointment scheduled for comprehensive exam. Please arrive 15 minutes early to complete intake paperwork.',
+              time: '2025-11-21 09:20',
+              avatarColor: 'blue',
+            },
+          ],
+          activity: [
+            {
+              title: 'Form completed',
+              description: 'Intake Form submitted by patient',
+              time: '2025-11-21 14:30',
+              icon: 'check_circle',
+              iconColor: 'blue',
+            },
+            {
+              title: 'Form sent',
+              description: 'Intake Form sent to patient by Dr. Smith',
+              time: '2025-11-21 09:15',
+              icon: 'send',
+              iconColor: 'purple',
+            },
+            {
+              title: 'Encounter created',
+              description: 'Created by Dr. Smith',
+              time: '2025-11-21 09:00',
+              icon: 'add_circle',
+              iconColor: 'green',
+            },
+          ],
+        },
+        'Smith, Ely': {
+          name: 'Smith, Ely',
+          dob: '1999-01-01',
+          phn: '9876 543 210',
+          email: 'ely@email.com',
+          detailsUrl: './patient-details/index-tabs.html?tab=encounter-2',
+          encounterStatus: 'In Progress',
+          created: '2025-11-21 12:11',
+          updated: '2025-11-21 12:11',
+          summaries: [
+            {
+              name: 'Summary: Intake Form',
+              type: 'Form Summary',
+              date: '2025-11-21',
+            },
+          ],
+          forms: [
+            {
+              name: 'Form "Intake Form"',
+              status: 'Completed',
+              date: '2025-11-21',
+            },
+          ],
+          notes: [
+            {
+              author: 'Dr. Smith',
+              visibility: 'Private',
+              text: 'Patient reports improvement in symptoms. Continue current treatment plan. Follow-up recommended in 2 weeks.',
+              time: '2025-11-21 15:45',
+              avatarColor: 'blue',
+            },
+            {
+              author: 'Maria Johnson (Patient)',
+              visibility: 'Public',
+              text: "I forgot to mention during my visit that I've also been experiencing occasional headaches in the morning. They usually go away after breakfast.",
+              time: '2025-11-21 14:30',
+              avatarColor: 'purple',
+            },
+            {
+              author: 'Dr. Smith',
+              visibility: 'Public',
+              text: 'Appointment scheduled for comprehensive exam. Please arrive 15 minutes early to complete intake paperwork.',
+              time: '2025-11-21 09:20',
+              avatarColor: 'blue',
+            },
+          ],
+          activity: [
+            {
+              title: 'Form completed',
+              description: 'Intake Form submitted by patient',
+              time: '2025-11-21 14:30',
+              icon: 'check_circle',
+              iconColor: 'blue',
+            },
+            {
+              title: 'Form sent',
+              description: 'Intake Form sent to patient by Dr. Smith',
+              time: '2025-11-21 09:15',
+              icon: 'send',
+              iconColor: 'purple',
+            },
+            {
+              title: 'Encounter created',
+              description: 'Created by Dr. Smith',
+              time: '2025-11-21 09:00',
+              icon: 'add_circle',
+              iconColor: 'green',
+            },
+          ],
+        },
+        'Johnson, Maria': {
+          name: 'Johnson, Maria',
+          dob: '1985-06-15',
+          phn: '5555 123 789',
+          email: 'maria.johnson@email.com',
+          detailsUrl: './patient-details/index-single.html?tab=encounter-1',
+          encounterStatus: 'In Progress',
+          created: '2025-11-21 12:11',
+          updated: '2025-11-21 12:11',
+          summaries: [
+            {
+              name: 'Summary: Intake Form',
+              type: 'Form Summary',
+              date: '2025-11-21',
+            },
+          ],
+          forms: [
+            {
+              name: 'Form "Intake Form"',
+              status: 'Completed',
+              date: '2025-11-21',
+            },
+          ],
+          notes: [
+            {
+              author: 'Dr. Smith',
+              visibility: 'Private',
+              text: 'Patient reports improvement in symptoms. Continue current treatment plan. Follow-up recommended in 2 weeks.',
+              time: '2025-11-21 15:45',
+              avatarColor: 'blue',
+            },
+            {
+              author: 'Maria Johnson (Patient)',
+              visibility: 'Public',
+              text: "I forgot to mention during my visit that I've also been experiencing occasional headaches in the morning. They usually go away after breakfast.",
+              time: '2025-11-21 14:30',
+              avatarColor: 'purple',
+            },
+            {
+              author: 'Dr. Smith',
+              visibility: 'Public',
+              text: 'Appointment scheduled for comprehensive exam. Please arrive 15 minutes early to complete intake paperwork.',
+              time: '2025-11-21 09:20',
+              avatarColor: 'blue',
+            },
+          ],
+          activity: [
+            {
+              title: 'Form completed',
+              description: 'Intake Form submitted by patient',
+              time: '2025-11-21 14:30',
+              icon: 'check_circle',
+              iconColor: 'blue',
+            },
+            {
+              title: 'Form sent',
+              description: 'Intake Form sent to patient by Dr. Smith',
+              time: '2025-11-21 09:15',
+              icon: 'send',
+              iconColor: 'purple',
+            },
+            {
+              title: 'Encounter created',
+              description: 'Created by Dr. Smith',
+              time: '2025-11-21 09:00',
+              icon: 'add_circle',
+              iconColor: 'green',
+            },
+          ],
+        },
+      };
+
+      // Initialize slideout
+      const slideout = document.querySelector('encounter-slideout');
+
+      // Add click handlers to first 3 patient links
+      document.addEventListener('DOMContentLoaded', () => {
+        const patientLinks = document.querySelectorAll('.patient-name');
+
+        // Only add handlers to the first 3 patients
+        patientLinks.forEach((link, index) => {
+          if (index < 3) {
+            link.addEventListener('click', (e) => {
+              e.preventDefault();
+              const patientName = link.textContent.trim();
+              const encounterData = encountersData[patientName];
+
+              if (encounterData) {
+                slideout.open(encounterData);
+              }
+            });
+          }
+        });
+      });
+    </script>
   </body>
 </html>
