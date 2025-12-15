@@ -15,6 +15,7 @@
     <script type="module" src="../shared/global-header.js"></script>
     <script type="module" src="../shared/status-chip.js"></script>
     <script type="module" src="../shared/send-form-modal.js"></script>
+    <script type="module" src="../shared/encounter-header.js"></script>
     <link href="../shared/styles.css" rel="stylesheet" />
 
     <script>
@@ -2872,6 +2873,9 @@
               </div>
             </div>
             <div class="tab-overflow p-4 pt-20 space-y-4">
+              <!-- Encounter Header -->
+              <encounter-header date="2025-11-21" patient-name="H, Jane"></encounter-header>
+
               <!-- Encounter Details -->
               <div
                 class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg border border-gray-300 dark:border-gray-700"
@@ -4310,6 +4314,9 @@
               </div>
             </div>
             <div class="tab-overflow p-4 pt-20 space-y-4">
+              <!-- Encounter Header -->
+              <encounter-header date="2025-11-14" patient-name="H, Jane"></encounter-header>
+
               <!-- Encounter Details -->
               <div
                 class="p-4 bg-neutral-bg dark:bg-background-dark rounded-lg border border-gray-300 dark:border-gray-700"
@@ -4976,6 +4983,26 @@
         // TODO: Implement encounter creation flow
         alert('New Encounter creation coming soon!');
       }
+
+      // Encounter header event listeners
+      document.addEventListener('send-form', function (event) {
+        const sendFormModal = document.getElementById('sendFormModal');
+        if (sendFormModal) {
+          sendFormModal.open({
+            showEncounterSelection: false,
+            patientName: event.detail.patientName || 'H, Jane',
+          });
+        }
+      });
+
+      document.addEventListener('view-patient', function () {
+        window.location.href = '../index.html';
+      });
+
+      document.addEventListener('archive-encounter', function () {
+        console.log('Archive encounter');
+        alert('Archive encounter functionality coming soon!');
+      });
 
       document.addEventListener('click', function (event) {
         const dropdown = document.getElementById('userDropdown');

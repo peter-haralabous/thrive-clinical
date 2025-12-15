@@ -15,6 +15,7 @@
     <script type="module" src="../shared/global-header.js"></script>
     <script type="module" src="../shared/status-chip.js"></script>
     <script type="module" src="../shared/send-form-modal.js"></script>
+    <script type="module" src="../shared/encounter-header.js"></script>
     <link href="../shared/styles.css" rel="stylesheet" />
 
     <script>
@@ -1520,7 +1521,9 @@
         const statusValue = isActive ? 'Active' : 'Archived';
         return `
           <div class="space-y-4">
-            <h1 class="text-2xl font-bold text-text-dark-gray dark:text-white mb-4">Encounter · ${date}</h1>
+            <!-- Encounter Header -->
+            <encounter-header date="${date}" patient-name="Smith, Ely"></encounter-header>
+
             <!-- Encounter Details -->
             <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
               <div class="flex items-center justify-between mb-4">
@@ -2229,6 +2232,26 @@
           });
         }
       }
+
+      // Encounter header event listeners
+      document.addEventListener('send-form', function (event) {
+        const sendFormModal = document.getElementById('sendFormModal');
+        if (sendFormModal) {
+          sendFormModal.open({
+            showEncounterSelection: false,
+            patientName: event.detail.patientName || 'Smith, Ely',
+          });
+        }
+      });
+
+      document.addEventListener('view-patient', function () {
+        window.location.href = '../index.html';
+      });
+
+      document.addEventListener('archive-encounter', function () {
+        console.log('Archive encounter');
+        alert('Archive encounter functionality coming soon!');
+      });
 
       function handleEditPatient() {
         console.log('Edit Patient clicked');

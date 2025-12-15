@@ -80,6 +80,11 @@ class StatusChip extends HTMLElement {
         color: '#0f5132',
         border: '1px solid #9dd9be',
       },
+      empty: {
+        background: '#ffffff',
+        color: '#6c757d',
+        border: '1px solid #dee2e6',
+      },
     };
     return variants[variant] || variants['active'];
   }
@@ -117,6 +122,7 @@ class StatusChip extends HTMLElement {
       Ready: 'ready',
       Consult: 'neutral',
       'Follow-up': 'neutral',
+      '--': 'empty',
     };
     return valueMap[value] || 'active';
   }
@@ -130,9 +136,15 @@ class StatusChip extends HTMLElement {
     if (editable) {
       // Render dropdown
       let options = [];
-      if (variant === 'sent' || variant === 'in-progress' || variant === 'completed') {
+      if (
+        variant === 'sent' ||
+        variant === 'in-progress' ||
+        variant === 'completed' ||
+        variant === 'empty'
+      ) {
         // Intake field options - check this first before generic progress check
         options = [
+          { value: '--', variant: 'empty' },
           { value: 'Sent', variant: 'sent' },
           { value: 'In progress', variant: 'in-progress' },
           { value: 'Completed', variant: 'completed' },
