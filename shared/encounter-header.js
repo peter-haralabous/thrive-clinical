@@ -229,7 +229,10 @@ class EncounterHeader extends HTMLElement {
               <span class="material-symbols-outlined icon">more_vert</span>
             </button>
             <div class="menu-dropdown" id="menu-dropdown">
-
+              <button class="menu-item" id="add-note-btn">
+                <span class="material-symbols-outlined icon">note_add</span>
+                <span>Add Note</span>
+              </button>
               <button class="menu-item archive" id="archive-btn">
                 <span class="material-symbols-outlined icon">archive</span>
                 <span>Archive Encounter</span>
@@ -246,6 +249,7 @@ class EncounterHeader extends HTMLElement {
     const menuBtn = this.shadowRoot.getElementById('menu-btn');
     const menuDropdown = this.shadowRoot.getElementById('menu-dropdown');
     const viewPatientBtn = this.shadowRoot.getElementById('view-patient-btn');
+    const addNoteBtn = this.shadowRoot.getElementById('add-note-btn');
     const archiveBtn = this.shadowRoot.getElementById('archive-btn');
 
     sendFormBtn.addEventListener('click', () => {
@@ -282,6 +286,16 @@ class EncounterHeader extends HTMLElement {
       menuDropdown.classList.remove('show');
       this.dispatchEvent(
         new CustomEvent('view-patient', {
+          bubbles: true,
+          composed: true,
+        })
+      );
+    });
+
+    addNoteBtn.addEventListener('click', () => {
+      menuDropdown.classList.remove('show');
+      this.dispatchEvent(
+        new CustomEvent('add-note', {
           bubbles: true,
           composed: true,
         })
