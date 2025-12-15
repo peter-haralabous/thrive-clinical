@@ -664,12 +664,25 @@ class EncounterSlideout extends HTMLElement {
           border-bottom: none;
         }
 
+        .forms-table tbody tr {
+          cursor: pointer;
+        }
+
+        .forms-table tbody tr:hover {
+          background: #f8f9fa;
+        }
+
         .form-name {
           display: flex;
           align-items: center;
           gap: 8px;
           color: #1d7aec;
           font-weight: 500;
+          cursor: pointer;
+        }
+
+        .form-name:hover {
+          text-decoration: underline;
         }
 
         .form-name .material-symbols-outlined {
@@ -740,6 +753,7 @@ class EncounterSlideout extends HTMLElement {
     this.classList.add('open');
     this.renderContent(patientData);
     this.setupKebabMenu();
+    this.setupFormLinks();
     document.body.style.overflow = 'hidden';
   }
 
@@ -813,18 +827,7 @@ class EncounterSlideout extends HTMLElement {
             <span class="detail-label">Updated</span>
             <span class="detail-value">${data.updated}</span>
           </div>
-          ${
-            data.concept
-              ? `
-            <div class="detail-item">
-              <span class="detail-label">Prototype Concept</span>
-              <status-chip variant="${this.getConceptVariant(data.concept)}" value="${
-                data.concept
-              }"></status-chip>
-            </div>
-          `
-              : ''
-          }
+
           ${
             data.intake
               ? `
@@ -865,6 +868,18 @@ class EncounterSlideout extends HTMLElement {
             <div class="detail-item">
               <span class="detail-label">Appointment Type</span>
               <status-chip variant="neutral" value="${data.appointmentType}" editable="true"></status-chip>
+            </div>
+          `
+              : ''
+          }
+          ${
+            data.concept
+              ? `
+            <div class="detail-item">
+              <span class="detail-label">View</span>
+              <status-chip variant="${this.getConceptVariant(data.concept)}" value="${
+                data.concept
+              }"></status-chip>
             </div>
           `
               : ''
@@ -931,7 +946,7 @@ class EncounterSlideout extends HTMLElement {
                 ${data.forms
                   .map(
                     (form) => `
-                  <tr>
+                  <tr class="form-row" data-form-id="${form.tabId || this.getFormTabId(form.name)}">
                     <td>
                       <div class="form-name">
                         <span class="material-symbols-outlined">description</span>
@@ -1047,6 +1062,37 @@ class EncounterSlideout extends HTMLElement {
         this.close();
       });
     });
+  }
+
+  setupFormLinks() {
+    const formRows = this.shadowRoot.querySelectorAll('.form-row');
+
+    formRows.forEach((row) => {
+      row.addEventListener('click', () => {
+        const formId = row.getAttribute('data-form-id');
+
+        // Dispatch event for parent page to handle
+        this.dispatchEvent(
+          new CustomEvent('open-form', {
+            detail: { formId },
+            bubbles: true,
+            composed: true,
+          })
+        );
+      });
+    });
+  }
+
+  getFormTabId(formName) {
+    // Convert form name to a tab ID format
+    // e.g., "Form 'Intake Form'" -> "intake-form"
+    // or "Intake Form" -> "intake-form"
+    const match = formName.match(/["']([^"']+)["']/);
+    const name = match ? match[1] : formName;
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
   }
 
   getStatusClass(status) {
