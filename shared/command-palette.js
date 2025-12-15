@@ -62,6 +62,7 @@ class CommandPalette extends HTMLElement {
           box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
           overflow: hidden;
           animation: slideDown 0.2s ease;
+          padding: 8px;
         }
 
         @keyframes slideDown {
@@ -84,7 +85,6 @@ class CommandPalette extends HTMLElement {
           font-size: 18px;
           font-weight: 600;
           color: #374151;
-          padding-left: 12px;
           margin: 0 0 12px 0;
         }
 
@@ -105,6 +105,21 @@ class CommandPalette extends HTMLElement {
         .palette-content {
           max-height: 400px;
           overflow-y: auto;
+        }
+
+        .palette-section {
+          padding: 12px 20px 8px;
+          font-size: 12px;
+          font-weight: 600;
+          text-transform: uppercase;
+          color: #6b7280;
+          letter-spacing: 0.5px;
+          border-top: 1px solid #e5e7eb;
+        }
+
+        .palette-section:first-child {
+          border-top: none;
+          padding-top: 8px;
         }
 
         .palette-item {
@@ -281,10 +296,18 @@ class CommandPalette extends HTMLElement {
   }
 
   open(options = {}) {
-    const { title = 'Command Palette', items = [], onSelect } = options;
+    const { title = 'Command Palette', items = [], sections = [], onSelect } = options;
 
-    this.items = items;
-    this.filteredItems = [...items];
+    // Support both flat items array and sections array
+    if (sections && sections.length > 0) {
+      this.sections = sections;
+      this.items = sections.flatMap((section) => section.items);
+    } else {
+      this.sections = items.length > 0 ? [{ title: '', items }] : [];
+      this.items = items;
+    }
+
+    this.filteredItems = [...this.items];
     this.onSelectCallback = onSelect;
     this.selectedIndex = 0;
     this.searchQuery = '';
@@ -317,11 +340,20 @@ class CommandPalette extends HTMLElement {
   filterItems() {
     if (!this.searchQuery) {
       this.filteredItems = [...this.items];
+      this.filteredSections = this.sections;
     } else {
       this.filteredItems = this.items.filter((item) => {
         const searchText = `${item.title} ${item.subtitle || ''}`.toLowerCase();
         return searchText.includes(this.searchQuery);
       });
+
+      // When searching, group filtered items into sections
+      this.filteredSections = this.sections
+        .map((section) => ({
+          ...section,
+          items: section.items.filter((item) => this.filteredItems.includes(item)),
+        }))
+        .filter((section) => section.items.length > 0);
     }
 
     this.selectedIndex = 0;
@@ -336,27 +368,43 @@ class CommandPalette extends HTMLElement {
       return;
     }
 
-    content.innerHTML = this.filteredItems
-      .map(
-        (item, index) => `
-      <div class="palette-item ${
-        index === this.selectedIndex ? 'selected' : ''
-      }" data-index="${index}">
-        <div class="item-icon">
-          <span class="material-symbols-outlined">${item.icon || 'person'}</span>
-        </div>
-        <div class="item-content">
-          <div class="item-title">${item.title}</div>
-          ${item.subtitle ? `<div class="item-subtitle">${item.subtitle}</div>` : ''}
-        </div>
-        <span class="material-symbols-outlined item-arrow">chevron_right</span>
-      </div>
-    `
-      )
-      .join('');
+    let html = '';
+    let itemIndex = 0;
+    const sectionsToRender = this.filteredSections || this.sections;
+
+    sectionsToRender.forEach((section) => {
+      if (section.items.length === 0) return;
+
+      // Add section header if title exists
+      if (section.title) {
+        html += `<div class="palette-section">${section.title}</div>`;
+      }
+
+      // Add items in this section
+      section.items.forEach((item) => {
+        const globalIndex = this.filteredItems.indexOf(item);
+        html += `
+          <div class="palette-item ${
+            globalIndex === this.selectedIndex ? 'selected' : ''
+          }" data-index="${globalIndex}">
+            <div class="item-icon">
+              <span class="material-symbols-outlined">${item.icon || 'person'}</span>
+            </div>
+            <div class="item-content">
+              <div class="item-title">${item.title}</div>
+              ${item.subtitle ? `<div class="item-subtitle">${item.subtitle}</div>` : ''}
+            </div>
+            <span class="material-symbols-outlined item-arrow">chevron_right</span>
+          </div>
+        `;
+      });
+    });
+
+    content.innerHTML = html;
 
     // Add click handlers to items
-    content.querySelectorAll('.palette-item').forEach((element, index) => {
+    content.querySelectorAll('.palette-item').forEach((element) => {
+      const index = parseInt(element.dataset.index);
       element.addEventListener('click', () => {
         this.selectedIndex = index;
         this.selectItem();

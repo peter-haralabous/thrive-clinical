@@ -1077,8 +1077,8 @@
 
       // Show confirmation dialog with patient info
       function showConfirmationDialog(patient) {
-        const patientNameEl = confirmationDialog.querySelector('.selected-patient-name');
-        const patientDetailsEl = confirmationDialog.querySelector('.selected-patient-details');
+        const patientNameEl = document.getElementById('selectedPatientName');
+        const patientDetailsEl = document.getElementById('selectedPatientDetails');
 
         if (patientNameEl) {
           patientNameEl.textContent = patient.title;
@@ -1091,63 +1091,97 @@
         confirmationDialog.style.display = 'flex';
       }
 
-      // Patient data for command palette
-      const patients = [
+      // Patient data for command palette with sections
+      const patientSections = [
         {
-          id: '1',
-          title: 'H, Jane',
-          subtitle: 'DOB: 1976-03-17 • PHN: 9000 123 456',
-          icon: 'person',
-          dob: '1976-03-17',
-          phn: '9000 123 456',
+          title: 'In this clinic',
+          items: [
+            {
+              id: '1',
+              title: 'H, Jane',
+              subtitle: 'DOB: 2000-01-01 • PHN: 9000 123 456',
+              icon: 'person',
+              dob: '2000-01-01',
+              phn: '9000 123 456',
+            },
+            {
+              id: '2',
+              title: 'Smith, Ely',
+              subtitle: 'DOB: 1999-01-01 • PHN: 9876 543 210',
+              icon: 'person',
+              dob: '1999-01-01',
+              phn: '9876 543 210',
+            },
+            {
+              id: '3',
+              title: 'Johnson, Maria',
+              subtitle: 'DOB: 1985-06-15 • PHN: 5555 123 789',
+              icon: 'person',
+              dob: '1985-06-15',
+              phn: '5555 123 789',
+            },
+            {
+              id: '4',
+              title: 'Williams, Robert',
+              subtitle: 'DOB: 1978-03-22 • PHN: 4444 567 890',
+              icon: 'person',
+              dob: '1978-03-22',
+              phn: '4444 567 890',
+            },
+            {
+              id: '5',
+              title: 'Davis, Jennifer',
+              subtitle: 'DOB: 1992-11-08 • PHN: 3333 789 012',
+              icon: 'person',
+              dob: '1992-11-08',
+              phn: '3333 789 012',
+            },
+            {
+              id: '6',
+              title: 'Brown, Michael',
+              subtitle: 'DOB: 1970-09-30 • PHN: 2222 345 678',
+              icon: 'person',
+              dob: '1970-09-30',
+              phn: '2222 345 678',
+            },
+          ],
         },
         {
-          id: '2',
-          title: 'H, Peter',
-          subtitle: 'DOB: 1980-01-01 • PHN: 9000 000 000',
-          icon: 'person',
-          dob: '1980-01-01',
-          phn: '9000 000 000',
-        },
-        {
-          id: '3',
-          title: 'Smith, Ely',
-          subtitle: 'DOB: 1999-01-01 • PHN: 9876 543 210',
-          icon: 'person',
-          dob: '1999-01-01',
-          phn: '9876 543 210',
-        },
-        {
-          id: '4',
-          title: 'Johnson, Maria',
-          subtitle: 'DOB: 1985-06-15 • PHN: 5555 123 789',
-          icon: 'person',
-          dob: '1985-06-15',
-          phn: '5555 123 789',
-        },
-        {
-          id: '5',
-          title: 'Williams, Robert',
-          subtitle: 'DOB: 1978-03-22 • PHN: 4444 567 890',
-          icon: 'person',
-          dob: '1978-03-22',
-          phn: '4444 567 890',
-        },
-        {
-          id: '6',
-          title: 'Davis, Jennifer',
-          subtitle: 'DOB: 1992-11-08 • PHN: 3333 789 012',
-          icon: 'person',
-          dob: '1992-11-08',
-          phn: '3333 789 012',
-        },
-        {
-          id: '7',
-          title: 'Brown, Michael',
-          subtitle: 'DOB: 1970-09-30 • PHN: 2222 345 678',
-          icon: 'person',
-          dob: '1970-09-30',
-          phn: '2222 345 678',
+          title: 'Other Patients',
+          items: [
+            {
+              id: '7',
+              title: 'Anderson, Patricia',
+              subtitle: 'DOB: 1982-04-12 • PHN: 8888 111 222',
+              icon: 'person',
+              dob: '1982-04-12',
+              phn: '8888 111 222',
+            },
+            {
+              id: '8',
+              title: 'Thompson, James',
+              subtitle: 'DOB: 1995-08-25 • PHN: 7777 333 444',
+              icon: 'person',
+              dob: '1995-08-25',
+              phn: '7777 333 444',
+            },
+            {
+              id: '9',
+              title: 'Martinez, Carlos',
+              subtitle: 'DOB: 1988-11-30 • PHN: 6666 555 777',
+              icon: 'person',
+              dob: '1988-11-30',
+              phn: '6666 555 777',
+            },
+            {
+              id: '10',
+              title: 'Wilson, Sarah',
+              subtitle: 'DOB: 1991-02-18 • PHN: 5555 888 999',
+              icon: 'person',
+              dob: '1991-02-18',
+              phn: '5555 888 999',
+            },
+          ],
         },
       ];
 
@@ -1159,7 +1193,7 @@
           newEncounterBtn.addEventListener('click', () => {
             commandPalette.open({
               title: 'New Encounter - Select patient',
-              items: patients,
+              sections: patientSections,
               onSelect: (patient) => {
                 selectedPatient = patient;
                 commandPalette.close();
