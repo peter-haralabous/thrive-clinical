@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Summary Template - Thrive Clinical</title>
+    <script type="module" src="../shared/global-header.js"></script>
+    <link rel="stylesheet" href="../shared/styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@300;400;500;600;700"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+      main {
+        margin-left: 256px;
+        padding-top: 0px;
+        min-height: 100vh;
+        background: #f8f9fa;
+      }
+
+      .content-area {
+        max-width: 100%;
+        padding: 0;
+        height: calc(100vh - 64px);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .page-header {
+        padding: 24px 32px;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        flex-shrink: 0;
+      }
+
+      .page-title-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .page-title-section h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #0b1220;
+      }
+
+      .template-info {
+        display: flex;
+        gap: 24px;
+        align-items: center;
+      }
+
+      .info-field {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .info-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+      }
+
+      .info-input {
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 14px;
+        min-width: 200px;
+      }
+
+      .info-input:focus {
+        outline: none;
+        border-color: #0f172a;
+      }
+
+      .btn-secondary {
+        background: #ffffff;
+        color: #0f172a;
+        border: 1px solid #d1d5db;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+      }
+
+      .btn-secondary:hover {
+        background: #f9fafb;
+      }
+
+      .btn-primary {
+        background: #0f172a;
+        color: #ffffff;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        margin-left: 8px;
+      }
+
+      .btn-primary:hover {
+        background: #1e293b;
+      }
+
+      .editor-container {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+      }
+
+      .editor-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        background: #ffffff;
+        border-right: 1px solid #e5e7eb;
+      }
+
+      .editor-toolbar {
+        width: 56px;
+        background: #f9fafb;
+        border-right: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 0;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+
+      .toolbar-divider {
+        width: 32px;
+        height: 1px;
+        background: #e5e7eb;
+        margin: 8px 0;
+      }
+
+      .toolbar-btn {
+        width: 40px;
+        height: 40px;
+        background: transparent;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+
+      .toolbar-btn:hover {
+        background: #e5e7eb;
+        color: #0f172a;
+      }
+
+      .toolbar-btn .material-symbols-outlined {
+        font-size: 20px;
+      }
+
+      .toolbar-btn-text {
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .toolbar-btn-add {
+        position: relative;
+      }
+
+      .toolbar-btn-add.active {
+        background: #e5e7eb;
+        color: #0f172a;
+      }
+
+      .insert-dropdown {
+        position: absolute;
+        left: 56px;
+        top: 0;
+        width: 280px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        display: none;
+        z-index: 50;
+      }
+
+      .insert-dropdown.show {
+        display: block;
+      }
+
+      .dropdown-search {
+        padding: 12px;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .dropdown-search input {
+        width: 100%;
+        padding: 8px 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 6px;
+        font-size: 14px;
+        outline: none;
+      }
+
+      .dropdown-search input:focus {
+        border-color: #3b82f6;
+      }
+
+      .dropdown-section {
+        padding: 8px 0;
+      }
+
+      .dropdown-section:not(:last-child) {
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .dropdown-section-title {
+        padding: 8px 12px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .dropdown-item {
+        padding: 10px 12px;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .dropdown-item:hover {
+        background: #f3f4f6;
+      }
+
+      .dropdown-item-title {
+        font-size: 14px;
+        color: #1f2937;
+        font-weight: 500;
+      }
+
+      .dropdown-item-code {
+        font-size: 12px;
+        color: #6b7280;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      }
+
+      .editor-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .editor-header {
+        padding: 16px 24px;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .editor-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .editor-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        background: #ffffff;
+      }
+
+      .editor-textarea {
+        width: 100%;
+        min-height: 100%;
+        border: none;
+        outline: none;
+        font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+        font-size: 13px;
+        line-height: 1.6;
+        resize: none;
+        color: #1f2937;
+      }
+
+      .preview-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f9fafb;
+      }
+
+      .preview-header {
+        padding: 16px 24px;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-shrink: 0;
+      }
+
+      .preview-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #0f172a;
+      }
+
+      .preview-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+      }
+
+      .preview-document {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 32px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .preview-document h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 16px;
+        margin-top: 24px;
+      }
+
+      .preview-document h2:first-child {
+        margin-top: 0;
+      }
+
+      .preview-document h3 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 12px;
+        margin-top: 20px;
+      }
+
+      .preview-document p {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #4b5563;
+        margin-bottom: 12px;
+      }
+
+      .preview-document ul {
+        list-style: disc;
+        margin-left: 24px;
+        margin-bottom: 12px;
+      }
+
+      .preview-document li {
+        font-size: 14px;
+        line-height: 1.6;
+        color: #4b5563;
+        margin-bottom: 4px;
+      }
+
+      .preview-document strong {
+        font-weight: 600;
+        color: #1f2937;
+      }
+    </style>
+  </head>
+  <body>
+    <global-header home-url="../index.html" base-path=".."></global-header>
+
+    <aside
+      class="w-64 bg-white border-r border-gray-200 flex-shrink-0 fixed left-0 top-16 h-screen z-30 flex flex-col overflow-y-auto"
+    >
+      <div class="p-4">
+        <div class="mb-4 pb-3 border-b border-gray-200">
+          <p class="text-base font-semibold text-gray-900" id="sidebarOrgName">
+            Valley Health Clinic
+          </p>
+        </div>
+        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Settings</h2>
+        <nav class="space-y-1">
+          <a
+            href="./organization-settings.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">apartment</span>
+            Organization Profile
+          </a>
+          <a
+            href="./worklist-preferences.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">list</span>
+            Worklist Preferences
+          </a>
+          <a
+            href="./custom-fields.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">tune</span>
+            Custom Fields
+          </a>
+          <a
+            href="./form-templates.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">description</span>
+            Form Templates
+          </a>
+          <a
+            href="./summary-templates.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-900 text-white font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg">summarize</span>
+            Summary Templates
+          </a>
+          <a
+            href="./automations.html"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 font-medium text-sm"
+          >
+            <span class="material-symbols-outlined text-lg text-gray-600">automation</span>
+            Automations
+          </a>
+        </nav>
+      </div>
+    </aside>
+
+    <main>
+      <div class="content-area">
+        <!-- Page Header -->
+        <div class="page-header">
+          <div class="page-title-section">
+            <h1>Edit Template: Health History - Simple Summary</h1>
+            <div style="display: flex; gap: 8px">
+              <button
+                class="btn-secondary"
+                onclick="window.location.href = './summary-templates.html'"
+              >
+                Cancel
+              </button>
+              <button class="btn-secondary" style="color: #dc2626; border-color: #dc2626">
+                <span class="material-symbols-outlined" style="font-size: 18px">delete</span>
+                Delete
+              </button>
+              <button class="btn-primary">
+                <span class="material-symbols-outlined" style="font-size: 18px">save</span>
+                Save Template
+              </button>
+            </div>
+          </div>
+          <div class="template-info">
+            <div class="info-field">
+              <span class="info-label">Name:</span>
+              <input
+                type="text"
+                class="info-input"
+                value="Health History - Simple Summary"
+                placeholder="Template name"
+              />
+            </div>
+            <div class="info-field">
+              <span class="info-label">Form:</span>
+              <select class="info-input">
+                <option>Simple Health History</option>
+                <option>Intake Form</option>
+                <option>Follow-up Form</option>
+              </select>
+            </div>
+            <div class="info-field">
+              <span class="info-label">Description:</span>
+              <input
+                type="text"
+                class="info-input"
+                value="Concise health history summary for quick clinical review"
+                placeholder="Template description"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Editor Container -->
+        <div class="editor-container">
+          <!-- Editor Panel -->
+          <div class="editor-panel">
+            <div class="editor-toolbar">
+              <div class="toolbar-btn-add">
+                <button class="toolbar-btn" id="addBlockBtn" title="Insert Block">
+                  <span class="material-symbols-outlined">add</span>
+                </button>
+                <div class="insert-dropdown" id="insertDropdown">
+                  <div class="dropdown-search">
+                    <input type="text" placeholder="Search..." id="blockSearch" />
+                  </div>
+                  <div class="dropdown-section">
+                    <div class="dropdown-section-title">AI Blocks</div>
+                    <div
+                      class="dropdown-item"
+                      data-code='{%ai "Allergies" %}
+Summarize allergies. Include allergen, reaction type, and severity if available. If no allergies are reported, state "No known allergies (NKA)." If incomplete, explicitly note missing elements.
+{% endai %}'
+                    >
+                      <div class="dropdown-item-title">Allergies</div>
+                      <div class="dropdown-item-code">{% ai &quot;Allergies&quot; %}</div>
+                    </div>
+                    <div
+                      class="dropdown-item"
+                      data-code='{% ai "Active Conditions" %}
+Identify all current, ongoing medical conditions that are actively affecting the patients health today. Use precise clinical terminology (e.g., "Type 2 Diabetes Mellitus", "Chronic Kidney Disease Stage 3b") whenever possible. Include acute issues under evaluation (e.g., "Community-acquired pneumonia") and chronic conditions under management. If symptoms suggest a condition but are not confirmed, label as "(possible)". If no active conditions are documented, state: "No active medical conditions reported."
+{% endai %}'
+                    >
+                      <div class="dropdown-item-title">Active Conditions</div>
+                      <div class="dropdown-item-code">{% ai &quot;Active Conditions&quot; %}</div>
+                    </div>
+                    <div
+                      class="dropdown-item"
+                      data-code='{% ai "Custom AI Title" %}
+// AI instructions go here
+{% endai %}'
+                    >
+                      <div class="dropdown-item-title">Custom AI Block</div>
+                      <div class="dropdown-item-code">{% ai &quot;Custom AI Block&quot; %}</div>
+                    </div>
+                  </div>
+                  <div class="dropdown-section">
+                    <div class="dropdown-section-title">Patient form data</div>
+                    <div class="dropdown-item" data-code="{{ patient.full_name }}">
+                      <div class="dropdown-item-title">Full Name</div>
+                      <div class="dropdown-item-code">{{ patient.full_name }}</div>
+                    </div>
+                    <div class="dropdown-item" data-code="{{ patient.first_name }}">
+                      <div class="dropdown-item-title">First Name</div>
+                      <div class="dropdown-item-code">{{ patient.first_name }}</div>
+                    </div>
+                    <div class="dropdown-item" data-code="{{ patient.last_name }}">
+                      <div class="dropdown-item-title">Last Name</div>
+                      <div class="dropdown-item-code">{{ patient.last_name }}</div>
+                    </div>
+                    <div class="dropdown-item" data-code="{{ patient.date_of_birth }}">
+                      <div class="dropdown-item-title">Date of Birth</div>
+                      <div class="dropdown-item-code">{{ patient.date_of_birth }}</div>
+                    </div>
+                    <div class="dropdown-item" data-code="{{ patient.mrn }}">
+                      <div class="dropdown-item-title">Medical Record Number</div>
+                      <div class="dropdown-item-code">{{ patient.mrn }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="toolbar-divider"></div>
+              <button class="toolbar-btn" title="Undo">
+                <span class="material-symbols-outlined">undo</span>
+              </button>
+              <button class="toolbar-btn" title="Redo">
+                <span class="material-symbols-outlined">redo</span>
+              </button>
+              <div class="toolbar-divider"></div>
+              <button class="toolbar-btn" title="Bold">
+                <span class="material-symbols-outlined">format_bold</span>
+              </button>
+              <button class="toolbar-btn" title="Italic">
+                <span class="material-symbols-outlined">format_italic</span>
+              </button>
+              <div class="toolbar-divider"></div>
+              <button class="toolbar-btn" title="Heading 1">
+                <span class="toolbar-btn-text">H1</span>
+              </button>
+              <button class="toolbar-btn" title="Heading 2">
+                <span class="toolbar-btn-text">H2</span>
+              </button>
+              <button class="toolbar-btn" title="Heading 3">
+                <span class="toolbar-btn-text">H3</span>
+              </button>
+              <div class="toolbar-divider"></div>
+              <button class="toolbar-btn" title="Bulleted List">
+                <span class="material-symbols-outlined">format_list_bulleted</span>
+              </button>
+              <button class="toolbar-btn" title="Numbered List">
+                <span class="material-symbols-outlined">format_list_numbered</span>
+              </button>
+              <div class="toolbar-divider"></div>
+              <button class="toolbar-btn" title="Insert Link">
+                <span class="material-symbols-outlined">link</span>
+              </button>
+              <button class="toolbar-btn" title="Insert Variable">
+                <span class="material-symbols-outlined">code</span>
+              </button>
+            </div>
+            <div class="editor-wrapper">
+              <div class="editor-header">
+                <span class="editor-title">EDITOR</span>
+              </div>
+              <div class="editor-content">
+                <textarea class="editor-textarea" spellcheck="false">
+## Surgical History
+{% if submission.data.surgery %}
+• Notes any priority concerns requiring attention
+
+## Patient Information:
+• Lifestyle: {% if submission.data.smoker %}Smoker{% endif %} {% if submission.data.drinks_alcohol %}Alcohol use{% endif %}
+• Cardiac: {% if submission.data.high_blood_pressure %}HTN{% endif %} {% if submission.data.heart_disease %}Heart disease{% endif %}
+• Respiratory: {% if submission.data.asthma_copd %}Asthma/COPD{% endif %} {% if submission.data.sleep_apnea %}Sleep apnea{% endif %}
+• Other: {% if submission.data.diabetes %}Diabetes{% endif %} {% if submission.data.stroke %}CVA history{% endif %}
+• Medications: {{ submission.data.medications|default:"None listed" }}
+
+{% if submission and submission.data %}
+
+## Active Medical Conditions
+
+### Cardiovascular
+{% if submission.data.high_blood_pressure %}- High Blood Pressure{% endif %}{% if submission.data.heart_disease %}- Heart Disease{% endif %}
+{% if submission.data.blood_thinners %}- On Blood Thinners{% endif %}{% if not submission.data.high_blood_pressure and not submission.data.heart_disease and not submission.data.blood_thinners %}None reported{% endif %}
+
+### Respiratory
+{% if submission.data.asthma_copd %}- Asthma/COPD{% endif %}{% if submission.data.sleep_apnea %}- Sleep Apnea{% endif %}{% if not submission.data.asthma_copd and not submission.data.sleep_apnea %}None reported{% endif %}
+
+### Other Conditions
+{% if submission.data.diabetes %}- Diabetes{% endif %}{% if submission.data.kidney_problems %}- Kidney Problems{% endif %}{% if submission.data.stroke %}- History of Stroke/TIA{% endif %}{% if submission.data.seizures %}- Seizures/Epilepsy{% endif %}{% if submission.data.bleeding_disorder %}- Bleeding/Clotting Disorder{% endif %}{% if not submission.data.diabetes and not submission.data.kidney_problems and not submission.data.stroke and not submission.data.seizures and not submission.data.bleeding_disorder %}None reported{% endif %}
+
+## Lifestyle Factors
+• Smoking: {% if submission.data.smoker %}Yes{% else %}No{% endif %}
+• Alcohol: {% if submission.data.drinks_alcohol %}Yes{% else %}No{% endif %}
+
+## Anesthesia History
+Previous Anesthetic Issues: {% if submission.data.anesthesia_issues %}Yes{% else %}No{% endif %} Details: {{ submission.data.anesthesia_details|default:"None provided" }}
+
+## Current Medications
+{{ submission.data.medications|default:"No medications listed" }}
+
+## Allergies
+{{ submission.data.allergies|default:"No known allergies" }}
+
+{% endif %}</textarea
+                >
+              </div>
+            </div>
+          </div>
+
+          <!-- Preview Panel -->
+          <div class="preview-panel">
+            <div class="preview-header">
+              <span class="preview-title">
+                <span
+                  class="material-symbols-outlined"
+                  style="font-size: 20px; vertical-align: middle"
+                >
+                  visibility
+                </span>
+                PREVIEW
+              </span>
+            </div>
+            <div class="preview-content">
+              <div class="preview-document">
+                <h2>Surgical History</h2>
+                <p>• Notes any priority concerns requiring attention</p>
+
+                <h2>Patient Information:</h2>
+                <ul>
+                  <li>
+                    <strong>Lifestyle:</strong>
+                    Smoker Alcohol use
+                  </li>
+                  <li>
+                    <strong>Cardiac:</strong>
+                    HTN Heart disease
+                  </li>
+                  <li>
+                    <strong>Respiratory:</strong>
+                    Asthma/COPD Sleep apnea
+                  </li>
+                  <li>
+                    <strong>Other:</strong>
+                    Diabetes CVA history
+                  </li>
+                  <li>
+                    <strong>Medications:</strong>
+                    None listed
+                  </li>
+                </ul>
+
+                <h2>Active Medical Conditions</h2>
+
+                <h3>Cardiovascular</h3>
+                <ul>
+                  <li>High Blood Pressure</li>
+                  <li>Heart Disease</li>
+                  <li>On Blood Thinners</li>
+                </ul>
+
+                <h3>Respiratory</h3>
+                <ul>
+                  <li>Asthma/COPD</li>
+                  <li>Sleep Apnea</li>
+                </ul>
+
+                <h3>Other Conditions</h3>
+                <ul>
+                  <li>Diabetes</li>
+                  <li>Kidney Problems</li>
+                  <li>History of Stroke/TIA</li>
+                  <li>Seizures/Epilepsy</li>
+                  <li>Bleeding/Clotting Disorder</li>
+                </ul>
+
+                <h2>Lifestyle Factors</h2>
+                <ul>
+                  <li>
+                    <strong>Smoking:</strong>
+                    Yes
+                  </li>
+                  <li>
+                    <strong>Alcohol:</strong>
+                    Regular use
+                  </li>
+                </ul>
+
+                <h2>Anesthesia History</h2>
+                <p>
+                  <strong>Previous Anesthetic Issues:</strong>
+                  Yes
+                  <strong>Details:</strong>
+                  Sample text
+                </p>
+
+                <h2>Current Medications</h2>
+                <p>This is a sample comment with more detailed information.</p>
+
+                <h2>Allergies</h2>
+                <p>
+                  <strong>Sample text:</strong>
+                  Sample text
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script>
+      // Dropdown functionality
+      const addBlockBtn = document.getElementById('addBlockBtn');
+      const insertDropdown = document.getElementById('insertDropdown');
+      const blockSearch = document.getElementById('blockSearch');
+      const editorTextarea = document.querySelector('.editor-textarea');
+
+      // Toggle dropdown
+      addBlockBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        insertDropdown.classList.toggle('show');
+        addBlockBtn.classList.toggle('active');
+        if (insertDropdown.classList.contains('show')) {
+          blockSearch.focus();
+        }
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!insertDropdown.contains(e.target) && !addBlockBtn.contains(e.target)) {
+          insertDropdown.classList.remove('show');
+          addBlockBtn.classList.remove('active');
+        }
+      });
+
+      // Insert block on item click
+      document.querySelectorAll('.dropdown-item').forEach((item) => {
+        item.addEventListener('click', () => {
+          const code = item.getAttribute('data-code');
+          const textarea = editorTextarea;
+          const start = textarea.selectionStart;
+          const end = textarea.selectionEnd;
+          const text = textarea.value;
+
+          // Insert the code at cursor position
+          textarea.value = text.substring(0, start) + code + text.substring(end);
+
+          // Set cursor position after inserted text
+          textarea.selectionStart = textarea.selectionEnd = start + code.length;
+          textarea.focus();
+
+          // Close dropdown
+          insertDropdown.classList.remove('show');
+          addBlockBtn.classList.remove('active');
+        });
+      });
+
+      // Search functionality
+      blockSearch.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        document.querySelectorAll('.dropdown-item').forEach((item) => {
+          const title = item.querySelector('.dropdown-item-title').textContent.toLowerCase();
+          const code = item.querySelector('.dropdown-item-code').textContent.toLowerCase();
+          if (title.includes(searchTerm) || code.includes(searchTerm)) {
+            item.style.display = 'flex';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+
+      // Prevent dropdown close when clicking search input
+      blockSearch.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    </script>
+  </body>
+</html>
