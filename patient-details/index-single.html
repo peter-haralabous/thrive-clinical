@@ -1160,7 +1160,7 @@
               <ul class="space-y-1">
                 <li>
                   <button
-                    onclick="toggleTab('document-lab')"
+                    onclick="openLabResultsModal()"
                     class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
                   >
                     <div class="flex items-center gap-3">
@@ -1185,6 +1185,66 @@
       <!-- Tab Content Area -->
       <div id="tab-content-area" class="tab-content-area">
         <!-- Tab panes will be dynamically added here -->
+      </div>
+
+      <!-- Lab Results Modal -->
+      <div
+        id="lab-results-modal"
+        class="hidden fixed inset-0 z-50 overflow-y-auto"
+        aria-labelledby="modal-title"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div
+          class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0"
+        >
+          <!-- Background overlay -->
+          <div
+            onclick="closeLabResultsModal()"
+            class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+            aria-hidden="true"
+          ></div>
+
+          <!-- Center modal -->
+          <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
+            &#8203;
+          </span>
+
+          <!-- Modal panel -->
+          <div
+            class="inline-block align-bottom bg-white dark:bg-card-dark rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full"
+          >
+            <!-- Header -->
+            <div
+              class="bg-white dark:bg-card-dark px-6 py-4 border-b border-gray-200 dark:border-gray-700"
+            >
+              <div class="flex items-center justify-between">
+                <h3
+                  class="text-xl font-semibold text-text-dark-gray dark:text-white"
+                  id="modal-title"
+                >
+                  Lab Results
+                </h3>
+                <button
+                  onclick="closeLabResultsModal()"
+                  class="text-gray-400 hover:text-gray-500 focus:outline-none"
+                >
+                  <span class="material-symbols-outlined text-2xl">close</span>
+                </button>
+              </div>
+            </div>
+            <!-- Content -->
+            <div
+              class="bg-white dark:bg-card-dark px-6 py-4 max-h-[calc(100vh-200px)] overflow-y-auto"
+            >
+              <img
+                src="../images/results-sample.png"
+                alt="Lab Results Table"
+                class="w-full h-auto"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </main>
     <script
@@ -2412,6 +2472,25 @@
       }
 
       function generateDocumentContent(name) {
+        if (name === 'Lab Results') {
+          return `
+            <div class="space-y-4">
+              <!-- Breadcrumb -->
+              <nav class="flex items-center gap-2 text-sm mb-2">
+                <a href="#" onclick="toggleTab('overview'); return false;" class="text-blue-600 hover:text-blue-800 hover:underline">Overview</a>
+                <span class="text-text-light-gray">/</span>
+              </nav>
+              <div class="bg-white dark:bg-card-dark rounded-lg shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                  <h1 class="text-2xl font-bold text-text-dark-gray dark:text-white">${name}</h1>
+                </div>
+                <div class="p-4">
+                  <img src="../images/results-sample.png" alt="Lab Results Table" class="w-full h-auto" />
+                </div>
+              </div>
+            </div>
+          `;
+        }
         return `
           <div class="space-y-4">
             <div class="p-4 bg-white dark:bg-card-dark rounded-lg shadow-sm">
@@ -2437,6 +2516,24 @@
           .forEach((dir) => dir.classList.add('hidden'));
         document.getElementById('root-menu').classList.remove('hidden');
       }
+
+      // Lab Results Modal functions
+      function openLabResultsModal() {
+        document.getElementById('lab-results-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLabResultsModal() {
+        document.getElementById('lab-results-modal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      }
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          closeLabResultsModal();
+        }
+      });
 
       // Initialize with Overview content
       document.addEventListener('DOMContentLoaded', function () {
