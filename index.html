@@ -741,7 +741,7 @@
               transition: background 0.2s;
             "
           >
-            No, view patient
+            No, go back
           </button>
           <button
             id="createEncounterBtn"
@@ -1255,9 +1255,17 @@
         if (viewPatientBtn) {
           viewPatientBtn.addEventListener('click', () => {
             confirmationDialog.style.display = 'none';
-            // Navigate to patient details page
-            if (selectedPatient) {
-              window.location.href = './patient-details/index.html';
+            // Go back to command palette with default list
+            if (commandPalette) {
+              commandPalette.open({
+                title: 'New Encounter - Select patient',
+                sections: patientSections,
+                onSelect: (patient) => {
+                  selectedPatient = patient;
+                  commandPalette.close();
+                  showConfirmationDialog(patient);
+                },
+              });
             }
           });
         }
