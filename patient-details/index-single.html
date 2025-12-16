@@ -2255,7 +2255,23 @@
                 <a href="#" onclick="toggleTab('overview'); return false;" class="text-blue-600 hover:text-blue-800 hover:underline">Overview</a>
                 <span class="text-text-light-gray">/</span>
               </nav>
-              <h1 class="text-2xl font-bold text-text-dark-gray dark:text-white mb-4">Summary: ${name}</h1>
+              <div class="flex items-center justify-between gap-4 mb-4 flex-wrap">
+                <h1 class="text-2xl font-bold text-text-dark-gray dark:text-white">Summary: ${name}</h1>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <button class="px-3 py-1.5 text-base font-medium text-text-dark-gray dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-lg">content_copy</span>
+                    Copy
+                  </button>
+                  <button class="px-3 py-1.5 text-base font-medium text-text-dark-gray dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-lg">print</span>
+                    Print
+                  </button>
+                  <button class="px-3 py-1.5 text-base font-medium text-text-dark-gray dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5">
+                    <span class="material-symbols-outlined text-lg">refresh</span>
+                    Regenerate
+                  </button>
+                </div>
+              </div>
               <div class="p-6 bg-white dark:bg-card-dark rounded-lg border border-gray-300 dark:border-gray-700">
 
                 <div class="space-y-6 text-base text-text-dark-gray dark:text-white">
