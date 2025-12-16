@@ -81,6 +81,7 @@ class EncounterHeader extends HTMLElement {
 
         .send-form-btn {
           display: flex;
+          flex-shrink:0;
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
