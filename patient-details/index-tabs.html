@@ -44,6 +44,11 @@
     </script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
+    <script>
+      // Get today's date in YYYY-MM-DD format for active encounters
+      const todayFormatted = new Date().toISOString().split('T')[0];
+    </script>
+
     <style>
       .material-symbols-outlined {
         font-variation-settings:
@@ -983,7 +988,11 @@
                   >
                     <div class="flex items-center gap-3">
                       <span class="material-symbols-outlined text-xl">calendar_month</span>
-                      <span class="sidebar-title">Encounter · 2025-11-21</span>
+                      <span class="sidebar-title" id="sidebar-encounter-1-title">Encounter ·</span>
+                      <script>
+                        document.getElementById('sidebar-encounter-1-title').textContent =
+                          'Encounter · ' + todayFormatted;
+                      </script>
                     </div>
                   </button>
                 </li>
@@ -1145,9 +1154,9 @@
           content: generateOverviewContent(),
         },
         'encounter-1': {
-          title: 'Encounter · 2025-11-21',
+          title: 'Encounter · ' + todayFormatted,
           icon: 'calendar_month',
-          content: generateEncounterContent('2025-11-21'),
+          content: generateEncounterContent(todayFormatted),
         },
         'encounter-2': {
           title: 'Encounter · 2025-11-14',
@@ -1516,7 +1525,7 @@
 
       function generateEncounterContent(date) {
         const isEncounter1 = date === '2025-11-14';
-        const isActive = date === '2025-11-21';
+        const isActive = date === todayFormatted;
         const statusVariant = isActive ? 'active' : 'archived';
         const statusValue = isActive ? 'Active' : 'Archived';
         return `
@@ -1630,7 +1639,7 @@
                       <td class="px-4 py-3">
                         <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Completed</span>
                       </td>
-                      <td class="px-4 py-3 text-text-light-gray">2025-11-21</td>
+                      <td class="px-4 py-3 text-text-light-gray">${date}</td>
                     </tr>
                     ${
                       isEncounter1

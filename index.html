@@ -354,8 +354,16 @@
                 <td>
                   <status-chip variant="neutral" value="Consult" editable="true"></status-chip>
                 </td>
-                <td style="white-space: nowrap">2025-11-21</td>
-                <td style="white-space: nowrap">2025-11-21</td>
+                <td style="white-space: nowrap">
+                  <script>
+                    document.write(todayFormatted);
+                  </script>
+                </td>
+                <td style="white-space: nowrap">
+                  <script>
+                    document.write(todayFormatted);
+                  </script>
+                </td>
                 <td class="row-actions">
                   <div class="action-menu-wrapper">
                     <button class="action-menu-btn" data-patient-name="H, Jane">
@@ -751,6 +759,10 @@
     </div>
 
     <script>
+      // Get today's date in YYYY-MM-DD format for active encounters
+      const today = new Date();
+      const todayFormatted = today.toISOString().split('T')[0];
+
       // Sample encounter data for the first 3 patients
       const encountersData = {
         'H, Jane': {
@@ -765,21 +777,21 @@
           readyForReview: 'Not ready',
           appointmentDate: '2025-12-15',
           appointmentType: 'Consult',
-          created: '2025-11-21 12:11',
-          updated: '2025-11-21 12:11',
+          created: todayFormatted + ' 12:11',
+          updated: todayFormatted + ' 12:11',
           summaries: [
             {
               id: 'summary-intake',
               name: 'Summary: Patient Intake Form',
               type: 'Form Summary',
-              date: '2025-11-21',
+              date: todayFormatted,
             },
           ],
           forms: [
             {
               name: 'Form "Intake Form"',
               status: 'Completed',
-              date: '2025-11-21',
+              date: todayFormatted,
             },
           ],
           notes: [
@@ -787,21 +799,21 @@
               author: 'Dr. Smith',
               visibility: 'Private',
               text: 'Patient reports improvement in symptoms. Continue current treatment plan. Follow-up recommended in 2 weeks.',
-              time: '2025-11-21 15:45',
+              time: todayFormatted + ' 15:45',
               avatarColor: 'blue',
             },
             {
               author: 'Maria Johnson (Patient)',
               visibility: 'Public',
               text: "I forgot to mention during my visit that I've also been experiencing occasional headaches in the morning. They usually go away after breakfast.",
-              time: '2025-11-21 14:30',
+              time: todayFormatted + ' 14:30',
               avatarColor: 'purple',
             },
             {
               author: 'Dr. Smith',
               visibility: 'Public',
               text: 'Appointment scheduled for comprehensive exam. Please arrive 15 minutes early to complete intake paperwork.',
-              time: '2025-11-21 09:20',
+              time: todayFormatted + ' 09:20',
               avatarColor: 'blue',
             },
           ],
@@ -809,21 +821,21 @@
             {
               title: 'Form completed',
               description: 'Intake Form submitted by patient',
-              time: '2025-11-21 14:30',
+              time: todayFormatted + ' 14:30',
               icon: 'check_circle',
               iconColor: 'blue',
             },
             {
               title: 'Form sent',
               description: 'Intake Form sent to patient by Dr. Smith',
-              time: '2025-11-21 09:15',
+              time: todayFormatted + ' 09:15',
               icon: 'send',
               iconColor: 'purple',
             },
             {
               title: 'Encounter created',
               description: 'Created by Dr. Smith',
-              time: '2025-11-21 09:00',
+              time: todayFormatted + ' 09:00',
               icon: 'add_circle',
               iconColor: 'green',
             },
@@ -841,21 +853,21 @@
           readyForReview: 'Not ready',
           appointmentDate: '2025-12-18',
           appointmentType: 'Follow-up',
-          created: '2025-11-21 12:11',
-          updated: '2025-11-21 12:11',
+          created: todayFormatted + ' 12:11',
+          updated: todayFormatted + ' 12:11',
           summaries: [
             {
               id: 'summary-intake',
               name: 'Summary: Patient Intake Form',
               type: 'Form Summary',
-              date: '2025-11-21',
+              date: todayFormatted,
             },
           ],
           forms: [
             {
               name: 'Form "Intake Form"',
               status: 'Completed',
-              date: '2025-11-21',
+              date: todayFormatted,
             },
           ],
           notes: [
@@ -863,21 +875,21 @@
               author: 'Dr. Smith',
               visibility: 'Private',
               text: 'Patient reports improvement in symptoms. Continue current treatment plan. Follow-up recommended in 2 weeks.',
-              time: '2025-11-21 15:45',
+              time: todayFormatted + ' 15:45',
               avatarColor: 'blue',
             },
             {
               author: 'Maria Johnson (Patient)',
               visibility: 'Public',
               text: "I forgot to mention during my visit that I've also been experiencing occasional headaches in the morning. They usually go away after breakfast.",
-              time: '2025-11-21 14:30',
+              time: todayFormatted + ' 14:30',
               avatarColor: 'purple',
             },
             {
               author: 'Dr. Smith',
               visibility: 'Public',
               text: 'Appointment scheduled for comprehensive exam. Please arrive 15 minutes early to complete intake paperwork.',
-              time: '2025-11-21 09:20',
+              time: todayFormatted + ' 09:20',
               avatarColor: 'blue',
             },
           ],
@@ -885,21 +897,21 @@
             {
               title: 'Form completed',
               description: 'Intake Form submitted by patient',
-              time: '2025-11-21 14:30',
+              time: todayFormatted + ' 14:30',
               icon: 'check_circle',
               iconColor: 'blue',
             },
             {
               title: 'Form sent',
               description: 'Intake Form sent to patient by Dr. Smith',
-              time: '2025-11-21 09:15',
+              time: todayFormatted + ' 09:15',
               icon: 'send',
               iconColor: 'purple',
             },
             {
               title: 'Encounter created',
               description: 'Created by Dr. Smith',
-              time: '2025-11-21 09:00',
+              time: todayFormatted + ' 09:00',
               icon: 'add_circle',
               iconColor: 'green',
             },

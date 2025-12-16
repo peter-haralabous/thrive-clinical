@@ -44,6 +44,11 @@
     </script>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
+    <script>
+      // Get today's date in YYYY-MM-DD format for active encounters
+      const todayFormatted = new Date().toISOString().split('T')[0];
+    </script>
+
     <style>
       .material-symbols-outlined {
         font-variation-settings:
@@ -986,7 +991,11 @@
                   >
                     <div class="flex items-center gap-3">
                       <span class="material-symbols-outlined text-xl">calendar_month</span>
-                      <span class="sidebar-title">Encounter · 2025-11-21</span>
+                      <span class="sidebar-title" id="sidebar-encounter-1-title">Encounter ·</span>
+                      <script>
+                        document.getElementById('sidebar-encounter-1-title').textContent =
+                          'Encounter · ' + todayFormatted;
+                      </script>
                     </div>
                   </button>
                 </li>
@@ -1569,7 +1578,12 @@
                       >
                         Follow-up Visit
                       </a>
-                      <span class="text-text-light-gray ml-2">- 2025-11-21</span>
+                      <span class="text-text-light-gray ml-2">
+                        -
+                        <script>
+                          document.write(todayFormatted);
+                        </script>
+                      </span>
                     </div>
                   </li>
                   <li class="flex items-start gap-2">
@@ -2834,7 +2848,10 @@
               >
                 <div class="flex items-center justify-between w-full">
                   <h1 class="text-xl font-bold text-text-dark-gray dark:text-neutral-bg truncate">
-                    Encounter · 2025-11-21
+                    Encounter ·
+                    <script>
+                      document.write(todayFormatted);
+                    </script>
                   </h1>
                   <div class="flex items-center gap-1 flex-shrink-0">
                     <button
@@ -2874,7 +2891,25 @@
             </div>
             <div class="tab-overflow p-4 pt-20 space-y-4">
               <!-- Encounter Header -->
-              <encounter-header date="2025-11-21" patient-name="H, Jane"></encounter-header>
+              <encounter-header id="encounter-header-1" patient-name="H, Jane"></encounter-header>
+              <script>
+                document.getElementById('encounter-header-1').setAttribute('date', todayFormatted);
+                // Update all remaining hardcoded dates within encounter-1
+                const encounter1Tab = document.getElementById('tab-encounter-1');
+                if (encounter1Tab) {
+                  const walker = document.createTreeWalker(
+                    encounter1Tab,
+                    NodeFilter.SHOW_TEXT,
+                    null
+                  );
+                  let node;
+                  while ((node = walker.nextNode())) {
+                    if (node.nodeValue && node.nodeValue.includes('2025-11-21')) {
+                      node.nodeValue = node.nodeValue.replace(/2025-11-21/g, todayFormatted);
+                    }
+                  }
+                }
+              </script>
 
               <!-- Encounter Details -->
               <div
@@ -2890,13 +2925,19 @@
                   <div>
                     <span class="text-gray-600 block mb-2 font-semibold">Created</span>
                     <span class="text-text-dark-gray dark:text-white font-medium">
-                      2025-11-21 12:11
+                      <script>
+                        document.write(todayFormatted);
+                      </script>
+                      12:11
                     </span>
                   </div>
                   <div>
                     <span class="text-gray-600 block mb-2 font-semibold">Updated</span>
                     <span class="text-text-dark-gray dark:text-white font-medium">
-                      2025-11-21 12:11
+                      <script>
+                        document.write(todayFormatted);
+                      </script>
+                      12:11
                     </span>
                   </div>
 
@@ -2974,7 +3015,11 @@
                           </div>
                         </td>
                         <td class="px-4 py-3 text-text-dark-gray dark:text-white">Form Summary</td>
-                        <td class="px-4 py-3 text-text-light-gray">2025-11-21</td>
+                        <td class="px-4 py-3 text-text-light-gray">
+                          <script>
+                            document.write(todayFormatted);
+                          </script>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -3033,7 +3078,11 @@
                             Completed
                           </span>
                         </td>
-                        <td class="px-4 py-3 text-text-light-gray">2025-11-21</td>
+                        <td class="px-4 py-3 text-text-light-gray">
+                          <script>
+                            document.write(todayFormatted);
+                          </script>
+                        </td>
                       </tr>
                     </tbody>
                   </table>
@@ -3172,7 +3221,12 @@
                       <p class="text-xs text-text-light-gray mt-1">
                         Intake Form submitted by patient
                       </p>
-                      <p class="text-xs text-text-light-gray mt-1">2025-11-21 14:30</p>
+                      <p class="text-xs text-text-light-gray mt-1">
+                        <script>
+                          document.write(todayFormatted);
+                        </script>
+                        14:30
+                      </p>
                     </div>
                   </div>
                   <div
@@ -3194,7 +3248,12 @@
                       <p class="text-xs text-text-light-gray mt-1">
                         Intake Form sent to patient by Dr. Smith
                       </p>
-                      <p class="text-xs text-text-light-gray mt-1">2025-11-21 09:15</p>
+                      <p class="text-xs text-text-light-gray mt-1">
+                        <script>
+                          document.write(todayFormatted);
+                        </script>
+                        09:15
+                      </p>
                     </div>
                   </div>
                   <div class="flex gap-3">
@@ -3212,7 +3271,12 @@
                         Encounter created
                       </p>
                       <p class="text-xs text-text-light-gray mt-1">Created by Dr. Smith</p>
-                      <p class="text-xs text-text-light-gray mt-1">2025-11-21 09:00</p>
+                      <p class="text-xs text-text-light-gray mt-1">
+                        <script>
+                          document.write(todayFormatted);
+                        </script>
+                        09:00
+                      </p>
                     </div>
                   </div>
                 </div>
