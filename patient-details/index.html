@@ -623,7 +623,7 @@
                     <div class="flex items-center justify-between">
                       <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-xl">science</span>
-                        <span class="sidebar-title">Lab Results</span>
+                        <span class="sidebar-title">Labs - 2025-12-01</span>
                       </div>
                       <span class="material-symbols-outlined text-xl sidebar-title">
                         chevron_right
@@ -969,7 +969,7 @@
                 </li>
               </ul>
             </nav>
-            <!-- Lab Results Directory -->
+            <!-- Labs - 2025-12-01 Directory -->
             <nav id="lab-results-directory" class="hidden">
               <button
                 onclick="showDirectory('health-records')"
@@ -983,7 +983,7 @@
               <div
                 class="mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
               >
-                Lab Results
+                Labs - 2025-12-01
               </div>
               <ul class="space-y-1">
                 <li>
@@ -1165,7 +1165,7 @@
                         <circle cx="9" cy="9" r="2" />
                         <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                       </svg>
-                      <span class="sidebar-title">Lab Results</span>
+                      <span class="sidebar-title">Labs - 2025-12-01</span>
                     </div>
                   </button>
                 </li>
@@ -4861,7 +4861,7 @@
           </div>
         </div>
 
-        <!-- Document: Lab Results Tab -->
+        <!-- Document: Labs - 2025-12-01 Tab -->
         <div
           id="tab-document-lab"
           class="vertical-tab collapsed bg-card-light dark:bg-card-dark border-r border-gray-200 dark:border-gray-700 hidden flex flex-col"
@@ -4886,7 +4886,7 @@
               close
             </span>
             <span class="tab-label text-sm font-semibold text-text-dark-gray dark:text-neutral-bg">
-              Lab Results
+              Labs - 2025-12-01
             </span>
           </button>
           <div class="tab-content">
@@ -4896,7 +4896,7 @@
               >
                 <div class="flex items-center justify-between w-full">
                   <h1 class="text-xl font-bold text-text-dark-gray dark:text-neutral-bg truncate">
-                    Lab Results
+                    Labs - 2025-12-01
                   </h1>
                   <div class="flex items-center gap-1 flex-shrink-0">
                     <button
@@ -4936,16 +4936,12 @@
             </div>
             <div class="tab-overflow p-4 pt-20">
               <div class="bg-white dark:bg-card-dark rounded-lg shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 class="text-xl font-semibold text-text-dark-gray dark:text-white">
-                    Lab Results
-                  </h2>
-                </div>
                 <div class="p-4">
                   <img
                     src="../images/results-sample.png"
-                    alt="Lab Results Table"
-                    class="w-full h-auto"
+                    alt="Labs - 2025-12-01 Table"
+                    class="w-full h-auto cursor-pointer"
+                    onclick="openImageModal(this.src)"
                   />
                 </div>
               </div>
@@ -5281,9 +5277,111 @@
           patientMenuDropdown.classList.add('hidden');
         }
       });
+
+      // Image modal functions
+      function openImageModal(imageSrc) {
+        const modal = document.getElementById('imageModal');
+        const modalImage = document.getElementById('modalImage');
+        modalImage.src = imageSrc;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeImageModal(event) {
+        // Close if clicking on overlay or close button
+        if (event.target.id === 'imageModal' || event.target.closest('button')) {
+          const modal = document.getElementById('imageModal');
+          modal.classList.remove('active');
+          document.body.style.overflow = '';
+        }
+      }
+
+      // Close modal with ESC key
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          const modal = document.getElementById('imageModal');
+          if (modal.classList.contains('active')) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        }
+      });
     </script>
 
     <!-- Send Form Modal -->
     <send-form-modal id="sendFormModal"></send-form-modal>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="modal-overlay" onclick="closeImageModal(event)">
+      <div class="modal image-modal">
+        <div class="modal-header">
+          <h2 class="text-xl font-semibold">Labs - 2025-12-01</h2>
+          <button onclick="closeImageModal(event)" class="text-gray-500 hover:text-gray-700">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <img id="modalImage" src="" alt="Labs - 2025-12-01" class="w-full h-auto" />
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal.image-modal {
+        background: white;
+        border-radius: 12px;
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        max-width: 90vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e5e7eb;
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        overflow: auto;
+        flex: 1;
+      }
+
+      .modal-body img {
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
   </body>
 </html>
