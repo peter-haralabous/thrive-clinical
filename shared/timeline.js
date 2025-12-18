@@ -17,11 +17,19 @@ class PatientTimeline extends HTMLElement {
 
   showModal(item) {
     const modal = this.shadowRoot.querySelector('.timeline-modal');
+    const modalContent = modal.querySelector('.modal-content');
     const modalTitle = this.shadowRoot.querySelector('.modal-title');
     const modalBody = this.shadowRoot.querySelector('.modal-body');
 
     // Set modal title
     modalTitle.textContent = item.title || item.content;
+
+    // Check if this item has an image (large modal for lab results)
+    if (item.hasImage) {
+      modalContent.classList.add('large-modal');
+    } else {
+      modalContent.classList.remove('large-modal');
+    }
 
     // Build modal content
     let content = '';
@@ -42,6 +50,15 @@ class PatientTimeline extends HTMLElement {
         `;
       });
       content += '</div>';
+    }
+
+    // Add image if present
+    if (item.hasImage && item.imagePath) {
+      content += `
+        <div class="modal-image">
+          <img src="${item.imagePath}" alt="${item.title}" />
+        </div>
+      `;
     }
 
     modalBody.innerHTML = content || '<p>No additional details available.</p>';
@@ -120,6 +137,17 @@ class PatientTimeline extends HTMLElement {
         end: todayStr,
         type: 'range',
         className: 'condition',
+        title: 'Chronic Low Back Pain',
+        description:
+          'Patient reports chronic lower back pain, primarily in the lumbar region. Pain is worse with prolonged sitting or standing.',
+        details: {
+          icd10: 'M54.5',
+          status: 'Active',
+          onsetDate: '2023-03-15',
+          severity: 'Moderate',
+          notes:
+            'Patient manages pain with physical therapy and occasional NSAIDs. Has been referred to orthopedics.',
+        },
       },
       {
         id: 5,
@@ -128,6 +156,16 @@ class PatientTimeline extends HTMLElement {
         end: todayStr,
         type: 'range',
         className: 'condition',
+        title: 'Fibrocystic Breast Disease',
+        description:
+          'Benign condition characterized by lumpy, tender breasts. Symptoms typically fluctuate with menstrual cycle.',
+        details: {
+          icd10: 'N60.1',
+          status: 'Active',
+          onsetDate: '2022-08-10',
+          notes:
+            'Patient experiences cyclical breast tenderness. Regular mammography screening recommended.',
+        },
       },
       {
         id: 6,
@@ -136,6 +174,16 @@ class PatientTimeline extends HTMLElement {
         end: todayStr,
         type: 'range',
         className: 'condition',
+        title: 'Recurrent Dizziness',
+        description:
+          'Patient reports episodes of dizziness and light-headedness, particularly when standing quickly.',
+        details: {
+          icd10: 'R42',
+          status: 'Active',
+          onsetDate: '2024-02-20',
+          notes:
+            'Possible orthostatic hypotension. Patient advised to rise slowly and maintain adequate hydration.',
+        },
       },
       {
         id: 7,
@@ -178,6 +226,19 @@ class PatientTimeline extends HTMLElement {
         end: todayStr,
         type: 'range',
         className: 'medication',
+        title: 'Warfarin 5mg',
+        description:
+          'Anticoagulant medication prescribed for atrial fibrillation to prevent blood clots and reduce stroke risk.',
+        details: {
+          status: 'Active',
+          dosage: '5mg daily',
+          frequency: 'Once daily in the evening',
+          prescribedBy: 'Dr. Sarah Johnson',
+          startDate: '2023-01-10',
+          indication: 'Atrial fibrillation',
+          notes:
+            'Patient requires regular INR monitoring. Target INR 2.0-3.0. Avoid foods high in Vitamin K. Last INR check was within therapeutic range.',
+        },
       },
       {
         id: 12,
@@ -186,6 +247,19 @@ class PatientTimeline extends HTMLElement {
         end: todayStr,
         type: 'range',
         className: 'medication',
+        title: 'Metformin 500mg',
+        description:
+          'First-line medication for type 2 diabetes management. Helps control blood sugar levels by improving insulin sensitivity.',
+        details: {
+          status: 'Active',
+          dosage: '500mg',
+          frequency: 'Twice daily with meals',
+          prescribedBy: 'Dr. Sarah Johnson',
+          startDate: '2022-11-15',
+          indication: 'Type 2 Diabetes Mellitus',
+          notes:
+            'Patient tolerating well. Take with food to minimize GI side effects. HbA1c has improved since starting medication.',
+        },
       },
       {
         id: 13,
@@ -194,6 +268,19 @@ class PatientTimeline extends HTMLElement {
         end: todayStr,
         type: 'range',
         className: 'medication',
+        title: 'Lisinopril 10mg',
+        description:
+          'ACE inhibitor used to treat high blood pressure and protect kidney function in diabetic patients.',
+        details: {
+          status: 'Active',
+          dosage: '10mg',
+          frequency: 'Once daily in the morning',
+          prescribedBy: 'Dr. Sarah Johnson',
+          startDate: '2023-04-20',
+          indication: 'Hypertension, Diabetic nephropathy prevention',
+          notes:
+            'Blood pressure well controlled on current dose. Patient advised to monitor for persistent dry cough. Renal function stable.',
+        },
       },
       {
         id: 14,
@@ -202,6 +289,19 @@ class PatientTimeline extends HTMLElement {
         end: todayStr,
         type: 'range',
         className: 'medication',
+        title: 'Atorvastatin 20mg',
+        description:
+          'Statin medication to lower cholesterol and reduce cardiovascular disease risk.',
+        details: {
+          status: 'Active',
+          dosage: '20mg',
+          frequency: 'Once daily at bedtime',
+          prescribedBy: 'Dr. Sarah Johnson',
+          startDate: '2023-07-08',
+          indication: 'Hyperlipidemia, Cardiovascular risk reduction',
+          notes:
+            'LDL cholesterol has decreased significantly. No muscle pain or weakness reported. Liver function tests normal.',
+        },
       },
 
       // Allergies (point events - when discovered)
@@ -211,6 +311,17 @@ class PatientTimeline extends HTMLElement {
         start: '2018-03-12',
         type: 'point',
         className: 'allergy',
+        title: 'Penicillin Allergy',
+        description:
+          'Patient developed severe allergic reaction (hives, difficulty breathing) after taking penicillin for strep throat.',
+        details: {
+          allergen: 'Penicillin',
+          reaction: 'Anaphylaxis',
+          severity: 'Severe',
+          dateDiscovered: '2018-03-12',
+          notes:
+            'Patient should avoid all penicillin-based antibiotics. Medical alert bracelet recommended.',
+        },
       },
       {
         id: 16,
@@ -218,6 +329,16 @@ class PatientTimeline extends HTMLElement {
         start: '2019-07-25',
         type: 'point',
         className: 'allergy',
+        title: 'Latex Allergy',
+        description:
+          'Contact dermatitis and itching noted after dental procedure with latex gloves.',
+        details: {
+          allergen: 'Latex',
+          reaction: 'Contact dermatitis, urticaria',
+          severity: 'Moderate',
+          dateDiscovered: '2019-07-25',
+          notes: 'All medical procedures should use latex-free gloves and equipment.',
+        },
       },
 
       // Immunizations
@@ -227,6 +348,16 @@ class PatientTimeline extends HTMLElement {
         start: '2024-09-22',
         type: 'point',
         className: 'immunization',
+        title: 'COVID-19 Vaccine (Updated)',
+        description: '2024-2025 updated COVID-19 vaccine administered.',
+        details: {
+          vaccine: 'COVID-19 (mRNA)',
+          manufacturer: 'Moderna',
+          lotNumber: 'CV24092201',
+          site: 'Left deltoid',
+          administeredBy: 'Nurse Johnson',
+          notes: 'No adverse reactions reported. Patient tolerated well.',
+        },
       },
       {
         id: 18,
@@ -234,6 +365,16 @@ class PatientTimeline extends HTMLElement {
         start: '2024-09-22',
         type: 'point',
         className: 'immunization',
+        title: 'Influenza Vaccine (2024-2025)',
+        description: 'Annual flu shot for 2024-2025 flu season.',
+        details: {
+          vaccine: 'Influenza (Quadrivalent)',
+          manufacturer: 'Sanofi Pasteur',
+          lotNumber: 'FL24092202',
+          site: 'Right deltoid',
+          administeredBy: 'Nurse Johnson',
+          notes: 'No adverse reactions. Patient advised about potential mild side effects.',
+        },
       },
 
       // Labs
@@ -243,6 +384,14 @@ class PatientTimeline extends HTMLElement {
         start: '2024-11-15',
         type: 'point',
         className: 'lab',
+        title: 'Comprehensive Metabolic Panel',
+        description: 'Routine metabolic panel to monitor kidney function and electrolytes.',
+        details: {
+          orderedBy: 'Dr. Sarah Johnson',
+          testType: 'Comprehensive Metabolic Panel (CMP)',
+          results: 'All values within normal range',
+          notes: 'Creatinine 0.9 mg/dL (normal). Glucose 98 mg/dL (normal). Electrolytes balanced.',
+        },
       },
 
       // Documents
@@ -252,6 +401,17 @@ class PatientTimeline extends HTMLElement {
         start: '2025-12-01',
         type: 'point',
         className: 'lab',
+        title: 'Laboratory Results - December 2025',
+        description: 'Comprehensive lab panel including CBC, metabolic panel, and lipid profile.',
+        hasImage: true,
+        imagePath: '../images/results-sample.png',
+        details: {
+          orderedBy: 'Dr. Sarah Johnson',
+          collectionDate: '2025-12-01',
+          resultsDate: '2025-12-01',
+          testType: 'Complete Blood Count, Metabolic Panel, Lipid Profile',
+          notes: 'View detailed results in the image below.',
+        },
       },
     ];
 

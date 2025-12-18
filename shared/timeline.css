@@ -263,6 +263,12 @@
   box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.modal-content.large-modal {
+  max-width: 1200px;
+  max-height: 90vh;
 }
 
 .modal-header {
@@ -337,4 +343,24 @@
 .detail-value {
   color: #6b7280;
   flex: 1;
+}
+
+.modal-image {
+  margin-top: 20px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f9fafb;
+}
+
+.modal-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.modal-image img:hover {
+  transform: scale(1.02);
 }
