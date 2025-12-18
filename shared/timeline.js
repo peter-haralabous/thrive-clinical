@@ -185,14 +185,7 @@ class PatientTimeline extends HTMLElement {
             'Possible orthostatic hypotension. Patient advised to rise slowly and maintain adequate hydration.',
         },
       },
-      {
-        id: 7,
-        content: 'HTN',
-        start: '2020-05-12',
-        end: todayStr,
-        type: 'range',
-        className: 'condition',
-      },
+
       {
         id: 8,
         content: 'Chronic Renal Insufficiency',
@@ -516,7 +509,7 @@ class PatientTimeline extends HTMLElement {
 
       <div class="timeline-wrapper">
         <div class="timeline-header">
-          <h2>Patient Timeline</h2>
+          <!-- <h2>Patient Timeline</h2> -->
           <p>View all patient health events, encounters, and milestones in chronological order</p>
         </div>
 
