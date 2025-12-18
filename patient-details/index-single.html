@@ -16,6 +16,7 @@
     <script type="module" src="../shared/status-chip.js"></script>
     <script type="module" src="../shared/send-form-modal.js"></script>
     <script type="module" src="../shared/encounter-header.js"></script>
+    <script type="module" src="../shared/timeline.js"></script>
     <link href="../shared/styles.css" rel="stylesheet" />
 
     <script>
@@ -444,6 +445,17 @@
                     </div>
                   </button>
                 </li>
+                <li>
+                  <button
+                    onclick="toggleTab('timeline')"
+                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
+                  >
+                    <div class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-xl">timeline</span>
+                      <span class="font-medium sidebar-title">Timeline</span>
+                    </div>
+                  </button>
+                </li>
               </ul>
               <div
                 class="mt-6 mb-2 px-4 text-xs font-semibold text-text-light-gray uppercase tracking-wider sidebar-title"
@@ -623,22 +635,6 @@
                       <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-xl">emergency</span>
                         <span class="sidebar-title">Allergies</span>
-                      </div>
-                      <span class="material-symbols-outlined text-xl sidebar-title">
-                        chevron_right
-                      </span>
-                    </div>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    onclick="showDirectory('lab-results')"
-                    class="w-full text-left px-4 py-3 rounded-lg hover:bg-neutral-bg dark:hover:bg-background-dark text-text-dark-gray dark:text-neutral-bg transition-colors"
-                  >
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-xl">science</span>
-                        <span class="sidebar-title">Labs - 2025-12-01</span>
                       </div>
                       <span class="material-symbols-outlined text-xl sidebar-title">
                         chevron_right
@@ -1277,6 +1273,11 @@
           title: 'Overview',
           icon: 'grid_view',
           content: generateOverviewContent(),
+        },
+        timeline: {
+          title: 'Timeline',
+          icon: 'timeline',
+          content: '<patient-timeline></patient-timeline>',
         },
         'encounter-1': {
           title: 'Encounter · ' + todayFormatted,
