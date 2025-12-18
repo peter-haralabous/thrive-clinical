@@ -1081,7 +1081,7 @@
           patientDetailsUrl = baseUrl + '?tab=' + summaryId;
         }
 
-        window.open(patientDetailsUrl, '_blank');
+        window.location.href = patientDetailsUrl;
       });
 
       // Listen for form link clicks from slideout
@@ -1097,7 +1097,7 @@
           patientDetailsUrl = baseUrl + '?tab=' + formId;
         }
 
-        window.open(patientDetailsUrl, '_blank');
+        window.location.href = patientDetailsUrl;
       });
 
       // New Encounter functionality
