@@ -41,7 +41,7 @@ class GlobalHeader extends HTMLElement {
 
         .global-header {
           background: white;
-          border-bottom: 1px solid rgba(11, 18, 32, 0.06);
+          border-bottom: 1px solid rgb(229 231 235);
           width: 100%;
         }
 
@@ -80,7 +80,12 @@ class GlobalHeader extends HTMLElement {
           font-weight: 700;
           color: #0b1220;
         }
-
+        .back-container {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          justify-content: start;
+          }
         .back-button {
           display: flex;
           align-items: center;
@@ -88,6 +93,7 @@ class GlobalHeader extends HTMLElement {
           text-decoration: none;
           color: #0b1220;
           padding: 8px 12px;
+          border: 1px solid rgb(229 231 235);
           border-radius: 8px;
           transition: background 0.2s;
         }
@@ -97,11 +103,16 @@ class GlobalHeader extends HTMLElement {
         }
 
         .back-button-icon {
-          width: 26px;
-          height: 26px;
+          width: 22px;
+          height: 22px;
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: all .15s;
+          transform: translateX(0);
+        }
+        .back-button:hover .back-button-icon  {
+          transform: translateX(-3px);
         }
 
         .back-button-text {
@@ -649,9 +660,11 @@ class GlobalHeader extends HTMLElement {
 
       <header class="global-header">
         <div class="global-header__inner">
+
           ${
             isPatientDetailsPage
               ? `
+              <div class="back-container">
           <a href="${homeUrl}" class="back-button">
             <span class="back-button-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -661,43 +674,44 @@ class GlobalHeader extends HTMLElement {
             </span>
             <span class="back-button-text">Patient Encounters</span>
           </a>
+          </div>
           `
               : `
           <a href="${homeUrl}" class="brand">
             <span class="logo">
             <svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: none;
-      }
+                <defs>
+                  <style>
+                    .cls-1 {
+                      fill: none;
+                    }
 
-      .cls-2 {
-        fill: #003a82;
-      }
+                    .cls-2 {
+                      fill: #003a82;
+                    }
 
-      .cls-3 {
-        clip-path: url(#clippath);
-      }
-    </style>
-    <clipPath id="clippath">
-      <rect class="cls-1" width="256" height="256"/>
-    </clipPath>
-  </defs>
-  <g class="cls-3">
-    <g>
-      <path class="cls-2" d="M205.77,69.63c1.37-16.26,8.28-27.68,8.28-27.68h-22.37c-21.79,0-39.46,17.66-39.46,39.46v22.37h22.36c19.68,0,29.81-17.88,31.18-34.14"/>
-      <path class="cls-2" d="M161.57,27.69c1.38-16.27,8.28-27.69,8.28-27.69h-22.37c-21.79,0-39.46,17.67-39.46,39.46v22.37h22.36c19.67,0,29.81-17.88,31.18-34.14"/>
-      <path class="cls-2" d="M186.37,205.78c16.26,1.37,27.68,8.28,27.68,8.28v-22.36c0-21.79-17.66-39.46-39.46-39.46h-22.37v22.36c0,19.68,17.88,29.81,34.14,31.18"/>
-      <path class="cls-2" d="M228.31,161.57c16.26,1.38,27.68,8.28,27.68,8.28v-22.36c0-21.79-17.66-39.46-39.46-39.46h-22.37v22.37c0,19.67,17.88,29.81,34.14,31.18"/>
-      <path class="cls-2" d="M50.23,186.37c-1.37,16.26-8.28,27.68-8.28,27.68h22.36c21.79,0,39.46-17.66,39.46-39.46v-22.36h-22.36c-19.68,0-29.81,17.88-31.18,34.14"/>
-      <path class="cls-2" d="M94.43,228.31c-1.38,16.26-8.28,27.68-8.28,27.68h22.36c21.79,0,39.46-17.66,39.46-39.46v-22.37h-22.37c-19.67,0-29.81,17.88-31.18,34.14"/>
-      <path class="cls-2" d="M69.63,50.23c-16.26-1.37-27.68-8.28-27.68-8.28v22.37c0,21.79,17.66,39.46,39.46,39.46h22.36v-22.36c0-19.68-17.88-29.81-34.14-31.18"/>
-      <path class="cls-2" d="M27.69,94.43c-16.27-1.37-27.69-8.27-27.69-8.27v22.37c0,21.78,17.67,39.45,39.46,39.45h22.37v-22.36c0-19.67-17.88-29.81-34.14-31.18"/>
-    </g>
-  </g>
-</svg>
-</span>
+                    .cls-3 {
+                      clip-path: url(#clippath);
+                    }
+                  </style>
+                  <clipPath id="clippath">
+                    <rect class="cls-1" width="256" height="256"/>
+                  </clipPath>
+                </defs>
+                <g class="cls-3">
+                  <g>
+                    <path class="cls-2" d="M205.77,69.63c1.37-16.26,8.28-27.68,8.28-27.68h-22.37c-21.79,0-39.46,17.66-39.46,39.46v22.37h22.36c19.68,0,29.81-17.88,31.18-34.14"/>
+                    <path class="cls-2" d="M161.57,27.69c1.38-16.27,8.28-27.69,8.28-27.69h-22.37c-21.79,0-39.46,17.67-39.46,39.46v22.37h22.36c19.67,0,29.81-17.88,31.18-34.14"/>
+                    <path class="cls-2" d="M186.37,205.78c16.26,1.37,27.68,8.28,27.68,8.28v-22.36c0-21.79-17.66-39.46-39.46-39.46h-22.37v22.36c0,19.68,17.88,29.81,34.14,31.18"/>
+                    <path class="cls-2" d="M228.31,161.57c16.26,1.38,27.68,8.28,27.68,8.28v-22.36c0-21.79-17.66-39.46-39.46-39.46h-22.37v22.37c0,19.67,17.88,29.81,34.14,31.18"/>
+                    <path class="cls-2" d="M50.23,186.37c-1.37,16.26-8.28,27.68-8.28,27.68h22.36c21.79,0,39.46-17.66,39.46-39.46v-22.36h-22.36c-19.68,0-29.81,17.88-31.18,34.14"/>
+                    <path class="cls-2" d="M94.43,228.31c-1.38,16.26-8.28,27.68-8.28,27.68h22.36c21.79,0,39.46-17.66,39.46-39.46v-22.37h-22.37c-19.67,0-29.81,17.88-31.18,34.14"/>
+                    <path class="cls-2" d="M69.63,50.23c-16.26-1.37-27.68-8.28-27.68-8.28v22.37c0,21.79,17.66,39.46,39.46,39.46h22.36v-22.36c0-19.68-17.88-29.81-34.14-31.18"/>
+                    <path class="cls-2" d="M27.69,94.43c-16.27-1.37-27.69-8.27-27.69-8.27v22.37c0,21.78,17.67,39.45,39.46,39.45h22.37v-22.36c0-19.67-17.88-29.81-34.14-31.18"/>
+                  </g>
+                </g>
+              </svg>
+              </span>
             <span class="brand-name">Thrive Clinical</span>
           </a>
           `
