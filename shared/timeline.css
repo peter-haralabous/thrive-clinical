@@ -1,0 +1,194 @@
+/* vis-timeline custom styling overrides */
+* {
+  box-sizing: border-box;
+}
+
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.timeline-wrapper {
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-header {
+  margin-bottom: 24px;
+}
+
+.timeline-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.timeline-header p {
+  margin: 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.timeline-legend {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.legend-items {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.fit-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  color: #4b5563;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.fit-button:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+
+.fit-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #4b5563;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-dot.encounter {
+  background: #3b82f6;
+}
+
+.legend-dot.lab {
+  background: #8b5cf6;
+}
+
+.legend-dot.medication {
+  background: #10b981;
+}
+
+.legend-dot.immunization {
+  background: #f59e0b;
+}
+
+.legend-dot.allergy {
+  background: #ef4444;
+}
+
+.legend-dot.condition {
+  background: #ec4899;
+}
+
+.legend-range {
+  width: 24px;
+  height: 12px;
+  border-radius: 1px;
+  border: 1px solid rgba(164, 164, 164, 1);
+  background-color: #e2e2e2ff;
+}
+
+#timeline-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  flex: 1;
+  min-height: 0;
+}
+.vis-timeline {
+  border: none;
+}
+
+/* Make point event dots larger */
+.vis-item.vis-dot {
+  border-width: 8px;
+  border-radius: 8px;
+}
+
+.vis-item .vis-item-content {
+  padding: 5px 12px;
+}
+.vis-item .vis-item-content {
+  margin-left: 4px !important;
+}
+/* Fix alignment and spacing for dot items */
+.vis-item.vis-dot .vis-item-content {
+  display: flex;
+  align-items: center;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  line-height: 16px;
+}
+
+/* Encounter styling - keep dots bright */
+.vis-item.encounter.vis-dot {
+  background-color: #3b82f6;
+  border-color: #2563eb;
+}
+
+/* Lab styling - keep dots bright */
+.vis-item.lab.vis-dot {
+  background-color: #8b5cf6;
+  border-color: #7c3aed;
+}
+
+/* Immunization styling - keep dots bright */
+.vis-item.immunization.vis-dot {
+  background-color: #f59e0b;
+  border-color: #d97706;
+}
+
+/* Allergy styling - keep dots bright */
+.vis-item.allergy.vis-dot {
+  background-color: #ef4444;
+  border-color: #dc2626;
+}
+.vis-item.vis-range {
+  border-radius: 6px;
+}
+/* Medication styling - light background with dark text for ranges */
+.vis-item.medication.vis-range {
+  background-color: #dcfce7;
+  border-color: #bbf7d0;
+  color: #14532d;
+}
+
+/* Condition styling - light background with dark text for ranges */
+.vis-item.condition.vis-range {
+  background-color: #fce7f3;
+  border-color: #fbcfe8;
+  color: #831843;
+}
